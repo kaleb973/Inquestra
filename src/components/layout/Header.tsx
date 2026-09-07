@@ -1,15 +1,31 @@
 'use client';
 // src/components/layout/Header.tsx
 // Top navigation bar: workspace identity, trial status badge, simulator toggle,
-// Save to Cloud button, and Export (.zip) button.
+// Save to Cloud button, Export (.zip) button, and User Login / Profile status.
 
-import { useState, useTransition } from 'react';
-import { Activity, Cpu, Circle, Square, Cloud, CloudOff, Loader2, Download } from 'lucide-react';
+import { useState, useTransition, useEffect } from 'react';
+import Link from 'next/link';
+import {
+  Activity,
+  Cpu,
+  Circle,
+  Square,
+  Cloud,
+  CloudOff,
+  Loader2,
+  Download,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+} from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { useTelemetrySim } from '@/hooks/useTelemetrySim';
 import { syncTrialToCloud } from '@/actions/syncActions';
 import { exportTrialAsZip } from '@/lib/exportTrial';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { signOut } from '@/actions/authActions';
 import type { TrialStatus } from '@/types/inquestra';
+import type { User } from '@supabase/supabase-js';
 
 const STATUS_COLORS: Record<TrialStatus, string> = {
   DRAFT: 'text-neutral-400 border-neutral-700',
@@ -33,25 +49,53 @@ export function Header() {
   const isSimRunning = hardwareStatus.isSimulated && hardwareStatus.isConnected;
   const isSynced = cloudTrialId !== null;
 
+  const [user, setUser] = useState<User | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isExporting, setIsExporting] = useState(false);
 
+  // Monitor Supabase Auth state client-side
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+      setUser(currentUser);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleSync = () => {
     setSyncError(null);
+
+    // If user is not logged in, direct them to login
+    if (!user) {
+      window.location.href = '/login?redirectTo=/';
+      return;
+    }
+
     startTransition(async () => {
-      try {
-        const result = await syncTrialToCloud({
-          title,
-          content,
-          status,
-          metadata: metadata.map(({ key, value }) => ({ key, value })),
-          cloudTrialId: cloudTrialId ?? undefined,
-          cloudProjectId: cloudProjectId ?? undefined,
+      const result = await syncTrialToCloud({
+        title,
+        content,
+        status,
+        metadata: metadata.map(({ key, value }) => ({ key, value })),
+        cloudTrialId: cloudTrialId ?? undefined,
+        cloudProjectId: cloudProjectId ?? undefined,
+      });
+
+      if (!result.success || result.error) {
+        setSyncError(result.error ?? 'Sync failed.');
+      } else if (result.cloudTrialId && result.cloudProjectId) {
+        setCloudIds({
+          cloudTrialId: result.cloudTrialId,
+          cloudProjectId: result.cloudProjectId,
         });
-        setCloudIds(result);
-      } catch (err) {
-        setSyncError(err instanceof Error ? err.message : 'Sync failed.');
       }
     });
   };
@@ -88,7 +132,6 @@ export function Header() {
     }
   };
 
-
   return (
     <header className="h-14 border-b border-neutral-800 bg-neutral-950 flex items-center px-5 gap-4 shrink-0 z-10">
       {/* Brand */}
@@ -112,7 +155,7 @@ export function Header() {
       <div className="ml-auto flex items-center gap-3">
         {/* Sync error */}
         {syncError && (
-          <span className="text-[11px] text-red-400 font-mono max-w-[180px] truncate">
+          <span className="text-[11px] text-red-400 font-mono max-w-[200px] truncate" title={syncError}>
             {syncError}
           </span>
         )}
@@ -192,6 +235,38 @@ export function Header() {
             </>
           )}
         </button>
+
+        <div className="h-5 w-px bg-neutral-800 shrink-0" />
+
+        {/* Auth status: User Profile or Sign In button */}
+        {user ? (
+          <div className="flex items-center gap-2">
+            <span
+              className="flex items-center gap-1.5 text-xs text-neutral-300 font-mono bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded max-w-[160px] truncate"
+              title={user.email}
+            >
+              <UserIcon className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span className="truncate">{user.email?.split('@')[0]}</span>
+            </span>
+            <form action={signOut}>
+              <button
+                type="submit"
+                title="Sign out"
+                className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 rounded transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            Sign In
+          </Link>
+        )}
       </div>
     </header>
   );
