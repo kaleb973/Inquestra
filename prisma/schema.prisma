@@ -1,0 +1,118 @@
+// prisma/schema.prisma
+// Inquestra Phase 2 — Relational data model
+// Deploy with: npx prisma db push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  PI
+  RESEARCHER
+  VIEWER
+}
+
+enum TrialStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  FAILED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  domain    String?   @unique
+  users     User[]
+  projects  Project[]
+  createdAt DateTime  @default(now())
+}
+
+model User {
+  id             String       @id @default(uuid())
+  authId         String       @unique // Maps to Supabase auth.users.id
+  email          String       @unique
+  role           Role         @default(RESEARCHER)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  trials         Trial[]
+  createdAt      DateTime     @default(now())
+}
+
+model Project {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  trials         Trial[]
+  createdAt      DateTime     @default(now())
+}
+
+model Trial {
+  id        String            @id @default(uuid())
+  title     String
+  content   Json              // TipTap ProseMirror JSON tree
+  status    TrialStatus       @default(DRAFT)
+  projectId String
+  project   Project           @relation(fields: [projectId], references: [id])
+  userId    String
+  author    User              @relation(fields: [userId], references: [id])
+  metadata  MetadataEntry[]
+  telemetry TelemetryStream[]
+  checksum  String?           @unique // SHA-256 cryptographic seal (Phase 4)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([userId])
+}
+
+model MetadataEntry {
+  id      String @id @default(uuid())
+  key     String
+  value   String
+  trialId String
+  trial   Trial  @relation(fields: [trialId], references: [id], onDelete: Cascade)
+
+  @@index([trialId])
+}
+
+model TelemetryStream {
+  id         String   @id @default(uuid())
+  sensorType String   // e.g. "ESP32_THERMISTOR"
+  fileUrl    String   // Cloudflare R2 / S3 signed pointer (Phase 3)
+  rowCount   Int
+  trialId    String
+  trial      Trial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  recordedAt DateTime @default(now())
+
+  @@index([trialId])
+}
+
+// Phase 4 — Reagent inventory management (slash command /reagent deduction)
+model Inventory {
+  id             String   @id @default(uuid())
+  chemical       String
+  quantity       Float
+  unit           String
+  thresholdValue Float    @default(0)
+  alertFlag      Boolean  @default(false)
+  organizationId String?
+  updatedAt      DateTime @updatedAt
+
+  @@index([chemical])
+  @@index([organizationId])
+}

@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark mode root ──────────────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── TipTap ProseMirror base ─────────────────────────────────────── */
+.ProseMirror {
+  outline: none;
+  caret-color: #34d399; /* emerald-400 */
+}
+
+/* Placeholder text via data-placeholder attribute */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #404040;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ── Tippy.js popup overrides ────────────────────────────────────── */
+.tippy-box {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.tippy-content {
+  padding: 0 !important;
+}
+.tippy-arrow {
+  display: none !important;
+}
+
+/* ── Prose (TipTap editor typography) ───────────────────────────── */
+.prose {
+  --tw-prose-body: #d4d4d4;
+  --tw-prose-headings: #ffffff;
+  --tw-prose-bold: #ffffff;
+  --tw-prose-code: #34d399;
+  --tw-prose-pre-bg: #171717;
+  --tw-prose-hr: #262626;
+  --tw-prose-quotes: #a3a3a3;
+  --tw-prose-quote-borders: #404040;
+  --tw-prose-bullets: #525252;
+  --tw-prose-counters: #525252;
+  --tw-prose-links: #34d399;
+}
+
+/* TipTap table styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+.ProseMirror td,
+.ProseMirror th {
+  border: 1px solid #262626;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  color: #d4d4d4;
+  font-size: 0.875rem;
+}
+.ProseMirror th {
+  background: #171717;
+  color: #a3a3a3;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ProseMirror tr:nth-child(even) td {
+  background: #111111;
+}
+
+/* Selected table cell */
+.ProseMirror .selectedCell::after {
+  background: rgba(52, 211, 153, 0.08);
+  content: '';
+  left: 0; right: 0; top: 0; bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
