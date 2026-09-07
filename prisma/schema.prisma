@@ -31,12 +31,14 @@ enum TrialStatus {
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model Organization {
-  id        String    @id @default(uuid())
+  id        String      @id @default(uuid())
   name      String
-  domain    String?   @unique
+  domain    String?     @unique
   users     User[]
   projects  Project[]
-  createdAt DateTime  @default(now())
+  inventory Inventory[]
+  equipment Equipment[]
+  createdAt DateTime    @default(now())
 }
 
 model User {
@@ -104,15 +106,33 @@ model TelemetryStream {
 
 // Phase 4 — Reagent inventory management (slash command /reagent deduction)
 model Inventory {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   chemical       String
   quantity       Float
   unit           String
-  thresholdValue Float    @default(0)
-  alertFlag      Boolean  @default(false)
+  thresholdValue Float        @default(0)
+  alertFlag      Boolean      @default(false)
   organizationId String?
-  updatedAt      DateTime @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  updatedAt      DateTime     @updatedAt
 
   @@index([chemical])
   @@index([organizationId])
+}
+
+// Phase 4 — Equipment calibration tracking
+model Equipment {
+  id              String       @id @default(uuid())
+  name            String
+  serialNumber    String?
+  lastCalibrated  DateTime
+  calibrationFreq Int          // in days
+  status          String       // e.g. "OPERATIONAL", "NEEDS_CALIBRATION", "BROKEN"
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
 }

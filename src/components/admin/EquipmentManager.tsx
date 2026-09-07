@@ -1,0 +1,139 @@
+'use client';
+// src/components/admin/EquipmentManager.tsx
+
+import { useState, useTransition } from 'react';
+import { addEquipment, updateEquipmentStatus } from '@/actions/adminActions';
+import { Loader2, Plus, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import type { Equipment } from '@prisma/client';
+
+export function EquipmentManager({ items }: { items: Equipment[] }) {
+  const [isPending, startTransition] = useTransition();
+  const [showAdd, setShowAdd] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    startTransition(async () => {
+      const res = await addEquipment(formData);
+      if (!res.success) setError(res.error || 'Failed to add equipment');
+      else setShowAdd(false);
+    });
+  };
+
+  const handleUpdateStatus = async (id: string, newStatus: string, calibratedNow: boolean = false) => {
+    startTransition(async () => {
+      await updateEquipmentStatus(id, newStatus, calibratedNow);
+    });
+  };
+
+  const isOverdue = (lastCalibrated: Date, freqDays: number) => {
+    const nextDue = new Date(lastCalibrated);
+    nextDue.setDate(nextDue.getDate() + freqDays);
+    return new Date() > nextDue;
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-white">Lab Equipment Calibration</h2>
+        <button
+          onClick={() => setShowAdd(!showAdd)}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors"
+        >
+          <Plus className="w-4 h-4" /> Add Equipment
+        </button>
+      </div>
+
+      {error && <div className="p-3 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded">{error}</div>}
+
+      {showAdd && (
+        <form onSubmit={handleAdd} className="bg-neutral-900 border border-neutral-800 p-4 rounded-lg grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+          <div className="col-span-2 md:col-span-1">
+            <label className="block text-xs font-medium text-neutral-400 mb-1">Equipment Name</label>
+            <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">Serial Number</label>
+            <input name="serialNumber" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">Last Calibrated</label>
+            <input required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">Freq (Days)</label>
+            <input required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+          </div>
+          <div className="hidden">
+            <input type="hidden" name="status" value="OPERATIONAL" />
+          </div>
+          <button disabled={isPending} type="submit" className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 h-[38px]">
+            {isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Save'}
+          </button>
+        </form>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.length === 0 && (
+          <p className="text-neutral-500 text-sm col-span-full">No equipment registered.</p>
+        )}
+        {items.map(item => {
+          const overdue = isOverdue(new Date(item.lastCalibrated), item.calibrationFreq);
+          return (
+            <div key={item.id} className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 flex flex-col relative overflow-hidden">
+              <div className={`absolute top-0 left-0 w-1 h-full ${item.status === 'BROKEN' ? 'bg-red-500' : overdue ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+              
+              <div className="flex justify-between items-start mb-4 pl-2">
+                <div>
+                  <h3 className="font-semibold text-white">{item.name}</h3>
+                  <p className="text-xs text-neutral-500 font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
+                </div>
+                {item.status === 'BROKEN' ? (
+                  <AlertCircle className="w-5 h-5 text-red-500" />
+                ) : overdue ? (
+                  <Calendar className="w-5 h-5 text-amber-500" />
+                ) : (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                )}
+              </div>
+
+              <div className="space-y-1 mb-6 pl-2">
+                <div className="text-xs text-neutral-400 flex justify-between">
+                  <span>Last Calibrated:</span>
+                  <span className="text-neutral-200">{new Date(item.lastCalibrated).toLocaleDateString()}</span>
+                </div>
+                <div className="text-xs text-neutral-400 flex justify-between">
+                  <span>Frequency:</span>
+                  <span className="text-neutral-200">Every {item.calibrationFreq} days</span>
+                </div>
+              </div>
+
+              <div className="mt-auto pl-2 flex gap-2">
+                <button
+                  onClick={() => handleUpdateStatus(item.id, 'OPERATIONAL', true)}
+                  disabled={isPending || (item.status === 'OPERATIONAL' && !overdue)}
+                  className="flex-1 px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-medium rounded transition-colors disabled:opacity-50"
+                >
+                  Log Calibration
+                </button>
+                <button
+                  onClick={() => handleUpdateStatus(item.id, item.status === 'BROKEN' ? 'OPERATIONAL' : 'BROKEN')}
+                  disabled={isPending}
+                  className={`px-3 py-1.5 text-xs font-medium rounded transition-colors border ${
+                    item.status === 'BROKEN' 
+                      ? 'border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-white' 
+                      : 'border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-900/50'
+                  }`}
+                >
+                  {item.status === 'BROKEN' ? 'Fix' : 'Mark Broken'}
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  );
+}

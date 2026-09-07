@@ -23,6 +23,7 @@ import { ReagentExtension } from '@/components/editor/nodes/ReagentNode';
 import { ProtocolExtension } from '@/components/editor/nodes/ProtocolBlock';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
+import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
 
 
 // ─── Debounce utility ─────────────────────────────────────────────────────────
@@ -225,7 +226,6 @@ const SlashCommandExtension = Extension.create({
     ];
   },
 });
-
 // ─── Editor Canvas Component ───────────────────────────────────────────────────
 
 export function EditorCanvas() {
@@ -374,7 +374,7 @@ export function EditorCanvas() {
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto relative">
         {/* Document title */}
         <div className="px-12 pt-10 pb-3">
           <input
@@ -392,6 +392,8 @@ export function EditorCanvas() {
         {/* TipTap editor content */}
         <EditorContent editor={editor} />
       </div>
+
+      <ReviewerOverlay />
     </div>
   );
 }
