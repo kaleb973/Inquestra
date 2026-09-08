@@ -63,89 +63,108 @@ function ReagentNodeView({ deleteNode }: NodeViewProps) {
   const isCommitted = feedback.type === 'success';
 
   return (
-    <NodeViewWrapper className="my-3" data-drag-handle>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-800">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-xs font-mono text-neutral-400">Reagent Deduction</span>
-            {isCommitted && (
-              <span className="text-[10px] bg-emerald-950/40 text-emerald-400 border border-emerald-900 px-1.5 py-0.5 rounded font-mono">
-                LOGGED
-              </span>
-            )}
-          </div>
-          <button
-            onClick={deleteNode}
-            className="text-neutral-700 hover:text-red-400 transition-colors p-1 rounded hover:bg-neutral-800"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <div className="px-4 py-3">
+    <NodeViewWrapper className="my-4 group" data-drag-handle>
+      <div className={`relative rounded-xl overflow-hidden transition-all duration-300 ${
+        isCommitted 
+          ? 'bg-neutral-950/40 border border-neutral-800/60 hover:border-neutral-700/80'
+          : 'bg-neutral-900/50 backdrop-blur-md border border-neutral-800 shadow-xl'
+      }`}>
+        {/* Sleek edge highlight */}
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500/50 to-transparent" />
+        
+        {/* Form / Content */}
+        <div className="px-5 py-4 pl-6">
           {!isCommitted ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Chemical name"
-                value={chemical}
-                onChange={(e) => setChemical(e.target.value)}
-                className="flex-1 bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors font-mono"
-              />
-              <input
-                type="number"
-                placeholder="Qty"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                min={0}
-                step="any"
-                className="w-20 bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors font-mono text-right"
-              />
-              <select
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1.5 text-xs text-neutral-300 focus:outline-none focus:border-neutral-600 transition-colors font-mono"
-              >
-                {['mL', 'L', 'µL', 'g', 'mg', 'µg', 'units', 'drops'].map((u) => (
-                  <option key={u} value={u}>{u}</option>
-                ))}
-              </select>
-              <button
-                onClick={handleDeduct}
-                disabled={feedback.type === 'loading'}
-                className="flex items-center gap-1 bg-purple-900/40 hover:bg-purple-900/70 border border-purple-900 text-purple-300 text-xs font-medium px-3 py-1.5 rounded transition-colors disabled:opacity-50"
-              >
-                <Minus className="w-3 h-3" />
-                {feedback.type === 'loading' ? 'Logging…' : 'Deduct'}
-              </button>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <FlaskConical className="w-4 h-4 text-purple-400" />
+                <span className="text-[11px] font-semibold tracking-widest uppercase text-neutral-400">
+                  Log Reagent Usage
+                </span>
+                <button
+                  onClick={deleteNode}
+                  className="ml-auto text-neutral-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Chemical name"
+                  value={chemical}
+                  onChange={(e) => setChemical(e.target.value)}
+                  className="flex-1 bg-neutral-950/80 border border-neutral-800/80 rounded-lg px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all shadow-inner"
+                />
+                <input
+                  type="number"
+                  placeholder="0.0"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  min={0}
+                  step="any"
+                  className="w-24 bg-neutral-950/80 border border-neutral-800/80 rounded-lg px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-right shadow-inner"
+                />
+                <select
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  className="bg-neutral-950/80 border border-neutral-800/80 rounded-lg px-3 py-2 text-sm text-neutral-300 focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer"
+                >
+                  {['mL', 'L', 'µL', 'g', 'mg', 'µg', 'units', 'drops'].map((u) => (
+                    <option key={u} value={u}>{u}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleDeduct}
+                  disabled={feedback.type === 'loading'}
+                  className="flex items-center gap-1.5 bg-white text-neutral-950 hover:bg-neutral-200 font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 text-sm shadow-sm"
+                >
+                  {feedback.type === 'loading' ? (
+                    'Logging…'
+                  ) : (
+                    <>
+                      <Minus className="w-3.5 h-3.5" />
+                      Log Use
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           ) : null}
 
           {/* Feedback */}
           {feedback.type === 'error' && (
-            <p className="text-red-400 text-xs mt-2 font-mono">{feedback.message}</p>
+            <p className="text-red-400 text-xs mt-3">{feedback.message}</p>
           )}
           {feedback.type === 'success' && (
-            <div className={`flex items-start gap-2 ${!isCommitted ? 'mt-2' : ''}`}>
-              {feedback.alert ? (
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              )}
-              <div>
-                <p className="text-xs text-neutral-200 font-mono">
-                  <span className="text-purple-300">{feedback.chemical}</span>
-                  {' '}deducted — {feedback.remaining.toFixed(2)} {feedback.unit} remaining
-                </p>
-                {feedback.alert && (
-                  <p className="text-[11px] text-amber-500 mt-0.5">
-                    ⚠ Stock below threshold — order required.
-                  </p>
+            <div className={`flex items-center gap-3 ${!isCommitted ? 'mt-3 pt-3 border-t border-neutral-800/60' : ''}`}>
+              <div className="flex items-center gap-2">
+                {feedback.alert ? (
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 )}
+                <span className="text-sm font-medium text-neutral-200">
+                  Used <span className="text-white">{quantity} {unit}</span> of <span className="text-purple-300 font-semibold">{feedback.chemical}</span>
+                </span>
               </div>
+              <div className="h-4 w-px bg-neutral-800 mx-1" />
+              <span className="text-xs text-neutral-500 font-mono">
+                {feedback.remaining.toFixed(2)} {feedback.unit} remaining
+              </span>
+              {feedback.alert && (
+                <span className="ml-auto text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium tracking-wide uppercase">
+                  Low Stock
+                </span>
+              )}
+              {isCommitted && (
+                <button
+                  onClick={deleteNode}
+                  className="ml-auto text-neutral-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           )}
         </div>

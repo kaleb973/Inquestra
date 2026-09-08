@@ -14,9 +14,10 @@ import {
   CloudOff,
   Loader2,
   Download,
+  Printer,
   LogIn,
   LogOut,
-  User as UserIcon,
+  Shield,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { useTelemetrySim } from '@/hooks/useTelemetrySim';
@@ -133,19 +134,19 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-neutral-800 bg-neutral-950 flex items-center px-5 gap-4 shrink-0 z-10">
+    <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
       {/* Brand */}
-      <div className="flex items-center gap-2 shrink-0">
-        <Activity className="text-emerald-400 w-5 h-5" />
-        <span className="text-white font-bold text-sm tracking-widest uppercase">
+      <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+        <Activity className="text-emerald-400 w-4 h-4" />
+        <span className="text-white font-semibold text-sm tracking-tight">
           Inquestra
         </span>
-      </div>
+      </Link>
 
-      <div className="h-5 w-px bg-neutral-800 shrink-0" />
+      <div className="h-4 w-px bg-neutral-800 shrink-0" />
 
       {/* Trial identity */}
-      <span className="text-neutral-400 text-sm truncate max-w-xs">{title}</span>
+      <span className="text-neutral-300 text-sm truncate max-w-xs font-medium tracking-tight">{title}</span>
       <span
         className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
       >
@@ -167,6 +168,16 @@ export function Header() {
             Saved
           </span>
         )}
+
+        {/* Print button */}
+        <button
+          onClick={() => window.print()}
+          title="Print to PDF"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-colors"
+        >
+          <Printer className="w-3.5 h-3.5" />
+          Print
+        </button>
 
         {/* Export button */}
         <button
@@ -241,13 +252,14 @@ export function Header() {
         {/* Auth status: User Profile or Sign In button */}
         {user ? (
           <div className="flex items-center gap-2">
-            <span
-              className="flex items-center gap-1.5 text-xs text-neutral-300 font-mono bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded max-w-[160px] truncate"
-              title={user.email}
+            <Link
+              href="/app/admin"
+              className="flex items-center gap-1.5 text-xs text-neutral-300 font-mono bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded max-w-[160px] truncate hover:bg-neutral-800 transition-colors"
+              title="Admin Dashboard"
             >
-              <UserIcon className="w-3 h-3 text-emerald-400 shrink-0" />
+              <Shield className="w-3 h-3 text-emerald-400 shrink-0" />
               <span className="truncate">{user.email?.split('@')[0]}</span>
-            </span>
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"

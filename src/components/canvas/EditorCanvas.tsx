@@ -266,7 +266,19 @@ export function EditorCanvas() {
     ],
     content: Object.keys(content).length > 0 ? content : undefined,
     onUpdate: ({ editor: ed }) => {
-      debouncedSave(ed.getJSON() as Record<string, unknown>);
+      const json = ed.getJSON() as Record<string, unknown>;
+      debouncedSave(json);
+      
+      // Fire-and-forget sync to DB
+      if (useNotebookStore.getState().activeTrial.id) {
+        import('@/actions/trialActions').then(({ updateTrialContent }) => {
+          updateTrialContent(
+            useNotebookStore.getState().activeTrial.id,
+            json,
+            useNotebookStore.getState().activeTrial.title
+          ).catch(console.error);
+        });
+      }
     },
     editorProps: {
       attributes: {
@@ -276,6 +288,18 @@ export function EditorCanvas() {
     },
     immediatelyRender: false,
   });
+
+  const activeTrialId = useNotebookStore((s) => s.activeTrial.id);
+
+  // Keep editor content in sync when switching trials
+  useEffect(() => {
+    if (editor && content) {
+      const currentJson = editor.getJSON();
+      if (JSON.stringify(currentJson) !== JSON.stringify(content)) {
+        editor.commands.setContent(content, false);
+      }
+    }
+  }, [activeTrialId, editor]); // Depend on the reactive ID
 
   // Keep editorRef in sync for drag-drop handler and HTML export
   useEffect(() => {
@@ -380,7 +404,15 @@ export function EditorCanvas() {
           <input
             type="text"
             value={title}
-            onChange={(e) => updateTitle(e.target.value)}
+            onChange={(e) => {
+              const newTitle = e.target.value;
+              updateTitle(newTitle);
+              if (activeTrialId) {
+                import('@/actions/trialActions').then(({ updateTrialContent }) => {
+                  updateTrialContent(activeTrialId, content, newTitle).catch(console.error);
+                });
+              }
+            }}
             placeholder="Untitled Trial"
             className="w-full bg-transparent text-3xl font-bold text-white placeholder:text-neutral-800 focus:outline-none"
           />

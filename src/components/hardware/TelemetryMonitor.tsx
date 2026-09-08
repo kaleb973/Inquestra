@@ -16,19 +16,19 @@ interface StatCardProps {
 
 function StatCard({ label, value, unit, Icon, accent }: StatCardProps) {
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
-      <div className="flex items-center gap-1.5 mb-1.5">
+    <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-3.5 shadow-sm hover:border-neutral-700 transition-colors">
+      <div className="flex items-center gap-1.5 mb-2">
         <Icon className="w-3.5 h-3.5 text-neutral-500" />
         <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">
           {label}
         </span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className={`font-mono text-sm font-medium ${accent ? 'text-emerald-400' : 'text-neutral-200'}`}>
+        <span className={`font-mono text-[15px] font-medium tracking-tight ${accent ? 'text-emerald-400' : 'text-neutral-200'}`}>
           {value}
         </span>
         {unit && (
-          <span className="text-[10px] text-neutral-600">{unit}</span>
+          <span className="text-[10px] text-neutral-500 font-mono">{unit}</span>
         )}
       </div>
     </div>
@@ -48,14 +48,14 @@ export function TelemetryMonitor() {
       : '—';
 
   return (
-    <div className="p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Activity className="w-4 h-4 text-emerald-400" />
+    <div className="p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Activity className="w-3.5 h-3.5 text-emerald-400" />
         <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
           Live DAQ Telemetry
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         <StatCard
           label="Buffer"
           value={stats.bufferCount}

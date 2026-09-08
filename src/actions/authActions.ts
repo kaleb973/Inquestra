@@ -70,6 +70,12 @@ export async function signIn(formData: FormData) {
               role: 'ADMIN',
             },
           },
+          projects: {
+            create: {
+              name: 'Default Workspace',
+              description: 'Initial project for research trials.',
+            },
+          },
         },
       });
     } else {

@@ -91,17 +91,57 @@ export async function updateTrialContent(
   return { success: true };
 }
 
-/**
- * Fetch all trials for a given project (RLS enforces tenant isolation at the DB level).
- */
-export async function getProjectTrials(projectId: string) {
+export async function fetchAllTrials() {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
 
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error('User not found');
+
   return prisma.trial.findMany({
-    where: { projectId },
+    where: { project: { organizationId: dbUser.organizationId } },
     orderBy: { updatedAt: 'desc' },
-    include: { metadata: true, author: { select: { email: true, role: true } } },
+    select: { id: true, title: true, status: true, updatedAt: true }
   });
+}
+
+export async function getTrial(id: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error('User not found');
+
+  return prisma.trial.findFirst({
+    where: { id, project: { organizationId: dbUser.organizationId } },
+  });
+}
+
+export async function createNewTrial() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error('User not found');
+
+  const project = await prisma.project.findFirst({
+    where: { organizationId: dbUser.organizationId }
+  });
+
+  if (!project) throw new Error('No project found');
+
+  const trial = await prisma.trial.create({
+    data: {
+      title: 'Untitled Trial',
+      content: { type: 'doc', content: [] },
+      projectId: project.id,
+      userId: dbUser.id,
+    }
+  });
+
+  revalidatePath('/app');
+  return trial;
 }
