@@ -80,7 +80,7 @@ export default async function AdminPage({
           {tabs.map(t => (
             <Link
               key={t.id}
-              href={`/admin?tab=${t.id}`}
+              href={`/app/admin?tab=${t.id}`}
               className={`flex items-center gap-2 pb-3 px-2 text-sm font-medium transition-colors border-b-2 ${
                 tab === t.id ? 'border-purple-500 text-white' : 'border-transparent text-neutral-500 hover:text-neutral-300'
               }`}

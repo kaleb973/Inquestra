@@ -8,8 +8,7 @@
 }
 
 html, body {
-  height: 100%;
-  overflow: hidden;
+  @apply bg-neutral-950 text-neutral-100;
 }
 
 /* ── TipTap ProseMirror base ─────────────────────────────────────── */
