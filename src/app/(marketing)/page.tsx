@@ -13,18 +13,18 @@ export default function MarketingPage() {
             <span className="font-bold text-xl tracking-tight">Inquestra</span>
           </div>
           <div className="flex items-center gap-4">
-            <a
-              href={process.env.NODE_ENV === 'development' ? 'http://app.localhost:3000/login' : 'https://app.inquestra.org/login'}
+            <Link
+              href="/app/login"
               className="text-sm font-medium text-neutral-300 hover:text-white transition-colors"
             >
               Sign In
-            </a>
-            <a
-              href={process.env.NODE_ENV === 'development' ? 'http://app.localhost:3000/signup' : 'https://app.inquestra.org/signup'}
+            </Link>
+            <Link
+              href="/app/signup"
               className="text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-black px-4 py-2 rounded-md transition-colors"
             >
               Get Started
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -46,12 +46,12 @@ export default function MarketingPage() {
             The first Electronic Research Notebook built specifically for Biomedical Engineering. Stream ESP32 telemetry directly into your research protocols with cryptographic data provenance.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href={process.env.NODE_ENV === 'development' ? 'http://app.localhost:3000' : 'https://app.inquestra.org'}
+            <Link
+              href="/app"
               className="flex items-center gap-2 bg-white text-black px-8 py-4 rounded-lg font-semibold hover:bg-neutral-200 transition-colors text-lg w-full sm:w-auto justify-center"
             >
               Enter Workspace <ArrowRight className="w-5 h-5" />
-            </a>
+            </Link>
           </div>
         </div>
       </main>

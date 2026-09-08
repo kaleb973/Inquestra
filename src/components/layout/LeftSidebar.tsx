@@ -56,6 +56,13 @@ export function LeftSidebar() {
         <p className="text-[10px] text-neutral-700 mt-4 px-2 leading-snug">
           Multi-trial management and PostgreSQL persistence are coming in Phase 2.
         </p>
+
+        <div className="mt-8 border-t border-neutral-800 pt-4">
+          <a href="/app/admin" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition-colors">
+            <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-neutral-600" />
+            Admin Dashboard
+          </a>
+        </div>
       </div>
 
       {/* Hardware Controls */}

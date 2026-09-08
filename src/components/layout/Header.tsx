@@ -75,7 +75,7 @@ export function Header() {
 
     // If user is not logged in, direct them to login
     if (!user) {
-      window.location.href = '/login?redirectTo=/';
+      window.location.href = '/app/login?redirectTo=/app';
       return;
     }
 
@@ -260,7 +260,7 @@ export function Header() {
           </div>
         ) : (
           <Link
-            href="/login"
+            href="/app/login"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
           >
             <LogIn className="w-3.5 h-3.5" />
