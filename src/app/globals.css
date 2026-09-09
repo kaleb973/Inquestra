@@ -2,13 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -- Dark mode root ------------------------------------------------ */
+/* -- Light mode root ------------------------------------------------ */
 :root {
-  color-scheme: dark;
+  --background: #F8FAFC; /* slate-50 */
+  --foreground: #0F172A; /* slate-900 */
+  --muted: #E2E8F0; /* slate-200 */
+  --muted-foreground: #64748B; /* slate-500 */
+  --primary: #1E293B; /* slate-800 */
+  --primary-foreground: #FFFFFF;
+  --accent: #10B981; /* emerald-500 */
+  --accent-foreground: #FFFFFF;
+  --border: #E2E8F0; /* slate-200 */
+}
+
+/* -- Dark mode ----------------------------------------------------- */
+.dark {
+  --background: #0B0F19; /* very deep navy/slate */
+  --foreground: #F8FAFC; /* slate-50 */
+  --muted: #1E293B; /* slate-800 */
+  --muted-foreground: #94A3B8; /* slate-400 */
+  --primary: #FFFFFF;
+  --primary-foreground: #0F172A; /* slate-900 */
+  --accent: #10B981; /* emerald-500 */
+  --accent-foreground: #FFFFFF;
+  --border: #1E293B; /* slate-800 */
 }
 
 html, body {
-  @apply bg-neutral-950 text-neutral-100;
+  @apply bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300;
 }
 
 /* -- TipTap ProseMirror base --------------------------------------- */

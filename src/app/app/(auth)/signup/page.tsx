@@ -30,7 +30,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-10">
@@ -40,9 +40,9 @@ export default function SignUpPage() {
           </span>
         </div>
 
-        <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-8">
+        <div className="bg-muted border border-border rounded-xl p-8">
           <h1 className="text-white text-xl font-semibold mb-1">Create account</h1>
-          <p className="text-neutral-500 text-sm mb-6">
+          <p className="text-muted-foreground text-sm mb-6">
             Join your research organization on Inquestra.
           </p>
 
@@ -54,7 +54,7 @@ export default function SignUpPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-xs font-medium text-neutral-400 mb-1.5">
+                <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Institutional email
                 </label>
                 <input
@@ -63,13 +63,13 @@ export default function SignUpPage() {
                   type="email"
                   required
                   autoComplete="email"
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
                   placeholder="researcher@university.edu"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-xs font-medium text-neutral-400 mb-1.5">
+                <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Password <span className="text-neutral-700">(min. 8 characters)</span>
                 </label>
                 <input
@@ -79,7 +79,7 @@ export default function SignUpPage() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
                   placeholder="••••••••"
                 />
               </div>

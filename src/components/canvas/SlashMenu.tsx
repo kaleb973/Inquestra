@@ -68,7 +68,7 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
 
     return (
       <div
-        className="bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl shadow-black/60 w-64 py-1 overflow-hidden"
+        className="bg-muted border border-border rounded-lg shadow-2xl shadow-black/60 w-64 py-1 overflow-hidden"
         role="listbox"
         aria-label="Slash commands"
       >
@@ -84,10 +84,10 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
                 : 'hover:bg-neutral-800/50'
             }`}
           >
-            <span className="text-neutral-400 shrink-0">{item.icon}</span>
+            <span className="text-muted-foreground shrink-0">{item.icon}</span>
             <div className="min-w-0">
-              <p className="text-sm text-neutral-100 font-medium">{item.title}</p>
-              <p className="text-[10px] text-neutral-500 truncate">{item.description}</p>
+              <p className="text-sm text-foreground font-medium">{item.title}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{item.description}</p>
             </div>
           </button>
         ))}

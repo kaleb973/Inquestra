@@ -61,7 +61,7 @@ export function ReviewerOverlay() {
   }
 
   return (
-    <div className="fixed bottom-4 right-80 mr-4 z-40 bg-neutral-900 border border-purple-900 rounded-lg shadow-xl w-80 overflow-hidden flex flex-col max-h-[60vh]">
+    <div className="fixed bottom-4 right-80 mr-4 z-40 bg-muted border border-purple-900 rounded-lg shadow-xl w-80 overflow-hidden flex flex-col max-h-[60vh]">
       <div className="bg-purple-950/50 p-3 border-b border-purple-900 flex items-center justify-between">
         <div className="flex items-center gap-2 text-purple-400">
           <ShieldAlert className="w-4 h-4" />
@@ -77,7 +77,7 @@ export function ReviewerOverlay() {
           <div className="flex flex-col items-center justify-center text-center py-6">
             <CheckCircle className="w-8 h-8 text-emerald-500 mb-2" />
             <p className="text-sm text-emerald-400 font-medium">No deviations found.</p>
-            <p className="text-xs text-neutral-500 mt-1">All protocol steps are properly timestamped.</p>
+            <p className="text-xs text-muted-foreground mt-1">All protocol steps are properly timestamped.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -86,9 +86,9 @@ export function ReviewerOverlay() {
               <span className="text-xs font-medium">Found {deviations.length} untimestamped steps</span>
             </div>
             {deviations.map((d, i) => (
-              <div key={i} className="bg-neutral-950 border border-neutral-800 p-3 rounded">
-                <p className="text-xs font-semibold text-neutral-300 mb-1">{d.protocolTitle}</p>
-                <p className="text-xs text-neutral-500 font-mono">Step {d.stepIndex}: {d.stepText}</p>
+              <div key={i} className="bg-background border border-border p-3 rounded">
+                <p className="text-xs font-semibold text-foreground mb-1">{d.protocolTitle}</p>
+                <p className="text-xs text-muted-foreground font-mono">Step {d.stepIndex}: {d.stepText}</p>
                 <div className="mt-2 text-[10px] text-red-400 uppercase font-semibold">Missing Timestamp</div>
               </div>
             ))}

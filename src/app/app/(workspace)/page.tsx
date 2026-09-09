@@ -10,7 +10,7 @@ import { EditorCanvas } from '@/components/canvas/EditorCanvas';
 
 export default function WorkspacePage() {
   return (
-    <div className="h-screen bg-neutral-950 flex flex-col overflow-hidden">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* Top bar */}
       <Header />
 

@@ -129,14 +129,14 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className="my-4" data-drag-handle>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
+      <div className="bg-muted border border-border rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-800 bg-neutral-900/80">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/80">
           <div className="flex items-center gap-2">
             {isCsvMode ? (
               <FileSpreadsheet className="w-3.5 h-3.5 text-blue-400" />
             ) : null}
-            <span className="text-xs font-mono text-neutral-400">
+            <span className="text-xs font-mono text-muted-foreground">
               {isCsvMode ? csvAttr.filename : 'Live Telemetry'}
             </span>
             {!isCsvMode && paused && (
@@ -152,7 +152,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
               <select
                 value={selectedChannel}
                 onChange={(e) => setSelectedChannel(e.target.value)}
-                className="bg-neutral-950 border border-neutral-800 rounded px-2 py-0.5 text-[10px] text-neutral-300 focus:outline-none font-mono"
+                className="bg-background border border-border rounded px-2 py-0.5 text-[10px] text-foreground focus:outline-none font-mono"
               >
                 {csvAttr.numericKeys.map((k) => (
                   <option key={k} value={k}>{k}</option>
@@ -163,7 +163,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
               <button
                 onClick={handlePauseToggle}
                 title={paused ? 'Resume stream' : 'Pause stream'}
-                className="text-neutral-500 hover:text-neutral-200 transition-colors p-1 rounded hover:bg-neutral-800"
+                className="text-muted-foreground hover:text-neutral-200 transition-colors p-1 rounded hover:bg-neutral-800"
               >
                 {paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
               </button>
@@ -171,7 +171,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
             <button
               onClick={handleCsvExport}
               title="Download CSV"
-              className="text-neutral-500 hover:text-neutral-200 transition-colors p-1 rounded hover:bg-neutral-800"
+              className="text-muted-foreground hover:text-neutral-200 transition-colors p-1 rounded hover:bg-neutral-800"
             >
               <Download className="w-3.5 h-3.5" />
             </button>

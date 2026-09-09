@@ -9,7 +9,7 @@ const tiers = [
     name: 'Free Open-Core',
     price: '$0',
     period: 'forever',
-    icon: <FlaskConical className="w-5 h-5 text-neutral-400" />,
+    icon: <FlaskConical className="w-5 h-5 text-muted-foreground" />,
     features: [
       'Local storage (no cloud)',
       'Web Serial DAQ (unlimited Hz)',
@@ -51,7 +51,7 @@ const tiers = [
 
 export default function BillingPage() {
   return (
-    <div className="min-h-screen bg-neutral-950 py-16 px-4">
+    <div className="min-h-screen bg-background py-16 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-4">
@@ -60,7 +60,7 @@ export default function BillingPage() {
             Paid plans coming soon
           </div>
           <h1 className="text-3xl font-bold text-white mb-3">Inquestra Pricing</h1>
-          <p className="text-neutral-400 max-w-lg mx-auto text-sm leading-relaxed">
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm leading-relaxed">
             Cloud and enterprise tiers are in development. Everything below is currently
             available free while we prepare for launch.
           </p>
@@ -71,8 +71,8 @@ export default function BillingPage() {
           {tiers.map((tier) => (
             <div
               key={tier.name}
-              className={`bg-neutral-900 rounded-xl border p-6 flex flex-col ${
-                tier.current ? 'border-emerald-800' : 'border-neutral-800 opacity-70'
+              className={`bg-muted rounded-xl border p-6 flex flex-col ${
+                tier.current ? 'border-emerald-800' : 'border-border opacity-70'
               }`}
             >
               {tier.current && (
@@ -88,12 +88,12 @@ export default function BillingPage() {
 
               <div className="mb-5 mt-3">
                 <span className="text-3xl font-bold text-white">{tier.price}</span>
-                <span className="text-xs text-neutral-500 ml-1">{tier.period}</span>
+                <span className="text-xs text-muted-foreground ml-1">{tier.period}</span>
               </div>
 
               <ul className="space-y-2 flex-1 mb-6">
                 {tier.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-xs text-neutral-300">
+                  <li key={f} className="flex items-start gap-2 text-xs text-foreground">
                     <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                     {f}
                   </li>
@@ -103,7 +103,7 @@ export default function BillingPage() {
               <div
                 className={`w-full py-2.5 rounded-lg text-sm font-medium text-center ${
                   tier.current
-                    ? 'bg-neutral-800 text-neutral-400 cursor-default'
+                    ? 'bg-neutral-800 text-muted-foreground cursor-default'
                     : 'bg-neutral-800/50 text-neutral-600 cursor-not-allowed'
                 }`}
               >

@@ -29,12 +29,12 @@ export function SerialControlPanel() {
 
       {/* Baud rate selector */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] text-neutral-500 shrink-0">Baud</span>
+        <span className="text-[10px] text-muted-foreground shrink-0">Baud</span>
         <select
           value={selectedBaud}
           onChange={(e) => setSelectedBaud(Number(e.target.value))}
           disabled={isPhysicallyConnected}
-          className="flex-1 bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-200 focus:outline-none focus:border-neutral-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs text-neutral-200 focus:outline-none focus:border-neutral-600 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {BAUD_RATES.map((rate) => (
             <option key={rate} value={rate}>
@@ -51,7 +51,7 @@ export function SerialControlPanel() {
             isPhysicallyConnected ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-700'
           }`}
         />
-        <span className="text-[10px] text-neutral-500 truncate">
+        <span className="text-[10px] text-muted-foreground truncate">
           {isPhysicallyConnected
             ? (hardwareStatus.portName ?? 'Connected')
             : 'No device'}
@@ -77,7 +77,7 @@ export function SerialControlPanel() {
         className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
           isPhysicallyConnected
             ? 'bg-red-900/30 text-red-400 border border-red-900 hover:bg-red-900/50'
-            : 'bg-neutral-800 text-neutral-200 border border-neutral-700 hover:bg-neutral-700'
+            : 'bg-neutral-800 text-neutral-200 border border-border hover:bg-neutral-700'
         }`}
       >
         {isPhysicallyConnected ? (

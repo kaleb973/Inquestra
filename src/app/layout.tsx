@@ -14,11 +14,20 @@ export const metadata: Metadata = {
     'Enterprise-grade Data Acquisition and Electronic Research Notebook for Biomedical Engineering.',
 };
 
+import { ThemeProvider } from '@/components/theme-provider';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", geist.variable)}>
-      <body className={`${inter.className} bg-neutral-950 text-neutral-100 antialiased`}>
-        {children}
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+      <body className={`${inter.className} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

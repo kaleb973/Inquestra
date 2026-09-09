@@ -19,8 +19,8 @@ export function LabSettings({ org }: { org: Organization }) {
   };
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden max-w-2xl">
-      <div className="px-5 py-4 border-b border-neutral-800">
+    <div className="bg-muted border border-border rounded-lg overflow-hidden max-w-2xl">
+      <div className="px-5 py-4 border-b border-border">
         <h2 className="text-sm font-semibold text-white flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 text-purple-400" />
           Compliance & Access Settings
@@ -33,7 +33,7 @@ export function LabSettings({ org }: { org: Organization }) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <h3 className="text-base font-medium text-neutral-200">21 CFR Part 11 Strict Mode</h3>
-            <p className="text-sm text-neutral-500 max-w-lg">
+            <p className="text-sm text-muted-foreground max-w-lg">
               When enabled, Inquestra strictly enforces equipment calibration schedules. Hardware data acquisition will be blocked if any registered lab equipment is flagged as <span className="font-mono text-xs text-amber-500 bg-amber-950/30 px-1 rounded">NEEDS_CALIBRATION</span> or <span className="font-mono text-xs text-red-500 bg-red-950/30 px-1 rounded">BROKEN</span>.
             </p>
           </div>

@@ -401,7 +401,7 @@ export function EditorCanvas() {
 
   return (
     <div
-      className={`flex-1 bg-neutral-950 overflow-y-auto relative transition-colors ${
+      className={`flex-1 bg-background overflow-y-auto relative transition-colors ${
         isDragOver ? 'bg-blue-950/20' : ''
       }`}
       onDragOver={handleDragOver}
@@ -411,7 +411,7 @@ export function EditorCanvas() {
       {/* Drag-over overlay */}
       {isDragOver && (
         <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center gap-3 bg-neutral-900/90 border-2 border-dashed border-blue-600 rounded-xl px-12 py-8">
+          <div className="flex flex-col items-center gap-3 bg-muted/90 border-2 border-dashed border-blue-600 rounded-xl px-12 py-8">
             <Upload className="w-8 h-8 text-blue-400" />
             <p className="text-blue-300 text-sm font-medium">Drop CSV to insert chart</p>
           </div>

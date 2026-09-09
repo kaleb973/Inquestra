@@ -52,22 +52,22 @@ export function InventoryManager({ items }: { items: Inventory[] }) {
       {error && <div className="p-3 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded">{error}</div>}
 
       {showAdd && (
-        <form onSubmit={handleAdd} className="bg-neutral-900 border border-neutral-800 p-4 rounded-lg flex flex-wrap gap-4 items-end">
+        <form onSubmit={handleAdd} className="bg-muted border border-border p-4 rounded-lg flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Chemical Name</label>
-            <input required name="chemical" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Chemical Name</label>
+            <input required name="chemical" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
           </div>
           <div className="w-24">
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Quantity</label>
-            <input required type="number" step="any" name="quantity" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Quantity</label>
+            <input required type="number" step="any" name="quantity" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
           </div>
           <div className="w-24">
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Unit</label>
-            <input required name="unit" placeholder="mL, g..." className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Unit</label>
+            <input required name="unit" placeholder="mL, g..." className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
           </div>
           <div className="w-32">
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Alert Threshold</label>
-            <input required type="number" step="any" name="thresholdValue" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Alert Threshold</label>
+            <input required type="number" step="any" name="thresholdValue" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
           </div>
           <button disabled={isPending} type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50">
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
@@ -75,10 +75,10 @@ export function InventoryManager({ items }: { items: Inventory[] }) {
         </form>
       )}
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
+      <div className="bg-muted border border-border rounded-lg overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-neutral-800 text-neutral-500 uppercase tracking-wider text-xs bg-neutral-950/50">
+            <tr className="border-b border-border text-muted-foreground uppercase tracking-wider text-xs bg-background/50">
               <th className="px-5 py-3 font-medium">Chemical</th>
               <th className="px-5 py-3 font-medium">Quantity</th>
               <th className="px-5 py-3 font-medium">Threshold</th>
@@ -101,13 +101,13 @@ export function InventoryManager({ items }: { items: Inventory[] }) {
                     step="any"
                     defaultValue={item.quantity}
                     onBlur={(e) => { if (e.target.value !== String(item.quantity)) handleUpdate(item.id, e.target.value) }}
-                    className="w-20 bg-transparent border-b border-transparent hover:border-neutral-700 focus:border-emerald-500 focus:outline-none text-white mr-1 px-1"
+                    className="w-20 bg-transparent border-b border-transparent hover:border-border focus:border-emerald-500 focus:outline-none text-white mr-1 px-1"
                   />
-                  <span className="text-neutral-500">{item.unit}</span>
+                  <span className="text-muted-foreground">{item.unit}</span>
                 </td>
-                <td className="px-5 py-3 font-mono text-neutral-500">{item.thresholdValue} {item.unit}</td>
+                <td className="px-5 py-3 font-mono text-muted-foreground">{item.thresholdValue} {item.unit}</td>
                 <td className="px-5 py-3 text-right space-x-2">
-                  <button onClick={() => handleDelete(item.id)} disabled={isPending} className="text-neutral-500 hover:text-red-400 transition-colors p-1">
+                  <button onClick={() => handleDelete(item.id)} disabled={isPending} className="text-muted-foreground hover:text-red-400 transition-colors p-1">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </td>

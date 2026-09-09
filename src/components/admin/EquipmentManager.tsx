@@ -49,22 +49,22 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
       {error && <div className="p-3 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded">{error}</div>}
 
       {showAdd && (
-        <form onSubmit={handleAdd} className="bg-neutral-900 border border-neutral-800 p-4 rounded-lg grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+        <form onSubmit={handleAdd} className="bg-muted border border-border p-4 rounded-lg grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
           <div className="col-span-2 md:col-span-1">
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Equipment Name</label>
-            <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Equipment Name</label>
+            <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Serial Number</label>
-            <input name="serialNumber" className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Serial Number</label>
+            <input name="serialNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Last Calibrated</label>
-            <input required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Last Calibrated</label>
+            <input required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">Freq (Days)</label>
-            <input required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Freq (Days)</label>
+            <input required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
           </div>
           <div className="hidden">
             <input type="hidden" name="status" value="OPERATIONAL" />
@@ -77,18 +77,18 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.length === 0 && (
-          <p className="text-neutral-500 text-sm col-span-full">No equipment registered.</p>
+          <p className="text-muted-foreground text-sm col-span-full">No equipment registered.</p>
         )}
         {items.map(item => {
           const overdue = isOverdue(new Date(item.lastCalibrated), item.calibrationFreq);
           return (
-            <div key={item.id} className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 flex flex-col relative overflow-hidden">
+            <div key={item.id} className="bg-muted border border-border rounded-lg p-4 flex flex-col relative overflow-hidden">
               <div className={`absolute top-0 left-0 w-1 h-full ${item.status === 'BROKEN' ? 'bg-red-500' : overdue ? 'bg-amber-500' : 'bg-emerald-500'}`} />
               
               <div className="flex justify-between items-start mb-4 pl-2">
                 <div>
                   <h3 className="font-semibold text-white">{item.name}</h3>
-                  <p className="text-xs text-neutral-500 font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
+                  <p className="text-xs text-muted-foreground font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
                 </div>
                 {item.status === 'BROKEN' ? (
                   <AlertCircle className="w-5 h-5 text-red-500" />
@@ -100,11 +100,11 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
               </div>
 
               <div className="space-y-1 mb-6 pl-2">
-                <div className="text-xs text-neutral-400 flex justify-between">
+                <div className="text-xs text-muted-foreground flex justify-between">
                   <span>Last Calibrated:</span>
                   <span className="text-neutral-200">{new Date(item.lastCalibrated).toLocaleDateString()}</span>
                 </div>
-                <div className="text-xs text-neutral-400 flex justify-between">
+                <div className="text-xs text-muted-foreground flex justify-between">
                   <span>Frequency:</span>
                   <span className="text-neutral-200">Every {item.calibrationFreq} days</span>
                 </div>
@@ -114,7 +114,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                 <button
                   onClick={() => handleUpdateStatus(item.id, 'OPERATIONAL', true)}
                   disabled={isPending || (item.status === 'OPERATIONAL' && !overdue)}
-                  className="flex-1 px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-medium rounded transition-colors disabled:opacity-50"
+                  className="flex-1 px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-foreground text-xs font-medium rounded transition-colors disabled:opacity-50"
                 >
                   Log Calibration
                 </button>
@@ -123,7 +123,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                   disabled={isPending}
                   className={`px-3 py-1.5 text-xs font-medium rounded transition-colors border ${
                     item.status === 'BROKEN' 
-                      ? 'border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-white' 
+                      ? 'border-border bg-neutral-800 hover:bg-neutral-700 text-white' 
                       : 'border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-900/50'
                   }`}
                 >

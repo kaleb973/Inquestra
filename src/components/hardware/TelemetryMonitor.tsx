@@ -16,10 +16,10 @@ interface StatCardProps {
 
 function StatCard({ label, value, unit, Icon, accent }: StatCardProps) {
   return (
-    <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-xl p-3.5 shadow-sm hover:border-neutral-700 transition-colors">
+    <div className="bg-muted/40 border border-border/80 rounded-xl p-3.5 shadow-sm hover:border-border transition-colors">
       <div className="flex items-center gap-1.5 mb-2">
-        <Icon className="w-3.5 h-3.5 text-neutral-500" />
-        <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">
+        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
           {label}
         </span>
       </div>
@@ -28,7 +28,7 @@ function StatCard({ label, value, unit, Icon, accent }: StatCardProps) {
           {value}
         </span>
         {unit && (
-          <span className="text-[10px] text-neutral-500 font-mono">{unit}</span>
+          <span className="text-[10px] text-muted-foreground font-mono">{unit}</span>
         )}
       </div>
     </div>
@@ -51,7 +51,7 @@ export function TelemetryMonitor() {
     <div className="p-5">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="w-3.5 h-3.5 text-emerald-400" />
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           Live DAQ Telemetry
         </span>
       </div>

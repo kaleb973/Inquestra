@@ -40,21 +40,30 @@ export function LeftSidebar() {
     });
   };
 
-  const handleSelectTrial = async (id: string) => {
-    try {
-      const trial = await getTrial(id);
-      if (trial) {
-        setActiveTrial(trial as any);
-      }
-    } catch (err) {
-      console.error(err);
+  const handleSelectTrial = (id: string) => {
+    const localTrial = trials.find(t => t.id === id);
+    if (localTrial) {
+      // Optimistic update for instant UI feedback (<50ms)
+      setActiveTrial({ ...localTrial, content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Loading...' }] }] }, metadata: [] } as any);
     }
+    
+    // Fetch full document in background
+    startTransition(async () => {
+      try {
+        const fullTrial = await getTrial(id);
+        if (fullTrial) {
+          setActiveTrial(fullTrial as any);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
   };
 
   return (
-    <aside className="w-[260px] bg-neutral-950/80 backdrop-blur-md border-r border-neutral-800/80 flex flex-col shrink-0 overflow-hidden shadow-2xl">
+    <aside className="w-[260px] bg-background/80 backdrop-blur-md border-r border-border/80 flex flex-col shrink-0 overflow-hidden shadow-2xl">
       {/* Project Switcher */}
-      <div className="px-3 py-3 border-b border-neutral-800/60 bg-neutral-900/20">
+      <div className="px-3 py-3 border-b border-border/60 bg-muted/20">
         <button className="w-full flex items-center justify-between px-2 py-1.5 rounded hover:bg-neutral-800/80 transition-all duration-200 group">
           <div className="flex items-center gap-2">
             <div className="bg-emerald-500/20 p-1 rounded">
@@ -62,7 +71,7 @@ export function LeftSidebar() {
             </div>
             <span className="text-sm text-neutral-200 font-medium truncate tracking-tight">BME Lab</span>
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+          <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-muted-foreground transition-colors" />
         </button>
       </div>
 
@@ -70,15 +79,15 @@ export function LeftSidebar() {
       <div className="flex-1 overflow-y-auto p-3">
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-1.5">
-            <BookOpen className="w-3.5 h-3.5 text-neutral-500" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+            <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               Trials
             </span>
           </div>
           <button 
             onClick={handleNewTrial}
             disabled={isPending}
-            className="text-neutral-500 hover:text-white hover:bg-neutral-800 transition-all duration-200 p-1 rounded disabled:opacity-50"
+            className="text-muted-foreground hover:text-white hover:bg-neutral-800 transition-all duration-200 p-1 rounded disabled:opacity-50"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
@@ -93,12 +102,12 @@ export function LeftSidebar() {
                 onClick={() => handleSelectTrial(t.id)}
                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left transition-all duration-200 border ${
                   isActive 
-                    ? 'bg-neutral-800/80 border-neutral-700/80 shadow-sm' 
-                    : 'bg-transparent border-transparent hover:bg-neutral-900/50 hover:border-neutral-800/50'
+                    ? 'bg-neutral-800/80 border-border/80 shadow-sm' 
+                    : 'bg-transparent border-transparent hover:bg-muted/50 hover:border-border/50'
                 }`}
               >
                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[t.status as TrialStatus]}`} />
-                <span className={`text-sm truncate flex-1 tracking-tight ${isActive ? 'text-white font-medium' : 'text-neutral-400'}`}>
+                <span className={`text-sm truncate flex-1 tracking-tight ${isActive ? 'text-white font-medium' : 'text-muted-foreground'}`}>
                   {t.title}
                 </span>
               </button>
@@ -106,8 +115,8 @@ export function LeftSidebar() {
           })}
         </div>
 
-        <div className="mt-8 border-t border-neutral-800/60 pt-4">
-          <a href="/app/admin" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition-all duration-200 tracking-tight">
+        <div className="mt-8 border-t border-border/60 pt-4">
+          <a href="/app/admin" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-white hover:bg-neutral-800/60 transition-all duration-200 tracking-tight">
             <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-neutral-600" />
             Lab Settings
           </a>
@@ -115,10 +124,10 @@ export function LeftSidebar() {
       </div>
 
       {/* Hardware Controls */}
-      <div className="border-t border-neutral-800 p-3 space-y-2">
+      <div className="border-t border-border p-3 space-y-2">
         <div className="flex items-center gap-2">
-          <HardDrive className="w-3.5 h-3.5 text-neutral-500" />
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+          <HardDrive className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Hardware
           </span>
         </div>

@@ -27,11 +27,12 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { signOut } from '@/actions/authActions';
 import { sealTrial } from '@/actions/trialActions';
 import { checkLabCompliance } from '@/actions/adminActions';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { TrialStatus } from '@/types/inquestra';
 import type { User } from '@supabase/supabase-js';
 
 const STATUS_COLORS: Record<TrialStatus, string> = {
-  DRAFT: 'text-neutral-400 border-neutral-700',
+  DRAFT: 'text-muted-foreground border-border',
   ACTIVE: 'text-emerald-400 border-emerald-900',
   COMPLETED: 'text-blue-400 border-blue-900',
   FAILED: 'text-red-400 border-red-900',
@@ -152,7 +153,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
+    <header className="h-14 border-b border-border/80 bg-background/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
       {/* Brand */}
       <Link href="/app" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
         <Activity className="text-emerald-400 w-4 h-4" />
@@ -164,7 +165,7 @@ export function Header() {
       <div className="h-4 w-px bg-neutral-800 shrink-0" />
 
       {/* Trial identity */}
-      <span className="text-neutral-300 text-sm truncate max-w-xs font-medium tracking-tight">{title}</span>
+      <span className="text-foreground text-sm truncate max-w-xs font-medium tracking-tight">{title}</span>
       <span
         className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
       >
@@ -191,7 +192,7 @@ export function Header() {
         <button
           onClick={() => window.print()}
           title="Print to PDF"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-neutral-800 text-foreground hover:bg-neutral-700 transition-colors"
         >
           <Printer className="w-3.5 h-3.5" />
           Print
@@ -202,7 +203,7 @@ export function Header() {
           onClick={handleExport}
           disabled={isExporting}
           title="Export trial as ZIP (Markdown + JSON + CSV)"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-neutral-800 text-foreground hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isExporting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -242,7 +243,7 @@ export function Header() {
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
             isSynced
               ? 'bg-blue-950/30 text-blue-400 border-blue-900 hover:bg-blue-950/60'
-              : 'bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700'
+              : 'bg-neutral-800 text-foreground border-border hover:bg-neutral-700'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isPending ? (
@@ -300,12 +301,14 @@ export function Header() {
 
         <div className="h-5 w-px bg-neutral-800 shrink-0" />
 
+        <ThemeToggle />
+
         {/* Auth status: User Profile or Sign In button */}
         {user ? (
           <div className="flex items-center gap-2">
             <Link
               href="/app/admin"
-              className="flex items-center gap-1.5 text-xs text-neutral-300 font-mono bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded max-w-[160px] truncate hover:bg-neutral-800 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[160px] truncate hover:bg-neutral-800 transition-colors"
               title="Admin Dashboard"
             >
               <Shield className="w-3 h-3 text-emerald-400 shrink-0" />
@@ -315,7 +318,7 @@ export function Header() {
               <button
                 type="submit"
                 title="Sign out"
-                className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-neutral-900 border border-transparent hover:border-neutral-800 rounded transition-colors"
+                className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-muted border border-transparent hover:border-border rounded transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>

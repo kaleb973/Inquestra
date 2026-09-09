@@ -118,10 +118,10 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
 
   return (
     <NodeViewWrapper className="my-4" data-drag-handle>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
+      <div className="bg-muted border border-border rounded-lg overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-neutral-800">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
           <div className="flex items-center gap-2 min-w-0">
             <ClipboardList className="w-3.5 h-3.5 text-violet-400 shrink-0" />
             <input
@@ -135,7 +135,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
             </span>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <span className="text-[10px] text-neutral-500 font-mono mr-1">
+            <span className="text-[10px] text-muted-foreground font-mono mr-1">
               {completedCount}/{totalCount}
             </span>
             <button
@@ -185,7 +185,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
                 <button
                   onClick={() => toggleStep(step.id)}
                   className={`mt-0.5 shrink-0 transition-colors ${
-                    step.checked ? 'text-violet-400' : 'text-neutral-600 hover:text-neutral-400'
+                    step.checked ? 'text-violet-400' : 'text-neutral-600 hover:text-muted-foreground'
                   }`}
                 >
                   {step.checked ? (
@@ -252,7 +252,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
                       if (e.key === 'Escape') setShowDeviation(null);
                     }}
                     placeholder="Describe deviation from protocol…"
-                    className="flex-1 bg-neutral-950 border border-amber-900/50 rounded px-2.5 py-1 text-[11px] text-amber-200 placeholder:text-neutral-700 focus:outline-none font-mono"
+                    className="flex-1 bg-background border border-amber-900/50 rounded px-2.5 py-1 text-[11px] text-amber-200 placeholder:text-neutral-700 focus:outline-none font-mono"
                   />
                   <button
                     onClick={() => saveDeviation(step.id)}
