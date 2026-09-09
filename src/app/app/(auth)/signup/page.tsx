@@ -19,9 +19,13 @@ export default function SignUpPage() {
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const result = await signUp(formData);
-      if (result?.error) setError(result.error);
-      if (result?.success) setSuccess(result.success);
+      try {
+        const result = await signUp(formData);
+        if (result?.error) setError(result.error);
+        if (result?.success) setSuccess(result.success);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
+      }
     });
   };
 

@@ -78,8 +78,12 @@ export async function updateTrialContent(
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
 
+  const trial = await prisma.trial.findUnique({ where: { id: trialId, userId: dbUser.id } });
+  if (!trial) throw new Error('Trial not found');
+  if (trial.checksum) throw new Error('Cannot edit a sealed trial. This trial is cryptographically locked.');
+
   const updated = await prisma.trial.update({
-    where: { id: trialId, userId: dbUser.id },
+    where: { id: trialId },
     data: {
       title: z.string().min(1).max(255).parse(title),
       content: content as Prisma.InputJsonValue,
@@ -146,4 +150,54 @@ export async function createNewTrial() {
 
   revalidatePath('/app');
   return trial;
+}
+
+import crypto from 'crypto';
+
+export async function sealTrial(trialId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error('User not found');
+
+  const trial = await prisma.trial.findFirst({
+    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+    include: { metadata: true }
+  });
+
+  if (!trial) throw new Error('Trial not found');
+  if (trial.checksum) throw new Error('Trial is already sealed');
+
+  // Cryptographic seal based on content, title, and metadata
+  const dataToHash = JSON.stringify({
+    title: trial.title,
+    content: trial.content,
+    metadata: trial.metadata,
+    createdAt: trial.createdAt.toISOString()
+  });
+  const checksum = crypto.createHash('sha256').update(dataToHash).digest('hex');
+
+  const updated = await prisma.trial.update({
+    where: { id: trialId },
+    data: {
+      status: 'COMPLETED',
+      checksum,
+      sealedAt: new Date(),
+      sealedBy: dbUser.id
+    }
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: dbUser.id,
+      organizationId: dbUser.organizationId,
+      action: 'TRIAL_SEALED',
+      details: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}`
+    }
+  });
+
+  revalidatePath('/app');
+  return updated;
 }

@@ -60,9 +60,19 @@ export function SerialControlPanel() {
 
       {/* Connect / Disconnect */}
       <button
-        onClick={() =>
-          isPhysicallyConnected ? disconnect() : connect(selectedBaud)
-        }
+        onClick={async () => {
+          if (isPhysicallyConnected) {
+            disconnect();
+          } else {
+            const { checkLabCompliance } = await import('@/actions/adminActions');
+            const res = await checkLabCompliance();
+            if (!res.compliant) {
+              alert(res.reason);
+              return;
+            }
+            connect(selectedBaud);
+          }
+        }}
         disabled={!isWebSerialSupported || hardwareStatus.isSimulated}
         className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
           isPhysicallyConnected

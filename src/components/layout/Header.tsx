@@ -25,6 +25,8 @@ import { syncTrialToCloud } from '@/actions/syncActions';
 import { exportTrialAsZip } from '@/lib/exportTrial';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { signOut } from '@/actions/authActions';
+import { sealTrial } from '@/actions/trialActions';
+import { checkLabCompliance } from '@/actions/adminActions';
 import type { TrialStatus } from '@/types/inquestra';
 import type { User } from '@supabase/supabase-js';
 
@@ -133,10 +135,26 @@ export function Header() {
     }
   };
 
+  const [isSealing, setIsSealing] = useState(false);
+  const handleSealTrial = () => {
+    if (!confirm('Seal this trial? This action is irreversible. The trial will be locked from further edits and cryptographically hashed.')) return;
+    setIsSealing(true);
+    startTransition(async () => {
+      try {
+        await sealTrial(activeTrial.id);
+        // Force reload to grab latest DB state since activeTrial doesn't auto-update checksum yet
+        window.location.reload(); 
+      } catch (err: any) {
+        alert(err.message || 'Failed to seal trial');
+        setIsSealing(false);
+      }
+    });
+  };
+
   return (
     <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
       {/* Brand */}
-      <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+      <Link href="/app" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
         <Activity className="text-emerald-400 w-4 h-4" />
         <span className="text-white font-semibold text-sm tracking-tight">
           Inquestra
@@ -194,6 +212,28 @@ export function Header() {
           {isExporting ? 'Exporting…' : 'Export'}
         </button>
 
+        {/* Seal Trial Button or Lock Badge */}
+        {activeTrial.checksum ? (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-900 bg-amber-950/30 text-amber-500" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
+            <Shield className="w-3.5 h-3.5" />
+            Sealed
+          </div>
+        ) : (
+          <button
+            onClick={handleSealTrial}
+            disabled={isSealing}
+            title="Seal trial (Irreversible)"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-900 bg-amber-950/40 text-amber-500 hover:bg-amber-950/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSealing ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Shield className="w-3.5 h-3.5" />
+            )}
+            {isSealing ? 'Sealing...' : 'Seal'}
+          </button>
+        )}
+
         {/* Save to Cloud button */}
         <button
           onClick={handleSync}
@@ -227,7 +267,18 @@ export function Header() {
 
         {/* Simulator mode toggle */}
         <button
-          onClick={() => (isSimRunning ? stopSimulation() : startSimulation())}
+          onClick={async () => {
+            if (isSimRunning) {
+              stopSimulation();
+            } else {
+              const res = await checkLabCompliance();
+              if (!res.compliant) {
+                alert(res.reason);
+                return;
+              }
+              startSimulation();
+            }
+          }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
             isSimRunning
               ? 'bg-red-950/40 text-red-400 border-red-900 hover:bg-red-950/70'

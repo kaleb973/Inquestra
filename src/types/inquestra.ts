@@ -34,6 +34,9 @@ export interface TrialDocument {
   metadata: MetadataEntry[];
   createdAt: string;   // ISO 8601
   updatedAt: string;   // ISO 8601
+  checksum?: string | null;
+  sealedAt?: string | null;
+  sealedBy?: string | null;
 }
 
 /**

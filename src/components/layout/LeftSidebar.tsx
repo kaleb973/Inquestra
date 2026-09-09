@@ -109,7 +109,7 @@ export function LeftSidebar() {
         <div className="mt-8 border-t border-neutral-800/60 pt-4">
           <a href="/app/admin" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition-all duration-200 tracking-tight">
             <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-neutral-600" />
-            Admin Dashboard
+            Lab Settings
           </a>
         </div>
       </div>

@@ -61,6 +61,24 @@ export async function deductReagent(payload: ReagentPayload) {
     },
   });
 
+  if (inventory.organizationId) {
+    try {
+      const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+      if (dbUser) {
+        await prisma.auditLog.create({
+          data: {
+            userId: dbUser.id,
+            organizationId: inventory.organizationId,
+            action: 'REAGENT_DEDUCTED',
+            details: `Deducted ${validated.quantity} ${validated.unit} of ${validated.chemical} for Trial ${validated.trialId}. Remaining: ${newQuantity}`,
+          },
+        });
+      }
+    } catch (e) {
+      console.error('Audit Log failed', e);
+    }
+  }
+
   return {
     success: true,
     alert: shouldAlert,

@@ -140,6 +140,16 @@ function buildSlashCommands(): SlashCommand[] {
           .run();
       },
     },
+    {
+      title: 'Ask AI',
+      description: 'Analyze anomalies in trial or telemetry',
+      icon: <span className="w-4 h-4 text-purple-400">✨</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).run();
+        // Dispatch event to open AI Drawer
+        document.dispatchEvent(new CustomEvent('inquestra:open-ai', { detail: { query: 'Can you analyze the current telemetry buffer for anomalies?' } }));
+      },
+    },
   ];
 }
 
@@ -301,6 +311,14 @@ export function EditorCanvas() {
     }
   }, [activeTrialId, editor]); // Depend on the reactive ID
 
+  // Lock editor if cryptographically sealed
+  const checksum = useNotebookStore((s) => s.activeTrial.checksum);
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!checksum, false);
+    }
+  }, [checksum, editor]);
+
   // Keep editorRef in sync for drag-drop handler and HTML export
   useEffect(() => {
     editorRef.current = editor;
@@ -406,6 +424,7 @@ export function EditorCanvas() {
           <input
             type="text"
             value={title}
+            disabled={!!checksum}
             onChange={(e) => {
               const newTitle = e.target.value;
               updateTitle(newTitle);
@@ -416,7 +435,7 @@ export function EditorCanvas() {
               }
             }}
             placeholder="Untitled Trial"
-            className="w-full bg-transparent text-3xl font-bold text-white placeholder:text-neutral-800 focus:outline-none"
+            className="w-full bg-transparent text-3xl font-bold text-white placeholder:text-neutral-800 focus:outline-none disabled:opacity-70"
           />
           <p className="text-[11px] text-neutral-700 mt-1 font-mono">
             Auto-saved · {formattedTime}

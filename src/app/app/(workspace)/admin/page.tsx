@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
-import { Shield, Users, FlaskConical, AlertTriangle, Box, Wrench } from 'lucide-react';
+import { Shield, Users, FlaskConical, AlertTriangle, Box, Wrench, ClipboardList } from 'lucide-react';
 import { InventoryManager } from '@/components/admin/InventoryManager';
 import { EquipmentManager } from '@/components/admin/EquipmentManager';
+import { LabSettings } from '@/components/admin/LabSettings';
 import Link from 'next/link';
 
 export default async function AdminPage({
@@ -26,7 +27,7 @@ export default async function AdminPage({
 
   const { tab = 'overview' } = await searchParams;
 
-  const [orgUsers, projects, trials, inventory, equipment] = await Promise.all([
+  const [orgUsers, projects, trials, inventory, equipment, auditLogs] = await Promise.all([
     prisma.user.findMany({
       where: { organizationId: dbUser.organizationId },
       orderBy: { createdAt: 'desc' },
@@ -46,6 +47,12 @@ export default async function AdminPage({
       where: { organizationId: dbUser.organizationId },
       orderBy: { name: 'asc' },
     }),
+    prisma.auditLog.findMany({
+      where: { organizationId: dbUser.organizationId },
+      orderBy: { createdAt: 'desc' },
+      include: { user: true },
+      take: 100,
+    }),
   ]);
 
   const inventoryAlerts = inventory.filter(i => i.alertFlag).length;
@@ -61,6 +68,8 @@ export default async function AdminPage({
     { id: 'overview', label: 'Overview', icon: <Shield className="w-4 h-4" /> },
     { id: 'inventory', label: 'Inventory', icon: <Box className="w-4 h-4" /> },
     { id: 'equipment', label: 'Equipment', icon: <Wrench className="w-4 h-4" /> },
+    { id: 'audit', label: 'Audit Logs', icon: <ClipboardList className="w-4 h-4" /> },
+    { id: 'settings', label: 'Settings', icon: <Shield className="w-4 h-4" /> },
   ];
 
   return (
@@ -70,8 +79,8 @@ export default async function AdminPage({
         <div className="flex items-center gap-3 mb-8">
           <Shield className="w-8 h-8 text-purple-400" />
           <div>
-            <h1 className="text-white text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-neutral-500 text-sm">{dbUser.organization.name}</p>
+            <h1 className="text-white text-2xl font-bold">Lab Management Suite</h1>
+            <p className="text-neutral-500 text-sm">{dbUser.organization.name} • 21 CFR Part 11 Compliant Environment</p>
           </div>
         </div>
 
@@ -172,6 +181,50 @@ export default async function AdminPage({
 
         {tab === 'inventory' && <InventoryManager items={inventory} />}
         {tab === 'equipment' && <EquipmentManager items={equipment} />}
+        {tab === 'settings' && <LabSettings org={dbUser.organization} />}
+        {tab === 'audit' && (
+          <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
+            <div className="px-5 py-4 border-b border-neutral-800 flex justify-between items-center">
+              <div>
+                <h2 className="text-sm font-semibold text-white">System Audit Logs</h2>
+                <p className="text-xs text-neutral-500 mt-1">Immutable chronological ledger of organization activity.</p>
+              </div>
+            </div>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-neutral-800 bg-neutral-950/50">
+                  <th className="text-left px-5 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Timestamp</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">User</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Action</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLogs.map((log) => (
+                  <tr key={log.id} className="border-b border-neutral-800/50 hover:bg-neutral-800/30 transition-colors">
+                    <td className="px-5 py-3 text-xs text-neutral-400 font-mono">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                    <td className="px-5 py-3 text-sm text-neutral-200">{log.user.email}</td>
+                    <td className="px-5 py-3">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded border border-neutral-700 bg-neutral-800 text-neutral-300">
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-sm text-neutral-400">{log.details}</td>
+                  </tr>
+                ))}
+                {auditLogs.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-5 py-8 text-center text-sm text-neutral-500">
+                      No audit logs found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

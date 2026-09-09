@@ -5,6 +5,17 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
+// Helper to log audit actions
+async function logAuditAction(userId: string, organizationId: string, action: string, details: string) {
+  try {
+    await prisma.auditLog.create({
+      data: { userId, organizationId, action, details },
+    });
+  } catch (err) {
+    console.error('Failed to write audit log:', err);
+  }
+}
+
 // Helper to verify admin/PI access
 async function verifyAdminAccess() {
   const supabase = await createSupabaseServerClient();
@@ -43,7 +54,8 @@ export async function addInventoryItem(formData: FormData) {
         organizationId: dbUser.organizationId,
       },
     });
-    revalidatePath('/admin');
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_ADDED', `Added ${quantity} ${unit} of ${chemical}`);
+    revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -67,7 +79,8 @@ export async function updateInventoryStock(id: string, newQuantity: number) {
         alertFlag: newQuantity <= (item.thresholdValue ?? 0),
       },
     });
-    revalidatePath('/admin');
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_UPDATED', `Updated ${item.chemical} stock from ${item.quantity} to ${newQuantity}`);
+    revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -84,7 +97,8 @@ export async function deleteInventoryItem(id: string) {
       return { success: false, error: 'Unauthorized' };
     }
     await prisma.inventory.delete({ where: { id } });
-    revalidatePath('/admin');
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_DELETED', `Deleted ${item.chemical} from inventory`);
+    revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -114,7 +128,8 @@ export async function addEquipment(formData: FormData) {
         organizationId: dbUser.organizationId,
       },
     });
-    revalidatePath('/admin');
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_ADDED', `Added equipment ${name} (SN: ${serialNumber})`);
+    revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -138,9 +153,68 @@ export async function updateEquipmentStatus(id: string, status: string, calibrat
         ...(calibratedNow ? { lastCalibrated: new Date() } : {}),
       },
     });
-    revalidatePath('/admin');
+    const details = calibratedNow ? `Calibrated equipment ${item.name} and set status to ${status}` : `Updated equipment ${item.name} status to ${status}`;
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_UPDATED', details);
+    revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
+}
+
+export async function updateStrictMode(enabled: boolean) {
+  const { dbUser, error } = await verifyAdminAccess();
+  if (error || !dbUser) return { success: false, error };
+
+  try {
+    await prisma.organization.update({
+      where: { id: dbUser.organizationId },
+      data: { strictMode: enabled }
+    });
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'STRICT_MODE_TOGGLED', `Set strictMode to ${enabled}`);
+    revalidatePath('/app/admin');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function checkLabCompliance() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { compliant: true };
+
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    include: { organization: true }
+  });
+
+  if (!dbUser || !dbUser.organization.strictMode) return { compliant: true };
+
+  const brokenEquipment = await prisma.equipment.findMany({
+    where: {
+      organizationId: dbUser.organizationId,
+      status: { in: ['BROKEN', 'NEEDS_CALIBRATION'] }
+    }
+  });
+
+  // Also check if any equipment is overdue
+  const now = new Date();
+  const equipment = await prisma.equipment.findMany({
+    where: { organizationId: dbUser.organizationId }
+  });
+  const overdue = equipment.filter(e => {
+    const nextDue = new Date(e.lastCalibrated);
+    nextDue.setDate(nextDue.getDate() + e.calibrationFreq);
+    return now > nextDue;
+  });
+
+  if (brokenEquipment.length > 0 || overdue.length > 0) {
+    return {
+      compliant: false,
+      reason: `Strict Mode: Data acquisition blocked. ${brokenEquipment.length + overdue.length} equipment item(s) are broken or overdue for calibration.`
+    };
+  }
+
+  return { compliant: true };
 }
