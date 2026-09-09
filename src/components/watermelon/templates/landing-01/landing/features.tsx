@@ -93,7 +93,7 @@ export default function Features() {
             className="text-primary mb-8 inline-flex items-center text-xs font-bold tracking-widest uppercase"
           >
             <span className="mr-3 opacity-70">{'//'}</span>
-            FEATURE BENTO
+            WHY INQUESTRA?
           </motion.div>
           <motion.div variants={itemVariants}>
             <Heading
@@ -101,7 +101,7 @@ export default function Features() {
               variant="big"
               className="text-foreground font-sans text-balance"
             >
-              Why choose <span className="text-primary">Watermelon</span>  UI?
+              Built for <span className="text-primary">Biomedical Engineering</span>
             </Heading>
           </motion.div>
         </motion.div>
@@ -113,39 +113,39 @@ export default function Features() {
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
         >
-          {/* Top Left: 100% Open Source */}
+          {/* Top Left: Open Source */}
           <FeatureCard
             variants={itemVariants}
             className="lg:col-span-2"
             icon={CodeIcon}
-            title="100% Open Source"
-            description="Free for commercial and personal use. No strings attached, just copy, paste, and ship faster than ever."
+            title="Live Hardware DAQ"
+            description="Connect ESP32s and Arduinos via Web Serial. Stream 100Hz telemetry directly into your experimental record without copying CSVs."
             descriptionClassName="max-w-sm text-pretty"
           >
             <OpenSourceComponent />
           </FeatureCard>
 
-          {/* Top Right: 600+ Components */}
+          {/* Top Right: Components */}
           <FeatureCard
             variants={itemVariants}
             className="lg:col-span-3"
             icon={PuzzleIcon}
-            title="600+ Premium Components"
-            description="An exhaustive library of meticulously crafted UI elements, covering everything from simple buttons to complex interactive widgets."
+            title="Smart Inventory"
+            description="Slash commands let you deduct reagents directly from your protocol steps. Admins get low-stock alerts automatically."
             descriptionClassName="max-w-md text-pretty"
           >
             <PremiumComponent />
           </FeatureCard>
 
-          {/* Bottom Left: Custom Theme Options */}
+          {/* Bottom Left: Theming */}
           <FeatureCard
             variants={itemVariants}
             className="lg:col-span-3"
             icon={PaintBoardIcon}
-            title="Powerful Theming"
+            title="PI Audit Trails"
             description={
               <>
-                Tweak CSS variables just like <br className='hidden md:block lg:hidden' /> you&apos;d adjust Tailwind classes. Add your own tokens, and every component instantly inherits your brand&apos;s unique DNA.
+                Immutable, timestamped protocol executions. <br className='hidden md:block lg:hidden' /> The Strict Mode Reviewer flags deviations immediately for PI sign-off.
               </>
             }
             descriptionClassName="max-w-lg text-balance"
@@ -153,13 +153,13 @@ export default function Features() {
             <ThemingComponent />
           </FeatureCard>
 
-          {/* Bottom Right: Modern Templates */}
+          {/* Bottom Right: Templates */}
           <FeatureCard
             variants={itemVariants}
             className="lg:col-span-2"
             icon={Layout01Icon}
             title="Production Ready"
-            description="Stop building layouts from scratch. Ship complete pages in hours, not weeks, with our production-ready templates."
+            description="Run your entire BME lab operations from a single unified platform. Stop switching between spreadsheets and generic tools."
             descriptionClassName="max-w-xs text-pretty"
           >
             <ProductionReadyComponent />

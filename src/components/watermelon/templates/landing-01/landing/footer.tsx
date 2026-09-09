@@ -66,45 +66,42 @@ export default function Footer() {
           {/* Left Side: Brand & Newsletter (span 5) */}
           <div className="flex flex-col items-start pr-0 lg:col-span-5 lg:pr-8">
             <div className="text-primary mb-6 flex items-center gap-2 font-mono text-xs tracking-widest">
-              <span className="opacity-70">{'//'}</span> WATERMELON UI
+              <span className="opacity-70">{'//'}</span> INQUESTRA
             </div>
             <h3 className="mb-6 font-sans text-3xl tracking-tight text-balance md:text-5xl">
-              Building the future <br className="hidden lg:block" /> of
-              interfaces
+              Unify your hardware <br className="hidden lg:block" /> and hypotheses
             </h3>
             <p className="mb-8 max-w-md text-sm leading-relaxed text-pretty text-white/50">
-              Watermelon UI is the foundational layer for modern web
-              applications—beautifully designed, perfectly animated, and deeply
-              technical
+              The Electronic Research Notebook for Biomedical Engineering. Stream 100Hz telemetry directly into your experimental record.
             </p>
 
             <a
-              href="/home"
+              href="/app"
               className="text-background bg-primary hover:bg-primary/90 inline-flex w-fit items-center justify-center px-8 py-4 text-xs font-bold tracking-widest uppercase transition-colors active:scale-[0.96]"
             >
-              Explore Docs <ArrowUpRight01Icon className="ml-2 h-4 w-4" />
+              Enter Workspace <ArrowUpRight01Icon className="ml-2 h-4 w-4" />
             </a>
           </div>
 
           {/* Right Side: Links (span 7) */}
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:col-span-7 lg:pl-8">
-            <FooterLinkColumn title="PRODUCT">
-              <FooterLink href="/animated-components">Animated</FooterLink>
-              <FooterLink href="/components">Components</FooterLink>
-              <FooterLink href="/blocks">Blocks</FooterLink>
-              <FooterLink href="/dashboards">Dashboards</FooterLink>
+            <FooterLinkColumn title="PLATFORM">
+              <FooterLink href="/app">Electronic Notebook</FooterLink>
+              <FooterLink href="/app">Live DAQ</FooterLink>
+              <FooterLink href="/app">Inventory Management</FooterLink>
+              <FooterLink href="/app">PI Approvals</FooterLink>
             </FooterLinkColumn>
 
-            <FooterLinkColumn title="COMMUNITY">
-              <FooterLink href="">Discord</FooterLink>
-              <FooterLink href="https://github.com/WatermelonCorp/watermelon-platform">GitHub</FooterLink>
-              <FooterLink href="https://x.com/watermelonui">X (Twitter)</FooterLink>
+            <FooterLinkColumn title="RESOURCES">
+              <FooterLink href="#">Documentation</FooterLink>
+              <FooterLink href="#">API Reference</FooterLink>
+              <FooterLink href="#">Hardware Guides</FooterLink>
             </FooterLinkColumn>
 
             <FooterLinkColumn title="COMPANY">
-              <FooterLink href="/terms">Terms</FooterLink>
-              <FooterLink href="/privacy">Privacy</FooterLink>
-              <FooterLink href="/copyright">Copyright</FooterLink>
+              <FooterLink href="#">About</FooterLink>
+              <FooterLink href="#">Contact</FooterLink>
+              <FooterLink href="#">Compliance</FooterLink>
             </FooterLinkColumn>
           </div>
 
@@ -117,9 +114,9 @@ export default function Footer() {
           <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[16px_16px]" />
           <div className="relative z-10 flex w-full flex-col items-center justify-between gap-6 px-2 md:flex-row">
             <div className="flex items-center gap-3">
-              <div className="bg-primary h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(163,255,18,0.6)]" />
+              <div className="bg-primary h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
               <span className="text-primary font-mono text-xs tracking-widest uppercase">
-                Built for developers
+                Built for biomedical engineering
               </span>
             </div>
 
@@ -137,7 +134,7 @@ export default function Footer() {
             </div>
 
             <div className="text-primary font-mono text-xs tracking-widest">
-              {'[ WATERMELON UI ]'}
+              {'[ INQUESTRA ]'}
             </div>
           </div>
         </div>
@@ -148,26 +145,26 @@ export default function Footer() {
             {/* Logo / Left */}
             <div className="flex items-center gap-3">
               <div className="group relative flex h-8 w-8 items-center justify-center">
-                <Activity className="text-primary h-full w-full" />
+                <Activity className="text-emerald-400 h-full w-full" />
               </div>
               <span className="font-sans text-lg font-bold tracking-tight text-white/90">
-                Watermelon UI
+                Inquestra
               </span>
             </div>
 
             <div className="hidden flex-col border-l border-white/10 pl-8 md:flex">
               <span className="text-xs tracking-widest text-white/40">
-                The foundational layer for apps.
+                Strict. Proven. Cryptographic.
               </span>
               <span className="text-xs tracking-widest text-white/40">
-                Fast. Animated. Technical.
+                The future of BME research.
               </span>
             </div>
           </div>
 
           <div className="flex w-full flex-col items-start justify-between gap-4 text-xs tracking-widest text-white/40 uppercase md:flex-row md:items-center md:gap-16 xl:w-auto xl:justify-end">
             <div className="flex flex-col gap-1">
-              <span>&copy; 2026 Watermelon UI.</span>
+              <span>&copy; 2026 Inquestra.</span>
               <span>All rights reserved.</span>
             </div>
             <div className="flex gap-4 md:gap-6">
@@ -182,12 +179,11 @@ export default function Footer() {
 
           <div className="flex w-full flex-col items-start gap-3 xl:w-auto xl:items-end">
             <div className="text-primary flex items-center gap-2 font-mono text-xs tracking-widest">
-              <span className="opacity-70">{'//'}</span> CONNECT
+              <span className="opacity-70">{'//'}</span> CONTACT
             </div>
             <div className="flex items-center gap-4">
-              <SocialLink href="https://x.com/watermelonui" icon={NewTwitterIcon} />
-              <SocialLink href="https://github.com/WatermelonCorp/watermelon-platform" icon={GithubIcon} />
-              <SocialLink href="#" icon={DiscordIcon} />
+              <SocialLink href="#" icon={NewTwitterIcon} />
+              <SocialLink href="#" icon={GithubIcon} />
             </div>
           </div>
         </div>

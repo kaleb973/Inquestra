@@ -157,7 +157,7 @@ const testimonials: Testimonial[] = [
   {
     id: 8,
     content:
-      'this one of the best way to show pricing plans on mobile built by @watermelonui',
+      'this is the best way to track lab DAQ metrics on mobile built by @inquestra',
     author: 'Ali bey',
     handle: '@alibey_10',
     avatar: 'https://unavatar.io/x/alibey_10',
@@ -295,7 +295,7 @@ export default function Testimonial() {
               variant="big"
               className="text-foreground font-sans text-balance"
             >
-              Loved by <span className="text-primary">builders</span>
+              Loved by <span className="text-primary">researchers</span>
             </Heading>
           </motion.div>
           <motion.p
@@ -304,7 +304,7 @@ export default function Testimonial() {
           >
             Don&apos;t just take our word for it.
             <br className="mt-2 block md:hidden" /> Real feedback from the
-            community.
+            research community.
           </motion.p>
         </motion.div>
       </Container>

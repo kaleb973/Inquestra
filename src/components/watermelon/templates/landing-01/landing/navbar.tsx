@@ -30,25 +30,20 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-8 h-8 flex items-center justify-center relative transition-transform duration-300 group-hover:scale-105">
-             <Activity className="w-full h-full text-primary" />
+             <Activity className="w-full h-full text-emerald-400" />
           </div>
-          <span className="font-mono font-bold text-sm tracking-widest uppercase">Watermelon UI</span>
+          <span className="font-mono font-bold text-sm tracking-widest uppercase">Inquestra</span>
         </Link>
 
 
 
         {/* Right side */}
         <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <a href="https://github.com/WatermelonCorp/watermelon-platform" target="_blank" rel="noreferrer" className="flex items-center justify-center h-10 w-10 border border-white/10 bg-transparent text-white/50 hover:text-white hover:bg-white/5 transition-colors">
-              <GithubIcon className="w-4 h-4" />
-            </a>
-            <a href="https://x.com/watermelonui" target="_blank" rel="noreferrer" className="flex items-center justify-center h-10 w-10 border border-white/10 bg-transparent text-white/50 hover:text-white hover:bg-white/5 transition-colors">
-              <NewTwitterIcon className="w-4 h-4" />
-            </a>
-          </div>
-          <Link href="/home" className="flex items-center h-10 bg-primary text-background font-mono font-bold tracking-widest uppercase px-6 text-xs hover:bg-primary/90 transition-colors active:scale-[0.96]">
-            Get Started
+          <Link href="/app/login" className="flex items-center h-10 bg-transparent text-white/70 font-mono font-bold tracking-widest uppercase px-6 text-xs hover:text-white transition-colors">
+            Log in
+          </Link>
+          <Link href="/app/signup" className="flex items-center h-10 bg-primary text-background font-mono font-bold tracking-widest uppercase px-6 text-xs hover:bg-primary/90 transition-colors active:scale-[0.96]">
+            Sign up
           </Link>
         </div>
 
@@ -66,13 +61,11 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border/50 shadow-lg p-4 flex flex-col gap-4 animate-fade-in-up">
-
-          <div className="flex items-center justify-center gap-8 p-4 border-t border-border/50 mt-2">
-            <a href="https://github.com/WatermelonCorp/watermelon-platform" className="text-muted-foreground hover:text-foreground"><GithubIcon className="w-6 h-6" /></a>
-            <a href="https://x.com/watermelonui" className="text-muted-foreground hover:text-foreground"><NewTwitterIcon className="w-6 h-6" /></a>
-          </div>
-          <Link href="/home" className="w-full text-center bg-primary text-background font-mono font-bold tracking-widest uppercase px-4 py-4 text-xs hover:bg-primary/90 transition-colors active:scale-[0.96] mt-2">
-            Get Started
+          <Link href="/app/login" className="w-full text-center bg-transparent text-foreground font-mono font-bold tracking-widest uppercase px-4 py-4 text-xs transition-colors mt-2">
+            Log in
+          </Link>
+          <Link href="/app/signup" className="w-full text-center bg-primary text-background font-mono font-bold tracking-widest uppercase px-4 py-4 text-xs hover:bg-primary/90 transition-colors active:scale-[0.96] mt-2">
+            Sign up
           </Link>
         </div>
       )}

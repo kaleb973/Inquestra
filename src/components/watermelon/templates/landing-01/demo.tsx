@@ -14,8 +14,8 @@ export default function Landing01Demo() {
       <ScrollExpandMedia
         mediaSrc="https://assets.watermelon.sh/video-demo.mp4"
         bgImageSrc="https://assets.watermelon.sh/lp-hero-01.avif"
-        title="Experience the Flow"
-        date="Discover"
+        title="100Hz Telemetry"
+        date="Live Protocol"
       />
       <Stats />
       <Features />

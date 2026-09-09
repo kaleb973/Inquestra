@@ -152,7 +152,7 @@ export default function Hero() {
             variants={itemVariants}
             className="text-primary mb-10 inline-flex items-center gap-2 border border-white/10 bg-white/3 px-4 py-1.5 text-xs font-bold tracking-widest uppercase backdrop-blur-sm"
           >
-            Open Source &mdash; Free Forever
+            Live Data Acquisition &mdash; Electronic Research Notebook
           </motion.div>
 
           {/* Main Heading — 2 lines */}
@@ -162,7 +162,7 @@ export default function Hero() {
               variant="big"
               className="text-foreground mb-2 font-sans leading-[0.95]"
             >
-              Beautiful Components
+              Unify Your Hardware
             </Heading>
           </motion.div>
 
@@ -172,7 +172,7 @@ export default function Hero() {
               variant="big"
               className="mb-8 font-sans leading-[0.95]"
             >
-              <span className="text-foreground">Built for </span>
+              <span className="text-foreground">and Your </span>
               <span className="relative inline-block min-w-[3ch]">
                 <AnimatePresence mode="wait">
                   <motion.span
@@ -197,8 +197,8 @@ export default function Hero() {
           {/* Subheading */}
           <motion.div variants={itemVariants}>
             <SubHeading variant="big" className="mb-12 max-w-2xl text-pretty">
-              600+ free, open-source UI components crafted for the design
-              community. Copy, paste, and ship — no strings attached.
+              The first Electronic Research Notebook built specifically for Biomedical Engineering. 
+              Stream ESP32 telemetry directly into your research protocols with cryptographic data provenance.
             </SubHeading>
           </motion.div>
 
@@ -208,20 +208,12 @@ export default function Hero() {
             className="flex flex-col gap-4 sm:flex-row"
           >
             <Link
-              href="/home"
+              href="/app"
               className="group text-background bg-primary hover:bg-primary/90 inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-bold transition-all active:scale-[0.97]"
             >
-              Browse Components
+              Enter Workspace
               <ArrowUpRight01Icon className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
-            <a
-              href="https://github.com/WatermelonCorp/watermelon-platform"
-              target="_blank"
-              rel="noreferrer"
-              className="text-foreground inline-flex items-center justify-center border border-white/10 px-8 py-3 text-sm font-bold transition-all hover:bg-white/5 active:scale-[0.97]"
-            >
-              Star on GitHub
-            </a>
           </motion.div>
 
           {/* Social proof strip */}
@@ -231,7 +223,7 @@ export default function Hero() {
           >
             <div className="flex items-center gap-3 font-mono text-xs tracking-widest text-white/40 uppercase">
               <span className="h-px w-8 bg-white/10" />
-              Trusted by developers worldwide
+              Built for precision
               <span className="h-px w-8 bg-white/10" />
             </div>
             <motion.div
@@ -246,7 +238,7 @@ export default function Hero() {
                 },
               }}
             >
-              {['600+ Components', '100+ Animations', '100% Free'].map(
+              {['Live DAQ', 'Smart Inventory', 'PI Audit Trails'].map(
                 (stat) => (
                   <motion.div
                     key={stat}
