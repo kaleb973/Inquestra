@@ -9,7 +9,7 @@ import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
 import type { MetadataEntry } from '@/types/inquestra';
 
 export function RightDrawer() {
-  const metadata = useNotebookStore((s) => s.activeTrial.metadata);
+  const metadata = useNotebookStore((s) => s.activeTrial?.metadata || []);
   const addMetadata = useNotebookStore((s) => s.addMetadata);
   const removeMetadata = useNotebookStore((s) => s.removeMetadata);
 

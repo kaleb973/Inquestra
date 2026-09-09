@@ -116,6 +116,7 @@ export async function getTrial(id: string) {
 
   return prisma.trial.findFirst({
     where: { id, project: { organizationId: dbUser.organizationId } },
+    include: { metadata: true },
   });
 }
 
@@ -139,7 +140,8 @@ export async function createNewTrial() {
       content: { type: 'doc', content: [] },
       projectId: project.id,
       userId: dbUser.id,
-    }
+    },
+    include: { metadata: true }
   });
 
   revalidatePath('/app');

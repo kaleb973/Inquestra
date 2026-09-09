@@ -264,7 +264,7 @@ export function EditorCanvas() {
       ProtocolExtension,
       SlashCommandExtension,
     ],
-    content: Object.keys(content).length > 0 ? content : undefined,
+    content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,
     onUpdate: ({ editor: ed }) => {
       const json = ed.getJSON() as Record<string, unknown>;
       debouncedSave(json);
@@ -373,11 +373,13 @@ export function EditorCanvas() {
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  const formattedTime = new Date(updatedAt).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const formattedTime = updatedAt 
+    ? new Date(updatedAt).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })
+    : '';
 
   return (
     <div

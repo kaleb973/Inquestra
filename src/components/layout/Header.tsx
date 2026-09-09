@@ -39,7 +39,7 @@ export function Header() {
   const title = useNotebookStore((s) => s.activeTrial.title);
   const status = useNotebookStore((s) => s.activeTrial.status);
   const content = useNotebookStore((s) => s.activeTrial.content);
-  const metadata = useNotebookStore((s) => s.activeTrial.metadata);
+  const metadata = useNotebookStore((s) => s.activeTrial?.metadata || []);
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
