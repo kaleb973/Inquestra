@@ -9,7 +9,7 @@ import type { TrialStatus } from '@/types/inquestra';
 
 const STATUS_DOT: Record<TrialStatus, string> = {
   DRAFT: 'bg-neutral-600',
-  ACTIVE: 'bg-emerald-400',
+  ACTIVE: 'bg-indigo-400',
   COMPLETED: 'bg-blue-400',
   FAILED: 'bg-red-400',
 };
@@ -66,8 +66,8 @@ export function LeftSidebar() {
       <div className="px-3 py-3 border-b border-border/60 bg-muted/20">
         <button className="w-full flex items-center justify-between px-2 py-1.5 rounded hover:bg-neutral-800/80 transition-all duration-200 group">
           <div className="flex items-center gap-2">
-            <div className="bg-emerald-500/20 p-1 rounded">
-              <FlaskConical className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <div className="bg-indigo-500/20 p-1 rounded">
+              <FlaskConical className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             </div>
             <span className="text-sm text-neutral-200 font-medium truncate tracking-tight">BME Lab</span>
           </div>

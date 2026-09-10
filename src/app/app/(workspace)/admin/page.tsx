@@ -38,16 +38,16 @@ export default async function AdminPage({
   let inventoryAlerts = 0;
 
   if (tab === 'overview') {
-    let inventoryAlertsCount: number;
-    [orgUsers, projects, trials, inventoryAlertsCount] = await Promise.all([
+    let inventoryItemsResult: any[];
+    [orgUsers, projects, trials, inventoryItemsResult] = await Promise.all([
       prisma.user.findMany({ where: { organizationId: dbUser.organizationId }, orderBy: { createdAt: 'desc' } }),
       prisma.project.findMany({ where: { organizationId: dbUser.organizationId }, include: { _count: { select: { trials: true } } } }),
       prisma.trial.count({ where: { project: { organizationId: dbUser.organizationId } } }),
-      prisma.inventory.count({ where: { organizationId: dbUser.organizationId, alertFlag: true } }),
+      prisma.inventoryItem.findMany({ where: { organizationId: dbUser.organizationId } }),
     ]);
-    inventoryAlerts = inventoryAlertsCount;
+    inventoryAlerts = inventoryItemsResult.filter(i => i.quantity < i.thresholdValue).length;
   } else if (tab === 'inventory') {
-    inventory = await prisma.inventory.findMany({ where: { organizationId: dbUser.organizationId }, orderBy: { chemical: 'asc' } });
+    inventory = await prisma.inventoryItem.findMany({ where: { organizationId: dbUser.organizationId }, orderBy: { name: 'asc' } });
   } else if (tab === 'equipment') {
     equipment = await prisma.equipment.findMany({ where: { organizationId: dbUser.organizationId }, orderBy: { name: 'asc' } });
   } else if (tab === 'audit') {
@@ -59,7 +59,7 @@ export default async function AdminPage({
   const ROLE_COLORS: Record<string, string> = {
     ADMIN: 'text-red-400 bg-red-950/40 border-red-900',
     PI: 'text-purple-400 bg-purple-950/40 border-purple-900',
-    RESEARCHER: 'text-emerald-400 bg-emerald-950/40 border-emerald-900',
+    RESEARCHER: 'text-indigo-400 bg-indigo-950/40 border-indigo-900',
     VIEWER: 'text-muted-foreground bg-neutral-800 border-border',
   };
 
@@ -186,7 +186,7 @@ export default async function AdminPage({
                 <h2 className="text-sm font-semibold text-white">Lab Teams</h2>
                 <p className="text-xs text-muted-foreground mt-1">Organize scientists and restrict access to trial data.</p>
               </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">
                 <Users className="w-3.5 h-3.5" />
                 Create Team
               </button>

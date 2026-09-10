@@ -24,7 +24,7 @@ function StatCard({ label, value, unit, Icon, accent }: StatCardProps) {
         </span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className={`font-mono text-[15px] font-medium tracking-tight ${accent ? 'text-emerald-400' : 'text-neutral-200'}`}>
+        <span className={`font-mono text-[15px] font-medium tracking-tight ${accent ? 'text-indigo-400' : 'text-neutral-200'}`}>
           {value}
         </span>
         {unit && (
@@ -50,7 +50,7 @@ export function TelemetryMonitor() {
   return (
     <div className="p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Activity className="w-3.5 h-3.5 text-emerald-400" />
+        <Activity className="w-3.5 h-3.5 text-indigo-400" />
         <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           Live DAQ Telemetry
         </span>

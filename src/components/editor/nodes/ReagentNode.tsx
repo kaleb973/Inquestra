@@ -142,7 +142,7 @@ function ReagentNodeView({ deleteNode }: NodeViewProps) {
                 {feedback.alert ? (
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                 ) : (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <CheckCircle2 className="w-4 h-4 text-indigo-500" />
                 )}
                 <span className="text-sm font-medium text-neutral-200">
                   Used <span className="text-white">{quantity} {unit}</span> of <span className="text-purple-300 font-semibold">{feedback.chemical}</span>

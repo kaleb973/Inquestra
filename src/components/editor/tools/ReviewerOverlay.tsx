@@ -75,8 +75,8 @@ export function ReviewerOverlay() {
       <div className="p-4 overflow-y-auto flex-1">
         {deviations.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-6">
-            <CheckCircle className="w-8 h-8 text-emerald-500 mb-2" />
-            <p className="text-sm text-emerald-400 font-medium">No deviations found.</p>
+            <CheckCircle className="w-8 h-8 text-indigo-500 mb-2" />
+            <p className="text-sm text-indigo-400 font-medium">No deviations found.</p>
             <p className="text-xs text-muted-foreground mt-1">All protocol steps are properly timestamped.</p>
           </div>
         ) : (

@@ -194,7 +194,9 @@ export async function sealTrial(trialId: string) {
       userId: dbUser.id,
       organizationId: dbUser.organizationId,
       action: 'TRIAL_SEALED',
-      details: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}`
+      entityType: 'Trial',
+      entityId: trialId,
+      details: { message: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}` }
     }
   });
 

@@ -4,7 +4,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Activity } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 import { signIn } from '@/actions/authActions';
 
 export default function LoginPage() {
@@ -31,7 +31,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          <Activity className="text-emerald-400 w-6 h-6" />
+          <Logo className="text-indigo-400 w-6 h-6" />
           <span className="text-white font-bold text-lg tracking-widest uppercase">
             Inquestra
           </span>
@@ -83,7 +83,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
             >
               {isPending ? 'Signing in…' : 'Sign in'}
             </button>
@@ -91,7 +91,7 @@ export default function LoginPage() {
 
           <p className="text-center text-xs text-neutral-600 mt-6">
             Don't have an account?{' '}
-            <Link href="/app/signup" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+            <Link href="/app/signup" className="text-indigo-400 hover:text-indigo-300 transition-colors">
               Create one
             </Link>
           </p>

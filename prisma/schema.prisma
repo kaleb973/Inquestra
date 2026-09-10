@@ -1,7 +1,3 @@
-// prisma/schema.prisma
-// Inquestra Phase 2 â€” Relational data model
-// Deploy with: npx prisma db push
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,7 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// â”€â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ======================= ENUMS =======================
 
 enum Role {
   ADMIN
@@ -24,38 +20,76 @@ enum Role {
 enum TrialStatus {
   DRAFT
   ACTIVE
+  IN_REVIEW
   COMPLETED
   FAILED
 }
 
-// â”€â”€â”€ Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+enum SignatureRole {
+  AUTHOR
+  WITNESS
+  PI_APPROVAL
+}
+
+enum InventoryType {
+  CHEMICAL
+  BIOLOGICAL
+  REAGENT
+  PLASMID
+  CELL_LINE
+  CONSUMABLE
+}
+
+// ======================= CORE / ORG =======================
 
 model Organization {
-  id        String      @id @default(uuid())
-  name      String
-  domain    String?     @unique
-  users     User[]
-  teams     Team[]
-  projects  Project[]
-  inventory Inventory[]
-  equipment Equipment[]
-  auditLogs AuditLog[]
-  strictMode Boolean    @default(false)
-  createdAt DateTime    @default(now())
+  id               String            @id @default(uuid())
+  name             String
+  domain           String?           @unique
+  strictMode       Boolean           @default(false)
+  
+  users            User[]
+  teams            Team[]
+  projects         Project[]
+  inventory        InventoryItem[]
+  storageLocations StorageLocation[]
+  equipment        Equipment[]
+  auditLogs        AuditLog[]
+  protocols        ProtocolTemplate[]
+
+  createdAt        DateTime          @default(now())
+}
+
+model Team {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  members        User[]
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
 }
 
 model User {
   id             String       @id @default(uuid())
-  authId         String       @unique // Maps to Supabase auth.users.id
+  authId         String       @unique
   email          String       @unique
   role           Role         @default(RESEARCHER)
+  
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   teamId         String?
   team           Team?        @relation(fields: [teamId], references: [id])
+  
   trials         Trial[]      @relation("TrialAuthor")
   sealedTrials   Trial[]      @relation("TrialSealer")
   auditLogs      AuditLog[]
+  signatures     Signature[]
+
   createdAt      DateTime     @default(now())
 }
 
@@ -63,29 +97,66 @@ model Project {
   id             String       @id @default(uuid())
   name           String
   description    String?
+  
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
+  
   trials         Trial[]
+
   createdAt      DateTime     @default(now())
 }
 
+// ======================= EXPERIMENTS / ELN =======================
+
+model ProtocolTemplate {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  content        Json         // TipTap Template
+  version        Int          @default(1)
+  isPublished    Boolean      @default(false)
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  trials         Trial[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
 model Trial {
-  id        String            @id @default(uuid())
-  title     String
-  content   Json              // TipTap ProseMirror JSON tree
-  status    TrialStatus       @default(DRAFT)
-  projectId String
-  project   Project           @relation(fields: [projectId], references: [id])
-  userId    String
-  author    User              @relation("TrialAuthor", fields: [userId], references: [id])
-  metadata  MetadataEntry[]
-  telemetry TelemetryStream[]
-  checksum  String?           @unique // SHA-256 cryptographic seal (Phase 4)
-  sealedAt  DateTime?
-  sealedBy  String?
-  sealer    User?             @relation("TrialSealer", fields: [sealedBy], references: [id])
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id             String            @id @default(uuid())
+  title          String
+  content        Json              // TipTap ProseMirror JSON tree
+  status         TrialStatus       @default(DRAFT)
+  
+  projectId      String
+  project        Project           @relation(fields: [projectId], references: [id])
+  
+  userId         String
+  author         User              @relation("TrialAuthor", fields: [userId], references: [id])
+  
+  protocolId     String?
+  protocol       ProtocolTemplate? @relation(fields: [protocolId], references: [id])
+
+  metadata       MetadataEntry[]
+  telemetry      TelemetryStream[]
+  
+  // Relational Linking
+  inventoryUsed  TrialInventory[]
+  equipmentUsed  TrialEquipment[]
+  
+  // Compliance
+  checksum       String?           @unique
+  sealedAt       DateTime?
+  sealedBy       String?
+  sealer         User?             @relation("TrialSealer", fields: [sealedBy], references: [id])
+  signatures     Signature[]
+
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   @@index([projectId])
   @@index([status])
@@ -104,42 +175,82 @@ model MetadataEntry {
 
 model TelemetryStream {
   id         String   @id @default(uuid())
-  sensorType String   // e.g. "ESP32_THERMISTOR"
-  fileUrl    String   // Cloudflare R2 / S3 signed pointer (Phase 3)
+  sensorType String   
+  fileUrl    String   // Pointer to R2/S3
   rowCount   Int
+  
   trialId    String
   trial      Trial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  
   recordedAt DateTime @default(now())
 
   @@index([trialId])
 }
 
-// Phase 4 â€” Reagent inventory management (slash command /reagent deduction)
-model Inventory {
+// ======================= INVENTORY / LIMS =======================
+
+model StorageLocation {
   id             String       @id @default(uuid())
-  chemical       String
+  name           String       // e.g. "Freezer A", "Box 2"
+  type           String       // e.g. "FREEZER", "RACK", "BOX", "WELL_PLATE"
+  barcode        String?      @unique
+  
+  parentId       String?
+  parent         StorageLocation?  @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children       StorageLocation[] @relation("LocationHierarchy")
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  items          InventoryItem[]
+
+  @@index([organizationId])
+  @@index([parentId])
+}
+
+model InventoryItem {
+  id             String       @id @default(uuid())
+  name           String
+  type           InventoryType
+  lotNumber      String?
+  barcode        String?      @unique
+  
   quantity       Float
   unit           String
   thresholdValue Float        @default(0)
-  alertFlag      Boolean      @default(false)
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  expirationDate DateTime?
+  
+  locationId     String?
+  location       StorageLocation? @relation(fields: [locationId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  trials         TrialInventory[]
+
+  createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  @@index([chemical])
   @@index([organizationId])
+  @@index([locationId])
+  @@index([type])
 }
 
-// Phase 4 â€” Equipment calibration tracking
 model Equipment {
   id              String       @id @default(uuid())
   name            String
   serialNumber    String?
+  barcode         String?      @unique
+  
   lastCalibrated  DateTime
   calibrationFreq Int          // in days
-  status          String       // e.g. "OPERATIONAL", "NEEDS_CALIBRATION", "BROKEN"
+  status          String       // "OPERATIONAL", "MAINTENANCE"
+  
   organizationId  String
   organization    Organization @relation(fields: [organizationId], references: [id])
+  
+  trials          TrialEquipment[]
+
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -147,30 +258,66 @@ model Equipment {
   @@index([status])
 }
 
-// Phase 6 — 21 CFR Part 11 Audit Logs
+// Join Tables for Traceability
+model TrialInventory {
+  id              String        @id @default(uuid())
+  trialId         String
+  trial           Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+  
+  quantityUsed    Float
+  unit            String
+  
+  @@unique([trialId, inventoryItemId])
+}
+
+model TrialEquipment {
+  id              String        @id @default(uuid())
+  trialId         String
+  trial           Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  equipmentId     String
+  equipment       Equipment     @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  
+  @@unique([trialId, equipmentId])
+}
+
+// ======================= COMPLIANCE (21 CFR Part 11) =======================
+
+model Signature {
+  id           String        @id @default(uuid())
+  trialId      String
+  trial        Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  
+  role         SignatureRole
+  meaning      String        // e.g. "I authored this experiment", "I reviewed this experiment"
+  signedAt     DateTime      @default(now())
+  
+  @@index([trialId])
+  @@index([userId])
+}
+
 model AuditLog {
   id             String       @id @default(uuid())
-  action         String       // e.g. 'TRIAL_SEALED', 'REAGENT_DEDUCTED', 'USER_INVITED'
-  details        String
+  action         String       // e.g. 'TRIAL_SEALED', 'INVENTORY_DEDUCTED', 'SIGNATURE_ADDED'
+  entityType     String       // e.g. 'Trial', 'InventoryItem'
+  entityId       String
+  details        Json
+  
   userId         String
   user           User         @relation(fields: [userId], references: [id])
+  
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  ipAddress      String?
+  
   createdAt      DateTime     @default(now())
 
   @@index([organizationId])
   @@index([userId])
-}
-
-model Team {
-  id             String       @id @default(uuid())
-  name           String
-  description    String?
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  members        User[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@index([organizationId])
+  @@index([entityType, entityId])
 }

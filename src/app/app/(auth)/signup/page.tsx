@@ -4,7 +4,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Activity } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 import { signUp } from '@/actions/authActions';
 
 export default function SignUpPage() {
@@ -34,7 +34,7 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          <Activity className="text-emerald-400 w-6 h-6" />
+          <Logo className="text-indigo-400 w-6 h-6" />
           <span className="text-white font-bold text-lg tracking-widest uppercase">
             Inquestra
           </span>
@@ -47,9 +47,9 @@ export default function SignUpPage() {
           </p>
 
           {success ? (
-            <div className="text-emerald-400 text-sm bg-emerald-950/40 border border-emerald-900 rounded-lg px-4 py-4 text-center">
+            <div className="text-indigo-400 text-sm bg-indigo-950/40 border border-indigo-900 rounded-lg px-4 py-4 text-center">
               <p className="font-medium mb-1">Check your inbox</p>
-              <p className="text-emerald-500 text-xs">{success}</p>
+              <p className="text-indigo-500 text-xs">{success}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,7 +93,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
               >
                 {isPending ? 'Creating account…' : 'Create account'}
               </button>
@@ -102,7 +102,7 @@ export default function SignUpPage() {
 
           <p className="text-center text-xs text-neutral-600 mt-6">
             Already have an account?{' '}
-            <Link href="/app/login" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+            <Link href="/app/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
               Sign in
             </Link>
           </p>

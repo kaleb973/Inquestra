@@ -1,25 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, ShieldCheck, Database, Zap, Cpu, TestTube, CheckCircle2, ArrowRight } from "lucide-react";
+import { ShieldCheck, Database, Zap, Cpu, TestTube, CheckCircle2, ArrowRight } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 import { motion } from "framer-motion";
 
 export default function MarketingPage() {
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-50 selection:bg-emerald-500/30 font-sans">
+    <div className="min-h-screen bg-gray-950 text-gray-50 selection:bg-indigo-500/30 font-sans">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2 group">
-              <Activity className="w-6 h-6 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
+              <Logo className="w-6 h-6 text-indigo-500 group-hover:text-indigo-400 transition-colors" />
               <span className="font-bold text-lg tracking-tight text-white">Inquestra</span>
             </Link>
             <div className="flex items-center gap-6">
               <Link href="/app/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
                 Log in
               </Link>
-              <Link href="/app/signup" className="text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition-colors">
+              <Link href="/app/signup" className="text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors">
                 Open Workspace
               </Link>
             </div>
@@ -29,17 +30,17 @@ export default function MarketingPage() {
 
       {/* Hero Section (PAS Framework) */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-gray-950 to-gray-950 -z-10" />
-        <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent opacity-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-gray-950 to-gray-950 -z-10" />
+        <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent opacity-50" />
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
             BME Data Acquisition & ERN
           </motion.div>
           
@@ -50,7 +51,7 @@ export default function MarketingPage() {
             className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight text-balance"
           >
             Stop copying CSVs. <br />
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-400 to-teal-200 bg-clip-text text-transparent">
               Start doing science.
             </span>
           </motion.h1>
@@ -71,7 +72,7 @@ export default function MarketingPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row justify-center gap-4"
           >
-            <Link href="/app/signup" className="inline-flex justify-center items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-medium text-lg transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+            <Link href="/app/signup" className="inline-flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl font-medium text-lg transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]">
               Enter Workspace <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
@@ -87,25 +88,25 @@ export default function MarketingPage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-colors shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
-                <Cpu className="w-6 h-6 text-emerald-400" />
+            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-indigo-500/30 transition-colors shadow-xl">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
+                <Cpu className="w-6 h-6 text-indigo-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Live Hardware DAQ</h3>
               <p className="text-gray-400 leading-relaxed text-sm">Connect ESP32s and Arduinos instantly via Web Serial. Visualize and record high-frequency telemetry without external scripts.</p>
             </div>
             
-            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-colors shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
-                <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-indigo-500/30 transition-colors shadow-xl">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
+                <ShieldCheck className="w-6 h-6 text-indigo-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Cryptographic Provenance</h3>
               <p className="text-gray-400 leading-relaxed text-sm">Every protocol run is immutable and timestamped. PI Audit Trails ensure zero silent modifications to your recorded results.</p>
             </div>
             
-            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-colors shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
-                <TestTube className="w-6 h-6 text-emerald-400" />
+            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-indigo-500/30 transition-colors shadow-xl">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
+                <TestTube className="w-6 h-6 text-indigo-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Smart Inventory</h3>
               <p className="text-gray-400 leading-relaxed text-sm">Reference reagents directly in your notebook. Slash commands deduct quantities instantly and alert admins when stock is low.</p>
@@ -120,7 +121,7 @@ export default function MarketingPage() {
           
           <div className="flex flex-col lg:flex-row items-center gap-16 mb-24 md:mb-32">
             <div className="flex-1">
-              <div className="inline-flex items-center gap-2 text-emerald-400 font-medium mb-4">
+              <div className="inline-flex items-center gap-2 text-indigo-400 font-medium mb-4">
                 <Database className="w-5 h-5" />
                 <span className="text-sm tracking-widest uppercase">The Old Way</span>
               </div>
@@ -161,37 +162,37 @@ export default function MarketingPage() {
 
           <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
             <div className="flex-1">
-              <div className="inline-flex items-center gap-2 text-emerald-400 font-medium mb-4">
+              <div className="inline-flex items-center gap-2 text-indigo-400 font-medium mb-4">
                 <Zap className="w-5 h-5" />
                 <span className="text-sm tracking-widest uppercase">The Inquestra Way</span>
               </div>
               <h3 className="text-3xl font-bold text-white mb-6 text-balance">One continuous flow of truth</h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
                   <p className="text-gray-400">Browser-native DAQ captures signals directly into the cloud.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
                   <p className="text-gray-400">Telemetry is appended directly to the active protocol step.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
                   <p className="text-gray-400">Strict mode locks the record, creating a permanent audit trail.</p>
                 </div>
               </div>
             </div>
             <div className="flex-1 w-full max-w-lg relative">
-              <div className="absolute inset-0 bg-emerald-500/10 blur-3xl rounded-full" />
+              <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full" />
               <div className="relative bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="font-mono text-emerald-400 text-sm">COM3 Connected (100Hz)</span>
+                  <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse" />
+                  <span className="font-mono text-indigo-400 text-sm">COM3 Connected (100Hz)</span>
                 </div>
                 <div className="h-32 bg-gray-950 rounded-xl border border-gray-800 relative overflow-hidden flex items-end">
                    <div className="w-full h-full flex items-end gap-1 px-2 pb-2 opacity-60">
                      {[40, 60, 45, 80, 55, 90, 75, 100, 65, 85, 70, 95].map((h, i) => (
-                       <div key={i} className="flex-1 bg-emerald-500 rounded-t-sm transition-all" style={{ height: `${h}%` }} />
+                       <div key={i} className="flex-1 bg-indigo-500 rounded-t-sm transition-all" style={{ height: `${h}%` }} />
                      ))}
                    </div>
                 </div>
@@ -203,11 +204,11 @@ export default function MarketingPage() {
 
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden border-t border-gray-800">
-        <div className="absolute inset-0 bg-emerald-900/10" />
+        <div className="absolute inset-0 bg-indigo-900/10" />
         <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">Ready to secure your lab's data?</h2>
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto text-balance">Join researchers who have abandoned disjointed spreadsheets for a platform built on cryptographic provenance.</p>
-          <Link href="/app/signup" className="inline-flex justify-center items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105">
+          <Link href="/app/signup" className="inline-flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105">
             Create Free Account
           </Link>
         </div>
@@ -217,7 +218,7 @@ export default function MarketingPage() {
       <footer className="bg-gray-950 py-12 border-t border-gray-900 text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4">
           <div className="flex items-center gap-2 opacity-50">
-            <Activity className="w-6 h-6 text-emerald-500" />
+            <Logo className="w-6 h-6 text-indigo-500" />
             <span className="font-bold text-white tracking-tight text-xl">Inquestra</span>
           </div>
           <p className="text-sm text-gray-600 font-mono mt-4">

@@ -42,7 +42,10 @@ const DEFAULT_STATS: TelemetryStats = {
 
 // ─── State shape ───────────────────────────────────────────────────────────────
 
+export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'COMPLIANCE';
+
 interface NotebookState {
+  rightDrawerMode: RightDrawerMode;
   activeTrial: TrialDocument;
   /** Supabase-side UUID for the synced trial (null = never synced) */
   cloudTrialId: string | null;
@@ -56,6 +59,7 @@ interface NotebookState {
 }
 
 interface NotebookActions {
+  setRightDrawerMode: (mode: RightDrawerMode) => void;
   setActiveTrial: (trial: TrialDocument) => void;
   setCloudIds: (ids: { cloudTrialId: string; cloudProjectId: string }) => void;
   /**
@@ -79,6 +83,7 @@ type NotebookStore = NotebookState & NotebookActions;
 export const useNotebookStore = create<NotebookStore>()(
   persist(
     (set) => ({
+      rightDrawerMode: 'TELEMETRY' as RightDrawerMode,
       activeTrial: makeDefaultTrial(),
       cloudTrialId: null,
       cloudProjectId: null,
@@ -86,6 +91,7 @@ export const useNotebookStore = create<NotebookStore>()(
       telemetryStats: DEFAULT_STATS,
       hardwareStatus: DEFAULT_HARDWARE,
 
+      setRightDrawerMode: (mode) => set({ rightDrawerMode: mode }),
       setActiveTrial: (trial) => set({ activeTrial: trial }),
 
       setCloudIds: ({ cloudTrialId, cloudProjectId }) =>

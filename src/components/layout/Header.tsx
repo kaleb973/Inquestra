@@ -6,7 +6,6 @@
 import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Activity,
   Cpu,
   Circle,
   Square,
@@ -19,6 +18,7 @@ import {
   LogOut,
   Shield,
 } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { useTelemetrySim } from '@/hooks/useTelemetrySim';
 import { syncTrialToCloud } from '@/actions/syncActions';
@@ -33,7 +33,7 @@ import type { User } from '@supabase/supabase-js';
 
 const STATUS_COLORS: Record<TrialStatus, string> = {
   DRAFT: 'text-muted-foreground border-border',
-  ACTIVE: 'text-emerald-400 border-emerald-900',
+  ACTIVE: 'text-indigo-400 border-indigo-900',
   COMPLETED: 'text-blue-400 border-blue-900',
   FAILED: 'text-red-400 border-red-900',
 };
@@ -156,7 +156,7 @@ export function Header() {
     <header className="h-14 border-b border-border/80 bg-background/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
       {/* Brand */}
       <Link href="/app" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-        <Activity className="text-emerald-400 w-4 h-4" />
+        <Logo className="text-indigo-400 w-5 h-5" />
         <span className="text-white font-semibold text-sm tracking-tight">
           Inquestra
         </span>
@@ -258,8 +258,8 @@ export function Header() {
 
         {/* Live connection badge */}
         {hardwareStatus.isConnected && (
-          <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-mono bg-emerald-950/50 border border-emerald-900/60 px-2.5 py-1 rounded">
-            <Circle className="w-2 h-2 fill-emerald-400 animate-pulse" />
+          <span className="flex items-center gap-1.5 text-xs text-indigo-400 font-mono bg-indigo-950/50 border border-indigo-900/60 px-2.5 py-1 rounded">
+            <Circle className="w-2 h-2 fill-indigo-400 animate-pulse" />
             {hardwareStatus.isSimulated ? 'SIMULATOR' : hardwareStatus.portName}
             &nbsp;·&nbsp;
             {hardwareStatus.packetsPerSec} Hz
@@ -283,7 +283,7 @@ export function Header() {
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
             isSimRunning
               ? 'bg-red-950/40 text-red-400 border-red-900 hover:bg-red-950/70'
-              : 'bg-emerald-950/40 text-emerald-400 border-emerald-900 hover:bg-emerald-950/70'
+              : 'bg-indigo-950/40 text-indigo-400 border-indigo-900 hover:bg-indigo-950/70'
           }`}
         >
           {isSimRunning ? (
@@ -311,7 +311,7 @@ export function Header() {
               className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[160px] truncate hover:bg-neutral-800 transition-colors"
               title="Admin Dashboard"
             >
-              <Shield className="w-3 h-3 text-emerald-400 shrink-0" />
+              <Shield className="w-3 h-3 text-indigo-400 shrink-0" />
               <span className="truncate">{user.email?.split('@')[0]}</span>
             </Link>
             <form action={signOut}>
@@ -327,7 +327,7 @@ export function Header() {
         ) : (
           <Link
             href="/app/login"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
           >
             <LogIn className="w-3.5 h-3.5" />
             Sign In

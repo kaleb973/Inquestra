@@ -1,7 +1,4 @@
-'use server';
-// src/actions/reagentActions.ts
-// Phase 4 — Autonomous reagent inventory deduction triggered by /reagent slash command.
-
+"use server";
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -15,75 +12,80 @@ const ReagentSchema = z.object({
 
 export type ReagentPayload = z.infer<typeof ReagentSchema>;
 
-/**
- * Deducts reagent from the Inventory table.
- * Sets alertFlag if remaining stock < thresholdValue.
- */
 export async function deductReagent(payload: ReagentPayload) {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
 
   const validated = ReagentSchema.parse(payload);
+  
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error('User not found in DB');
 
-  // Find the inventory record (scoped to org via RLS)
-  const inventory = await prisma.inventory.findFirst({
+  const inventoryItem = await prisma.inventoryItem.findFirst({
     where: {
-      chemical: {
+      name: {
         equals: validated.chemical,
         mode: 'insensitive',
       },
+      organizationId: dbUser.organizationId
     },
   });
 
-  if (!inventory) {
-    // Create a new inventory record if not found
-    await prisma.inventory.create({
+  if (!inventoryItem) {
+    const newItem = await prisma.inventoryItem.create({
       data: {
-        chemical: validated.chemical,
-        quantity: -validated.quantity, // Negative = deficit, triggers alert
+        name: validated.chemical,
+        type: 'CHEMICAL',
+        quantity: -validated.quantity,
         unit: validated.unit,
         thresholdValue: 0,
-        alertFlag: true,
+        organizationId: dbUser.organizationId
       },
     });
-    return { success: true, alert: true, message: 'Reagent not in inventory — deficit logged.' };
+    
+    await prisma.auditLog.create({
+      data: {
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+        action: 'REAGENT_DEDUCTED',
+        entityType: 'InventoryItem',
+        entityId: newItem.id,
+        details: { message: `Deficit logged for ${validated.chemical}` }
+      },
+    });
+
+    return { success: true, alert: true, message: 'Reagent not in inventory - deficit logged.' };
   }
 
-  const newQuantity = inventory.quantity - validated.quantity;
-  const shouldAlert = newQuantity < inventory.thresholdValue;
+  const newQuantity = inventoryItem.quantity - validated.quantity;
+  const shouldAlert = newQuantity < inventoryItem.thresholdValue;
 
-  await prisma.inventory.update({
-    where: { id: inventory.id },
+  await prisma.inventoryItem.update({
+    where: { id: inventoryItem.id },
     data: {
       quantity: newQuantity,
-      alertFlag: shouldAlert,
     },
   });
 
-  if (inventory.organizationId) {
-    try {
-      const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-      if (dbUser) {
-        await prisma.auditLog.create({
-          data: {
-            userId: dbUser.id,
-            organizationId: inventory.organizationId,
-            action: 'REAGENT_DEDUCTED',
-            details: `Deducted ${validated.quantity} ${validated.unit} of ${validated.chemical} for Trial ${validated.trialId}. Remaining: ${newQuantity}`,
-          },
-        });
+  await prisma.auditLog.create({
+    data: {
+      userId: dbUser.id,
+      organizationId: inventoryItem.organizationId,
+      action: 'REAGENT_DEDUCTED',
+      entityType: 'InventoryItem',
+      entityId: inventoryItem.id,
+      details: {
+        message: `Deducted ${validated.quantity} ${validated.unit} for Trial ${validated.trialId}. Remaining: ${newQuantity}`
       }
-    } catch (e) {
-      console.error('Audit Log failed', e);
-    }
-  }
+    },
+  });
 
   return {
     success: true,
     alert: shouldAlert,
     remaining: newQuantity,
-    unit: inventory.unit,
+    unit: inventoryItem.unit,
     chemical: validated.chemical,
   };
 }

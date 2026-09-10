@@ -21,6 +21,10 @@ import { useNotebookStore } from '@/store/useNotebookStore';
 import { InteractiveChartExtension } from '@/components/editor/nodes/InteractiveChartNode';
 import { ReagentExtension } from '@/components/editor/nodes/ReagentNode';
 import { ProtocolExtension } from '@/components/editor/nodes/ProtocolBlock';
+import { MoleculeExtension } from '@/components/editor/nodes/MoleculeNode';
+import { MathExtension } from '@/components/editor/nodes/MathNode';
+import { SequenceExtension } from '@/components/editor/nodes/SequenceNode';
+import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
@@ -43,6 +47,38 @@ function debounce<T extends (...args: Parameters<T>) => void>(
 
 function buildSlashCommands(): SlashCommand[] {
   return [
+    {
+      title: 'Molecule (SMILES)',
+      description: 'Draw 2D chemical structure',
+      icon: <FlaskConical className="w-4 h-4 text-indigo-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'moleculeBlock' }).run();
+      },
+    },
+    {
+      title: 'Math Equation',
+      description: 'Insert KaTeX formula',
+      icon: <span className="w-4 h-4 font-serif italic font-bold">∑</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'mathBlock' }).run();
+      },
+    },
+    {
+      title: 'Sequence (DNA/RNA)',
+      description: 'Biological sequence alignment',
+      icon: <span className="w-4 h-4 font-mono font-bold text-purple-400">GC</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'sequenceBlock' }).run();
+      },
+    },
+    {
+      title: 'Equipment Link',
+      description: 'Link an instrument to this trial',
+      icon: <span className="w-4 h-4 font-bold text-indigo-400">EQ</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'equipmentBlock' }).run();
+      },
+    },
     {
       title: 'Chart',
       description: 'Insert a live telemetry chart node',
@@ -272,6 +308,10 @@ export function EditorCanvas() {
       InteractiveChartExtension,
       ReagentExtension,
       ProtocolExtension,
+      MoleculeExtension,
+      MathExtension,
+      SequenceExtension,
+      EquipmentExtension,
       SlashCommandExtension,
     ],
     content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,

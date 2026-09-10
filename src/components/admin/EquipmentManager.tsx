@@ -83,7 +83,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
           const overdue = isOverdue(new Date(item.lastCalibrated), item.calibrationFreq);
           return (
             <div key={item.id} className="bg-muted border border-border rounded-lg p-4 flex flex-col relative overflow-hidden">
-              <div className={`absolute top-0 left-0 w-1 h-full ${item.status === 'BROKEN' ? 'bg-red-500' : overdue ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+              <div className={`absolute top-0 left-0 w-1 h-full ${item.status === 'BROKEN' ? 'bg-red-500' : overdue ? 'bg-amber-500' : 'bg-indigo-500'}`} />
               
               <div className="flex justify-between items-start mb-4 pl-2">
                 <div>
@@ -95,7 +95,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                 ) : overdue ? (
                   <Calendar className="w-5 h-5 text-amber-500" />
                 ) : (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  <CheckCircle2 className="w-5 h-5 text-indigo-500" />
                 )}
               </div>
 

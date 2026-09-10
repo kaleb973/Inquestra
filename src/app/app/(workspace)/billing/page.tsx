@@ -22,7 +22,7 @@ const tiers = [
     name: 'Pro',
     price: '$15',
     period: 'per user / month',
-    icon: <Zap className="w-5 h-5 text-emerald-400" />,
+    icon: <Zap className="w-5 h-5 text-indigo-400" />,
     features: [
       'Everything in Free',
       'Cloud persistence',
@@ -72,11 +72,11 @@ export default function BillingPage() {
             <div
               key={tier.name}
               className={`bg-muted rounded-xl border p-6 flex flex-col ${
-                tier.current ? 'border-emerald-800' : 'border-border opacity-70'
+                tier.current ? 'border-indigo-800' : 'border-border opacity-70'
               }`}
             >
               {tier.current && (
-                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-900 rounded-full px-2.5 py-0.5 w-fit mb-3 uppercase tracking-wider">
+                <span className="text-[10px] font-semibold text-indigo-400 bg-indigo-950/60 border border-indigo-900 rounded-full px-2.5 py-0.5 w-fit mb-3 uppercase tracking-wider">
                   Your plan
                 </span>
               )}
@@ -94,7 +94,7 @@ export default function BillingPage() {
               <ul className="space-y-2 flex-1 mb-6">
                 {tier.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-xs text-foreground">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-indigo-400 mt-0.5 shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -115,7 +115,7 @@ export default function BillingPage() {
 
         <p className="text-center text-xs text-neutral-700">
           Questions?{' '}
-          <Link href="/" className="text-emerald-600 hover:text-emerald-500 transition-colors">
+          <Link href="/" className="text-indigo-600 hover:text-indigo-500 transition-colors">
             Return to workspace
           </Link>
         </p>

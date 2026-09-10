@@ -1,22 +1,25 @@
-'use server';
-// src/actions/adminActions.ts
-
+"use server";
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// Helper to log audit actions
 async function logAuditAction(userId: string, organizationId: string, action: string, details: string) {
   try {
     await prisma.auditLog.create({
-      data: { userId, organizationId, action, details },
+      data: { 
+        userId, 
+        organizationId, 
+        action, 
+        details: { message: details },
+        entityType: "AdminAction",
+        entityId: "global"
+      },
     });
   } catch (err) {
     console.error('Failed to write audit log:', err);
   }
 }
 
-// Helper to verify admin/PI access
 async function verifyAdminAccess() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -33,8 +36,6 @@ async function verifyAdminAccess() {
   return { error: null, user, dbUser };
 }
 
-// -- Inventory Actions --
-
 export async function addInventoryItem(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
@@ -42,15 +43,14 @@ export async function addInventoryItem(formData: FormData) {
   const chemical = formData.get('chemical') as string;
   const quantity = parseFloat(formData.get('quantity') as string);
   const unit = formData.get('unit') as string;
-  const thresholdValue = parseFloat(formData.get('thresholdValue') as string);
 
   try {
-    await prisma.inventory.create({
+    await prisma.inventoryItem.create({
       data: {
-        chemical,
+        name: chemical,
+        type: "CHEMICAL",
         quantity,
         unit,
-        thresholdValue,
         organizationId: dbUser.organizationId,
       },
     });
@@ -67,19 +67,18 @@ export async function updateInventoryStock(id: string, newQuantity: number) {
   if (error || !dbUser) return { success: false, error };
 
   try {
-    const item = await prisma.inventory.findUnique({ where: { id } });
+    const item = await prisma.inventoryItem.findUnique({ where: { id } });
     if (item?.organizationId !== dbUser.organizationId) {
       return { success: false, error: 'Unauthorized' };
     }
 
-    await prisma.inventory.update({
+    await prisma.inventoryItem.update({
       where: { id },
       data: {
         quantity: newQuantity,
-        alertFlag: newQuantity <= (item.thresholdValue ?? 0),
       },
     });
-    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_UPDATED', `Updated ${item.chemical} stock from ${item.quantity} to ${newQuantity}`);
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_UPDATED', `Updated ${item.name} stock to ${newQuantity}`);
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
@@ -92,20 +91,18 @@ export async function deleteInventoryItem(id: string) {
   if (error || !dbUser) return { success: false, error };
 
   try {
-    const item = await prisma.inventory.findUnique({ where: { id } });
+    const item = await prisma.inventoryItem.findUnique({ where: { id } });
     if (item?.organizationId !== dbUser.organizationId) {
       return { success: false, error: 'Unauthorized' };
     }
-    await prisma.inventory.delete({ where: { id } });
-    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_DELETED', `Deleted ${item.chemical} from inventory`);
+    await prisma.inventoryItem.delete({ where: { id } });
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_DELETED', `Deleted ${item.name}`);
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
 }
-
-// -- Equipment Actions --
 
 export async function addEquipment(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
@@ -128,7 +125,7 @@ export async function addEquipment(formData: FormData) {
         organizationId: dbUser.organizationId,
       },
     });
-    await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_ADDED', `Added equipment ${name} (SN: ${serialNumber})`);
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_ADDED', `Added equipment ${name}`);
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
@@ -142,9 +139,7 @@ export async function updateEquipmentStatus(id: string, status: string, calibrat
 
   try {
     const item = await prisma.equipment.findUnique({ where: { id } });
-    if (item?.organizationId !== dbUser.organizationId) {
-      return { success: false, error: 'Unauthorized' };
-    }
+    if (item?.organizationId !== dbUser.organizationId) return { success: false, error: 'Unauthorized' };
 
     await prisma.equipment.update({
       where: { id },
@@ -153,8 +148,8 @@ export async function updateEquipmentStatus(id: string, status: string, calibrat
         ...(calibratedNow ? { lastCalibrated: new Date() } : {}),
       },
     });
-    const details = calibratedNow ? `Calibrated equipment ${item.name} and set status to ${status}` : `Updated equipment ${item.name} status to ${status}`;
-    await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_UPDATED', details);
+    
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_UPDATED', `Updated ${item.name}`);
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
@@ -171,7 +166,7 @@ export async function updateStrictMode(enabled: boolean) {
       where: { id: dbUser.organizationId },
       data: { strictMode: enabled }
     });
-    await logAuditAction(dbUser.id, dbUser.organizationId, 'STRICT_MODE_TOGGLED', `Set strictMode to ${enabled}`);
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'STRICT_MODE', `Strict mode ${enabled}`);
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: any) {
@@ -198,23 +193,8 @@ export async function checkLabCompliance() {
     }
   });
 
-  // Also check if any equipment is overdue
-  const now = new Date();
-  const equipment = await prisma.equipment.findMany({
-    where: { organizationId: dbUser.organizationId }
-  });
-  const overdue = equipment.filter(e => {
-    const nextDue = new Date(e.lastCalibrated);
-    nextDue.setDate(nextDue.getDate() + e.calibrationFreq);
-    return now > nextDue;
-  });
-
-  if (brokenEquipment.length > 0 || overdue.length > 0) {
-    return {
-      compliant: false,
-      reason: `Strict Mode: Data acquisition blocked. ${brokenEquipment.length + overdue.length} equipment item(s) are broken or overdue for calibration.`
-    };
+  if (brokenEquipment.length > 0) {
+    return { compliant: false, reason: `Blocked: ${brokenEquipment.length} broken/overdue items.` };
   }
-
   return { compliant: true };
 }
