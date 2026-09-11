@@ -22,12 +22,26 @@ const r2 = new S3Client({
  * Returns a 1-hour presigned PUT URL for the browser to upload directly to R2.
  * Also returns the fileKey for creating the TelemetryStream record on completion.
  */
-export async function getTelemetryUploadUrl(trialId: string, filename: string) {
+export async function getTelemetryUploadUrl(trialId: string, filename: string, fileSize?: number) {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
 
-  const fileKey = `trials/${trialId}/${randomUUID()}-${filename}`;
+  // Security: Check file size (e.g. max 50MB)
+  if (fileSize && fileSize > 50 * 1024 * 1024) {
+    throw new Error('File size exceeds the 50MB limit.');
+  }
+
+  // Security: Validate file type to prevent execution
+  const allowedExtensions = ['.csv', '.txt', '.json'];
+  const lowerFilename = filename.toLowerCase();
+  if (!allowedExtensions.some(ext => lowerFilename.endsWith(ext))) {
+    throw new Error('Invalid file type. Only CSV, TXT, and JSON are allowed.');
+  }
+
+  // Strip path traversal attempts
+  const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '');
+  const fileKey = `trials/${trialId}/${randomUUID()}-${safeFilename}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME!,

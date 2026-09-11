@@ -36,13 +36,15 @@ async function verifyAdminAccess() {
   return { error: null, user, dbUser };
 }
 
+import DOMPurify from 'isomorphic-dompurify';
+
 export async function addInventoryItem(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
-  const chemical = formData.get('chemical') as string;
+  const chemical = DOMPurify.sanitize(formData.get('chemical') as string);
   const quantity = parseFloat(formData.get('quantity') as string);
-  const unit = formData.get('unit') as string;
+  const unit = DOMPurify.sanitize(formData.get('unit') as string);
 
   try {
     await prisma.inventoryItem.create({
@@ -108,11 +110,11 @@ export async function addEquipment(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
-  const name = formData.get('name') as string;
-  const serialNumber = formData.get('serialNumber') as string;
+  const name = DOMPurify.sanitize(formData.get('name') as string);
+  const serialNumber = DOMPurify.sanitize(formData.get('serialNumber') as string);
   const lastCalibrated = new Date(formData.get('lastCalibrated') as string);
   const calibrationFreq = parseInt(formData.get('calibrationFreq') as string, 10);
-  const status = formData.get('status') as string;
+  const status = DOMPurify.sanitize(formData.get('status') as string);
 
   try {
     await prisma.equipment.create({

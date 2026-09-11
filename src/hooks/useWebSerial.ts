@@ -3,7 +3,7 @@
 // Manages navigator.serial lifecycle: connect, stream-parse, disconnect.
 // Emits parsed float values from \n-delimited serial output into the Zustand store.
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 
 export function useWebSerial() {
@@ -113,6 +113,15 @@ export function useWebSerial() {
     readerRef.current = null;
     setHardwareStatus({ isConnected: false, portName: null, packetsPerSec: 0, isSimulated: false });
   }, [setHardwareStatus]);
+
+  // Clean up on unmount to prevent memory leaks and dangling hardware locks
+  useEffect(() => {
+    return () => {
+      if (activeRef.current) {
+        disconnect();
+      }
+    };
+  }, [disconnect]);
 
   return { connect, disconnect };
 }

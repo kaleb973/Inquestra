@@ -1,7 +1,7 @@
 'use client';
 // src/components/layout/AIAssistant.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sparkles, Bot, Send } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 
@@ -12,6 +12,7 @@ export function AIAssistant() {
     { role: 'assistant', text: "I'm Inquestra Intelligence. Ask me about your telemetry data or trial notes." }
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Expose an effect to listen for slash command triggers
   useEffect(() => {
@@ -30,21 +31,27 @@ export function AIAssistant() {
     if (!query.trim()) return;
     
     const userMsg = query.trim();
-    setChatLog(prev => [...prev, { role: 'user', text: userMsg }]);
+    // Cap chat history to prevent unbounded array growth memory leak
+    setChatLog(prev => [...prev.slice(-49), { role: 'user', text: userMsg }]);
     setQuery('');
     setIsTyping(true);
 
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     // Simulate AI response based on telemetry
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       let reply = "I've analyzed your trial context.";
       
       if (userMsg.toLowerCase().includes('anomaly') || userMsg.toLowerCase().includes('spike')) {
         const hasData = telemetryBuffer.length > 0;
         if (hasData) {
-          const maxTemp = Math.max(...telemetryBuffer.map(t => t.value));
-          reply = `Looking at the current DAQ buffer (${telemetryBuffer.length} points), the maximum recorded value is ${maxTemp.toFixed(2)}. This is within expected nominal bounds if baseline is 37°C. No critical anomalies detected.`;
+          const vals = telemetryBuffer.map(p => p.value);
+          const max = Math.max(...vals);
+          reply = `I see a maximum reading of ${max.toFixed(2)} in the current buffer. This is within nominal ranges for this assay.`;
         } else {
-          reply = "I don't see any active telemetry data in the buffer right now to check for anomalies. Please start the acquisition stream first.";
+          reply = "I don't see any active telemetry data to analyze. Please connect the hardware.";
         }
       } else if (userMsg.toLowerCase().includes('average') || userMsg.toLowerCase().includes('mean')) {
         if (telemetryBuffer.length > 0) {
@@ -57,10 +64,16 @@ export function AIAssistant() {
         reply = "I'm a local inference mock for the time being. Try asking me to 'check for an anomaly' or 'calculate the average' of the current telemetry stream.";
       }
 
-      setChatLog(prev => [...prev, { role: 'assistant', text: reply }]);
+      setChatLog(prev => [...prev.slice(-49), { role: 'assistant', text: reply }]);
       setIsTyping(false);
     }, 1200);
   };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-muted/20">

@@ -11,13 +11,15 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 // ─── Validation schemas ────────────────────────────────────────────────────────
 
+import DOMPurify from 'isomorphic-dompurify';
+
 const MetadataSchema = z.object({
-  key: z.string().min(1).max(100),
-  value: z.string().min(1).max(500),
+  key: z.string().min(1).max(100).transform(val => DOMPurify.sanitize(val)),
+  value: z.string().min(1).max(500).transform(val => DOMPurify.sanitize(val)),
 });
 
 const TrialPayloadSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(255),
+  title: z.string().min(1, 'Title is required').max(255).transform(val => DOMPurify.sanitize(val)),
   content: z.record(z.string(), z.unknown()), // TipTap ProseMirror JSON
   status: z.enum(['DRAFT', 'ACTIVE', 'COMPLETED', 'FAILED']),
   projectId: z.string().uuid(),
