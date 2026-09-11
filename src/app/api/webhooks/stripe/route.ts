@@ -10,7 +10,7 @@ export const config = {
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2025-02-24.acacia',
+  apiVersion: '2026-08-26.dahlia',
 });
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
