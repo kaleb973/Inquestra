@@ -2,7 +2,7 @@
 // src/app/app/(auth)/join/page.tsx
 // Invite acceptance page — renders the lab clearance preview and sign-up form.
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { previewInvite, acceptInvite } from '@/actions/inviteActions';
 import { FlaskConical, Shield, Loader2, CheckCircle, AlertTriangle, Eye, EyeOff } from 'lucide-react';
@@ -35,7 +35,7 @@ const ROLE_META: Record<Role, { label: string; level: string; color: string; dut
   },
 };
 
-export default function JoinPage() {
+function JoinPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token') ?? '';
@@ -247,5 +247,17 @@ export default function JoinPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <JoinPageContent />
+    </Suspense>
   );
 }
