@@ -1,11 +1,20 @@
 'use client';
 // src/app/(auth)/signup/page.tsx
-// Researcher account creation — validates email + password, sends confirmation.
+// Researcher account creation — collects name, lab type, email, password.
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 import { signUp } from '@/actions/authActions';
+
+const LAB_TYPES = [
+  { value: '', label: '— Select lab type —' },
+  { value: 'Academic Lab', label: 'Academic / University Lab' },
+  { value: 'Biotech / Startup', label: 'Biotech / Startup' },
+  { value: 'Hospital / Clinical', label: 'Hospital / Clinical Research' },
+  { value: 'Government / Federal', label: 'Government / Federal Lab' },
+  { value: 'Independent', label: 'Independent Researcher' },
+];
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
@@ -23,14 +32,14 @@ export default function SignUpPage() {
         const result = await signUp(formData);
         if (result?.error) setError(result.error);
         if (result?.success) setSuccess(result.success);
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred.');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       }
     });
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-10">
@@ -43,7 +52,7 @@ export default function SignUpPage() {
         <div className="bg-muted border border-border rounded-xl p-8">
           <h1 className="text-white text-xl font-semibold mb-1">Create account</h1>
           <p className="text-muted-foreground text-sm mb-6">
-            Join your research organization on Inquestra.
+            Set up your research lab on Inquestra.
           </p>
 
           {success ? (
@@ -53,6 +62,44 @@ export default function SignUpPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Full Name */}
+              <div>
+                <label htmlFor="fullName" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Full name
+                </label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  disabled={isPending}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  placeholder="Dr. Jane Smith"
+                />
+              </div>
+
+              {/* Lab Type */}
+              <div>
+                <label htmlFor="labType" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Lab type
+                </label>
+                <select
+                  id="labType"
+                  name="labType"
+                  required
+                  disabled={isPending}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {LAB_TYPES.map((t) => (
+                    <option key={t.value} value={t.value} disabled={t.value === ''}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Institutional email
@@ -63,11 +110,13 @@ export default function SignUpPage() {
                   type="email"
                   required
                   autoComplete="email"
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
+                  disabled={isPending}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="researcher@university.edu"
                 />
               </div>
 
+              {/* Password */}
               <div>
                 <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Password <span className="text-neutral-700">(min. 8 characters)</span>
@@ -79,7 +128,8 @@ export default function SignUpPage() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors"
+                  disabled={isPending}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="••••••••"
                 />
               </div>
@@ -100,12 +150,20 @@ export default function SignUpPage() {
             </form>
           )}
 
-          <p className="text-center text-xs text-neutral-600 mt-6">
-            Already have an account?{' '}
-            <Link href="/app/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-              Sign in
-            </Link>
-          </p>
+          <div className="mt-6 space-y-2 text-center">
+            <p className="text-xs text-neutral-600">
+              Already have an account?{' '}
+              <Link href="/app/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                Sign in
+              </Link>
+            </p>
+            <p className="text-xs text-neutral-700">
+              Have an invite link?{' '}
+              <Link href="/app/join" className="text-indigo-500 hover:text-indigo-400 transition-colors">
+                Join your lab →
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

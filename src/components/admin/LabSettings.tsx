@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 import { updateStrictMode } from '@/actions/adminActions';
 import { Loader2, ShieldCheck, ShieldAlert, Check, X, AlertTriangle, Cpu, Box, FileText, Lock } from 'lucide-react';
 import type { Organization } from '@prisma/client';
+import { SecuritySettings } from '@/components/admin/SecuritySettings';
 
 export function LabSettings({ org }: { org: Organization }) {
   const [isPending, startTransition] = useTransition();
@@ -199,6 +200,9 @@ export function LabSettings({ org }: { org: Organization }) {
           </div>
         </div>
       </div>
+
+      {/* Security / 2FA */}
+      <SecuritySettings />
     </div>
   );
 }

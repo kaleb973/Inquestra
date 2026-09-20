@@ -330,6 +330,13 @@ export function Header() {
                 <span className="text-muted-foreground">·</span>
                 <span className="truncate">{user.email?.split('@')[0]}</span>
               </Link>
+            ) : profile === null ? (
+              // Profile still loading — show skeleton to avoid role flash
+              <div className="flex items-center gap-1.5 bg-muted border border-border px-2.5 py-1 rounded">
+                <div className="w-14 h-2.5 rounded bg-muted-foreground/20 animate-pulse" />
+                <span className="text-muted-foreground">·</span>
+                <div className="w-16 h-2.5 rounded bg-muted-foreground/20 animate-pulse" />
+              </div>
             ) : (
               <Link
                 href="/app/admin"
@@ -337,7 +344,7 @@ export function Header() {
                 title="Lab Operations & Settings"
               >
                 <span className="font-semibold text-sky-600 dark:text-sky-400 text-[10px] uppercase">
-                  {profile?.role ?? 'Researcher'}
+                  {profile.role}
                 </span>
                 <span className="text-muted-foreground">·</span>
                 <span className="truncate">{user.email?.split('@')[0]}</span>
