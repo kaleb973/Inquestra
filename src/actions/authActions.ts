@@ -12,23 +12,7 @@ function getAppUrl(): string {
   return (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 }
 
-/** Sanitize raw Supabase errors (such as alphabet dumps) into clean human-readable text. */
-export function formatAuthError(msg: string): string {
-  const lower = msg.toLowerCase();
-  if (lower.includes('password should contain at least one character of each')) {
-    return 'Password must contain at least one uppercase letter, one lowercase letter, and one number.';
-  }
-  if (lower.includes('password should be at least')) {
-    return 'Password must be at least 8 characters long.';
-  }
-  if (lower.includes('user already registered') || lower.includes('already exists')) {
-    return 'An account with this email already exists. Please sign in instead.';
-  }
-  if (lower.includes('invalid login credentials')) {
-    return 'Invalid email or password.';
-  }
-  return msg;
-}
+import { formatAuthError } from '@/lib/utils';
 
 export async function signUp(formData: FormData) {
   const email = formData.get('email') as string;
@@ -60,6 +44,46 @@ export async function signUp(formData: FormData) {
   }
 }
 
+/** Ensure a Prisma record exists for a logged-in Supabase user. */
+export async function provisionUserRecord(user: {
+  id: string;
+  email?: string;
+  user_metadata?: { full_name?: string; lab_type?: string; [key: string]: any };
+}): Promise<void> {
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+  });
+
+  if (!dbUser && user.email) {
+    const fullName = user.user_metadata?.full_name as string | undefined;
+    const labType = user.user_metadata?.lab_type as string | undefined;
+
+    const nameBase = fullName ?? user.email.split('@')[0] ?? 'Researcher';
+    const orgName = labType
+      ? `${nameBase}'s ${labType}`
+      : `${nameBase}'s Lab`;
+
+    await prisma.organization.create({
+      data: {
+        name: orgName,
+        users: {
+          create: {
+            authId: user.id,
+            email: user.email,
+            role: 'PI',
+          },
+        },
+        projects: {
+          create: {
+            name: 'Default Workspace',
+            description: 'Initial project for research trials.',
+          },
+        },
+      },
+    });
+  }
+}
+
 export type SignInResult =
   | { success: true }
   | { mfaRequired: true; factorId: string }
@@ -79,38 +103,7 @@ export async function signIn(formData: FormData): Promise<SignInResult> {
     }
 
     // --- Just-in-time Prisma User Provisioning ---
-    const dbUser = await prisma.user.findUnique({
-      where: { authId: data.user.id },
-    });
-
-    if (!dbUser) {
-      const fullName = data.user.user_metadata?.full_name as string | undefined;
-      const labType = data.user.user_metadata?.lab_type as string | undefined;
-
-      const nameBase = fullName ?? data.user.email?.split('@')[0] ?? 'Researcher';
-      const orgName = labType
-        ? `${nameBase}'s ${labType}`
-        : `${nameBase}'s Lab`;
-
-      await prisma.organization.create({
-        data: {
-          name: orgName,
-          users: {
-            create: {
-              authId: data.user.id,
-              email: data.user.email!,
-              role: 'PI',
-            },
-          },
-          projects: {
-            create: {
-              name: 'Default Workspace',
-              description: 'Initial project for research trials.',
-            },
-          },
-        },
-      });
-    }
+    await provisionUserRecord(data.user);
 
     // --- MFA Check ---
     // If user has an active verified TOTP factor, require a second step.

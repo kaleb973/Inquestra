@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
+import { provisionUserRecord } from '@/actions/authActions';
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
@@ -19,6 +21,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
+      // --- Just-in-time Prisma User Provisioning for magic links/email confirmation ---
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await provisionUserRecord(user);
+      }
       return NextResponse.redirect(`${baseUrl}${next}`);
     }
   }

@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { generateInviteToken, verifyInviteToken } from '@/lib/inviteToken';
-import { formatAuthError } from '@/actions/authActions';
+import { formatAuthError } from '@/lib/utils';
 import type { Role } from '@prisma/client';
 import DOMPurify from 'isomorphic-dompurify';
 
