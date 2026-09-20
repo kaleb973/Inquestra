@@ -28,9 +28,15 @@ ALTER TABLE "AuditLog" ENABLE ROW LEVEL SECURITY;
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION current_user_org_id()
-RETURNS TEXT AS $$
-  SELECT "organizationId" FROM "User" WHERE "authId" = auth.uid()::text LIMIT 1;
+RETURNS TEXT
+SET search_path = public
+AS $$
+  SELECT "organizationId" FROM "User" WHERE "authId" = (select auth.uid())::text LIMIT 1;
 $$ LANGUAGE SQL STABLE SECURITY DEFINER;
+
+-- Revoke public execution to satisfy Supabase security linter
+REVOKE EXECUTE ON FUNCTION current_user_org_id() FROM public;
+GRANT EXECUTE ON FUNCTION current_user_org_id() TO authenticated;
 
 -- ==============================================================================
 -- 3. ORGANIZATION POLICIES
@@ -51,6 +57,8 @@ CREATE POLICY "user_tenant_read" ON "User"
 FOR SELECT USING (
   "organizationId" = current_user_org_id()
 );
+
+DROP POLICY IF EXISTS "user_select_own_or_org" ON "User"; -- dropping old policy from csv
 
 DROP POLICY IF EXISTS "team_tenant_all" ON "Team";
 CREATE POLICY "team_tenant_all" ON "Team"
@@ -79,6 +87,8 @@ FOR ALL USING (
 -- ==============================================================================
 
 DROP POLICY IF EXISTS "trial_tenant_select" ON "Trial";
+DROP POLICY IF EXISTS "trial_select_tenant_isolation" ON "Trial"; -- dropping old policy from csv
+
 CREATE POLICY "trial_tenant_select" ON "Trial"
 FOR SELECT USING (
   EXISTS (
@@ -89,18 +99,23 @@ FOR SELECT USING (
 );
 
 DROP POLICY IF EXISTS "trial_author_mutation" ON "Trial";
+DROP POLICY IF EXISTS "trial_mutation_author_only" ON "Trial"; -- dropping old policy from csv
+
 CREATE POLICY "trial_author_mutation" ON "Trial"
 FOR ALL USING (
   -- Must be from same org and authored by active user
   EXISTS (
     SELECT 1 FROM "User" u
-    WHERE u."authId" = auth.uid()::text
+    WHERE u."authId" = (select auth.uid())::text
     AND u.id = "Trial"."userId"
     AND u."organizationId" = current_user_org_id()
   )
 );
 
 DROP POLICY IF EXISTS "metadata_via_trial" ON "MetadataEntry";
+DROP POLICY IF EXISTS "metadata_select_via_trial" ON "MetadataEntry"; -- from csv
+DROP POLICY IF EXISTS "metadata_mutation_via_trial" ON "MetadataEntry"; -- from csv
+
 CREATE POLICY "metadata_via_trial" ON "MetadataEntry"
 FOR ALL USING (
   EXISTS (
@@ -112,6 +127,9 @@ FOR ALL USING (
 );
 
 DROP POLICY IF EXISTS "telemetry_via_trial" ON "TelemetryStream";
+DROP POLICY IF EXISTS "telemetry_select_via_trial" ON "TelemetryStream"; -- from csv
+DROP POLICY IF EXISTS "telemetry_mutation_via_trial" ON "TelemetryStream"; -- from csv
+
 CREATE POLICY "telemetry_via_trial" ON "TelemetryStream"
 FOR ALL USING (
   EXISTS (
@@ -121,6 +139,19 @@ FOR ALL USING (
     AND p."organizationId" = current_user_org_id()
   )
 );
+
+DROP POLICY IF EXISTS "revision_via_trial" ON "TrialRevision";
+CREATE POLICY "revision_via_trial" ON "TrialRevision"
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM "Trial" t
+    JOIN "Project" p ON p.id = t."projectId"
+    WHERE t.id = "TrialRevision"."trialId"
+    AND p."organizationId" = current_user_org_id()
+  )
+);
+
+ALTER TABLE "TrialRevision" ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================================================
 -- 7. LIMS INVENTORY, STORAGE & EQUIPMENT POLICIES
@@ -188,7 +219,7 @@ FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM "User" u
     WHERE u.id = "Signature"."userId"
-    AND u."authId" = auth.uid()::text
+    AND u."authId" = (select auth.uid())::text
     AND u."organizationId" = current_user_org_id()
   )
 );

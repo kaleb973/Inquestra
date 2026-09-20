@@ -93,6 +93,9 @@ model User {
   revisions      TrialRevision[] @relation("RevisionAuthor")
 
   createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([teamId])
 }
 
 model Project {
@@ -174,6 +177,8 @@ model Trial {
   @@index([projectId])
   @@index([status])
   @@index([userId])
+  @@index([protocolId])
+  @@index([sealedBy])
 }
 
 // Snapshot of trial content at a point in time — append-only version history
@@ -190,6 +195,7 @@ model TrialRevision {
 
   @@index([trialId])
   @@index([savedAt])
+  @@index([savedById])
 }
 
 model MetadataEntry {
@@ -299,6 +305,7 @@ model TrialInventory {
   unit            String
   
   @@unique([trialId, inventoryItemId])
+  @@index([inventoryItemId])
 }
 
 model TrialEquipment {
@@ -309,6 +316,7 @@ model TrialEquipment {
   equipment       Equipment     @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
   
   @@unique([trialId, equipmentId])
+  @@index([equipmentId])
 }
 
 // ======================= COMPLIANCE (21 CFR Part 11) =======================
