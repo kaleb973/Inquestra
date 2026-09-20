@@ -78,7 +78,7 @@ export default function LoginPage() {
     setError(null);
     setIsPasskeyPending(true);
     try {
-      const { error } = await supabase.auth.signInWithPasskey();
+      const { data, error } = await supabase.auth.signInWithPasskey();
       if (error) {
         const msg = error.message.toLowerCase();
         // If the user cancelled, closed the OS dialog, or timed out, do NOT show an ugly error
@@ -97,6 +97,17 @@ export default function LoginPage() {
         setIsPasskeyPending(false);
         return;
       }
+
+      // Security Guard: Prevent account mismatch / spoofing via Windows PIN
+      if (data?.user?.email && data.user.email.toLowerCase() !== email.trim().toLowerCase()) {
+        await supabase.auth.signOut();
+        setError(
+          `Security mismatch: The selected passkey belongs to ${data.user.email}, not ${email.trim()}. Please choose the matching account or use your password.`
+        );
+        setIsPasskeyPending(false);
+        return;
+      }
+
       setStep('redirecting');
       window.location.href = '/app';
     } catch (err: unknown) {
