@@ -267,7 +267,7 @@ export function Header() {
         {activeTrial.checksum ? (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
             <Shield className="w-3.5 h-3.5" />
-            Sealed
+            Cryptographically Sealed
           </div>
         ) : (
           <button
@@ -281,7 +281,7 @@ export function Header() {
             ) : (
               <Shield className="w-3.5 h-3.5" />
             )}
-            {isSealing ? 'Sealing...' : 'Seal'}
+            {isSealing ? 'Sealing...' : 'Seal Trial'}
           </button>
         )}
 

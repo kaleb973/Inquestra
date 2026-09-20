@@ -78,6 +78,14 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
 
     // Create or update
     if (payload.cloudTrialId) {
+      const existing = await prisma.trial.findUnique({
+        where: { id: payload.cloudTrialId, userId: dbUser.id },
+        select: { checksum: true }
+      });
+      if (existing?.checksum) {
+        throw new Error("Cannot sync changes: This trial is cryptographically sealed and locked.");
+      }
+
       await prisma.trial.update({
         where: { id: payload.cloudTrialId, userId: dbUser.id },
         data: {
