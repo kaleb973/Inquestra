@@ -4,8 +4,20 @@
 
 import { useEffect, useState, useTransition, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { previewInvite, acceptInvite } from '@/actions/inviteActions';
-import { FlaskConical, Shield, Loader2, CheckCircle, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import {
+  FlaskConical,
+  Shield,
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  KeyRound,
+  ArrowRight,
+  ArrowLeft,
+} from 'lucide-react';
 import type { Role } from '@prisma/client';
 
 const ROLE_META: Record<Role, { label: string; level: string; color: string; duties: string }> = {
@@ -38,11 +50,15 @@ const ROLE_META: Record<Role, { label: string; level: string; color: string; dut
 function JoinPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get('token') ?? '';
+  const tokenFromUrl = searchParams.get('token') ?? '';
+
+  const [currentToken, setCurrentToken] = useState(tokenFromUrl);
+  const [manualInput, setManualInput] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const [preview, setPreview] = useState<{ orgName: string; role: Role } | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(true);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(Boolean(tokenFromUrl));
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,20 +68,54 @@ function JoinPageContent() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!token) {
-      setPreviewError('No invite token found in this link.');
+    if (!tokenFromUrl) {
       setIsLoadingPreview(false);
       return;
     }
-    previewInvite(token).then((res) => {
+    previewInvite(tokenFromUrl).then((res) => {
       if (res.valid) {
         setPreview({ orgName: res.orgName, role: res.role });
+        setCurrentToken(tokenFromUrl);
       } else {
         setPreviewError(res.error);
       }
       setIsLoadingPreview(false);
     });
-  }, [token]);
+  }, [tokenFromUrl]);
+
+  const handleVerifyManualToken = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const raw = manualInput.trim();
+    if (!raw) return;
+
+    // Extract token if user pasted a full URL
+    let extracted = raw;
+    try {
+      if (raw.includes('token=')) {
+        const urlObj = new URL(raw.startsWith('http') ? raw : `https://${raw}`);
+        extracted = urlObj.searchParams.get('token') || raw;
+      }
+    } catch {
+      extracted = raw;
+    }
+
+    setIsVerifying(true);
+    setPreviewError(null);
+    try {
+      const res = await previewInvite(extracted);
+      if (res.valid) {
+        setPreview({ orgName: res.orgName, role: res.role });
+        setCurrentToken(extracted);
+        router.replace(`/app/join?token=${encodeURIComponent(extracted)}`);
+      } else {
+        setPreviewError(res.error);
+      }
+    } catch (err: unknown) {
+      setPreviewError(err instanceof Error ? err.message : 'Failed to verify invite token.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +125,7 @@ function JoinPageContent() {
     }
     setFormError(null);
     startTransition(async () => {
-      const result = await acceptInvite(token, email, password);
+      const result = await acceptInvite(currentToken, email, password);
       if (!result.success) {
         setFormError(result.error);
         return;
@@ -94,17 +144,71 @@ function JoinPageContent() {
     );
   }
 
-  // ── Invalid invite ─────────────────────────────────────────────────────────
-  if (previewError) {
+  // ── Manual Token Entry / Invalid Link Entry ────────────────────────────────
+  if (!preview) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="max-w-sm w-full bg-card border border-red-500/30 rounded-2xl p-8 text-center space-y-4 shadow-xl">
-          <AlertTriangle className="w-10 h-10 text-red-500 mx-auto" />
-          <h1 className="text-base font-semibold text-foreground">Invite Invalid</h1>
-          <p className="text-sm text-muted-foreground">{previewError}</p>
-          <p className="text-xs text-muted-foreground">
-            Ask your Lab PI or Admin to generate a new invite link.
-          </p>
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
+        <div className="max-w-md w-full bg-card border border-border rounded-2xl p-8 space-y-6 shadow-xl">
+          <div className="text-center space-y-2">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400">
+              <KeyRound className="w-5 h-5" />
+            </div>
+            <h1 className="text-lg font-semibold text-foreground">Join Your Lab</h1>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Enter the invite token or paste the full invite link provided by your Lab PI or Administrator.
+            </p>
+          </div>
+
+          {previewError && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-red-300">Invite Invalid or Expired</p>
+                <p className="mt-0.5">{previewError}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleVerifyManualToken} className="space-y-4">
+            <div>
+              <label htmlFor="inviteToken" className="block text-xs font-medium text-foreground mb-1.5">
+                Invite Link or Token
+              </label>
+              <input
+                id="inviteToken"
+                type="text"
+                required
+                autoFocus
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                placeholder="Paste link or token here…"
+                className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isVerifying || !manualInput.trim()}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isVerifying ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
+              {isVerifying ? 'Verifying invite…' : 'Continue to Clearance →'}
+            </button>
+          </form>
+
+          <div className="pt-2 text-center border-t border-border/60">
+            <Link
+              href="/app/login"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back to sign in
+            </Link>
+          </div>
         </div>
       </div>
     );
