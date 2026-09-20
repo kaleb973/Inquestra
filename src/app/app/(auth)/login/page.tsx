@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 import { signIn, verifyMfaLogin } from '@/actions/authActions';
 import type { SignInResult } from '@/actions/authActions';
-import { ShieldCheck, Smartphone, Fingerprint, Loader2 } from 'lucide-react';
+import { ShieldCheck, Smartphone, Fingerprint, Loader2, Eye, EyeOff } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type LoginStep = 'email' | 'authenticate' | 'mfa' | 'redirecting';
@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [step, setStep] = useState<LoginStep>('email');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isPasskeyPending, setIsPasskeyPending] = useState(false);
   const supabase = createSupabaseBrowserClient();
@@ -79,14 +80,38 @@ export default function LoginPage() {
     try {
       const { error } = await supabase.auth.signInWithPasskey();
       if (error) {
-        setError(error.message);
+        const msg = error.message.toLowerCase();
+        // If the user cancelled, closed the OS dialog, or timed out, do NOT show an ugly error
+        if (
+          msg.includes('not allowed') ||
+          msg.includes('abort') ||
+          msg.includes('cancelled') ||
+          msg.includes('canceled') ||
+          msg.includes('timed out')
+        ) {
+          setIsPasskeyPending(false);
+          return;
+        }
+
+        setError('No passkey found for this device. Please sign in with your password below.');
         setIsPasskeyPending(false);
         return;
       }
       setStep('redirecting');
       window.location.href = '/app';
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Passkey login failed.');
+      const msg = err instanceof Error ? err.message.toLowerCase() : '';
+      if (
+        msg.includes('not allowed') ||
+        msg.includes('abort') ||
+        msg.includes('cancelled') ||
+        msg.includes('canceled') ||
+        msg.includes('timed out')
+      ) {
+        setIsPasskeyPending(false);
+        return;
+      }
+      setError('Unable to authenticate with passkey. Please sign in with your password.');
       setIsPasskeyPending(false);
     }
   };
@@ -238,17 +263,28 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
                     Password
                   </label>
-                  <input
-                    ref={passwordInputRef}
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                    disabled={isPending || isPasskeyPending}
-                    className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      ref={passwordInputRef}
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      autoComplete="current-password"
+                      disabled={isPending || isPasskeyPending}
+                      className="w-full bg-background border border-border rounded-lg px-3 py-2.5 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 {error && (

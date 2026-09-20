@@ -6,6 +6,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 import { signUp } from '@/actions/authActions';
+import { Eye, EyeOff } from 'lucide-react';
 
 const LAB_TYPES = [
   { value: '', label: '— Select lab type —' },
@@ -19,6 +20,7 @@ const LAB_TYPES = [
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -121,17 +123,28 @@ export default function SignUpPage() {
                 <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Password <span className="text-neutral-700">(min. 8 characters)</span>
                 </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  disabled={isPending}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    disabled={isPending}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2.5 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               {error && (
