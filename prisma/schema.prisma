@@ -89,6 +89,8 @@ model User {
   sealedTrials   Trial[]      @relation("TrialSealer")
   auditLogs      AuditLog[]
   signatures     Signature[]
+  ledProjects    Project[]    @relation("ProjectLead")
+  revisions      TrialRevision[] @relation("RevisionAuthor")
 
   createdAt      DateTime     @default(now())
 }
@@ -97,13 +99,23 @@ model Project {
   id             String       @id @default(uuid())
   name           String
   description    String?
-  
+  code           String?      // e.g. "PRJ-NEURO-01" — grant/protocol identifier
+  status         String       @default("ACTIVE") // ACTIVE | ARCHIVED | COMPLETED
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
+
+  // Designated Project PI / Lead Scientist
+  leadId         String?
+  lead           User?        @relation("ProjectLead", fields: [leadId], references: [id])
+
   trials         Trial[]
 
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+
+  @@index([organizationId])
+  @@index([leadId])
 }
 
 // ======================= EXPERIMENTS / ELN =======================
@@ -143,6 +155,7 @@ model Trial {
 
   metadata       MetadataEntry[]
   telemetry      TelemetryStream[]
+  revisions      TrialRevision[]
   
   // Relational Linking
   inventoryUsed  TrialInventory[]
@@ -161,6 +174,22 @@ model Trial {
   @@index([projectId])
   @@index([status])
   @@index([userId])
+}
+
+// Snapshot of trial content at a point in time — append-only version history
+model TrialRevision {
+  id        String   @id @default(uuid())
+  trialId   String
+  trial     Trial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  title     String
+  content   Json
+  savedById String
+  savedBy   User     @relation("RevisionAuthor", fields: [savedById], references: [id])
+  note      String?  // optional commit-style message
+  savedAt   DateTime @default(now())
+
+  @@index([trialId])
+  @@index([savedAt])
 }
 
 model MetadataEntry {

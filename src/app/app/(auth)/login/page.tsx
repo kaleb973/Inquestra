@@ -19,7 +19,11 @@ export default function LoginPage() {
     startTransition(async () => {
       try {
         const result = await signIn(formData);
-        if (result?.error) setError(result.error);
+        if (result?.error) {
+          setError(result.error);
+        } else if (result?.success) {
+          window.location.href = '/app';
+        }
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred.');
       }

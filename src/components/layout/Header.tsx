@@ -6,9 +6,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Cpu,
   Circle,
-  Square,
   Cloud,
   CloudOff,
   Loader2,
@@ -20,22 +18,22 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
-import { useTelemetrySim } from '@/hooks/useTelemetrySim';
 import { syncTrialToCloud } from '@/actions/syncActions';
 import { exportTrialAsZip } from '@/lib/exportTrial';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { signOut } from '@/actions/authActions';
 import { sealTrial } from '@/actions/trialActions';
-import { checkLabCompliance } from '@/actions/adminActions';
+import { checkLabCompliance, getCurrentUserProfile } from '@/actions/adminActions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { TrialStatus } from '@/types/inquestra';
 import type { User } from '@supabase/supabase-js';
+import type { Role } from '@prisma/client';
 
 const STATUS_COLORS: Record<TrialStatus, string> = {
-  DRAFT: 'text-muted-foreground border-border',
-  ACTIVE: 'text-indigo-400 border-indigo-900',
-  COMPLETED: 'text-blue-400 border-blue-900',
-  FAILED: 'text-red-400 border-red-900',
+  DRAFT: 'bg-muted-foreground/30 text-muted-foreground border-border',
+  ACTIVE: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
+  COMPLETED: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30',
+  FAILED: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30',
 };
 
 export function Header() {
@@ -48,12 +46,20 @@ export function Header() {
   const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
   const setCloudIds = useNotebookStore((s) => s.setCloudIds);
   const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
-  const { startSimulation, stopSimulation } = useTelemetrySim();
 
-  const isSimRunning = hardwareStatus.isSimulated && hardwareStatus.isConnected;
   const isSynced = cloudTrialId !== null;
 
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<{
+    id: string;
+    email: string;
+    role: Role;
+    organizationId: string;
+    orgName: string;
+    strictMode: boolean;
+    teamId: string | null;
+    teamName: string | null;
+  } | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isExporting, setIsExporting] = useState(false);
@@ -63,12 +69,24 @@ export function Header() {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
       setUser(currentUser);
+      if (currentUser) {
+        getCurrentUserProfile().then((p) => {
+          if (p) setProfile(p);
+        });
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        getCurrentUserProfile().then((p) => {
+          if (p) setProfile(p);
+        });
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -86,7 +104,7 @@ export function Header() {
     startTransition(async () => {
       const result = await syncTrialToCloud({
         title,
-        content,
+        content: JSON.parse(JSON.stringify(content || {})),
         status,
         metadata: metadata.map(({ key, value }) => ({ key, value })),
         cloudTrialId: cloudTrialId ?? undefined,
@@ -142,8 +160,28 @@ export function Header() {
     setIsSealing(true);
     startTransition(async () => {
       try {
-        await sealTrial(activeTrial.id);
-        // Force reload to grab latest DB state since activeTrial doesn't auto-update checksum yet
+        let targetId = cloudTrialId || activeTrial.id;
+        
+        // Ensure trial exists in DB by syncing first
+        const syncResult = await syncTrialToCloud({
+          title,
+          content: JSON.parse(JSON.stringify(content || {})),
+          status,
+          metadata: metadata.map(({ key, value }) => ({ key, value })),
+          cloudTrialId: targetId ?? undefined,
+          cloudProjectId: cloudProjectId ?? undefined,
+        });
+
+        if (syncResult.success && syncResult.cloudTrialId) {
+          targetId = syncResult.cloudTrialId;
+          setCloudIds({
+            cloudTrialId: syncResult.cloudTrialId,
+            cloudProjectId: syncResult.cloudProjectId ?? '',
+          });
+        }
+
+        await sealTrial(targetId);
+        // Force reload to grab latest DB state
         window.location.reload(); 
       } catch (err: any) {
         alert(err.message || 'Failed to seal trial');
@@ -156,13 +194,13 @@ export function Header() {
     <header className="h-14 border-b border-border/80 bg-background/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
       {/* Brand */}
       <Link href="/app" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-        <Logo className="text-indigo-400 w-5 h-5" />
-        <span className="text-white font-semibold text-sm tracking-tight">
+        <Logo className="text-indigo-600 dark:text-indigo-400 w-5 h-5" />
+        <span className="text-foreground font-semibold text-sm tracking-tight">
           Inquestra
         </span>
       </Link>
 
-      <div className="h-4 w-px bg-neutral-800 shrink-0" />
+      <div className="h-4 w-px bg-border shrink-0" />
 
       {/* Trial identity */}
       <span className="text-foreground text-sm truncate max-w-xs font-medium tracking-tight">{title}</span>
@@ -192,7 +230,7 @@ export function Header() {
         <button
           onClick={() => window.print()}
           title="Print to PDF"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-neutral-800 text-foreground hover:bg-neutral-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted text-foreground hover:bg-accent transition-colors"
         >
           <Printer className="w-3.5 h-3.5" />
           Print
@@ -203,7 +241,7 @@ export function Header() {
           onClick={handleExport}
           disabled={isExporting}
           title="Export trial as ZIP (Markdown + JSON + CSV)"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-neutral-800 text-foreground hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isExporting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -215,7 +253,7 @@ export function Header() {
 
         {/* Seal Trial Button or Lock Badge */}
         {activeTrial.checksum ? (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-900 bg-amber-950/30 text-amber-500" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
             <Shield className="w-3.5 h-3.5" />
             Sealed
           </div>
@@ -224,7 +262,7 @@ export function Header() {
             onClick={handleSealTrial}
             disabled={isSealing}
             title="Seal trial (Irreversible)"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-900 bg-amber-950/40 text-amber-500 hover:bg-amber-950/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSealing ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -239,11 +277,11 @@ export function Header() {
         <button
           onClick={handleSync}
           disabled={isPending}
-          title={isSynced ? 'Re-sync to cloud' : 'Save to cloud'}
+          title={isSynced ? 'Push latest trial changes to cloud' : 'Save trial to cloud'}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
             isSynced
-              ? 'bg-blue-950/30 text-blue-400 border-blue-900 hover:bg-blue-950/60'
-              : 'bg-neutral-800 text-foreground border-border hover:bg-neutral-700'
+              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20'
+              : 'bg-muted text-foreground border-border hover:bg-accent'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isPending ? (
@@ -253,67 +291,59 @@ export function Header() {
           ) : (
             <CloudOff className="w-3.5 h-3.5" />
           )}
-          {isPending ? 'Syncing…' : isSynced ? 'Re-sync' : 'Save to Cloud'}
+          {isPending ? 'Syncing…' : isSynced ? 'Sync Changes' : 'Save to Cloud'}
         </button>
 
         {/* Live connection badge */}
         {hardwareStatus.isConnected && (
-          <span className="flex items-center gap-1.5 text-xs text-indigo-400 font-mono bg-indigo-950/50 border border-indigo-900/60 px-2.5 py-1 rounded">
-            <Circle className="w-2 h-2 fill-indigo-400 animate-pulse" />
-            {hardwareStatus.isSimulated ? 'SIMULATOR' : hardwareStatus.portName}
+          <span className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded">
+            <Circle className="w-2 h-2 fill-indigo-500 animate-pulse" />
+            {hardwareStatus.portName || 'USB Connected'}
             &nbsp;·&nbsp;
             {hardwareStatus.packetsPerSec} Hz
           </span>
         )}
 
-        {/* Simulator mode toggle */}
-        <button
-          onClick={async () => {
-            if (isSimRunning) {
-              stopSimulation();
-            } else {
-              const res = await checkLabCompliance();
-              if (!res.compliant) {
-                alert(res.reason);
-                return;
-              }
-              startSimulation();
-            }
-          }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
-            isSimRunning
-              ? 'bg-red-950/40 text-red-400 border-red-900 hover:bg-red-950/70'
-              : 'bg-indigo-950/40 text-indigo-400 border-indigo-900 hover:bg-indigo-950/70'
-          }`}
-        >
-          {isSimRunning ? (
-            <>
-              <Square className="w-3.5 h-3.5" />
-              Stop Simulator
-            </>
-          ) : (
-            <>
-              <Cpu className="w-3.5 h-3.5" />
-              Sim Mode
-            </>
-          )}
-        </button>
-
-        <div className="h-5 w-px bg-neutral-800 shrink-0" />
+        <div className="h-5 w-px bg-border shrink-0" />
 
         <ThemeToggle />
 
         {/* Auth status: User Profile or Sign In button */}
         {user ? (
           <div className="flex items-center gap-2">
-            <Link
-              href="/app/admin"
-              className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[160px] truncate hover:bg-neutral-800 transition-colors"
-              title="Admin Dashboard"
-            >
-              <Shield className="w-3 h-3 text-indigo-400 shrink-0" />
-              <span className="truncate">{user.email?.split('@')[0]}</span>
-            </Link>
+            {profile && (profile.role === 'ADMIN' || profile.role === 'PI') ? (
+              <Link
+                href="/app/admin"
+                className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[240px] truncate hover:bg-accent hover:border-indigo-500/60 transition-colors shadow-sm"
+                title="Lab Operations & Settings"
+              >
+                <Shield className="w-3 h-3 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <span
+                  className={`font-semibold text-[10px] uppercase ${
+                    profile.role === 'PI'
+                      ? 'text-violet-700 dark:text-violet-300'
+                      : 'text-indigo-700 dark:text-indigo-300'
+                  }`}
+                >
+                  {profile.role === 'PI' ? '★ LAB PI' : profile.role}
+                </span>
+                <span className="text-muted-foreground">·</span>
+                <span className="truncate">{user.email?.split('@')[0]}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/app/admin"
+                className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[220px] truncate hover:bg-accent hover:border-sky-500/40 transition-colors shadow-sm"
+                title="Lab Operations & Settings"
+              >
+                <span className="font-semibold text-sky-600 dark:text-sky-400 text-[10px] uppercase">
+                  {profile?.role ?? 'Researcher'}
+                </span>
+                <span className="text-muted-foreground">·</span>
+                <span className="truncate">{user.email?.split('@')[0]}</span>
+              </Link>
+            )}
+
             <form action={signOut}>
               <button
                 type="submit"

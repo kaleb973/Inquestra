@@ -42,7 +42,7 @@ const DEFAULT_STATS: TelemetryStats = {
 
 // ─── State shape ───────────────────────────────────────────────────────────────
 
-export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'COMPLIANCE';
+export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'COMPLIANCE' | 'HISTORY';
 
 interface NotebookState {
   rightDrawerMode: RightDrawerMode;
@@ -92,7 +92,7 @@ export const useNotebookStore = create<NotebookStore>()(
       hardwareStatus: DEFAULT_HARDWARE,
 
       setRightDrawerMode: (mode) => set({ rightDrawerMode: mode }),
-      setActiveTrial: (trial) => set({ activeTrial: trial }),
+      setActiveTrial: (trial) => set({ activeTrial: trial, cloudTrialId: trial.id }),
 
       setCloudIds: ({ cloudTrialId, cloudProjectId }) =>
         set({ cloudTrialId, cloudProjectId }),

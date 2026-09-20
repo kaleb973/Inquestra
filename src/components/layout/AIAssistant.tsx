@@ -88,14 +88,14 @@ export function AIAssistant() {
         {chatLog.map((msg, i) => (
           <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
-              <div className="w-6 h-6 rounded bg-blue-900/40 flex items-center justify-center shrink-0 mt-0.5">
-                <Bot className="w-3.5 h-3.5 text-blue-400" />
+              <div className="w-6 h-6 rounded bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                <Bot className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
               </div>
             )}
             <div className={`text-xs px-3 py-2 rounded-lg max-w-[85%] ${
               msg.role === 'user' 
-                ? 'bg-neutral-800 text-neutral-200 rounded-tr-sm' 
-                : 'bg-blue-950/30 text-blue-100 border border-blue-900/50 rounded-tl-sm'
+                ? 'bg-primary text-primary-foreground rounded-tr-sm shadow-sm' 
+                : 'bg-card text-foreground border border-border rounded-tl-sm shadow-sm'
             }`}>
               {msg.text}
             </div>
@@ -103,10 +103,10 @@ export function AIAssistant() {
         ))}
         {isTyping && (
           <div className="flex gap-2 justify-start">
-            <div className="w-6 h-6 rounded bg-blue-900/40 flex items-center justify-center shrink-0">
-              <Bot className="w-3.5 h-3.5 text-blue-400" />
+            <div className="w-6 h-6 rounded bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <Bot className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
             </div>
-            <div className="text-xs px-3 py-2 rounded-lg bg-blue-950/30 text-blue-300 border border-blue-900/50 rounded-tl-sm flex items-center gap-1">
+            <div className="text-xs px-3 py-2 rounded-lg bg-card text-muted-foreground border border-border rounded-tl-sm flex items-center gap-1 shadow-sm">
               <span className="animate-bounce">.</span>
               <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
               <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
@@ -115,7 +115,7 @@ export function AIAssistant() {
         )}
       </div>
 
-      <div className="p-4 border-t border-border/60 bg-background/50">
+      <div className="p-4 border-t border-border bg-background/50">
         <div className="relative">
           <input
             type="text"
@@ -123,11 +123,11 @@ export function AIAssistant() {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             placeholder="Ask AI about this trial..."
-            className="w-full bg-muted border border-border rounded-lg pl-3 pr-10 py-2.5 text-xs text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-blue-800 focus:ring-1 focus:ring-blue-800 transition-all shadow-inner"
+            className="w-full bg-background border border-border rounded-lg pl-3 pr-10 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-sm"
           />
           <button 
             onClick={handleSend}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-blue-400 transition-colors p-1"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-indigo-500 transition-colors p-1"
           >
             <Send className="w-3.5 h-3.5" />
           </button>

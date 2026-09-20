@@ -37,26 +37,26 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Lab Equipment Calibration</h2>
+        <h2 className="text-lg font-semibold text-foreground">Lab Equipment Calibration</h2>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors shadow-sm font-medium"
         >
           <Plus className="w-4 h-4" /> Add Equipment
         </button>
       </div>
 
-      {error && <div className="p-3 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded">{error}</div>}
+      {error && <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
 
       {showAdd && (
-        <form onSubmit={handleAdd} className="bg-muted border border-border p-4 rounded-lg grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+        <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
           <div className="col-span-2 md:col-span-1">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Equipment Name</label>
-            <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">Serial Number</label>
-            <input name="serialNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <input name="serialNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">Last Calibrated</label>
@@ -82,12 +82,12 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
         {items.map(item => {
           const overdue = isOverdue(new Date(item.lastCalibrated), item.calibrationFreq);
           return (
-            <div key={item.id} className="bg-muted border border-border rounded-lg p-4 flex flex-col relative overflow-hidden">
+            <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex flex-col relative overflow-hidden shadow-sm">
               <div className={`absolute top-0 left-0 w-1 h-full ${item.status === 'BROKEN' ? 'bg-red-500' : overdue ? 'bg-amber-500' : 'bg-indigo-500'}`} />
               
               <div className="flex justify-between items-start mb-4 pl-2">
                 <div>
-                  <h3 className="font-semibold text-white">{item.name}</h3>
+                  <h3 className="font-semibold text-foreground">{item.name}</h3>
                   <p className="text-xs text-muted-foreground font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
                 </div>
                 {item.status === 'BROKEN' ? (
@@ -102,11 +102,11 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
               <div className="space-y-1 mb-6 pl-2">
                 <div className="text-xs text-muted-foreground flex justify-between">
                   <span>Last Calibrated:</span>
-                  <span className="text-neutral-200">{new Date(item.lastCalibrated).toLocaleDateString()}</span>
+                  <span className="text-foreground font-medium">{new Date(item.lastCalibrated).toLocaleDateString()}</span>
                 </div>
                 <div className="text-xs text-muted-foreground flex justify-between">
                   <span>Frequency:</span>
-                  <span className="text-neutral-200">Every {item.calibrationFreq} days</span>
+                  <span className="text-foreground font-medium">Every {item.calibrationFreq} days</span>
                 </div>
               </div>
 
@@ -114,7 +114,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                 <button
                   onClick={() => handleUpdateStatus(item.id, 'OPERATIONAL', true)}
                   disabled={isPending || (item.status === 'OPERATIONAL' && !overdue)}
-                  className="flex-1 px-2 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-foreground text-xs font-medium rounded transition-colors disabled:opacity-50"
+                  className="flex-1 px-2 py-1.5 bg-muted hover:bg-accent text-foreground text-xs font-medium rounded transition-colors border border-border disabled:opacity-50"
                 >
                   Log Calibration
                 </button>
@@ -123,8 +123,8 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                   disabled={isPending}
                   className={`px-3 py-1.5 text-xs font-medium rounded transition-colors border ${
                     item.status === 'BROKEN' 
-                      ? 'border-border bg-neutral-800 hover:bg-neutral-700 text-white' 
-                      : 'border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-900/50'
+                      ? 'border-border bg-muted hover:bg-accent text-foreground' 
+                      : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20'
                   }`}
                 >
                   {item.status === 'BROKEN' ? 'Fix' : 'Mark Broken'}

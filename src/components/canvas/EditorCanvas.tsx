@@ -28,6 +28,10 @@ import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
+import { SignaturePanel } from '@/components/editor/tools/SignaturePanel';
+import { updateTrialContent, sealTrial } from '@/actions/trialActions';
+import { getCurrentUserProfile } from '@/actions/adminActions';
+import type { Role } from '@prisma/client';
 
 
 // ─── Debounce utility ─────────────────────────────────────────────────────────
@@ -176,16 +180,6 @@ function buildSlashCommands(): SlashCommand[] {
           .run();
       },
     },
-    {
-      title: 'Ask AI',
-      description: 'Analyze anomalies in trial or telemetry',
-      icon: <span className="w-4 h-4 text-purple-400">✨</span>,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).run();
-        // Dispatch event to open AI Drawer
-        document.dispatchEvent(new CustomEvent('inquestra:open-ai', { detail: { query: 'Can you analyze the current telemetry buffer for anomalies?' } }));
-      },
-    },
   ];
 }
 
@@ -290,6 +284,28 @@ export function EditorCanvas() {
   const debouncedSave = useRef(
     debounce((json: Record<string, unknown>) => {
       updateContentRef.current(json);
+      const cloudTrialId = useNotebookStore.getState().cloudTrialId;
+      if (cloudTrialId) {
+        updateTrialContent(
+          cloudTrialId,
+          JSON.parse(JSON.stringify(json)),
+          useNotebookStore.getState().activeTrial.title
+        ).catch(console.error);
+      }
+    }, 500)
+  ).current;
+
+  const debouncedTitleSave = useRef(
+    debounce((newTitle: string) => {
+      const cloudTrialId = useNotebookStore.getState().cloudTrialId;
+      const currentContent = useNotebookStore.getState().activeTrial.content;
+      if (cloudTrialId) {
+        updateTrialContent(
+          cloudTrialId,
+          JSON.parse(JSON.stringify(currentContent || {})),
+          newTitle
+        ).catch(console.error);
+      }
     }, 500)
   ).current;
 
@@ -299,7 +315,13 @@ export function EditorCanvas() {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: 'Begin your research notes… Type / for commands, or drop a .csv file here.',
+        placeholder: ({ node }) => {
+          if (node.type.name === 'heading') {
+            return 'Heading…';
+          }
+          return "Type '/' for commands, reagents, charts… or start typing notes";
+        },
+        includeChildren: true,
       }),
       Table.configure({ resizable: true }),
       TableRow,
@@ -318,22 +340,11 @@ export function EditorCanvas() {
     onUpdate: ({ editor: ed }) => {
       const json = ed.getJSON() as Record<string, unknown>;
       debouncedSave(json);
-      
-      // Fire-and-forget sync to DB
-      if (useNotebookStore.getState().activeTrial.id) {
-        import('@/actions/trialActions').then(({ updateTrialContent }) => {
-          updateTrialContent(
-            useNotebookStore.getState().activeTrial.id,
-            json,
-            useNotebookStore.getState().activeTrial.title
-          ).catch(console.error);
-        });
-      }
     },
     editorProps: {
       attributes: {
         class:
-          'prose prose-invert prose-sm max-w-none focus:outline-none min-h-[calc(100vh-9rem)] px-12 py-8',
+          'prose dark:prose-invert prose-sm max-w-none focus:outline-none min-h-[calc(100vh-14rem)] px-2 py-4 text-foreground',
       },
     },
     immediatelyRender: false,
@@ -350,9 +361,8 @@ export function EditorCanvas() {
       }
     }
   }, [activeTrialId, editor]); // Depend on the reactive ID
-
-  // Lock editor if cryptographically sealed
   const checksum = useNotebookStore((s) => s.activeTrial.checksum);
+  const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   useEffect(() => {
     if (editor) {
       editor.setEditable(!checksum, false);
@@ -376,6 +386,29 @@ export function EditorCanvas() {
     };
     document.addEventListener('inquestra:request-html', handler);
     return () => document.removeEventListener('inquestra:request-html', handler);
+  }, []);
+
+  // Listen for reagent insert events (e.g. clicked from LIMS sidebar)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ name: string; unit: string; quantity?: number }>).detail;
+      if (editorRef.current) {
+        editorRef.current
+          .chain()
+          .focus('end')
+          .insertContent({
+            type: 'reagentBlock',
+            attrs: {
+              initialChemical: detail.name,
+              initialUnit: detail.unit || 'mL',
+              initialQuantity: detail.quantity ? String(detail.quantity) : '',
+            },
+          })
+          .run();
+      }
+    };
+    window.addEventListener('inquestra:insert-reagent', handler);
+    return () => window.removeEventListener('inquestra:insert-reagent', handler);
   }, []);
 
   // ─── Drag-and-drop CSV handler ─────────────────────────────────────────────
@@ -431,7 +464,21 @@ export function EditorCanvas() {
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  const formattedTime = updatedAt 
+  const [isMounted, setIsMounted] = useState(false);
+  const [userRole, setUserRole] = useState<Role | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+    getCurrentUserProfile().then((profile) => {
+      if (profile) {
+        setUserRole(profile.role);
+        setUserEmail(profile.email);
+      }
+    }).catch(console.error);
+  }, []);
+
+  const formattedTime = isMounted && updatedAt 
     ? new Date(updatedAt).toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
@@ -441,12 +488,18 @@ export function EditorCanvas() {
 
   return (
     <div
-      className={`flex-1 bg-background overflow-y-auto relative transition-colors ${
+      className={`flex-1 bg-slate-100 dark:bg-background overflow-y-auto relative transition-colors cursor-default ${
         isDragOver ? 'bg-blue-950/20' : ''
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={(e) => {
+        // Clicking outer void focuses the editor at the end
+        if (e.target === e.currentTarget && editor) {
+          editor.commands.focus('end');
+        }
+      }}
     >
       {/* Drag-over overlay */}
       {isDragOver && (
@@ -458,35 +511,69 @@ export function EditorCanvas() {
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto relative">
-        {/* Document title */}
-        <div className="px-12 pt-10 pb-3">
-          <input
-            type="text"
-            value={title}
-            disabled={!!checksum}
-            onChange={(e) => {
-              const newTitle = e.target.value;
-              updateTitle(newTitle);
-              if (activeTrialId) {
-                import('@/actions/trialActions').then(({ updateTrialContent }) => {
-                  updateTrialContent(activeTrialId, content, newTitle).catch(console.error);
-                });
-              }
-            }}
-            placeholder="Untitled Trial"
-            className="w-full bg-transparent text-3xl font-bold text-white placeholder:text-neutral-800 focus:outline-none disabled:opacity-70"
-          />
-          <p className="text-[11px] text-neutral-700 mt-1 font-mono">
-            Auto-saved · {formattedTime}
-          </p>
+      {/* Notebook Paper Sheet */}
+      <div className="max-w-4xl mx-auto my-6 px-4 md:px-8">
+        <div 
+          className="bg-card border border-border/80 rounded-2xl shadow-xl p-6 md:p-10 transition-all cursor-text relative"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && editor && !editor.isFocused) {
+              editor.commands.focus('end');
+            }
+          }}
+        >
+          {/* Subtle notebook binder margin indicator on the left */}
+          <div className="absolute top-8 bottom-8 left-3 w-[2px] bg-gradient-to-b from-indigo-500/20 via-border/30 to-transparent rounded-full pointer-events-none" />
+
+          {/* Document header / Title */}
+          <div className="pb-4 border-b border-border/60 mb-6 pl-2">
+            <input
+              type="text"
+              value={title}
+              disabled={!!checksum}
+              onChange={(e) => {
+                const newTitle = e.target.value;
+                updateTitle(newTitle);
+                debouncedTitleSave(newTitle);
+              }}
+              placeholder="Untitled Trial"
+              className="w-full bg-transparent text-3xl font-bold text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-70"
+            />
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-2 font-mono">
+              <span suppressHydrationWarning>
+                {formattedTime ? `Auto-saved · ${formattedTime}` : 'Auto-save active'}
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground">
+                Type <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-foreground font-mono text-[10px]">/</kbd> for commands, reagents, charts
+              </span>
+            </div>
+          </div>
+
+          {/* TipTap editor content */}
+          <div className="pl-2">
+            <EditorContent editor={editor} />
+          </div>
+
+          {isMounted && (
+            <SignaturePanel
+              trialId={cloudTrialId}
+              isSynced={!!cloudTrialId}
+              isSealed={!!checksum}
+              currentUserRole={userRole}
+              currentUserEmail={userEmail}
+              onRequestSeal={async () => {
+                if (cloudTrialId) {
+                  try {
+                    await sealTrial(cloudTrialId);
+                    alert('Trial successfully sealed.');
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : 'Seal failed');
+                  }
+                }
+              }}
+            />
+          )}
         </div>
-
-        {/* TipTap editor content */}
-        <EditorContent editor={editor} />
       </div>
-
-      <ReviewerOverlay />
     </div>
   );
 }

@@ -72,7 +72,9 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
       }
     }
 
-    const contentValue = payload.content as Prisma.InputJsonValue;
+    const contentValue = (typeof payload.content === 'object' && payload.content !== null)
+      ? (JSON.parse(JSON.stringify(payload.content)) as Prisma.InputJsonValue)
+      : ({} as Prisma.InputJsonValue);
 
     // Create or update
     if (payload.cloudTrialId) {

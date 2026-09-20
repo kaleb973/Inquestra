@@ -12,13 +12,6 @@ export async function signUp(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  // Security request: "make sure only I can"
-  // If a user already exists in the database, prevent new signups.
-  const totalUsers = await prisma.user.count();
-  if (totalUsers > 0) {
-    return { error: 'Registrations are currently closed. Contact your administrator.' };
-  }
-
   const supabase = await createSupabaseServerClient();
 
   const { error } = await supabase.auth.signUp({
@@ -55,49 +48,32 @@ export async function signIn(formData: FormData) {
   });
 
   if (!dbUser) {
-    // Check if this is the very first user in the entire database
-    const totalUsers = await prisma.user.count();
+    // Multi-tenant Self-Serve:
+    // When an independent user signs up without an invite, they get their OWN Lab and become the PI.
+    const orgName = data.user.email?.split('@')[0] ? `${data.user.email?.split('@')[0]}'s Lab` : 'My BME Lab';
     
-    if (totalUsers === 0) {
-      // First user becomes the ADMIN and creates the default Organization
-      await prisma.organization.create({
-        data: {
-          name: 'My BME Lab',
-          users: {
-            create: {
-              authId: data.user.id,
-              email: data.user.email!,
-              role: 'ADMIN',
-            },
-          },
-          projects: {
-            create: {
-              name: 'Default Workspace',
-              description: 'Initial project for research trials.',
-            },
-          },
-        },
-      });
-    } else {
-      // If users already exist, lock down the system (security request: "make sure only I can")
-      // We will create them as a VIEWER with no org, or just reject them.
-      // Let's create them as VIEWER in the first org found, but they won't have admin access.
-      const firstOrg = await prisma.organization.findFirst();
-      if (firstOrg) {
-        await prisma.user.create({
-          data: {
+    await prisma.organization.create({
+      data: {
+        name: orgName,
+        users: {
+          create: {
             authId: data.user.id,
             email: data.user.email!,
-            role: 'VIEWER',
-            organizationId: firstOrg.id,
+            role: 'PI',
           },
-        });
-      }
-    }
+        },
+        projects: {
+          create: {
+            name: 'Default Workspace',
+            description: 'Initial project for research trials.',
+          },
+        },
+      },
+    });
   }
 
   revalidatePath('/', 'layout');
-  redirect('/app');
+  return { success: true };
 }
 
 export async function signOut() {

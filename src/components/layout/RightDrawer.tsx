@@ -1,22 +1,89 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Tag, Plus, X, Activity, Box, FileKey } from 'lucide-react';
+import { Tag, Plus, X, Activity, Box, FileKey, History } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
+import { VersionHistory } from '@/components/editor/tools/VersionHistory';
 import type { MetadataEntry } from '@/types/inquestra';
-import { AIAssistant } from '@/components/layout/AIAssistant';
+
+import { fetchInventoryForSearch } from '@/actions/adminActions';
+import { getTrialInventory } from '@/actions/reagentActions';
 
 export function RightDrawer() {
-  const metadata = useNotebookStore((s) => s.activeTrial?.metadata || []);
+  const activeTrial = useNotebookStore((s) => s.activeTrial);
+  const metadata = activeTrial?.metadata || [];
   const addMetadata = useNotebookStore((s) => s.addMetadata);
   const removeMetadata = useNotebookStore((s) => s.removeMetadata);
-  const isSealed = !!useNotebookStore((s) => s.activeTrial?.checksum);
+  const isSealed = !!activeTrial?.checksum;
   
   const rightDrawerMode = useNotebookStore((s) => s.rightDrawerMode);
   const setRightDrawerMode = useNotebookStore((s) => s.setRightDrawerMode);
+  const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
 
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
+  
+  // Inventory state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [linkedItems, setLinkedItems] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingLinked, setIsLoadingLinked] = useState(false);
+
+  // Fetch linked items and listen for live updates from notebook deductions
+  useEffect(() => {
+    async function loadLinked() {
+      if (!activeTrial?.id || rightDrawerMode !== 'INVENTORY') return;
+      setIsLoadingLinked(true);
+      try {
+        const items = await getTrialInventory(activeTrial.id);
+        setLinkedItems(items);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoadingLinked(false);
+      }
+    }
+    loadLinked();
+
+    const handleInventoryUpdate = () => {
+      loadLinked();
+      // Also refresh stock levels in search results
+      fetchInventoryForSearch(searchQuery).then(setSearchResults).catch(console.error);
+    };
+
+    window.addEventListener('inquestra:inventory-updated', handleInventoryUpdate);
+    return () => window.removeEventListener('inquestra:inventory-updated', handleInventoryUpdate);
+  }, [activeTrial?.id, rightDrawerMode, searchQuery]);
+
+  // Debounced search (and initial load when empty)
+  useEffect(() => {
+    if (rightDrawerMode !== 'INVENTORY') return;
+    
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const results = await fetchInventoryForSearch(searchQuery);
+        setSearchResults(results);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsSearching(false);
+      }
+    }, searchQuery ? 300 : 0);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery, rightDrawerMode]);
+
+  const insertReagentIntoDoc = (item: { name: string; unit: string }) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('inquestra:insert-reagent', {
+          detail: { name: item.name, unit: item.unit },
+        })
+      );
+    }
+  };
 
   const handleAddTag = () => {
     const key = newKey.trim();
@@ -46,7 +113,7 @@ export function RightDrawer() {
           className={`flex-1 py-3 text-[11px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'TELEMETRY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
         >
           <Activity className="w-4 h-4" />
-          DAQ & AI
+          Live DAQ
         </button>
         <button 
           onClick={() => setRightDrawerMode('INVENTORY')}
@@ -62,26 +129,169 @@ export function RightDrawer() {
           <FileKey className="w-4 h-4" />
           Compliance
         </button>
+        <button 
+          onClick={() => setRightDrawerMode('HISTORY')}
+          className={`flex-1 py-3 text-[11px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'HISTORY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        >
+          <History className="w-4 h-4" />
+          History
+        </button>
       </div>
 
       <div className="flex-1 overflow-hidden flex flex-col bg-muted/10">
         {rightDrawerMode === 'TELEMETRY' && (
-          <>
+          <div className="flex-1 overflow-y-auto">
             <TelemetryMonitor />
-            <div className="p-4 overflow-y-auto flex-1 border-t border-border">
-               <AIAssistant />
-            </div>
-          </>
+          </div>
         )}
 
         {rightDrawerMode === 'INVENTORY' && (
-          <div className="p-5 overflow-y-auto flex-1">
-            <h3 className="text-sm font-semibold mb-4 text-foreground">Linked Inventory (LIMS)</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              Scan barcode or search to link an inventory lot to this experiment.
-            </p>
-            <div className="bg-muted rounded-md p-3 text-center border border-dashed border-border">
-               <span className="text-xs text-muted-foreground">No inventory linked to this trial.</span>
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <div className="p-4 border-b border-border bg-background/50">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-foreground">Lab Inventory</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">LIMS-lite</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mb-3">
+                Click any item or <span className="text-indigo-400 font-medium">Use in Note</span> to log chemical usage in your trial notebook.
+              </p>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search reagents, plasmids, lot #..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+                />
+                <div className="absolute left-3 top-2.5 text-muted-foreground">
+                  <Box className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              {/* Linked to active trial */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Linked to This Trial</span>
+                  <button
+                    onClick={() => insertReagentIntoDoc({ name: '', unit: 'mL' })}
+                    className="text-[10px] text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Log Reagent
+                  </button>
+                </div>
+                
+                {isLoadingLinked ? (
+                  <p className="text-xs text-muted-foreground italic px-1">Loading linked items...</p>
+                ) : linkedItems.length === 0 ? (
+                  <div className="bg-background/50 border border-dashed border-border rounded-lg p-4 text-center">
+                    <span className="text-xs text-muted-foreground block mb-2">No inventory logged for this trial yet.</span>
+                    <button
+                      onClick={() => insertReagentIntoDoc({ name: '', unit: 'mL' })}
+                      className="px-2.5 py-1 text-xs bg-muted hover:bg-accent border border-border rounded text-foreground transition-colors inline-flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Insert Reagent Log
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {linkedItems.map((link) => (
+                      <div key={link.id} className="bg-card border border-border rounded-lg p-3 shadow-sm">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-xs font-semibold text-foreground">{link.inventoryItem.name}</span>
+                          <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded">
+                            {link.quantityUsed} {link.unit} used
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground mt-2">
+                          <span className="uppercase tracking-wider font-mono text-[9px] bg-muted border border-border/60 px-1 py-0.5 rounded text-foreground">{link.inventoryItem.type}</span>
+                          {link.inventoryItem.location && (
+                            <span>• {link.inventoryItem.location.name}</span>
+                          )}
+                          {link.inventoryItem.lotNumber && (
+                            <span className="font-mono text-muted-foreground">• Lot: {link.inventoryItem.lotNumber}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Lab Inventory Search / Browse */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    {searchQuery ? 'Search Results' : 'Lab Inventory (Available)'}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-mono">{searchResults.length} items</span>
+                </div>
+                
+                {isSearching ? (
+                  <p className="text-xs text-muted-foreground italic px-1">Searching inventory...</p>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-4 border border-dashed border-border rounded-lg text-center">
+                    <p className="text-xs text-muted-foreground">No inventory items found matching "{searchQuery}".</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {searchResults.map((item) => (
+                      <div 
+                        key={item.id} 
+                        className="bg-card border border-border hover:border-indigo-500/50 transition-colors rounded-lg p-3 group relative shadow-sm"
+                      >
+                        <div className="flex justify-between items-start gap-2 mb-1.5">
+                          <span className="text-xs font-semibold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                            {item.name}
+                          </span>
+                          <span className={`text-[10px] font-mono shrink-0 px-1.5 py-0.5 rounded border ${
+                            item.quantity < item.thresholdValue 
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' 
+                              : 'bg-muted text-muted-foreground border-border'
+                          }`}>
+                            {item.quantity} {item.unit}
+                          </span>
+                        </div>
+                        
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground mb-3">
+                          <span className="uppercase tracking-wider font-mono text-[9px] bg-muted border border-border/60 px-1 py-0.5 rounded text-foreground">
+                            {item.type}
+                          </span>
+                          
+                          {item.location && (
+                            <span className="text-indigo-600 dark:text-indigo-400">
+                              📍 {item.location.name}
+                            </span>
+                          )}
+                          
+                          {item.expirationDate && (
+                            <span className={
+                              ((new Date(item.expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) <= 30
+                                ? 'text-red-500 font-medium'
+                                : 'text-muted-foreground'
+                            }>
+                              Exp: {new Date(item.expirationDate).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            {item.lotNumber ? `Lot #${item.lotNumber}` : 'No lot #'}
+                          </span>
+                          <button
+                            onClick={() => insertReagentIntoDoc({ name: item.name, unit: item.unit })}
+                            className="px-2 py-1 text-[10px] font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white rounded border border-indigo-500/30 transition-all flex items-center gap-1 shadow-sm"
+                          >
+                            <Plus className="w-3 h-3" /> Use in Note
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -93,7 +303,7 @@ export function RightDrawer() {
               21 CFR Part 11 Electronic Signatures.
             </p>
             {isSealed ? (
-               <div className="bg-green-500/10 text-green-500 border border-green-500/20 rounded p-3 text-xs">
+               <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded p-3 text-xs">
                  Document cryptographically sealed.
                </div>
             ) : (
@@ -157,6 +367,12 @@ export function RightDrawer() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {rightDrawerMode === 'HISTORY' && (
+          <div className="flex-1 overflow-hidden flex flex-col bg-background">
+            <VersionHistory trialId={activeTrial?.id ?? null} isSynced={!!cloudTrialId} />
           </div>
         )}
       </div>

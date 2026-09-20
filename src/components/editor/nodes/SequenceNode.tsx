@@ -48,13 +48,13 @@ function SequenceNode(props: any) {
 
   // Simple coloring for nucleotides
   const getColor = (char: string) => {
-    if (type !== 'DNA' && type !== 'RNA') return 'text-neutral-300';
+    if (type !== 'DNA' && type !== 'RNA') return 'text-foreground';
     const c = char.toUpperCase();
-    if (c === 'A') return 'text-red-400 bg-red-950/30';
-    if (c === 'T' || c === 'U') return 'text-blue-400 bg-blue-950/30';
-    if (c === 'G') return 'text-indigo-400 bg-indigo-950/30';
-    if (c === 'C') return 'text-amber-400 bg-amber-950/30';
-    return 'text-neutral-500';
+    if (c === 'A') return 'text-red-600 dark:text-red-400 bg-red-500/10 rounded-sm px-0.5';
+    if (c === 'T' || c === 'U') return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 rounded-sm px-0.5';
+    if (c === 'G') return 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 rounded-sm px-0.5';
+    if (c === 'C') return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-sm px-0.5';
+    return 'text-muted-foreground';
   };
 
   const getComplement = (char: string) => {
@@ -69,33 +69,38 @@ function SequenceNode(props: any) {
 
   return (
     <NodeViewWrapper className="my-4 group">
-      <div className="border border-border bg-neutral-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ring-1 ring-white/5 relative">
+      <div 
+        contentEditable={false}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        className="border border-border bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
+      >
         {/* Header */}
-        <div className="bg-neutral-800/80 px-4 py-2 flex items-center justify-between border-b border-border">
+        <div className="bg-muted/60 px-4 py-2 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-2">
-            <Dna className="w-4 h-4 text-purple-400" />
+            <Dna className="w-4 h-4 text-purple-500 dark:text-purple-400" />
             {isEditing ? (
               <input
                 autoFocus
-                className="bg-neutral-950 border border-border rounded px-2 py-0.5 text-sm text-white focus:outline-none focus:border-purple-500 w-48"
+                className="bg-background border border-border rounded px-2 py-0.5 text-sm text-foreground focus:outline-none focus:border-purple-500 w-48 shadow-sm"
                 value={node.attrs.name}
                 onChange={(e) => updateAttributes({ name: e.target.value })}
               />
             ) : (
               <h3 
-                className="font-medium text-neutral-200 text-sm cursor-pointer hover:text-white"
+                className="font-medium text-foreground text-sm cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 onClick={() => setIsEditing(true)}
               >
                 {node.attrs.name}
               </h3>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {isEditing && (
               <select
                 value={type}
                 onChange={(e) => updateAttributes({ type: e.target.value })}
-                className="bg-background border border-border rounded px-2 py-0.5 text-xs text-white focus:outline-none"
+                className="bg-background border border-border rounded px-2 py-0.5 text-xs text-foreground focus:outline-none shadow-sm"
               >
                 <option value="DNA">DNA</option>
                 <option value="RNA">RNA</option>
@@ -108,7 +113,7 @@ function SequenceNode(props: any) {
             {isEditing && (
               <button 
                 onClick={() => setIsEditing(false)}
-                className="text-xs bg-purple-600 hover:bg-purple-500 px-2 py-1 rounded text-white font-medium"
+                className="text-xs bg-purple-600 hover:bg-purple-500 px-2.5 py-1 rounded text-white font-medium shadow-sm transition-colors"
               >
                 Done
               </button>
@@ -118,12 +123,12 @@ function SequenceNode(props: any) {
 
         {/* Content */}
         {isEditing ? (
-          <div className="p-3">
+          <div className="p-3 bg-muted/20">
             <textarea
               value={sequence}
               onChange={(e) => updateAttributes({ sequence: e.target.value.replace(/\s/g, '').toUpperCase() })}
               placeholder="Paste sequence here..."
-              className="w-full bg-background border border-border rounded p-3 text-sm font-mono text-neutral-300 focus:outline-none focus:border-purple-500 min-h-[150px]"
+              className="w-full bg-background border border-border rounded p-3 text-sm font-mono text-foreground focus:outline-none focus:border-purple-500 min-h-[150px] shadow-sm"
             />
           </div>
         ) : (

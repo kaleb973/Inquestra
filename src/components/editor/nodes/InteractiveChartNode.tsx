@@ -128,23 +128,28 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
   const pointCount = isCsvMode ? csvChartData.length : activeData.length;
 
   return (
-    <NodeViewWrapper className="my-4" data-drag-handle>
-      <div className="bg-muted border border-border rounded-lg overflow-hidden">
+    <NodeViewWrapper className="my-4">
+      <div 
+        contentEditable={false}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-card border border-border rounded-lg overflow-hidden shadow-sm"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/80">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/40">
           <div className="flex items-center gap-2">
             {isCsvMode ? (
-              <FileSpreadsheet className="w-3.5 h-3.5 text-blue-400" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-blue-500" />
             ) : null}
             <span className="text-xs font-mono text-muted-foreground">
               {isCsvMode ? csvAttr.filename : 'Live Telemetry'}
             </span>
             {!isCsvMode && paused && (
-              <span className="text-[10px] bg-amber-900/40 text-amber-400 border border-amber-900 px-1.5 py-0.5 rounded font-mono">
+              <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono">
                 PAUSED
               </span>
             )}
-            <span className="text-[10px] text-neutral-600 font-mono">{pointCount} pts</span>
+            <span className="text-[10px] text-muted-foreground font-mono">{pointCount} pts</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Channel selector for CSV mode */}
@@ -163,7 +168,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
               <button
                 onClick={handlePauseToggle}
                 title={paused ? 'Resume stream' : 'Pause stream'}
-                className="text-muted-foreground hover:text-neutral-200 transition-colors p-1 rounded hover:bg-neutral-800"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-accent"
               >
                 {paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
               </button>
@@ -171,14 +176,14 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
             <button
               onClick={handleCsvExport}
               title="Download CSV"
-              className="text-muted-foreground hover:text-neutral-200 transition-colors p-1 rounded hover:bg-neutral-800"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-accent"
             >
               <Download className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={deleteNode}
               title="Remove chart"
-              className="text-neutral-600 hover:text-red-400 transition-colors p-1 rounded hover:bg-neutral-800"
+              className="text-muted-foreground hover:text-red-500 transition-colors p-1 rounded hover:bg-accent"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -188,7 +193,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
         {/* Chart body */}
         <div className="p-4">
           {pointCount === 0 ? (
-            <div className="h-[180px] flex items-center justify-center text-neutral-700 text-sm">
+            <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">
               {isCsvMode ? 'No numeric data in selected channel.' : 'Waiting for telemetry data…'}
             </div>
           ) : (
@@ -199,21 +204,21 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
               >
                 <defs>
                   <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={isCsvMode ? '#60a5fa' : '#34d399'} stopOpacity={0.2} />
-                    <stop offset="95%" stopColor={isCsvMode ? '#60a5fa' : '#34d399'} stopOpacity={0} />
+                    <stop offset="5%" stopColor={isCsvMode ? '#3b82f6' : '#6366f1'} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={isCsvMode ? '#3b82f6' : '#6366f1'} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f1f1f" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" vertical={false} />
                 <XAxis
                   dataKey="xKey"
                   tickFormatter={isCsvMode ? (v: number) => `${v}` : timeFormatter}
-                  tick={{ fill: '#525252', fontSize: 9 }}
+                  tick={{ fill: '#888888', fontSize: 9 }}
                   tickLine={false}
-                  axisLine={{ stroke: '#262626' }}
+                  axisLine={{ stroke: '#888888', strokeOpacity: 0.3 }}
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  tick={{ fill: '#525252', fontSize: 9 }}
+                  tick={{ fill: '#888888', fontSize: 9 }}
                   tickLine={false}
                   axisLine={false}
                   domain={['auto', 'auto']}
@@ -221,13 +226,15 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#171717',
-                    border: '1px solid #404040',
-                    borderRadius: 6,
+                    background: 'var(--card, #ffffff)',
+                    border: '1px solid var(--border, #e5e7eb)',
+                    borderRadius: 8,
                     fontSize: 11,
+                    color: 'var(--foreground, #000000)',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
-                  labelStyle={{ color: '#737373' }}
-                  itemStyle={{ color: isCsvMode ? '#60a5fa' : '#34d399' }}
+                  labelStyle={{ color: '#888888' }}
+                  itemStyle={{ color: isCsvMode ? '#3b82f6' : '#6366f1' }}
                   labelFormatter={(v: unknown) =>
                     isCsvMode ? `Row ${v}` : typeof v === 'number' ? timeFormatter(v) : String(v)
                   }
@@ -239,7 +246,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke={isCsvMode ? '#60a5fa' : '#34d399'}
+                  stroke={isCsvMode ? '#3b82f6' : '#6366f1'}
                   strokeWidth={1.5}
                   fill="url(#chartGradient)"
                   dot={false}
@@ -260,7 +267,7 @@ export const InteractiveChartExtension = Node.create({
   name: 'interactiveChart',
   group: 'block',
   atom: true,
-  draggable: true,
+  draggable: false,
 
   addAttributes() {
     return {

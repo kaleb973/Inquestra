@@ -80,13 +80,13 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
             onClick={() => selectItem(index)}
             className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
               index === selectedIndex
-                ? 'bg-neutral-800'
-                : 'hover:bg-neutral-800/50'
+                ? 'bg-accent text-accent-foreground'
+                : 'hover:bg-muted/60 text-foreground'
             }`}
           >
             <span className="text-muted-foreground shrink-0">{item.icon}</span>
             <div className="min-w-0">
-              <p className="text-sm text-foreground font-medium">{item.title}</p>
+              <p className="text-sm font-medium">{item.title}</p>
               <p className="text-[10px] text-muted-foreground truncate">{item.description}</p>
             </div>
           </button>

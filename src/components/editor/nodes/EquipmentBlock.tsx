@@ -37,14 +37,14 @@ function EquipmentNode(props: any) {
   return (
     <NodeViewWrapper className="my-4">
       <div 
-        className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-950/40 border border-indigo-900/60 rounded-md text-indigo-200 text-sm cursor-pointer hover:bg-indigo-900/60 transition-colors"
+        className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md text-indigo-700 dark:text-indigo-300 text-sm cursor-pointer hover:bg-indigo-500/20 transition-colors shadow-sm"
         onClick={() => setRightDrawerMode('INVENTORY')}
       >
-        <Microscope className="w-4 h-4 text-indigo-400" />
+        <Microscope className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
         <span className="font-medium">
           {node.attrs.equipmentName ? `Equipment: ${node.attrs.equipmentName}` : 'Link Equipment...'}
         </span>
-        <ExternalLink className="w-3 h-3 opacity-50 ml-1" />
+        <ExternalLink className="w-3 h-3 opacity-60 ml-1" />
       </div>
     </NodeViewWrapper>
   );

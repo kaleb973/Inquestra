@@ -3,7 +3,7 @@
 
 import { useState, useTransition } from 'react';
 import { updateStrictMode } from '@/actions/adminActions';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import { Loader2, ShieldCheck, ShieldAlert, Check, X, AlertTriangle, Cpu, Box, FileText, Lock } from 'lucide-react';
 import type { Organization } from '@prisma/client';
 
 export function LabSettings({ org }: { org: Organization }) {
@@ -18,38 +18,185 @@ export function LabSettings({ org }: { org: Organization }) {
     });
   };
 
+  const isStrict = !!org.strictMode;
+
   return (
-    <div className="bg-muted border border-border rounded-lg overflow-hidden max-w-2xl">
-      <div className="px-5 py-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-purple-400" />
-          Compliance & Access Settings
-        </h2>
-      </div>
-
-      <div className="p-5">
-        {error && <div className="mb-4 p-3 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded">{error}</div>}
-
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <h3 className="text-base font-medium text-neutral-200">21 CFR Part 11 Strict Mode</h3>
-            <p className="text-sm text-muted-foreground max-w-lg">
-              When enabled, Inquestra strictly enforces equipment calibration schedules. Hardware data acquisition will be blocked if any registered lab equipment is flagged as <span className="font-mono text-xs text-amber-500 bg-amber-950/30 px-1 rounded">NEEDS_CALIBRATION</span> or <span className="font-mono text-xs text-red-500 bg-red-950/30 px-1 rounded">BROKEN</span>.
+    <div className="space-y-6 max-w-4xl">
+      {/* Main Mode Card */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border/60 bg-muted/40">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              {isStrict ? (
+                <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              ) : (
+                <ShieldAlert className="w-5 h-5 text-muted-foreground" />
+              )}
+              <h2 className="text-lg font-semibold text-foreground">Compliance & Governance Policy</h2>
+              <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border font-semibold ${
+                isStrict 
+                  ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30' 
+                  : 'bg-muted text-muted-foreground border-border'
+              }`}>
+                {isStrict ? 'Strict Mode (GLP / 21 CFR Part 11)' : 'Flexible Bench Mode'}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
+              Configure how Inquestra enforces inventory overdrafts, chemical registration, and instrument calibration across your organization.
             </p>
           </div>
-          <button
-            onClick={handleToggle}
-            disabled={isPending}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
-              org.strictMode ? 'bg-purple-600' : 'bg-neutral-700'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                org.strictMode ? 'translate-x-5' : 'translate-x-0'
+
+          {/* Master Toggle */}
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-xs font-medium text-foreground">
+              {isStrict ? 'Strict Enforcement Active' : 'Flexible Discovery Active'}
+            </span>
+            <button
+              onClick={handleToggle}
+              disabled={isPending}
+              aria-label="Toggle Strict Compliance Mode"
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
+                isStrict ? 'bg-indigo-600' : 'bg-muted-foreground/30'
               }`}
-            />
-          </button>
+            >
+              {isPending ? (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                </span>
+              ) : (
+                <span
+                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    isStrict ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="m-5 p-3 bg-red-950/50 border border-red-900 text-red-400 text-xs rounded">
+            {error}
+          </div>
+        )}
+
+        {/* Feature Comparison Matrix */}
+        <div className="p-6">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+            Side-by-Side Policy Comparison
+          </h3>
+
+          <div className="border border-border rounded-xl overflow-hidden text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-3 bg-muted/40 font-semibold border-b border-border text-foreground">
+              <div className="p-3">Function / Dimension</div>
+              <div className="p-3 border-l border-border bg-muted/20">Flexible Mode (Off)</div>
+              <div className="p-3 border-l border-border bg-indigo-500/10 text-indigo-700 dark:text-indigo-200">Strict Compliance Mode (On)</div>
+            </div>
+
+            {/* Row 1: Inventory Overdraft */}
+            <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border/50 hover:bg-muted/20 transition-colors">
+              <div className="p-3 flex items-start gap-2 font-medium text-foreground">
+                <Box className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <div>
+                  <div>Inventory Overdrafts</div>
+                  <div className="text-[10px] text-muted-foreground font-normal">Deducting more quantity than is in stock</div>
+                </div>
+              </div>
+              <div className="p-3 border-l border-border/50 text-foreground">
+                <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 mb-1">
+                  <Check className="w-3.5 h-3.5" /> Allowed (Deficit Logged)
+                </span>
+                Stock balance goes negative (e.g. <code className="font-mono text-[10px] text-amber-600 dark:text-amber-300">-3 mL</code>). Scientist is not blocked at the bench; lab manager is alerted.
+              </div>
+              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
+                <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
+                  <Lock className="w-3.5 h-3.5" /> Hard Block (Zero Overdraft)
+                </span>
+                Deduction is strictly rejected. Scientists cannot consume more physical material than what has been verified and logged into inventory.
+              </div>
+            </div>
+
+            {/* Row 2: Uncataloged Materials */}
+            <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border/50 hover:bg-muted/20 transition-colors">
+              <div className="p-3 flex items-start gap-2 font-medium text-foreground">
+                <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <div>
+                  <div>Uncataloged Reagents</div>
+                  <div className="text-[10px] text-muted-foreground font-normal">Using a chemical not in database</div>
+                </div>
+              </div>
+              <div className="p-3 border-l border-border/50 text-foreground">
+                <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 mb-1">
+                  <Check className="w-3.5 h-3.5" /> Auto-Created with Warning
+                </span>
+                Item is automatically created on the fly with negative stock so experimental notes can be saved without delay.
+              </div>
+              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
+                <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
+                  <Lock className="w-3.5 h-3.5" /> Hard Block (Must be Registered)
+                </span>
+                Reagents must be pre-cataloged with lot numbers and physical storage locations before they can be used in any experiment.
+              </div>
+            </div>
+
+            {/* Row 3: Instrument Calibration */}
+            <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border/50 hover:bg-muted/20 transition-colors">
+              <div className="p-3 flex items-start gap-2 font-medium text-foreground">
+                <Cpu className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <div>
+                  <div>Hardware & Sensor DAQ</div>
+                  <div className="text-[10px] text-muted-foreground font-normal">Overdue or uncalibrated devices</div>
+                </div>
+              </div>
+              <div className="p-3 border-l border-border/50 text-foreground">
+                <span className="text-foreground font-medium flex items-center gap-1 mb-1">
+                  Warning Tags Only
+                </span>
+                Telemetry streams are tagged with calibration warnings, but live DAQ ingestion continues unimpeded.
+              </div>
+              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
+                <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
+                  <Lock className="w-3.5 h-3.5" /> DAQ Hardware Gate
+                </span>
+                Serial port data acquisition is locked if connected instrument is marked <span className="font-mono text-[9px] bg-amber-950/40 text-amber-400 px-1 py-0.5 rounded border border-amber-900/50">NEEDS_CALIBRATION</span> or <span className="font-mono text-[9px] bg-red-950/40 text-red-400 px-1 py-0.5 rounded border border-red-900/50">BROKEN</span>.
+              </div>
+            </div>
+
+            {/* Row 4: Audit Trail */}
+            <div className="grid grid-cols-1 md:grid-cols-3 hover:bg-neutral-900/20 transition-colors">
+              <div className="p-3 flex items-start gap-2 font-medium text-white">
+                <ShieldAlert className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                <div>
+                  <div>21 CFR Part 11 Audit Trail</div>
+                  <div className="text-[10px] text-muted-foreground font-normal">Regulatory inspection readiness</div>
+                </div>
+              </div>
+              <div className="p-3 border-l border-border/50 text-neutral-300">
+                Standard audit events recorded for user accountability.
+              </div>
+              <div className="p-3 border-l border-border/50 text-neutral-300 bg-indigo-950/10">
+                Full regulatory audit trail with cryptographic trial sealing and strict discrepancy prevention.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Practical Guidance Box */}
+      <div className="p-5 bg-background/50 border border-border rounded-xl space-y-3">
+        <h4 className="text-xs font-semibold text-white flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-400" />
+          Which mode should my lab use?
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground leading-relaxed">
+          <div className="p-3 bg-muted/30 border border-border/50 rounded-lg">
+            <span className="text-white font-medium block mb-1">Choose Flexible Mode if:</span>
+            You are an early-stage research lab, university group, or discovery incubator where moving fast at the bench is prioritized and lab members frequently introduce novel chemicals before logging them in digital inventory.
+          </div>
+          <div className="p-3 bg-indigo-950/20 border border-indigo-900/30 rounded-lg">
+            <span className="text-indigo-300 font-medium block mb-1">Choose Strict Mode if:</span>
+            You are operating in regulated biopharma, clinical trials, GMP/GLP manufacturing, or pre-clinical safety studies where FDA 21 CFR Part 11 requires immutable material verification and zero unverified chemical usage.
+          </div>
         </div>
       </div>
     </div>

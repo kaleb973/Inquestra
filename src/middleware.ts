@@ -4,8 +4,45 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { checkRateLimit, getClientIp, type RateLimitResult } from '@/lib/rateLimit';
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const clientIp = getClientIp(request.headers);
+
+  // 1. Rate Limiting Protection
+  let rateLimitResult: RateLimitResult = { success: true, limit: 180, remaining: 180, reset: 0 };
+
+  if (pathname.startsWith('/app/login') || pathname.startsWith('/app/signup')) {
+    // High-security window for authentication (brute-force defense): 12 attempts per minute
+    rateLimitResult = checkRateLimit(`auth:${clientIp}`, 12, 60_000);
+  } else if (pathname.startsWith('/api')) {
+    // API endpoints: 60 requests per minute
+    rateLimitResult = checkRateLimit(`api:${clientIp}`, 60, 60_000);
+  } else if (pathname.startsWith('/app')) {
+    // General workspace navigation: 180 requests per minute
+    rateLimitResult = checkRateLimit(`app:${clientIp}`, 180, 60_000);
+  }
+
+  if (!rateLimitResult.success) {
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Too many requests.',
+        message: `Rate limit exceeded. Please wait ${rateLimitResult.retryAfterSeconds} seconds before trying again.`,
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimitResult.retryAfterSeconds || 60),
+          'X-RateLimit-Limit': String(rateLimitResult.limit),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(rateLimitResult.reset),
+        },
+      }
+    );
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -34,8 +71,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
-
   // Subpath routing (everything under /app is the workspace)
   const isAppProtectedRoute =
     pathname.startsWith('/app/admin') ||
@@ -57,6 +92,12 @@ export async function middleware(request: NextRequest) {
     homeUrl.pathname = '/app';
     return NextResponse.redirect(homeUrl);
   }
+
+  // 2. Attach Enterprise Security Headers (Defense in Depth)
+  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff');
+  supabaseResponse.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block');
+  supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   return supabaseResponse;
 }
