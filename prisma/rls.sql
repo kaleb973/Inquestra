@@ -4,7 +4,42 @@
 -- Safe to execute idempotently in the Supabase SQL Editor.
 
 -- ==============================================================================
--- 1. ENABLE ROW-LEVEL SECURITY ON ALL APPLICATION TABLES
+-- 1. CLEANUP ORPHAN / INSECURE FUNCTIONS
+-- ==============================================================================
+
+-- Revoke public execution from rls_auto_enable if it exists in public
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname = 'public' AND p.proname = 'rls_auto_enable') THEN
+    REVOKE EXECUTE ON FUNCTION public.rls_auto_enable() FROM anon, authenticated, public;
+  END IF;
+END $$;
+
+-- ==============================================================================
+-- 2. PRIVATE SCHEMA & TENANT ISOLATION HELPER
+-- ==============================================================================
+
+-- Moving helper to a private schema prevents it from being exposed on PostgREST /rest/v1/rpc
+CREATE SCHEMA IF NOT EXISTS internal;
+GRANT USAGE ON SCHEMA internal TO authenticated, anon;
+
+CREATE OR REPLACE FUNCTION internal.current_user_org_id()
+RETURNS TEXT
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT "organizationId" FROM "User" WHERE "authId" = (select auth.uid())::text LIMIT 1;
+$$;
+
+GRANT EXECUTE ON FUNCTION internal.current_user_org_id() TO authenticated, anon;
+
+-- Remove legacy public function to clear Supabase security linter warnings
+DROP FUNCTION IF EXISTS public.current_user_org_id() CASCADE;
+
+-- ==============================================================================
+-- 3. ENABLE ROW-LEVEL SECURITY ON ALL APPLICATION TABLES
 -- ==============================================================================
 
 ALTER TABLE "Organization" ENABLE ROW LEVEL SECURITY;
@@ -13,6 +48,7 @@ ALTER TABLE "Team" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "Project" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "ProtocolTemplate" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "Trial" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "TrialRevision" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "MetadataEntry" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "TelemetryStream" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "StorageLocation" ENABLE ROW LEVEL SECURITY;
@@ -24,97 +60,111 @@ ALTER TABLE "Signature" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "AuditLog" ENABLE ROW LEVEL SECURITY;
 
 -- ==============================================================================
--- 2. HELPER FUNCTION: GET CURRENT USER ORG ID
--- ==============================================================================
-
-CREATE OR REPLACE FUNCTION current_user_org_id()
-RETURNS TEXT
-SET search_path = public
-AS $$
-  SELECT "organizationId" FROM "User" WHERE "authId" = (select auth.uid())::text LIMIT 1;
-$$ LANGUAGE SQL STABLE SECURITY DEFINER;
-
--- Revoke public execution to satisfy Supabase security linter
-REVOKE EXECUTE ON FUNCTION current_user_org_id() FROM public;
-GRANT EXECUTE ON FUNCTION current_user_org_id() TO authenticated;
-
--- ==============================================================================
--- 3. ORGANIZATION POLICIES
+-- 4. ORGANIZATION POLICIES
 -- ==============================================================================
 
 DROP POLICY IF EXISTS "org_member_read" ON "Organization";
 CREATE POLICY "org_member_read" ON "Organization"
 FOR SELECT USING (
-  id = current_user_org_id()
+  id = internal.current_user_org_id()
 );
 
 -- ==============================================================================
--- 4. USER & TEAM POLICIES
+-- 5. USER & TEAM POLICIES
 -- ==============================================================================
 
 DROP POLICY IF EXISTS "user_tenant_read" ON "User";
+DROP POLICY IF EXISTS "user_select_own_or_org" ON "User";
 CREATE POLICY "user_tenant_read" ON "User"
 FOR SELECT USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
-
-DROP POLICY IF EXISTS "user_select_own_or_org" ON "User"; -- dropping old policy from csv
 
 DROP POLICY IF EXISTS "team_tenant_all" ON "Team";
 CREATE POLICY "team_tenant_all" ON "Team"
 FOR ALL USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 -- ==============================================================================
--- 5. PROJECT & PROTOCOL TEMPLATE POLICIES
+-- 6. PROJECT & PROTOCOL TEMPLATE POLICIES
 -- ==============================================================================
 
 DROP POLICY IF EXISTS "project_tenant_all" ON "Project";
 CREATE POLICY "project_tenant_all" ON "Project"
 FOR ALL USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 DROP POLICY IF EXISTS "protocol_tenant_all" ON "ProtocolTemplate";
 CREATE POLICY "protocol_tenant_all" ON "ProtocolTemplate"
 FOR ALL USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 -- ==============================================================================
--- 6. TRIAL & RESEARCH NOTEBOOK POLICIES
+-- 7. TRIAL & RESEARCH NOTEBOOK POLICIES (MUTUALLY EXCLUSIVE ACTIONS)
 -- ==============================================================================
 
+-- Drop all old policies to avoid multiple permissive policies on SELECT
 DROP POLICY IF EXISTS "trial_tenant_select" ON "Trial";
-DROP POLICY IF EXISTS "trial_select_tenant_isolation" ON "Trial"; -- dropping old policy from csv
+DROP POLICY IF EXISTS "trial_select_tenant_isolation" ON "Trial";
+DROP POLICY IF EXISTS "trial_author_mutation" ON "Trial";
+DROP POLICY IF EXISTS "trial_mutation_author_only" ON "Trial";
+DROP POLICY IF EXISTS "trial_author_insert" ON "Trial";
+DROP POLICY IF EXISTS "trial_author_update" ON "Trial";
+DROP POLICY IF EXISTS "trial_author_delete" ON "Trial";
 
+-- Exactly ONE policy for SELECT
 CREATE POLICY "trial_tenant_select" ON "Trial"
 FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM "Project" p
     WHERE p.id = "Trial"."projectId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
-DROP POLICY IF EXISTS "trial_author_mutation" ON "Trial";
-DROP POLICY IF EXISTS "trial_mutation_author_only" ON "Trial"; -- dropping old policy from csv
-
-CREATE POLICY "trial_author_mutation" ON "Trial"
-FOR ALL USING (
-  -- Must be from same org and authored by active user
+-- Exactly ONE policy for INSERT
+CREATE POLICY "trial_author_insert" ON "Trial"
+FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM "User" u
     WHERE u."authId" = (select auth.uid())::text
     AND u.id = "Trial"."userId"
-    AND u."organizationId" = current_user_org_id()
+    AND u."organizationId" = internal.current_user_org_id()
   )
 );
 
+-- Exactly ONE policy for UPDATE
+CREATE POLICY "trial_author_update" ON "Trial"
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM "User" u
+    WHERE u."authId" = (select auth.uid())::text
+    AND u.id = "Trial"."userId"
+    AND u."organizationId" = internal.current_user_org_id()
+  )
+);
+
+-- Exactly ONE policy for DELETE
+CREATE POLICY "trial_author_delete" ON "Trial"
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM "User" u
+    WHERE u."authId" = (select auth.uid())::text
+    AND u.id = "Trial"."userId"
+    AND u."organizationId" = internal.current_user_org_id()
+  )
+);
+
+-- ==============================================================================
+-- 8. METADATA, TELEMETRY & REVISION POLICIES
+-- ==============================================================================
+
 DROP POLICY IF EXISTS "metadata_via_trial" ON "MetadataEntry";
-DROP POLICY IF EXISTS "metadata_select_via_trial" ON "MetadataEntry"; -- from csv
-DROP POLICY IF EXISTS "metadata_mutation_via_trial" ON "MetadataEntry"; -- from csv
+DROP POLICY IF EXISTS "metadata_select_via_trial" ON "MetadataEntry";
+DROP POLICY IF EXISTS "metadata_mutation_via_trial" ON "MetadataEntry";
 
 CREATE POLICY "metadata_via_trial" ON "MetadataEntry"
 FOR ALL USING (
@@ -122,13 +172,13 @@ FOR ALL USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "MetadataEntry"."trialId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
 DROP POLICY IF EXISTS "telemetry_via_trial" ON "TelemetryStream";
-DROP POLICY IF EXISTS "telemetry_select_via_trial" ON "TelemetryStream"; -- from csv
-DROP POLICY IF EXISTS "telemetry_mutation_via_trial" ON "TelemetryStream"; -- from csv
+DROP POLICY IF EXISTS "telemetry_select_via_trial" ON "TelemetryStream";
+DROP POLICY IF EXISTS "telemetry_mutation_via_trial" ON "TelemetryStream";
 
 CREATE POLICY "telemetry_via_trial" ON "TelemetryStream"
 FOR ALL USING (
@@ -136,7 +186,7 @@ FOR ALL USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "TelemetryStream"."trialId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
@@ -147,32 +197,30 @@ FOR ALL USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "TrialRevision"."trialId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
-ALTER TABLE "TrialRevision" ENABLE ROW LEVEL SECURITY;
-
 -- ==============================================================================
--- 7. LIMS INVENTORY, STORAGE & EQUIPMENT POLICIES
+-- 9. LIMS INVENTORY, STORAGE & EQUIPMENT POLICIES
 -- ==============================================================================
 
 DROP POLICY IF EXISTS "storage_tenant_all" ON "StorageLocation";
 CREATE POLICY "storage_tenant_all" ON "StorageLocation"
 FOR ALL USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 DROP POLICY IF EXISTS "inventory_tenant_all" ON "InventoryItem";
 CREATE POLICY "inventory_tenant_all" ON "InventoryItem"
 FOR ALL USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 DROP POLICY IF EXISTS "equipment_tenant_all" ON "Equipment";
 CREATE POLICY "equipment_tenant_all" ON "Equipment"
 FOR ALL USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 DROP POLICY IF EXISTS "trial_inventory_join_all" ON "TrialInventory";
@@ -182,7 +230,7 @@ FOR ALL USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "TrialInventory"."trialId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
@@ -193,12 +241,12 @@ FOR ALL USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "TrialEquipment"."trialId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
 -- ==============================================================================
--- 8. COMPLIANCE: IMMUTABLE AUDIT LOG & ELECTRONIC SIGNATURES (21 CFR Part 11)
+-- 10. COMPLIANCE: IMMUTABLE AUDIT LOG & ELECTRONIC SIGNATURES (21 CFR Part 11)
 -- ==============================================================================
 
 -- Electronic Signatures: Viewable by org members; Insertable by signer; NEVER updatable or deletable!
@@ -209,7 +257,7 @@ FOR SELECT USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "Signature"."trialId"
-    AND p."organizationId" = current_user_org_id()
+    AND p."organizationId" = internal.current_user_org_id()
   )
 );
 
@@ -220,23 +268,19 @@ FOR INSERT WITH CHECK (
     SELECT 1 FROM "User" u
     WHERE u.id = "Signature"."userId"
     AND u."authId" = (select auth.uid())::text
-    AND u."organizationId" = current_user_org_id()
+    AND u."organizationId" = internal.current_user_org_id()
   )
 );
-
--- Notice: NO UPDATE OR DELETE POLICY ON "Signature" — Immutable by design.
 
 -- AuditLog: Append-only ledger; Never editable or deletable!
 DROP POLICY IF EXISTS "audit_log_tenant_select" ON "AuditLog";
 CREATE POLICY "audit_log_tenant_select" ON "AuditLog"
 FOR SELECT USING (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
 
 DROP POLICY IF EXISTS "audit_log_tenant_insert" ON "AuditLog";
 CREATE POLICY "audit_log_tenant_insert" ON "AuditLog"
 FOR INSERT WITH CHECK (
-  "organizationId" = current_user_org_id()
+  "organizationId" = internal.current_user_org_id()
 );
-
--- Notice: NO UPDATE OR DELETE POLICY ON "AuditLog" — Immutable by design.
