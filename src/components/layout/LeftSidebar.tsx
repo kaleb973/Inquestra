@@ -3,6 +3,7 @@
 // Left panel: dynamic project switcher, trial list, hardware controls.
 
 import { useEffect, useState, useTransition, useCallback } from 'react';
+import Link from 'next/link';
 import {
   FlaskConical,
   ChevronDown,
@@ -505,13 +506,13 @@ export function LeftSidebar() {
 
           {/* Lab & Settings link */}
           <div className="mt-8 border-t border-border/60 pt-4">
-            <a
+            <Link
               href="/app/admin"
               className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
             >
               <Settings2 className="w-3.5 h-3.5 shrink-0" />
               Lab &amp; Settings
-            </a>
+            </Link>
           </div>
         </div>
 

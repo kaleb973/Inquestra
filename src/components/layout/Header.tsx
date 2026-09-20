@@ -63,6 +63,18 @@ export function Header() {
   const [syncError, setSyncError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isExporting, setIsExporting] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      await supabase.auth.signOut();
+      window.location.href = '/app/login';
+    } catch {
+      await signOut();
+    }
+  };
 
   // Monitor Supabase Auth state client-side
   useEffect(() => {
@@ -351,15 +363,18 @@ export function Header() {
               </Link>
             )}
 
-            <form action={signOut}>
-              <button
-                type="submit"
-                title="Sign out"
-                className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-muted border border-transparent hover:border-border rounded transition-colors"
-              >
+            <button
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              title="Sign out"
+              className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-muted border border-transparent hover:border-border rounded transition-colors disabled:opacity-50"
+            >
+              {isSigningOut ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+              ) : (
                 <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </form>
+              )}
+            </button>
           </div>
         ) : (
           <Link

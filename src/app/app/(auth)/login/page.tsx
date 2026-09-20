@@ -10,10 +10,11 @@ import type { SignInResult } from '@/actions/authActions';
 import { ShieldCheck, Smartphone, Fingerprint, Loader2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
-type LoginStep = 'password' | 'mfa' | 'redirecting';
+type LoginStep = 'email' | 'authenticate' | 'mfa' | 'redirecting';
 
 export default function LoginPage() {
-  const [step, setStep] = useState<LoginStep>('password');
+  const [step, setStep] = useState<LoginStep>('email');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isPasskeyPending, setIsPasskeyPending] = useState(false);
@@ -23,19 +24,35 @@ export default function LoginPage() {
   const [factorId, setFactorId] = useState('');
   const [otp, setOtp] = useState('');
   const otpRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus OTP input when entering MFA step
+  // Focus appropriate inputs when step changes
   useEffect(() => {
-    if (step === 'mfa') {
+    if (step === 'authenticate') {
+      setTimeout(() => passwordInputRef.current?.focus(), 50);
+    } else if (step === 'mfa') {
       setTimeout(() => otpRef.current?.focus(), 50);
     }
   }, [step]);
 
-  // ── Step 1: Password ──────────────────────────────────────────────
+  // ── Step 1: Email ─────────────────────────────────────────────────
+  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    setStep('authenticate');
+  };
+
+  // ── Step 2: Password ──────────────────────────────────────────────
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     const formData = new FormData(e.currentTarget);
+    formData.set('email', email.trim());
 
     startTransition(async () => {
       try {
@@ -74,7 +91,7 @@ export default function LoginPage() {
     }
   };
 
-  // ── Step 2: TOTP Challenge ────────────────────────────────────────
+  // ── Step 3: TOTP Challenge ────────────────────────────────────────
   const handleMfaSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -114,35 +131,13 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* ── Password Step ── */}
-          {step === 'password' && (
+          {/* ── Step 1: Email ── */}
+          {step === 'email' && (
             <>
               <h1 className="text-white text-xl font-semibold mb-1">Sign in</h1>
-              <p className="text-muted-foreground text-sm mb-6">Access your research workspace.</p>
+              <p className="text-muted-foreground text-sm mb-6">Enter your lab email to continue.</p>
 
-              <div className="space-y-4 mb-6">
-                <button
-                  type="button"
-                  onClick={handlePasskeySignIn}
-                  disabled={isPending || isPasskeyPending}
-                  className="w-full flex items-center justify-center gap-2 bg-background border border-border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed text-foreground text-sm font-medium py-2.5 rounded-lg transition-colors"
-                >
-                  {isPasskeyPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                  ) : (
-                    <Fingerprint className="w-4 h-4 text-indigo-400" />
-                  )}
-                  {isPasskeyPending ? 'Awaiting passkey…' : 'Sign in with Passkey'}
-                </button>
-
-                <div className="flex items-center gap-3">
-                  <div className="h-px bg-border flex-1" />
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">Or</span>
-                  <div className="h-px bg-border flex-1" />
-                </div>
-              </div>
-
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
                     Email address
@@ -152,18 +147,99 @@ export default function LoginPage() {
                     name="email"
                     type="email"
                     required
-                    autoComplete="email"
-                    disabled={isPending || isPasskeyPending}
+                    autoFocus
+                    autoComplete="username webauthn"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isPending}
                     className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="researcher@university.edu"
                   />
                 </div>
 
+                {error && (
+                  <p className="text-red-400 text-xs bg-red-950/40 border border-red-900 rounded px-3 py-2">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={!email.trim()}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                >
+                  Continue →
+                </button>
+              </form>
+
+              <div className="mt-6 space-y-2 text-center">
+                <p className="text-xs text-neutral-600">
+                  Don&apos;t have an account?{' '}
+                  <Link href="/app/signup" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                    Create one
+                  </Link>
+                </p>
+                <p className="text-xs text-neutral-700">
+                  Have an invite link?{' '}
+                  <Link href="/app/join" className="text-indigo-500 hover:text-indigo-400 transition-colors">
+                    Join your lab →
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* ── Step 2: Authenticate (Passkey or Password) ── */}
+          {step === 'authenticate' && (
+            <>
+              <div className="flex items-center justify-between mb-5 pb-3 border-b border-border/70">
+                <div className="min-w-0 pr-2">
+                  <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Signing in as</p>
+                  <p className="text-sm font-medium text-white truncate">{email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setStep('email');
+                  }}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors shrink-0 font-medium"
+                >
+                  Change
+                </button>
+              </div>
+
+              {/* Passkey option */}
+              <div className="space-y-4 mb-6">
+                <button
+                  type="button"
+                  onClick={handlePasskeySignIn}
+                  disabled={isPending || isPasskeyPending}
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/40 hover:border-indigo-500/60 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-300 hover:text-indigo-200 text-sm font-medium py-2.5 rounded-lg transition-colors"
+                >
+                  {isPasskeyPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                  ) : (
+                    <Fingerprint className="w-4 h-4 text-indigo-400" />
+                  )}
+                  {isPasskeyPending ? 'Awaiting passkey…' : 'Sign in with Passkey'}
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">Or enter password</span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+              </div>
+
+              {/* Password form */}
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
                     Password
                   </label>
                   <input
+                    ref={passwordInputRef}
                     id="password"
                     name="password"
                     type="password"
@@ -186,23 +262,21 @@ export default function LoginPage() {
                   disabled={isPending || isPasskeyPending}
                   className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
                 >
-                  {isPending ? 'Signing in…' : 'Sign in'}
+                  {isPending ? 'Signing in…' : 'Sign in with Password'}
                 </button>
               </form>
 
-              <div className="mt-6 space-y-2 text-center">
-                <p className="text-xs text-neutral-600">
-                  Don&apos;t have an account?{' '}
-                  <Link href="/app/signup" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                    Create one
-                  </Link>
-                </p>
-                <p className="text-xs text-neutral-700">
-                  Have an invite link?{' '}
-                  <Link href="/app/join" className="text-indigo-500 hover:text-indigo-400 transition-colors">
-                    Join your lab →
-                  </Link>
-                </p>
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setStep('email');
+                  }}
+                  className="text-xs text-muted-foreground hover:text-white transition-colors"
+                >
+                  ← Back to email
+                </button>
               </div>
             </>
           )}
@@ -260,7 +334,7 @@ export default function LoginPage() {
               </form>
 
               <button
-                onClick={() => { setStep('password'); setError(null); setOtp(''); }}
+                onClick={() => { setStep('authenticate'); setError(null); setOtp(''); }}
                 className="mt-4 w-full text-xs text-neutral-600 hover:text-neutral-400 transition-colors text-center"
               >
                 ← Back to sign in

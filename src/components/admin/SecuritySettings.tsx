@@ -80,27 +80,29 @@ export function SecuritySettings() {
 
   useEffect(() => {
     (async () => {
-      // Fetch MFA
-      const { data, error } = await supabase.auth.mfa.listFactors();
+      // Concurrently fetch TOTP factors and passkeys
+      const [mfaRes] = await Promise.all([
+        supabase.auth.mfa.listFactors(),
+        fetchPasskeys(),
+      ]);
+
+      const { data, error } = mfaRes;
       if (!error && data) {
         const verified = data.totp.find((f) => f.factor_type === 'totp');
         if (verified) {
           setActiveFactor(verified as Factor);
           setMfaState('active');
         } else {
-          for (const f of data.all) {
-            if (f.factor_type === 'totp' && f.status === 'unverified') {
-              await supabase.auth.mfa.unenroll({ factorId: f.id });
-            }
-          }
           setMfaState('inactive');
+          // Clean up dangling unverified factors in background without blocking UI
+          const unverified = data.all.filter((f) => f.factor_type === 'totp' && f.status === 'unverified');
+          if (unverified.length > 0) {
+            Promise.allSettled(unverified.map((f) => supabase.auth.mfa.unenroll({ factorId: f.id }))).catch(() => {});
+          }
         }
       } else {
         setMfaState('inactive');
       }
-
-      // Fetch Passkeys
-      await fetchPasskeys();
     })();
   }, []);
 
