@@ -121,7 +121,7 @@ export default function SignUpPage() {
               {/* Password */}
               <div>
                 <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Password <span className="text-neutral-700">(min. 8 characters)</span>
+                  Password <span className="text-neutral-500">(min. 8 chars, uppercase, lowercase &amp; number)</span>
                 </label>
                 <div className="relative">
                   <input

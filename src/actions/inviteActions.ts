@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { generateInviteToken, verifyInviteToken } from '@/lib/inviteToken';
+import { formatAuthError } from '@/actions/authActions';
 import type { Role } from '@prisma/client';
 import DOMPurify from 'isomorphic-dompurify';
 
@@ -105,7 +106,7 @@ export async function acceptInvite(
   });
 
   if (error || !data.user) {
-    return { success: false, error: error?.message ?? 'Sign-up failed.' };
+    return { success: false, error: formatAuthError(error?.message ?? 'Sign-up failed.') };
   }
 
   // Create Prisma user record immediately with the designated org and role

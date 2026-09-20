@@ -304,7 +304,7 @@ function JoinPageContent() {
 
             <div>
               <label className="block text-xs font-medium text-foreground mb-1.5">
-                Password
+                Password <span className="text-muted-foreground font-normal">(min. 8 chars, uppercase, lowercase &amp; number)</span>
               </label>
               <div className="relative">
                 <input
