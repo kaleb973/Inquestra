@@ -14,14 +14,14 @@ export async function middleware(request: NextRequest) {
   let rateLimitResult: RateLimitResult = { success: true, limit: 180, remaining: 180, reset: 0 };
 
   if (pathname.startsWith('/app/login') || pathname.startsWith('/app/signup')) {
-    // High-security window for authentication (brute-force defense): 12 attempts per minute
-    rateLimitResult = checkRateLimit(`auth:${clientIp}`, 12, 60_000);
+    // High-security window for authentication (brute-force defense): 60 attempts per minute
+    rateLimitResult = checkRateLimit(`auth:${clientIp}`, 60, 60_000);
   } else if (pathname.startsWith('/api')) {
-    // API endpoints: 60 requests per minute
-    rateLimitResult = checkRateLimit(`api:${clientIp}`, 60, 60_000);
+    // API endpoints: 120 requests per minute
+    rateLimitResult = checkRateLimit(`api:${clientIp}`, 120, 60_000);
   } else if (pathname.startsWith('/app')) {
-    // General workspace navigation: 180 requests per minute
-    rateLimitResult = checkRateLimit(`app:${clientIp}`, 180, 60_000);
+    // General workspace navigation: 300 requests per minute
+    rateLimitResult = checkRateLimit(`app:${clientIp}`, 300, 60_000);
   }
 
   if (!rateLimitResult.success) {
