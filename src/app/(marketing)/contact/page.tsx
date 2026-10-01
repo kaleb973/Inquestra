@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Logo } from '@/components/ui/Logo';
-import { Mail, Shield, Check, Copy, ExternalLink, ArrowLeft, Headphones } from 'lucide-react';
+import { Mail, Shield, Check, Copy, ExternalLink, Headphones } from 'lucide-react';
 
 export default function ContactPage() {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -19,36 +18,9 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 font-sans">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <Logo className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-              <span className="font-semibold text-base tracking-tight text-foreground">Inquestra</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Home
-              </Link>
-              <Link
-                href="/app"
-                className="text-xs font-medium bg-foreground text-background hover:bg-foreground/90 px-3.5 py-1.5 rounded transition-colors"
-              >
-                Open Workspace
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+    <div className="pt-28 pb-20">
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-3">
@@ -187,18 +159,6 @@ export default function ContactPage() {
           </p>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="py-8 border-t border-border text-center text-xs text-muted-foreground">
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-2">
-          <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-          <span>•</span>
-          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-          <span>•</span>
-          <Link href="/app/login" className="hover:text-foreground transition-colors">Researcher Login</Link>
-        </div>
-        <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved.</p>
-      </footer>
     </div>
   );
 }

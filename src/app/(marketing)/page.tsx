@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, Cpu, ShieldCheck, Database, Terminal, FileCode2, Lock, Activity, Check } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -25,59 +24,14 @@ export default function MarketingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 font-sans">
+    <div className="font-sans">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <Logo className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-              <span className="font-semibold text-base tracking-tight text-foreground">Inquestra</span>
-            </Link>
-
-            <div className="hidden md:flex items-center gap-8 text-xs font-medium text-muted-foreground">
-              <a href="#instrumentation" className="hover:text-foreground transition-colors">
-                Hardware DAQ
-              </a>
-              <a href="#provenance" className="hover:text-foreground transition-colors">
-                Cryptographic Provenance
-              </a>
-              <a href="#architecture" className="hover:text-foreground transition-colors">
-                Architecture
-              </a>
-              <Link href="/app/billing" className="hover:text-foreground transition-colors">
-                Pricing
-              </Link>
-              <Link href="/contact" className="hover:text-foreground transition-colors">
-                Contact
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Link
-                href="/app/login"
-                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
-              >
-                Log In
-              </Link>
-              <Link
-                href="/app"
-                className="text-xs font-medium bg-foreground text-background hover:bg-foreground/90 px-3.5 py-2 rounded transition-colors"
-              >
-                Open Workspace
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 border-b border-border">
+      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           
           <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-6">
@@ -102,12 +56,13 @@ export default function MarketingPage() {
               Open Research Workspace
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <a
-              href="#architecture"
+            <Link
+              href="/architecture"
               className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
             >
               View System Architecture
-            </a>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
 
           {/* Institutional Deployment Banner */}
@@ -243,10 +198,19 @@ export default function MarketingPage() {
                   Browser-Native Web Serial
                 </h3>
               </div>
-              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed">
-                Connect microcontroller hardware directly from Chromium-based browsers. Inquestra
-                ingests high-speed continuous byte streams from ESP32, Arduino, Teensy, and custom UART devices
-                without intermediate Python scripts, terminal listeners, or virtual COM bridges.
+              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed space-y-3">
+                <p>
+                  Connect microcontroller hardware directly from Chromium-based browsers. Inquestra
+                  ingests high-speed continuous byte streams from ESP32, Arduino, Teensy, and custom UART devices
+                  without intermediate Python scripts, terminal listeners, or virtual COM bridges.
+                </p>
+                <Link
+                  href="/hardware"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+                >
+                  Explore Hardware DAQ &amp; Microcontroller Specs
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
               <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
                 <div className="text-muted-foreground">// Direct Serial Configuration</div>
@@ -264,10 +228,19 @@ export default function MarketingPage() {
                   Cryptographic Immutability
                 </h3>
               </div>
-              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed">
-                Research falsification often occurs in the gap between data collection and report drafting.
-                Inquestra seals every trial with a deterministic SHA-256 hash. Once locked by the Principal Investigator,
-                the trial record, associated sensor packets, and audit ledger cannot be modified silently.
+              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed space-y-3">
+                <p>
+                  Research falsification often occurs in the gap between data collection and report drafting.
+                  Inquestra seals every trial with a deterministic SHA-256 hash. Once locked by the Principal Investigator,
+                  the trial record, associated sensor packets, and audit ledger cannot be modified silently.
+                </p>
+                <Link
+                  href="/provenance"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+                >
+                  Read 21 CFR Part 11 Regulatory Matrix
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
               <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
                 <div className="text-muted-foreground">// Immutable Audit Ledger</div>
@@ -281,15 +254,24 @@ export default function MarketingPage() {
             {/* Capability 03 */}
             <div className="grid md:grid-cols-12 gap-8 items-start border-t border-border pt-10">
               <div className="md:col-span-3">
-                <span className="text-xs font-mono text-muted-foreground">03 / LAB LOGISTICS</span>
+                <span className="text-xs font-mono text-muted-foreground">03 / ARCHITECTURE &amp; LIMS</span>
                 <h3 className="text-lg font-semibold text-foreground mt-2">
-                  Integrated LIMS &amp; Inventory
+                  Integrated Pipeline &amp; Inventory
                 </h3>
               </div>
-              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed">
-                Track chemical lots, plasmids, primers, and antibodies directly inside your experimental protocol.
-                Using notebook slash commands, researchers deduct reagent volumes in real-time, automatically warning
-                lab administrators when safety thresholds are breached.
+              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed space-y-3">
+                <p>
+                  Track chemical lots, plasmids, primers, and antibodies directly inside your experimental protocol.
+                  Using notebook slash commands, researchers deduct reagent volumes in real-time, automatically warning
+                  lab administrators when safety thresholds are breached.
+                </p>
+                <Link
+                  href="/architecture"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+                >
+                  Inspect Full Pipeline Architecture
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
               <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
                 <div className="text-muted-foreground">// Reagent Tracking Slash Command</div>
@@ -414,43 +396,6 @@ export default function MarketingPage() {
           </div>
         </div>
       </section>
-
-      {/* Institutional Footer */}
-      <footer className="py-12 bg-background text-xs text-muted-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-border pb-8">
-            <div className="flex items-center gap-2.5">
-              <Logo className="w-5 h-5 text-foreground" />
-              <span className="font-semibold text-sm text-foreground tracking-tight">Inquestra</span>
-              <span className="text-border">|</span>
-              <span>Biomedical Engineering DAQ &amp; ERN</span>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <Link href="/terms" className="hover:text-foreground transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/privacy" className="hover:text-foreground transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/contact" className="hover:text-foreground transition-colors">
-                Contact &amp; Support
-              </Link>
-              <Link href="/app/billing" className="hover:text-foreground transition-colors">
-                Subscription Tiers
-              </Link>
-              <Link href="/demo" className="hover:text-foreground transition-colors">
-                System Demo
-              </Link>
-            </div>
-          </div>
-
-          <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-muted-foreground/80">
-            <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved. Cryptographic provenance for scientific reproducibility.</p>
-            <p className="font-mono">Complies with 21 CFR Part 11 &amp; NIH FAIR Directives</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

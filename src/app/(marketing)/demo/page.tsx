@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Play, Pause, RotateCcw, Shield, Terminal, Activity, ArrowRight } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
+import { Play, Pause, RotateCcw, Shield, Terminal, Activity, ArrowRight } from "lucide-react";
 
 export default function DemoPage() {
   const [isRunning, setIsRunning] = useState(true);
@@ -41,41 +40,9 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
-      {/* Top Bar */}
-      <nav className="border-b border-border bg-background/90 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Back
-            </Link>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Logo className="w-5 h-5 text-foreground" />
-              <span className="font-semibold text-sm">Inquestra DAQ Demo</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono text-muted-foreground hidden sm:inline">
-              Interactive Test Environment
-            </span>
-            <Link
-              href="/app"
-              className="text-xs font-medium bg-foreground text-background hover:bg-foreground/90 px-3.5 py-1.5 rounded transition-colors"
-            >
-              Launch Full App
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <div className="pt-28 pb-16">
       {/* Main Interactive Demo Container */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-8">
           <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
             Interactive System Preview

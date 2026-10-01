@@ -49,6 +49,14 @@ export const metadata: Metadata = {
     description:
       'Stream ESP32 and Arduino telemetry directly into cryptographically sealed lab protocols.',
   },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-icon', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   robots: {
     index: true,
     follow: true,

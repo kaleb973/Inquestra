@@ -1,0 +1,20 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'Inquestra — Biomedical DAQ & Electronic Lab Notebook',
+    short_name: 'Inquestra',
+    description: 'Hardware DAQ and FDA 21 CFR Part 11 compliant Electronic Research Notebook for Biomedical Engineering.',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#07090e',
+    theme_color: '#07090e',
+    icons: [
+      {
+        src: '/icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+      },
+    ],
+  };
+}
