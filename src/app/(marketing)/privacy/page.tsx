@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">1. Executive Overview &amp; Research Confidentiality</h2>
             <p className="mb-3">
-              Inquestra Technologies Inc. (&quot;Inquestra&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;)
+              Inquestra (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;)
               respects the confidentiality of your scientific research, intellectual property, and personal information.
               This Privacy Policy describes our practices regarding the collection, handling, and safeguarding of data
               when you use our Electronic Research Notebook (ERN) and Data Acquisition (DAQ) systems.
@@ -166,12 +166,11 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 9 */}
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">9. Corporate Contact &amp; Physical Address</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">9. Privacy Inquiries &amp; Data Protection Office</h2>
             <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1 text-xs font-mono text-gray-300">
-              <p className="font-semibold text-white text-sm font-sans mb-1">Inquestra Technologies Inc. — Data Protection Office</p>
-              <p>548 Market St, Suite 89201, San Francisco, CA 94104, USA</p>
+              <p className="font-semibold text-white text-sm font-sans mb-1">Inquestra — Data Protection &amp; Compliance</p>
               <p>Email: <a href="mailto:privacy@inquestra.org" className="text-indigo-400 underline">privacy@inquestra.org</a></p>
-              <p>Security Incidents: <a href="mailto:security@inquestra.org" className="text-indigo-400 underline">security@inquestra.org</a></p>
+              <p>Security Inquiries: <a href="mailto:security@inquestra.org" className="text-indigo-400 underline">security@inquestra.org</a></p>
             </div>
           </section>
         </div>
@@ -179,7 +178,7 @@ export default function PrivacyPolicyPage() {
 
       {/* Footer */}
       <footer className="bg-gray-950 py-8 border-t border-gray-900 text-center text-xs text-gray-500">
-        <p>&copy; {new Date().getFullYear()} Inquestra Technologies Inc. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved.</p>
       </footer>
     </div>
   );

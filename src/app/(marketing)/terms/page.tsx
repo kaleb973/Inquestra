@@ -61,7 +61,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-lg font-semibold text-white mb-3">1. Agreement to Terms &amp; Age Eligibility</h2>
             <p className="mb-3">
               These Terms of Service (&quot;Terms&quot;) constitute a legally binding agreement between you
-              (&quot;User&quot;, &quot;you&quot;, or &quot;your&quot;) and Inquestra Technologies Inc.
+              (&quot;User&quot;, &quot;you&quot;, or &quot;your&quot;) and Inquestra
               (&quot;Inquestra&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;), governing your access to and
               use of the Inquestra Data Acquisition (DAQ) and Electronic Research Notebook (ERN) platform, websites,
               APIs, and services.
@@ -160,11 +160,9 @@ export default function TermsOfServicePage() {
               <li>A statement, under penalty of perjury, that the information in the notification is accurate and that you are authorized to act on behalf of the owner.</li>
             </ol>
             <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1 text-xs font-mono text-gray-300">
-              <p className="font-semibold text-white text-sm font-sans mb-1">Designated DMCA Copyright Agent:</p>
-              <p>Inquestra Technologies Inc. — Legal &amp; DMCA Agent</p>
-              <p>548 Market St, Suite 89201, San Francisco, CA 94104, USA</p>
+              <p className="font-semibold text-white text-sm font-sans mb-1">Designated DMCA Copyright Notices:</p>
+              <p>Inquestra — Copyright &amp; Legal Notices</p>
               <p>Email: <a href="mailto:copyright@inquestra.org" className="text-indigo-400 underline">copyright@inquestra.org</a> / <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a></p>
-              <p>Phone: +1 (415) 890-5326</p>
             </div>
           </section>
 
@@ -198,7 +196,7 @@ export default function TermsOfServicePage() {
 
       {/* Footer */}
       <footer className="bg-gray-950 py-8 border-t border-gray-900 text-center text-xs text-gray-500">
-        <p>&copy; {new Date().getFullYear()} Inquestra Technologies Inc. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved.</p>
       </footer>
     </div>
   );

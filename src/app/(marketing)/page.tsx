@@ -241,7 +241,7 @@ export default function MarketingPage() {
           </div>
 
           <p className="text-xs text-gray-500 font-sans max-w-xl mx-auto leading-relaxed mt-2">
-            &copy; {new Date().getFullYear()} Inquestra Technologies Inc. All rights reserved. Electronic Research Notebook &amp; Hardware DAQ for Biomedical Engineering.
+            &copy; {new Date().getFullYear()} Inquestra. All rights reserved. Electronic Research Notebook &amp; Hardware DAQ for Biomedical Engineering.
           </p>
         </div>
       </footer>
