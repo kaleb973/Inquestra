@@ -1,6 +1,4 @@
 'use client';
-// src/app/(auth)/signup/page.tsx
-// Researcher account creation — collects name, lab type, email, password.
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
@@ -41,26 +39,26 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 font-sans">
       <div className="w-full max-w-sm">
         {/* Brand */}
-        <div className="flex items-center justify-center gap-2 mb-10">
-          <Logo className="text-indigo-400 w-6 h-6" />
-          <span className="text-white font-bold text-lg tracking-widest uppercase">
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8 group">
+          <Logo className="text-foreground group-hover:text-primary transition-colors w-6 h-6" />
+          <span className="text-foreground font-semibold text-base tracking-tight">
             Inquestra
           </span>
-        </div>
+        </Link>
 
-        <div className="bg-muted border border-border rounded-xl p-8">
-          <h1 className="text-white text-xl font-semibold mb-1">Create account</h1>
-          <p className="text-muted-foreground text-sm mb-6">
-            Set up your research lab on Inquestra.
+        <div className="bg-card border border-border rounded-lg p-6 sm:p-8 shadow-sm">
+          <h1 className="text-foreground text-xl font-semibold mb-1">Create lab account</h1>
+          <p className="text-muted-foreground text-xs mb-6">
+            Set up your research workspace on Inquestra.
           </p>
 
           {success ? (
-            <div className="text-indigo-400 text-sm bg-indigo-950/40 border border-indigo-900 rounded-lg px-4 py-4 text-center">
-              <p className="font-medium mb-1">Check your inbox</p>
-              <p className="text-indigo-500 text-xs">{success}</p>
+            <div className="text-primary text-xs bg-primary/10 border border-primary/20 rounded p-4 text-center">
+              <p className="font-semibold mb-1">Check your inbox</p>
+              <p className="text-muted-foreground leading-relaxed">{success}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,7 +74,7 @@ export default function SignUpPage() {
                   required
                   autoComplete="name"
                   disabled={isPending}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="Dr. Jane Smith"
                 />
               </div>
@@ -91,7 +89,7 @@ export default function SignUpPage() {
                   name="labType"
                   required
                   disabled={isPending}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {LAB_TYPES.map((t) => (
                     <option key={t.value} value={t.value} disabled={t.value === ''}>
@@ -104,7 +102,7 @@ export default function SignUpPage() {
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Institutional email
+                  Institutional work email
                 </label>
                 <input
                   id="email"
@@ -113,7 +111,7 @@ export default function SignUpPage() {
                   required
                   autoComplete="email"
                   disabled={isPending}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="researcher@university.edu"
                 />
               </div>
@@ -121,7 +119,7 @@ export default function SignUpPage() {
               {/* Password */}
               <div>
                 <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Password <span className="text-neutral-500">(min. 8 chars, uppercase, lowercase &amp; number)</span>
+                  Password <span className="text-muted-foreground/80">(min. 8 chars, mixed case &amp; numbers)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -132,7 +130,7 @@ export default function SignUpPage() {
                     minLength={8}
                     autoComplete="new-password"
                     disabled={isPending}
-                    className="w-full bg-background border border-border rounded-lg px-3 py-2.5 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full bg-background border border-border rounded px-3 py-2 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="••••••••"
                   />
                   <button
@@ -140,14 +138,14 @@ export default function SignUpPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
                     title={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              {/* Age Certification & Terms Agreement (COPPA / Legal Compliance) */}
+              {/* Age Certification & Terms Agreement */}
               <div className="flex items-start gap-2.5 pt-1">
                 <input
                   id="termsAccepted"
@@ -156,22 +154,22 @@ export default function SignUpPage() {
                   value="true"
                   required
                   disabled={isPending}
-                  className="mt-0.5 w-4 h-4 rounded border-border bg-background text-indigo-600 focus:ring-indigo-500/30 focus:ring-offset-0 transition-colors cursor-pointer"
+                  className="mt-0.5 w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary focus:ring-offset-0 transition-colors cursor-pointer"
                 />
                 <label htmlFor="termsAccepted" className="text-xs text-muted-foreground leading-snug cursor-pointer select-none">
                   I certify that I am at least 18 years of age and agree to the{' '}
-                  <Link href="/terms" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                  <Link href="/terms" target="_blank" className="text-primary hover:underline underline-offset-2">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                  <Link href="/privacy" target="_blank" className="text-primary hover:underline underline-offset-2">
                     Privacy Policy
                   </Link>.
                 </label>
               </div>
 
               {error && (
-                <p className="text-red-400 text-xs bg-red-950/40 border border-red-900 rounded px-3 py-2">
+                <p className="text-critical text-xs bg-critical/10 border border-critical/20 rounded px-3 py-2">
                   {error}
                 </p>
               )}
@@ -179,23 +177,32 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                className="w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold py-2.5 rounded transition-colors"
               >
-                {isPending ? 'Creating account…' : 'Create account'}
+                {isPending ? 'Creating account…' : 'Create Lab Account'}
               </button>
             </form>
           )}
 
-          <div className="mt-6 space-y-2 text-center">
-            <p className="text-xs text-neutral-600">
+          {/* Value Prop Underneath */}
+          <div className="mt-6 pt-4 border-t border-border text-center text-[11px] text-muted-foreground">
+            <span>Free open-core access</span>
+            <span className="mx-1.5">·</span>
+            <span>No credit card required</span>
+            <span className="mx-1.5">·</span>
+            <span>Export data anytime</span>
+          </div>
+
+          <div className="mt-4 space-y-1.5 text-center">
+            <p className="text-xs text-muted-foreground">
               Already have an account?{' '}
-              <Link href="/app/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+              <Link href="/app/login" className="text-primary hover:underline transition-colors font-medium">
                 Sign in
               </Link>
             </p>
-            <p className="text-xs text-neutral-700">
+            <p className="text-xs text-muted-foreground">
               Have an invite link?{' '}
-              <Link href="/app/join" className="text-indigo-500 hover:text-indigo-400 transition-colors">
+              <Link href="/app/join" className="text-primary hover:underline transition-colors font-medium">
                 Join your lab →
               </Link>
             </p>
@@ -203,12 +210,12 @@ export default function SignUpPage() {
         </div>
 
         {/* Legal Footer Links */}
-        <div className="mt-8 text-center text-xs text-neutral-600 flex items-center justify-center gap-3">
-          <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms of Service</Link>
+        <div className="mt-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-3">
+          <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
           <span>•</span>
-          <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy Policy</Link>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
           <span>•</span>
-          <Link href="/" className="hover:text-neutral-400 transition-colors">Home</Link>
+          <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
         </div>
       </div>
     </div>

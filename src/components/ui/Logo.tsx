@@ -4,6 +4,8 @@ export function Logo({ className }: { className?: string }) {
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-hidden="true"
       className={className}
     >
       <path d="M 20 50 C 20 20, 50 20, 50 50 C 50 80, 80 80, 80 50" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />

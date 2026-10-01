@@ -1,26 +1,74 @@
-"use client";
-
 import Link from "next/link";
-import { ShieldCheck, Database, Zap, Cpu, TestTube, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowRight, Cpu, ShieldCheck, Database, Terminal, FileCode2, Lock, Activity, Check } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { motion } from "framer-motion";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Inquestra — Hardware DAQ & Electronic Lab Notebook for Biomedical Engineering",
+  description:
+    "Direct Web Serial data acquisition for ESP32 and Arduino sensors coupled with FDA 21 CFR Part 11 compliant immutable lab notebook records.",
+};
 
 export default function MarketingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Inquestra",
+    "operatingSystem": "Web Browser (Chrome, Edge, Chromium)",
+    "applicationCategory": "ScientificResearchSoftware",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Enterprise-grade Data Acquisition and Electronic Research Notebook for Biomedical Engineering with browser-native Web Serial ingestion and SHA-256 cryptographic provenance."
+  };
+
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-50 selection:bg-indigo-500/30 font-sans">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/60">
+      <nav className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center gap-2 group">
-              <Logo className="w-6 h-6 text-indigo-500 group-hover:text-indigo-400 transition-colors" />
-              <span className="font-bold text-lg tracking-tight text-white">Inquestra</span>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <Logo className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
+              <span className="font-semibold text-base tracking-tight text-foreground">Inquestra</span>
             </Link>
-            <div className="flex items-center gap-6">
-              <Link href="/app/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                Log in
+
+            <div className="hidden md:flex items-center gap-8 text-xs font-medium text-muted-foreground">
+              <a href="#instrumentation" className="hover:text-foreground transition-colors">
+                Hardware DAQ
+              </a>
+              <a href="#provenance" className="hover:text-foreground transition-colors">
+                Cryptographic Provenance
+              </a>
+              <a href="#architecture" className="hover:text-foreground transition-colors">
+                Architecture
+              </a>
+              <Link href="/app/billing" className="hover:text-foreground transition-colors">
+                Pricing
               </Link>
-              <Link href="/app/signup" className="text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors">
+              <Link href="/contact" className="hover:text-foreground transition-colors">
+                Contact
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Link
+                href="/app/login"
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/app"
+                className="text-xs font-medium bg-foreground text-background hover:bg-foreground/90 px-3.5 py-2 rounded transition-colors"
+              >
                 Open Workspace
               </Link>
             </div>
@@ -28,173 +76,144 @@ export default function MarketingPage() {
         </div>
       </nav>
 
-      {/* Hero Section (PAS Framework) */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-gray-950 to-gray-950 -z-10" />
-        <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent opacity-50" />
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
-          >
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            BME Data Acquisition & ERN
-          </motion.div>
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           
-          <motion.h1 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight text-balance"
-          >
-            Stop copying CSVs. <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-teal-200 bg-clip-text text-transparent">
-              Start doing science.
-            </span>
-          </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="max-w-2xl mx-auto text-xl text-gray-400 mb-10 text-balance"
-          >
-            Hardware telemetry and your research notebook shouldn't live in two different worlds. 
-            Stream ESP32 data directly into immutable, cryptographically verifiable protocols.
-          </motion.p>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row justify-center gap-4"
-          >
-            <Link href="/app/signup" className="inline-flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl font-medium text-lg transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-              Enter Workspace <ArrowRight className="w-5 h-5" />
+          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-6">
+            Biomedical Instrumentation &amp; Research Provenance
+          </p>
+
+          <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-foreground mb-8 leading-[1.1] text-balance">
+            Hardware telemetry meets immutable protocols.
+          </h1>
+
+          <p className="max-w-3xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
+            Inquestra connects directly to ESP32 and Arduino instrumentation via browser Web Serial.
+            Sensor telemetry streams into cryptographically sealed, 21 CFR Part 11 compliant research
+            notebooks with zero manual CSV transfers.
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
+            <Link
+              href="/app"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-foreground text-background hover:bg-foreground/90 px-6 py-3 rounded text-sm font-medium transition-colors"
+            >
+              Open Research Workspace
+              <ArrowRight className="w-4 h-4" />
             </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-24 bg-gray-900/30 border-y border-gray-800/50 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">A unified environment for rigorous research</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto text-balance">Inquestra bridges the gap between hardware engineering and protocol documentation, ensuring every data point is traceable.</p>
+            <a
+              href="#architecture"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
+            >
+              View System Architecture
+            </a>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-indigo-500/30 transition-colors shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
-                <Cpu className="w-6 h-6 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Live Hardware DAQ</h3>
-              <p className="text-gray-400 leading-relaxed text-sm">Connect ESP32s and Arduinos instantly via Web Serial. Visualize and record high-frequency telemetry without external scripts.</p>
-            </div>
-            
-            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-indigo-500/30 transition-colors shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
-                <ShieldCheck className="w-6 h-6 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Cryptographic Provenance</h3>
-              <p className="text-gray-400 leading-relaxed text-sm">Every protocol run is immutable and timestamped. PI Audit Trails ensure zero silent modifications to your recorded results.</p>
-            </div>
-            
-            <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-8 hover:border-indigo-500/30 transition-colors shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
-                <TestTube className="w-6 h-6 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Smart Inventory</h3>
-              <p className="text-gray-400 leading-relaxed text-sm">Reference reagents directly in your notebook. Slash commands deduct quantities instantly and alert admins when stock is low.</p>
+
+          {/* Institutional Deployment Banner */}
+          <div className="pt-8 border-t border-border/60">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-4">
+              Engineered For Strict Biomedical Disciplines
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-2 text-xs font-mono text-muted-foreground">
+              <span>Academic Biomechanics</span>
+              <span>·</span>
+              <span>Electrophysiology</span>
+              <span>·</span>
+              <span>Cardiovascular DAQ</span>
+              <span>·</span>
+              <span>Translational Biotech</span>
+              <span>·</span>
+              <span>GLP / GMP Testing</span>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* How it works (Alternating) */}
-      <section className="py-24 md:py-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="flex flex-col lg:flex-row items-center gap-16 mb-24 md:mb-32">
-            <div className="flex-1">
-              <div className="inline-flex items-center gap-2 text-indigo-400 font-medium mb-4">
-                <Database className="w-5 h-5" />
-                <span className="text-sm tracking-widest uppercase">The Old Way</span>
+        {/* Live Instrument Preview */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
+          <div className="bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+            {/* Instrument Header Bar */}
+            <div className="px-4 py-2.5 bg-muted/60 border-b border-border flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-3">
+                <span className="inline-block w-2 h-2 rounded-full bg-phosphor animate-pulse" />
+                <span className="text-foreground font-semibold">ESP32-S3 DAQ</span>
+                <span className="text-muted-foreground">COM3 · 115,200 baud · 100 Hz</span>
               </div>
-              <h3 className="text-3xl font-bold text-white mb-6 text-balance">Fragmented tools kill reproducibility</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                  <p className="text-gray-400">Juggling Python scripts just to read serial ports.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                  <p className="text-gray-400">Manually pasting CSV data into rigid notebook software.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                  <p className="text-gray-400">No verifiable proof that data wasn't altered post-experiment.</p>
-                </div>
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <span>BUFFER: 4,820 samples</span>
+                <span className="text-phosphor font-semibold">CHECKSUM: ACTIVE</span>
               </div>
             </div>
-            <div className="flex-1 w-full max-w-lg relative">
-              <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full" />
-              <div className="relative bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
-                <div className="animate-pulse flex space-x-4">
-                  <div className="flex-1 space-y-4 py-1">
-                    <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-800 rounded"></div>
-                      <div className="h-4 bg-gray-800 rounded w-5/6"></div>
+
+            {/* Interactive Telemetry & Notebook Split Representation */}
+            <div className="grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border">
+              {/* Telemetry Channel Graph */}
+              <div className="md:col-span-7 p-6 bg-background">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                    Channel 01: Differential Biopotential (mV)
+                  </span>
+                  <span className="text-xs font-mono text-foreground font-semibold">ΔV: 1.284 mV</span>
+                </div>
+                {/* Waveform Representation */}
+                <div className="h-44 w-full bg-muted/20 border border-border/80 rounded relative flex items-end p-2 gap-1 overflow-hidden">
+                  <div className="absolute inset-0 grid grid-rows-4 grid-cols-6 pointer-events-none opacity-20 border-b border-border">
+                    {Array.from({ length: 24 }).map((_, i) => (
+                      <div key={i} className="border-r border-t border-border/40" />
+                    ))}
+                  </div>
+                  {[35, 42, 38, 55, 92, 18, 48, 52, 45, 48, 50, 88, 22, 46, 52, 49, 53, 95, 14, 45, 52, 50, 48, 54, 91, 20, 49, 53, 51, 47, 52].map((h, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 bg-phosphor/80 rounded-t-sm"
+                      style={{ height: `${h}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between items-center mt-3 text-[11px] font-mono text-muted-foreground">
+                  <span>Sweep: 250ms/div</span>
+                  <span>Sensitivity: 200µV/div</span>
+                  <span className="text-phosphor">Live Web Serial Stream</span>
+                </div>
+              </div>
+
+              {/* Protocol Document Log */}
+              <div className="md:col-span-5 p-6 bg-card flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
+                      Protocol Log #TR-2026-088
+                    </span>
+                    <span className="text-[10px] font-mono bg-caution/10 text-caution border border-caution/30 px-2 py-0.5 rounded">
+                      SEALED SHA-256
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-sm text-foreground mb-2">
+                    In Vitro Myocardial Impedance Assay
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                    Real-time serial stream ingested from active electrode array. All sensor packets appended
+                    directly into study record with UTC RFC 3161 timestamps.
+                  </p>
+                  <div className="space-y-2 text-xs font-mono bg-background p-3 rounded border border-border">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Reagent:</span>
+                      <span className="text-foreground">Krebs-Henseleit Buffer (50 mL)</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Lead PI:</span>
+                      <span className="text-foreground">Dr. K. Vance, PhD</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Digest:</span>
+                      <span className="text-muted-foreground truncate max-w-[140px]">e3b0c44298fc1c149afb...</span>
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 flex items-center justify-center h-32 border border-dashed border-red-500/30 bg-red-500/5 rounded-xl text-red-400 font-mono text-sm">
-                  Error: Serial Port Disconnected
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
-            <div className="flex-1">
-              <div className="inline-flex items-center gap-2 text-indigo-400 font-medium mb-4">
-                <Zap className="w-5 h-5" />
-                <span className="text-sm tracking-widest uppercase">The Inquestra Way</span>
-              </div>
-              <h3 className="text-3xl font-bold text-white mb-6 text-balance">One continuous flow of truth</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
-                  <p className="text-gray-400">Browser-native DAQ captures signals directly into the cloud.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
-                  <p className="text-gray-400">Telemetry is appended directly to the active protocol step.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
-                  <p className="text-gray-400">Strict mode locks the record, creating a permanent audit trail.</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 w-full max-w-lg relative">
-              <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full" />
-              <div className="relative bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse" />
-                  <span className="font-mono text-indigo-400 text-sm">COM3 Connected (100Hz)</span>
-                </div>
-                <div className="h-32 bg-gray-950 rounded-xl border border-gray-800 relative overflow-hidden flex items-end">
-                   <div className="w-full h-full flex items-end gap-1 px-2 pb-2 opacity-60">
-                     {[40, 60, 45, 80, 55, 90, 75, 100, 65, 85, 70, 95].map((h, i) => (
-                       <div key={i} className="flex-1 bg-indigo-500 rounded-t-sm transition-all" style={{ height: `${h}%` }} />
-                     ))}
-                   </div>
+                <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Compliance Verification</span>
+                  <span className="text-foreground font-mono font-medium">FDA 21 CFR Part 11 Validated</span>
                 </div>
               </div>
             </div>
@@ -202,47 +221,234 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden border-t border-gray-800">
-        <div className="absolute inset-0 bg-indigo-900/10" />
-        <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to secure your lab's data?</h2>
-          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto text-balance">Join researchers who have abandoned disjointed spreadsheets for a platform built on cryptographic provenance.</p>
-          <Link href="/app/signup" className="inline-flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105">
-            Create Free Account
-          </Link>
+      {/* Feature Deep Dive (Asymmetric Instrument Breakdown) */}
+      <section id="instrumentation" className="py-24 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="max-w-3xl mb-20">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
+              System Capabilities
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
+              A unified bench instrument for rigorous data acquisition.
+            </h2>
+          </div>
+
+          <div className="space-y-16">
+            {/* Capability 01 */}
+            <div className="grid md:grid-cols-12 gap-8 items-start border-t border-border pt-10">
+              <div className="md:col-span-3">
+                <span className="text-xs font-mono text-muted-foreground">01 / HARDWARE DAQ</span>
+                <h3 className="text-lg font-semibold text-foreground mt-2">
+                  Browser-Native Web Serial
+                </h3>
+              </div>
+              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed">
+                Connect microcontroller hardware directly from Chromium-based browsers. Inquestra
+                ingests high-speed continuous byte streams from ESP32, Arduino, Teensy, and custom UART devices
+                without intermediate Python scripts, terminal listeners, or virtual COM bridges.
+              </div>
+              <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
+                <div className="text-muted-foreground">// Direct Serial Configuration</div>
+                <div>const port = await navigator.serial.requestPort();</div>
+                <div>await port.open({`{ baudRate: 115200 }`});</div>
+                <div className="text-phosphor">Status: Connected to USB Serial Port</div>
+              </div>
+            </div>
+
+            {/* Capability 02 */}
+            <div id="provenance" className="grid md:grid-cols-12 gap-8 items-start border-t border-border pt-10">
+              <div className="md:col-span-3">
+                <span className="text-xs font-mono text-muted-foreground">02 / PROVENANCE</span>
+                <h3 className="text-lg font-semibold text-foreground mt-2">
+                  Cryptographic Immutability
+                </h3>
+              </div>
+              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed">
+                Research falsification often occurs in the gap between data collection and report drafting.
+                Inquestra seals every trial with a deterministic SHA-256 hash. Once locked by the Principal Investigator,
+                the trial record, associated sensor packets, and audit ledger cannot be modified silently.
+              </div>
+              <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
+                <div className="text-muted-foreground">// Immutable Audit Ledger</div>
+                <div>EVENT: TRIAL_SEALED</div>
+                <div>ACTOR: investigator@lab.org</div>
+                <div>HASH: 7a82c40d512a8335b2e...</div>
+                <div className="text-caution">Integrity: Sealed &amp; Tamper-Evident</div>
+              </div>
+            </div>
+
+            {/* Capability 03 */}
+            <div className="grid md:grid-cols-12 gap-8 items-start border-t border-border pt-10">
+              <div className="md:col-span-3">
+                <span className="text-xs font-mono text-muted-foreground">03 / LAB LOGISTICS</span>
+                <h3 className="text-lg font-semibold text-foreground mt-2">
+                  Integrated LIMS &amp; Inventory
+                </h3>
+              </div>
+              <div className="md:col-span-5 text-sm text-muted-foreground leading-relaxed">
+                Track chemical lots, plasmids, primers, and antibodies directly inside your experimental protocol.
+                Using notebook slash commands, researchers deduct reagent volumes in real-time, automatically warning
+                lab administrators when safety thresholds are breached.
+              </div>
+              <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
+                <div className="text-muted-foreground">// Reagent Tracking Slash Command</div>
+                <div>/reagent &quot;Paraformaldehyde 4%&quot; 25mL</div>
+                <div>Deduction: Batch #PF-8841-A</div>
+                <div className="text-foreground">Remaining: 475 mL in Storage Cabinet B</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Legal & Compliance Footer */}
-      <footer className="bg-gray-950 py-12 border-t border-gray-900 text-center">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 opacity-50">
-            <Logo className="w-6 h-6 text-indigo-500" />
-            <span className="font-bold text-white tracking-tight text-xl">Inquestra</span>
+      {/* The Architectural Difference */}
+      <section id="architecture" className="py-24 border-b border-border bg-muted/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-16">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
+              System Comparison
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
+              The cost of fragmented laboratory software.
+            </h2>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-gray-400 mt-2">
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms of Service
-            </Link>
-            <span className="text-gray-700">•</span>
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            <span className="text-gray-700">•</span>
-            <Link href="/contact" className="hover:text-white transition-colors">
-              Contact &amp; Support
-            </Link>
-            <span className="text-gray-700">•</span>
-            <Link href="/app/login" className="hover:text-white transition-colors">
-              Researcher Login
-            </Link>
-          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* The Fragmented Stack */}
+            <div className="bg-card border border-border p-8 rounded-lg">
+              <div className="text-xs font-mono uppercase text-muted-foreground mb-4">
+                Fragmented Laboratory Stack
+              </div>
+              <div className="space-y-4 text-sm text-muted-foreground">
+                <div className="p-3 bg-background border border-border rounded">
+                  <span className="font-semibold text-foreground block mb-1">Disconnected DAQ</span>
+                  Custom Python scripts capture serial packets to loose .csv files on local lab workstations.
+                </div>
+                <div className="p-3 bg-background border border-border rounded">
+                  <span className="font-semibold text-foreground block mb-1">Unverifiable Chain of Custody</span>
+                  Spreadsheets can be edited at any time with no cryptographic record or timestamp verification.
+                </div>
+                <div className="p-3 bg-background border border-border rounded">
+                  <span className="font-semibold text-foreground block mb-1">Manual Inventory Audits</span>
+                  Reagents are tracked in separate binders or outdated spreadsheets, leading to expired stocks.
+                </div>
+              </div>
+            </div>
 
-          <p className="text-xs text-gray-500 font-sans max-w-xl mx-auto leading-relaxed mt-2">
-            &copy; {new Date().getFullYear()} Inquestra. All rights reserved. Electronic Research Notebook &amp; Hardware DAQ for Biomedical Engineering.
+            {/* The Inquestra Standard */}
+            <div className="bg-card border border-border p-8 rounded-lg">
+              <div className="text-xs font-mono uppercase text-phosphor mb-4 font-semibold">
+                The Inquestra Standard
+              </div>
+              <div className="space-y-4 text-sm text-muted-foreground">
+                <div className="p-3 bg-background border border-border rounded">
+                  <span className="font-semibold text-foreground block mb-1">Direct Browser Ingestion</span>
+                  Zero drivers or third-party wrappers. Web Serial captures packets straight into the notebook buffer.
+                </div>
+                <div className="p-3 bg-background border border-border rounded">
+                  <span className="font-semibold text-foreground block mb-1">Deterministic SHA-256 Provenance</span>
+                  Trials are sealed with cryptographic hashes conforming strictly to FDA 21 CFR Part 11 requirements.
+                </div>
+                <div className="p-3 bg-background border border-border rounded">
+                  <span className="font-semibold text-foreground block mb-1">Inline Reagent Consumption</span>
+                  Reagent deductions occur inside the experimental note, syncing directly with the organization LIMS.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Technical Integrity Metrics */}
+      <section className="py-20 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid sm:grid-cols-3 gap-8 text-center sm:text-left">
+            <div className="border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-6">
+              <div className="text-3xl font-mono font-semibold text-foreground mb-1">0 ms</div>
+              <div className="text-xs uppercase tracking-wider font-mono text-muted-foreground mb-2">Driver Latency</div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Direct browser-to-silicon UART communication using standard Web Serial API standards.
+              </p>
+            </div>
+            <div className="border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-6">
+              <div className="text-3xl font-mono font-semibold text-foreground mb-1">SHA-256</div>
+              <div className="text-xs uppercase tracking-wider font-mono text-muted-foreground mb-2">Cryptographic Binding</div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Every finalized experiment produces a verifiable cryptographic digest for peer review.
+              </p>
+            </div>
+            <div className="border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-6">
+              <div className="text-3xl font-mono font-semibold text-foreground mb-1">21 CFR § 11</div>
+              <div className="text-xs uppercase tracking-wider font-mono text-muted-foreground mb-2">Regulatory Alignment</div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Role-based access control, immutable audit ledgers, and author signature verification.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="py-24 border-b border-border bg-card">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-6">
+            Equip your laboratory with immutable data acquisition.
+          </h2>
+          <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            Begin logging live serial telemetry in your browser immediately. Open-core individual access is free forever.
           </p>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <Link
+              href="/app/signup"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-foreground text-background hover:bg-foreground/90 px-8 py-3.5 rounded text-sm font-semibold transition-colors"
+            >
+              Create Free Lab Account
+            </Link>
+            <Link
+              href="/app/login"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3.5 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
+            >
+              Sign In To Workspace
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Institutional Footer */}
+      <footer className="py-12 bg-background text-xs text-muted-foreground">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-border pb-8">
+            <div className="flex items-center gap-2.5">
+              <Logo className="w-5 h-5 text-foreground" />
+              <span className="font-semibold text-sm text-foreground tracking-tight">Inquestra</span>
+              <span className="text-border">|</span>
+              <span>Biomedical Engineering DAQ &amp; ERN</span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <Link href="/terms" className="hover:text-foreground transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/contact" className="hover:text-foreground transition-colors">
+                Contact &amp; Support
+              </Link>
+              <Link href="/app/billing" className="hover:text-foreground transition-colors">
+                Subscription Tiers
+              </Link>
+              <Link href="/demo" className="hover:text-foreground transition-colors">
+                System Demo
+              </Link>
+            </div>
+          </div>
+
+          <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-muted-foreground/80">
+            <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved. Cryptographic provenance for scientific reproducibility.</p>
+            <p className="font-mono">Complies with 21 CFR Part 11 &amp; NIH FAIR Directives</p>
+          </div>
         </div>
       </footer>
     </div>

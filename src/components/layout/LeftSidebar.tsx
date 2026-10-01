@@ -25,10 +25,10 @@ import type { ProjectWithLead } from '@/actions/projectActions';
 import type { Role } from '@prisma/client';
 
 const STATUS_DOT: Record<TrialStatus, string> = {
-  DRAFT: 'bg-neutral-500',
-  ACTIVE: 'bg-indigo-400',
-  COMPLETED: 'bg-blue-400',
-  FAILED: 'bg-red-400',
+  DRAFT: 'bg-muted-foreground',
+  ACTIVE: 'bg-primary',
+  COMPLETED: 'bg-phosphor',
+  FAILED: 'bg-critical',
 };
 
 const ROLE_LABEL: Record<Role, string> = {
@@ -193,14 +193,14 @@ function NewProjectModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              className="flex-1 px-3 py-2 rounded text-xs font-medium border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="flex-1 px-3 py-2 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               {isPending ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -344,8 +344,8 @@ export function LeftSidebar() {
               className="flex-1 flex items-center justify-between px-2 py-1.5 rounded hover:bg-accent transition-all duration-200 group min-w-0"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <div className="bg-indigo-500/20 p-1 rounded shrink-0">
-                  <FlaskConical className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <div className="bg-muted p-1 rounded shrink-0">
+                  <FlaskConical className="w-3.5 h-3.5 text-foreground shrink-0" />
                 </div>
                 <div className="min-w-0">
                   <span className="text-sm text-foreground font-medium truncate tracking-tight block">
@@ -393,18 +393,18 @@ export function LeftSidebar() {
                     setProjectMenuOpen(false);
                   }}
                   className={`w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-accent transition-colors border-b border-border/30 last:border-0 ${
-                    p.id === activeProjectId ? 'bg-indigo-500/5' : ''
+                    p.id === activeProjectId ? 'bg-muted/60' : ''
                   }`}
                 >
                   <FolderOpen
                     className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                      p.id === activeProjectId ? 'text-indigo-400' : 'text-muted-foreground'
+                      p.id === activeProjectId ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   />
                   <div className="min-w-0 flex-1">
                     <span
                       className={`text-xs font-medium block truncate ${
-                        p.id === activeProjectId ? 'text-indigo-600 dark:text-indigo-400' : 'text-foreground'
+                        p.id === activeProjectId ? 'text-primary font-semibold' : 'text-foreground'
                       }`}
                     >
                       {p.name}

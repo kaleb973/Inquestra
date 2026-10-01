@@ -30,10 +30,10 @@ import type { User } from '@supabase/supabase-js';
 import type { Role } from '@prisma/client';
 
 const STATUS_COLORS: Record<TrialStatus, string> = {
-  DRAFT: 'bg-muted-foreground/30 text-muted-foreground border-border',
-  ACTIVE: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
-  COMPLETED: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30',
-  FAILED: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30',
+  DRAFT: 'bg-muted text-muted-foreground border-border',
+  ACTIVE: 'bg-primary/10 text-primary border-primary/30',
+  COMPLETED: 'bg-phosphor/10 text-phosphor border-phosphor/30',
+  FAILED: 'bg-critical/10 text-critical border-critical/30',
 };
 
 export function Header() {
@@ -203,10 +203,10 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-border/80 bg-background/80 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm">
+    <header className="h-14 border-b border-border bg-background/90 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm font-sans">
       {/* Brand */}
-      <Link href="/app" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-        <Logo className="text-indigo-600 dark:text-indigo-400 w-5 h-5" />
+      <Link href="/app" className="flex items-center gap-2.5 shrink-0 group">
+        <Logo className="text-foreground group-hover:text-primary transition-colors w-5 h-5" />
         <span className="text-foreground font-semibold text-sm tracking-tight">
           Inquestra
         </span>
@@ -225,14 +225,14 @@ export function Header() {
       <div className="ml-auto flex items-center gap-3">
         {/* Sync error */}
         {syncError && (
-          <span className="text-[11px] text-red-400 font-mono max-w-[200px] truncate" title={syncError}>
+          <span className="text-[11px] text-critical font-mono max-w-[200px] truncate" title={syncError}>
             {syncError}
           </span>
         )}
 
         {/* Cloud sync badge when synced */}
         {isSynced && !syncError && (
-          <span className="flex items-center gap-1.5 text-xs text-blue-400 font-mono">
+          <span className="flex items-center gap-1.5 text-xs text-primary font-mono">
             <Cloud className="w-3.5 h-3.5" />
             Saved
           </span>
@@ -242,7 +242,7 @@ export function Header() {
         <button
           onClick={() => window.print()}
           title="Print to PDF"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted text-foreground hover:bg-accent transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors"
         >
           <Printer className="w-3.5 h-3.5" />
           Print
@@ -253,7 +253,7 @@ export function Header() {
           onClick={handleExport}
           disabled={isExporting}
           title="Export trial as ZIP (Markdown + JSON + CSV)"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isExporting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -265,16 +265,16 @@ export function Header() {
 
         {/* Seal Trial Button or Lock Badge */}
         {activeTrial.checksum ? (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution font-mono" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
             <Shield className="w-3.5 h-3.5" />
-            Cryptographically Sealed
+            Sealed SHA-256
           </div>
         ) : (
           <button
             onClick={handleSealTrial}
             disabled={isSealing}
             title="Seal trial (Irreversible)"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution hover:bg-caution/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSealing ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -292,8 +292,8 @@ export function Header() {
           title={isSynced ? 'Push latest trial changes to cloud' : 'Save trial to cloud'}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
             isSynced
-              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20'
-              : 'bg-muted text-foreground border-border hover:bg-accent'
+              ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
+              : 'bg-muted/60 text-foreground border-border hover:bg-accent'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isPending ? (
@@ -308,9 +308,9 @@ export function Header() {
 
         {/* Live connection badge */}
         {hardwareStatus.isConnected && (
-          <span className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded">
-            <Circle className="w-2 h-2 fill-indigo-500 animate-pulse" />
-            {hardwareStatus.portName || 'USB Connected'}
+          <span className="flex items-center gap-1.5 text-xs text-phosphor font-mono bg-phosphor/10 border border-phosphor/30 px-2.5 py-1 rounded">
+            <Circle className="w-2 h-2 fill-phosphor animate-pulse" />
+            {hardwareStatus.portName || 'USB Serial'}
             &nbsp;·&nbsp;
             {hardwareStatus.packetsPerSec} Hz
           </span>
@@ -379,7 +379,7 @@ export function Header() {
         ) : (
           <Link
             href="/app/login"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors"
           >
             <LogIn className="w-3.5 h-3.5" />
             Sign In

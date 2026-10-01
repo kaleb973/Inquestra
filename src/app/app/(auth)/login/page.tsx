@@ -150,28 +150,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 font-sans">
       <div className="w-full max-w-sm">
         {/* Brand */}
-        <div className="flex items-center justify-center gap-2 mb-10">
-          <Logo className="text-indigo-400 w-6 h-6" />
-          <span className="text-white font-bold text-lg tracking-widest uppercase">Inquestra</span>
-        </div>
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8 group">
+          <Logo className="text-foreground group-hover:text-primary transition-colors w-6 h-6" />
+          <span className="text-foreground font-semibold text-base tracking-tight">Inquestra</span>
+        </Link>
 
-        <div className="bg-muted border border-border rounded-xl p-8">
+        <div className="bg-card border border-border rounded-lg p-6 sm:p-8 shadow-sm">
           {/* ── Redirecting ── */}
           {step === 'redirecting' && (
             <div className="text-center py-4 space-y-2">
-              <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-indigo-400 text-sm font-medium">Redirecting to your workspace…</p>
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-primary text-sm font-medium">Redirecting to your workspace…</p>
             </div>
           )}
 
           {/* ── Step 1: Email ── */}
           {step === 'email' && (
             <>
-              <h1 className="text-white text-xl font-semibold mb-1">Sign in</h1>
-              <p className="text-muted-foreground text-sm mb-6">Enter your lab email to continue.</p>
+              <h1 className="text-foreground text-xl font-semibold mb-1">Sign in</h1>
+              <p className="text-muted-foreground text-xs mb-6">Enter your lab email to continue.</p>
 
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div>
@@ -188,13 +188,13 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isPending}
-                    className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="researcher@university.edu"
                   />
                 </div>
 
                 {error && (
-                  <p className="text-red-400 text-xs bg-red-950/40 border border-red-900 rounded px-3 py-2">
+                  <p className="text-critical text-xs bg-critical/10 border border-critical/20 rounded px-3 py-2">
                     {error}
                   </p>
                 )}
@@ -202,22 +202,22 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={!email.trim()}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold py-2.5 rounded transition-colors"
                 >
                   Continue →
                 </button>
               </form>
 
               <div className="mt-6 space-y-2 text-center">
-                <p className="text-xs text-neutral-600">
+                <p className="text-xs text-muted-foreground">
                   Don&apos;t have an account?{' '}
-                  <Link href="/app/signup" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                  <Link href="/app/signup" className="text-primary hover:underline transition-colors font-medium">
                     Create one
                   </Link>
                 </p>
-                <p className="text-xs text-neutral-700">
+                <p className="text-xs text-muted-foreground">
                   Have an invite link?{' '}
-                  <Link href="/app/join" className="text-indigo-500 hover:text-indigo-400 transition-colors">
+                  <Link href="/app/join" className="text-primary hover:underline transition-colors font-medium">
                     Join your lab →
                   </Link>
                 </p>
@@ -228,10 +228,10 @@ export default function LoginPage() {
           {/* ── Step 2: Authenticate (Passkey or Password) ── */}
           {step === 'authenticate' && (
             <>
-              <div className="flex items-center justify-between mb-5 pb-3 border-b border-border/70">
+              <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
                 <div className="min-w-0 pr-2">
                   <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Signing in as</p>
-                  <p className="text-sm font-medium text-white truncate">{email}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{email}</p>
                 </div>
                 <button
                   type="button"
@@ -239,7 +239,7 @@ export default function LoginPage() {
                     setError(null);
                     setStep('email');
                   }}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors shrink-0 font-medium"
+                  className="text-xs text-primary hover:underline transition-colors shrink-0 font-medium"
                 >
                   Change
                 </button>
@@ -251,19 +251,19 @@ export default function LoginPage() {
                   type="button"
                   onClick={handlePasskeySignIn}
                   disabled={isPending || isPasskeyPending}
-                  className="w-full flex items-center justify-center gap-2 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/40 hover:border-indigo-500/60 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-300 hover:text-indigo-200 text-sm font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-muted hover:bg-accent border border-border disabled:opacity-50 disabled:cursor-not-allowed text-foreground text-xs font-semibold py-2.5 rounded transition-colors"
                 >
                   {isPasskeyPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
                   ) : (
-                    <Fingerprint className="w-4 h-4 text-indigo-400" />
+                    <Fingerprint className="w-4 h-4 text-primary" />
                   )}
                   {isPasskeyPending ? 'Awaiting passkey…' : 'Sign in with Passkey'}
                 </button>
 
                 <div className="flex items-center gap-3">
                   <div className="h-px bg-border flex-1" />
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">Or enter password</span>
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">Or password</span>
                   <div className="h-px bg-border flex-1" />
                 </div>
               </div>
@@ -283,7 +283,7 @@ export default function LoginPage() {
                       required
                       autoComplete="current-password"
                       disabled={isPending || isPasskeyPending}
-                      className="w-full bg-background border border-border rounded-lg px-3 py-2.5 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full bg-background border border-border rounded px-3 py-2 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                       placeholder="••••••••"
                     />
                     <button
@@ -291,7 +291,7 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       tabIndex={-1}
                       title={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -299,7 +299,7 @@ export default function LoginPage() {
                 </div>
 
                 {error && (
-                  <p className="text-red-400 text-xs bg-red-950/40 border border-red-900 rounded px-3 py-2">
+                  <p className="text-critical text-xs bg-critical/10 border border-critical/20 rounded px-3 py-2">
                     {error}
                   </p>
                 )}
@@ -307,7 +307,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isPending || isPasskeyPending}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold py-2.5 rounded transition-colors"
                 >
                   {isPending ? 'Signing in…' : 'Sign in with Password'}
                 </button>
@@ -320,7 +320,7 @@ export default function LoginPage() {
                     setError(null);
                     setStep('email');
                   }}
-                  className="text-xs text-muted-foreground hover:text-white transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   ← Back to email
                 </button>
@@ -332,11 +332,11 @@ export default function LoginPage() {
           {step === 'mfa' && (
             <>
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                <div className="p-2 rounded bg-primary/10 border border-primary/20 shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-white text-base font-semibold">Two-factor authentication</h1>
+                  <h1 className="text-foreground text-base font-semibold">Two-factor authentication</h1>
                   <p className="text-muted-foreground text-xs mt-0.5">Enter the code from your authenticator app.</p>
                 </div>
               </div>
@@ -361,12 +361,12 @@ export default function LoginPage() {
                       setError(null);
                     }}
                     placeholder="000000"
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-2xl font-mono text-center text-white tracking-[0.4em] placeholder:text-neutral-700 placeholder:text-base placeholder:tracking-normal focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full bg-background border border-border rounded px-4 py-3 text-2xl font-mono text-center text-foreground tracking-[0.4em] placeholder:text-muted-foreground placeholder:text-base placeholder:tracking-normal focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 {error && (
-                  <p className="text-red-400 text-xs bg-red-950/40 border border-red-900 rounded px-3 py-2">
+                  <p className="text-critical text-xs bg-critical/10 border border-critical/20 rounded px-3 py-2">
                     {error}
                   </p>
                 )}
@@ -374,7 +374,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isPending || otp.length !== 6}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold py-2.5 rounded transition-colors"
                 >
                   {isPending ? 'Verifying…' : 'Verify & Sign in'}
                 </button>
@@ -382,7 +382,7 @@ export default function LoginPage() {
 
               <button
                 onClick={() => { setStep('authenticate'); setError(null); setOtp(''); }}
-                className="mt-4 w-full text-xs text-neutral-600 hover:text-neutral-400 transition-colors text-center"
+                className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground transition-colors text-center"
               >
                 ← Back to sign in
               </button>
