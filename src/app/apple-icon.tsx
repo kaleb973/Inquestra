@@ -16,8 +16,7 @@ export default function AppleIcon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#0c1017',
-          borderRadius: 36,
+          background: '#07090e',
         }}
       >
         <svg
