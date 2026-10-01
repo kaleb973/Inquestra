@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm your Inquestra account</title>
+</head>
+<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#09090b;padding:48px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0">
+
+          <!-- Logo / Brand -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-right:8px;vertical-align:middle;">
+                    <!-- Inline SVG logo mark -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 3H4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h1l3 5v6a1 1 0 0 0 2 0v-6l3-5h1a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-5Z" stroke="#818cf8" stroke-width="1.5" stroke-linejoin="round"/>
+                      <path d="M17 8h3" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+                      <path d="M17 12h2" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">INQUESTRA</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background-color:#18181b;border:1px solid #27272a;border-radius:12px;padding:40px 36px;">
+
+              <!-- Heading -->
+              <p style="margin:0 0 8px 0;font-size:22px;font-weight:600;color:#ffffff;line-height:1.3;">
+                Confirm your email address
+              </p>
+              <p style="margin:0 0 28px 0;font-size:14px;color:#71717a;line-height:1.6;">
+                You're one step away from accessing your research workspace. Click the button below to verify your email and activate your Inquestra account.
+              </p>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="display:inline-block;background-color:#4f46e5;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 28px;border-radius:8px;letter-spacing:0.01em;">
+                      Confirm Email Address
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Fallback link -->
+              <p style="margin:0 0 4px 0;font-size:12px;color:#52525b;">
+                If the button doesn't work, copy and paste this link into your browser:
+              </p>
+              <p style="margin:0 0 28px 0;font-size:11px;color:#4f46e5;word-break:break-all;">
+                {{ .ConfirmationURL }}
+              </p>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid #27272a;margin:0 0 24px 0;" />
+
+              <!-- Security note -->
+              <p style="margin:0;font-size:12px;color:#52525b;line-height:1.6;">
+                This link expires in <strong style="color:#71717a;">24 hours</strong>. If you did not create an Inquestra account, you can safely ignore this email — no action is needed.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer (CAN-SPAM Compliant) -->
+          <tr>
+            <td align="center" style="padding-top:24px;">
+              <p style="margin:0 0 8px 0;font-size:11px;color:#71717a;line-height:1.6;">
+                Inquestra Technologies Inc. · Enterprise BME Research Platform<br />
+                548 Market St, Suite 89201, San Francisco, CA 94104, USA
+              </p>
+              <p style="margin:0;font-size:10px;color:#52525b;line-height:1.6;">
+                This is an automated transactional security message regarding your account registration. You are receiving this because an account was initiated at inquestra.org.<br />
+                <a href="https://inquestra.org/terms" style="color:#71717a;text-decoration:underline;">Terms of Service</a> · 
+                <a href="https://inquestra.org/privacy" style="color:#71717a;text-decoration:underline;">Privacy Policy</a> · 
+                <a href="mailto:support@inquestra.org" style="color:#71717a;text-decoration:underline;">Support</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

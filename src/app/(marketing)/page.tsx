@@ -214,15 +214,34 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* Legal & Simple Footer (No fake links) */}
+      {/* Legal & Compliance Footer */}
       <footer className="bg-gray-950 py-12 border-t border-gray-900 text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4">
           <div className="flex items-center gap-2 opacity-50">
             <Logo className="w-6 h-6 text-indigo-500" />
             <span className="font-bold text-white tracking-tight text-xl">Inquestra</span>
           </div>
-          <p className="text-sm text-gray-600 font-mono mt-4">
-            &copy; {new Date().getFullYear()} Inquestra. All rights reserved.
+
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-gray-400 mt-2">
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+            <span className="text-gray-700">•</span>
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-gray-700">•</span>
+            <Link href="/app/login" className="hover:text-white transition-colors">
+              Researcher Login
+            </Link>
+            <span className="text-gray-700">•</span>
+            <a href="mailto:legal@inquestra.org" className="hover:text-white transition-colors">
+              Legal &amp; DMCA
+            </a>
+          </div>
+
+          <p className="text-xs text-gray-500 font-sans max-w-xl mx-auto leading-relaxed mt-2">
+            &copy; {new Date().getFullYear()} Inquestra Technologies Inc. All rights reserved. Electronic Research Notebook &amp; Hardware DAQ for Biomedical Engineering.
           </p>
         </div>
       </footer>

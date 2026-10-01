@@ -20,6 +20,7 @@ import {
 import { Pause, Play, Download, X, FileSpreadsheet } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import type { TelemetrySample } from '@/types/inquestra';
+import { formatSafeCsvCell } from '@/lib/csvParser';
 
 const CHART_WINDOW = 100;
 const POLL_INTERVAL_MS = 100;
@@ -92,10 +93,10 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
 
   const handleCsvExport = useCallback(() => {
     if (isCsvMode) {
-      // Export the imported CSV back out
-      const header = csvAttr.headers.join(',');
+      // Export the imported CSV back out safely
+      const header = csvAttr.headers.map((h) => formatSafeCsvCell(h)).join(',');
       const rows = csvAttr.rows.map((row) =>
-        csvAttr.headers.map((h) => row[h] ?? '').join(',')
+        csvAttr.headers.map((h) => formatSafeCsvCell(row[h] ?? '')).join(',')
       );
       const csv = [header, ...rows].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -109,7 +110,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes }: NodeViewProps) {
       const liveData = paused ? frozenData : displayData;
       const header = 'xKey,value';
       const rows = liveData.map(
-        (p) => `${p.xKey},${p.value}`
+        (p) => `${formatSafeCsvCell(p.xKey)},${formatSafeCsvCell(p.value)}`
       );
       const csv = [header, ...rows].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

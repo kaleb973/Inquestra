@@ -43,11 +43,47 @@ export function parseCSVStream(file: File): Promise<ParsedTelemetryData> {
   });
 }
 
+/**
+ * Sanitizes a CSV cell value against CSV / Formula Injection (CWE-1236).
+ * Prepends a single quote if the string begins with formula trigger characters (=, +, -, @, \t, \r).
+ */
+export function sanitizeCsvCell(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  const str = String(value);
+  // OWASP CSV Formula Injection defense: escape leading formula triggers
+  if (/^[=\+\-@\t\r]/.test(str)) {
+    return `'${str}`;
+  }
+  return str;
+}
+
+/**
+ * Formats and escapes a cell value safely for standard CSV rows (neutralizing formula injection).
+ */
+export function formatSafeCsvCell(value: unknown): string {
+  const sanitized = sanitizeCsvCell(value);
+  if (/[",\n\r]/.test(sanitized)) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+  return sanitized;
+}
+
 /** Convert parsed rows back to a CSV blob for re-upload or download */
 export function serializeToCSV(data: ParsedTelemetryData): Blob {
+  const safeHeaders = data.headers.map((h) => sanitizeCsvCell(h));
+  const safeRows = data.rows.map((row) => {
+    const safeRow: Record<string, number | string> = {};
+    for (const h of data.headers) {
+      const val = row[h];
+      const safeKey = sanitizeCsvCell(h);
+      safeRow[safeKey] = typeof val === 'string' ? sanitizeCsvCell(val) : (val ?? '');
+    }
+    return safeRow;
+  });
+
   const csv = Papa.unparse({
-    fields: data.headers,
-    data: data.rows,
+    fields: safeHeaders,
+    data: safeRows,
   });
   return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 }

@@ -389,6 +389,15 @@ export default function LoginPage() {
             </>
           )}
         </div>
+
+        {/* Legal Footer Links */}
+        <div className="mt-8 text-center text-xs text-neutral-600 flex items-center justify-center gap-3">
+          <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms of Service</Link>
+          <span>•</span>
+          <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy Policy</Link>
+          <span>•</span>
+          <Link href="/" className="hover:text-neutral-400 transition-colors">Home</Link>
+        </div>
       </div>
     </div>
   );

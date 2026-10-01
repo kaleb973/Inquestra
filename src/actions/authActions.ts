@@ -19,6 +19,13 @@ export async function signUp(formData: FormData) {
   const password = formData.get('password') as string;
   const fullName = (formData.get('fullName') as string | null)?.trim() ?? '';
   const labType = (formData.get('labType') as string | null)?.trim() ?? '';
+  const termsAccepted = formData.get('termsAccepted');
+
+  if (!termsAccepted || (termsAccepted !== 'true' && termsAccepted !== 'on')) {
+    return {
+      error: 'You must certify that you are at least 18 years of age and agree to the Terms of Service and Privacy Policy.',
+    };
+  }
 
   try {
     const supabase = await createSupabaseServerClient();

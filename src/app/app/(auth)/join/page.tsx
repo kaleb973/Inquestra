@@ -63,6 +63,7 @@ function JoinPageContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -123,9 +124,13 @@ function JoinPageContent() {
       setFormError('Email and password are required.');
       return;
     }
+    if (!termsAccepted) {
+      setFormError('You must certify that you are at least 18 years of age and agree to the Terms of Service and Privacy Policy.');
+      return;
+    }
     setFormError(null);
     startTransition(async () => {
-      const result = await acceptInvite(currentToken, email, password);
+      const result = await acceptInvite(currentToken, email, password, termsAccepted);
       if (!result.success) {
         setFormError(result.error);
         return;
@@ -324,6 +329,28 @@ function JoinPageContent() {
               </div>
             </div>
 
+            {/* Age Certification & Terms Agreement (COPPA / Legal Compliance) */}
+            <div className="flex items-start gap-2.5 pt-1">
+              <input
+                id="termsAcceptedJoin"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                disabled={isPending}
+                className="mt-0.5 w-4 h-4 rounded border-border bg-background text-indigo-600 focus:ring-indigo-500/30 focus:ring-offset-0 transition-colors cursor-pointer"
+              />
+              <label htmlFor="termsAcceptedJoin" className="text-xs text-muted-foreground leading-snug cursor-pointer select-none">
+                I certify that I am at least 18 years of age and agree to the{' '}
+                <Link href="/terms" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                  Privacy Policy
+                </Link>.
+              </label>
+            </div>
+
             {formError && (
               <p className="text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                 {formError}
@@ -348,6 +375,15 @@ function JoinPageContent() {
             By joining, you acknowledge your compliance duties under{' '}
             <span className="font-medium">FDA 21 CFR Part 11</span> and your lab&apos;s GLP policies.
           </p>
+        </div>
+
+        {/* Legal Footer Links */}
+        <div className="text-center text-xs text-neutral-600 flex items-center justify-center gap-3">
+          <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms of Service</Link>
+          <span>•</span>
+          <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy Policy</Link>
+          <span>•</span>
+          <Link href="/" className="hover:text-neutral-400 transition-colors">Home</Link>
         </div>
       </div>
     </div>

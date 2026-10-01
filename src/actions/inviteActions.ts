@@ -74,8 +74,16 @@ export async function previewInvite(token: string): Promise<{
 export async function acceptInvite(
   token: string,
   email: string,
-  password: string
+  password: string,
+  termsAccepted?: boolean
 ): Promise<{ success: true } | { success: false; error: string }> {
+  if (!termsAccepted) {
+    return {
+      success: false,
+      error: 'You must certify that you are at least 18 years of age and agree to the Terms of Service and Privacy Policy.',
+    };
+  }
+
   const cleanEmail = DOMPurify.sanitize(email.trim().toLowerCase());
 
   let orgId: string;

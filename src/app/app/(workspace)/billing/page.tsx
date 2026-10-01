@@ -113,9 +113,28 @@ export default function BillingPage() {
           ))}
         </div>
 
-        <p className="text-center text-xs text-neutral-700">
+        {/* California ARL & Subscription Policy Notice */}
+        <div className="max-w-2xl mx-auto mb-8 p-4 rounded-xl bg-card border border-border/70 text-center space-y-1.5">
+          <p className="text-xs font-medium text-foreground">
+            Automatic Renewal &amp; Online Cancellation Commitment
+          </p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            All future commercial plans bill automatically at the specified billing cycle (monthly or annually) until cancelled.
+            You will be able to cancel online at any time directly from this dashboard with zero cancellation fees.
+            Review our{' '}
+            <Link href="/terms" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline">
+              Privacy Policy
+            </Link>.
+          </p>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground">
           Questions?{' '}
-          <Link href="/" className="text-indigo-600 hover:text-indigo-500 transition-colors">
+          <Link href="/app" className="text-indigo-400 hover:text-indigo-300 transition-colors">
             Return to workspace
           </Link>
         </p>

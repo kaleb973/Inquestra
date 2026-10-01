@@ -147,6 +147,29 @@ export default function SignUpPage() {
                 </div>
               </div>
 
+              {/* Age Certification & Terms Agreement (COPPA / Legal Compliance) */}
+              <div className="flex items-start gap-2.5 pt-1">
+                <input
+                  id="termsAccepted"
+                  name="termsAccepted"
+                  type="checkbox"
+                  value="true"
+                  required
+                  disabled={isPending}
+                  className="mt-0.5 w-4 h-4 rounded border-border bg-background text-indigo-600 focus:ring-indigo-500/30 focus:ring-offset-0 transition-colors cursor-pointer"
+                />
+                <label htmlFor="termsAccepted" className="text-xs text-muted-foreground leading-snug cursor-pointer select-none">
+                  I certify that I am at least 18 years of age and agree to the{' '}
+                  <Link href="/terms" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+                    Privacy Policy
+                  </Link>.
+                </label>
+              </div>
+
               {error && (
                 <p className="text-red-400 text-xs bg-red-950/40 border border-red-900 rounded px-3 py-2">
                   {error}
@@ -177,6 +200,15 @@ export default function SignUpPage() {
               </Link>
             </p>
           </div>
+        </div>
+
+        {/* Legal Footer Links */}
+        <div className="mt-8 text-center text-xs text-neutral-600 flex items-center justify-center gap-3">
+          <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms of Service</Link>
+          <span>•</span>
+          <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy Policy</Link>
+          <span>•</span>
+          <Link href="/" className="hover:text-neutral-400 transition-colors">Home</Link>
         </div>
       </div>
     </div>

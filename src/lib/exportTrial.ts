@@ -6,6 +6,7 @@
 
 import JSZip from 'jszip';
 import TurndownService from 'turndown';
+import { formatSafeCsvCell } from '@/lib/csvParser';
 
 interface ExportPayload {
   title: string;
@@ -58,11 +59,11 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   // ── 3. Metadata CSV ─────────────────────────────────────────────────────────
   const csvRows = [
     'key,value',
-    `title,"${payload.title}"`,
-    `status,${payload.status}`,
-    `created,${payload.createdAt}`,
-    `updated,${payload.updatedAt}`,
-    ...payload.metadata.map((m) => `${m.key},"${m.value.replace(/"/g, '""')}"`),
+    `title,${formatSafeCsvCell(payload.title)}`,
+    `status,${formatSafeCsvCell(payload.status)}`,
+    `created,${formatSafeCsvCell(payload.createdAt)}`,
+    `updated,${formatSafeCsvCell(payload.updatedAt)}`,
+    ...payload.metadata.map((m) => `${formatSafeCsvCell(m.key)},${formatSafeCsvCell(m.value)}`),
   ];
   const metadataCsv = csvRows.join('\n');
 
