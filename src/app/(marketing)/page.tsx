@@ -231,13 +231,9 @@ export default function MarketingPage() {
               Privacy Policy
             </Link>
             <span className="text-gray-700">•</span>
-            <a href="mailto:support@inquestra.org" className="hover:text-white transition-colors">
-              Support
-            </a>
-            <span className="text-gray-700">•</span>
-            <a href="mailto:legal@inquestra.org" className="hover:text-white transition-colors">
-              Legal &amp; DMCA
-            </a>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              Contact &amp; Support
+            </Link>
             <span className="text-gray-700">•</span>
             <Link href="/app/login" className="hover:text-white transition-colors">
               Researcher Login

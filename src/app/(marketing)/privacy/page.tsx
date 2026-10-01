@@ -160,17 +160,22 @@ export default function PrivacyPolicyPage() {
               pursuant to institutional compliance, NIH FAIR data directives, and FDA GLP regulatory record retention mandates.
             </p>
             <p>
-              To exercise your data privacy rights, email <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a>.
+              To exercise your data privacy rights, email <span className="text-indigo-400 select-all font-mono">legal@inquestra.org</span> or visit our <Link href="/contact" className="text-indigo-400 underline">Contact Page</Link>.
             </p>
           </section>
 
           {/* Section 9 */}
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">9. Privacy Inquiries &amp; Data Protection Office</h2>
-            <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1 text-xs font-mono text-gray-300">
+            <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1.5 text-xs font-mono text-gray-300">
               <p className="font-semibold text-white text-sm font-sans mb-1">Inquestra — Data Protection &amp; Compliance</p>
-              <p>Legal &amp; Privacy: <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a></p>
-              <p>Platform Support: <a href="mailto:support@inquestra.org" className="text-indigo-400 underline">support@inquestra.org</a></p>
+              <p>Legal &amp; Privacy: <span className="text-indigo-400 font-semibold select-all">legal@inquestra.org</span></p>
+              <p>Platform Support: <span className="text-indigo-400 font-semibold select-all">support@inquestra.org</span></p>
+              <p className="pt-1 font-sans">
+                <Link href="/contact" className="text-indigo-400 hover:text-indigo-300 underline">
+                  Visit Contact &amp; Support Page →
+                </Link>
+              </p>
             </div>
           </section>
         </div>

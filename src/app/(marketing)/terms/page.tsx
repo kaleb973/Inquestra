@@ -159,10 +159,17 @@ export default function TermsOfServicePage() {
               <li>A statement that you have a good faith belief that use of the material is not authorized by the copyright owner, its agent, or the law; and</li>
               <li>A statement, under penalty of perjury, that the information in the notification is accurate and that you are authorized to act on behalf of the owner.</li>
             </ol>
-            <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1 text-xs font-mono text-gray-300">
+            <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1.5 text-xs font-mono text-gray-300">
               <p className="font-semibold text-white text-sm font-sans mb-1">Designated DMCA Copyright Notices:</p>
               <p>Inquestra — Legal &amp; Compliance Team</p>
-              <p>Email: <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a></p>
+              <p>
+                Email: <span className="text-indigo-400 font-semibold select-all">legal@inquestra.org</span>
+              </p>
+              <p className="pt-1 font-sans">
+                <Link href="/contact" className="text-indigo-400 hover:text-indigo-300 underline">
+                  Visit Contact &amp; Inquiries Page →
+                </Link>
+              </p>
             </div>
           </section>
 
@@ -188,7 +195,8 @@ export default function TermsOfServicePage() {
             <p>
               We reserve the right to revise these Terms as regulatory standards and platform capabilities evolve. Continued use
               of the platform after an update signifies your acceptance. For legal questions or institutional master services
-              agreements (MSAs), please contact <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a>.
+              agreements (MSAs), please visit our <Link href="/contact" className="text-indigo-400 underline">Contact Page</Link> or
+              email <span className="text-indigo-400 select-all font-mono">legal@inquestra.org</span>.
             </p>
           </section>
         </div>
