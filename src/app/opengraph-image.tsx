@@ -39,22 +39,22 @@ export default function OpenGraphImage() {
           >
             <svg width="36" height="36" viewBox="0 0 100 100" fill="none">
               <path
-                d="M 22 50 C 22 22, 50 22, 50 50 C 50 78, 78 78, 78 50"
-                stroke="#00E599"
-                strokeWidth="9"
+                d="M 20 50 C 20 20, 50 20, 50 50 C 50 80, 80 80, 80 50"
+                stroke="#ffffff"
+                strokeWidth="8"
                 strokeLinecap="round"
               />
               <path
-                d="M 22 50 C 22 78, 50 78, 50 50 C 50 22, 78 22, 78 50"
-                stroke="#00E599"
-                strokeWidth="9"
+                d="M 20 50 C 20 80, 50 80, 50 50 C 50 20, 80 20, 80 50"
+                stroke="#ffffff"
+                strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray="10 10"
-                opacity="0.4"
+                opacity="0.5"
               />
-              <circle cx="22" cy="50" r="8" fill="#00E599" />
-              <circle cx="78" cy="50" r="8" fill="#00E599" />
-              <circle cx="50" cy="50" r="7" fill="#00E599" />
+              <circle cx="20" cy="50" r="8" fill="#ffffff" />
+              <circle cx="80" cy="50" r="8" fill="#ffffff" />
+              <circle cx="50" cy="50" r="6" fill="#ffffff" />
             </svg>
           </div>
           <span style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '-0.02em', color: '#f3f4f6' }}>
