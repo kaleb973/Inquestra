@@ -161,8 +161,8 @@ export default function TermsOfServicePage() {
             </ol>
             <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1 text-xs font-mono text-gray-300">
               <p className="font-semibold text-white text-sm font-sans mb-1">Designated DMCA Copyright Notices:</p>
-              <p>Inquestra — Copyright &amp; Legal Notices</p>
-              <p>Email: <a href="mailto:copyright@inquestra.org" className="text-indigo-400 underline">copyright@inquestra.org</a> / <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a></p>
+              <p>Inquestra — Legal &amp; Compliance Team</p>
+              <p>Email: <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a></p>
             </div>
           </section>
 

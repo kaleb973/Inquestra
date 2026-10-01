@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage() {
               pursuant to institutional compliance, NIH FAIR data directives, and FDA GLP regulatory record retention mandates.
             </p>
             <p>
-              To exercise your data privacy rights, email <a href="mailto:privacy@inquestra.org" className="text-indigo-400 underline">privacy@inquestra.org</a>.
+              To exercise your data privacy rights, email <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a>.
             </p>
           </section>
 
@@ -169,8 +169,8 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-lg font-semibold text-white mb-3">9. Privacy Inquiries &amp; Data Protection Office</h2>
             <div className="p-4 bg-gray-900 border border-gray-800 rounded-xl space-y-1 text-xs font-mono text-gray-300">
               <p className="font-semibold text-white text-sm font-sans mb-1">Inquestra — Data Protection &amp; Compliance</p>
-              <p>Email: <a href="mailto:privacy@inquestra.org" className="text-indigo-400 underline">privacy@inquestra.org</a></p>
-              <p>Security Inquiries: <a href="mailto:security@inquestra.org" className="text-indigo-400 underline">security@inquestra.org</a></p>
+              <p>Legal &amp; Privacy: <a href="mailto:legal@inquestra.org" className="text-indigo-400 underline">legal@inquestra.org</a></p>
+              <p>Platform Support: <a href="mailto:support@inquestra.org" className="text-indigo-400 underline">support@inquestra.org</a></p>
             </div>
           </section>
         </div>
