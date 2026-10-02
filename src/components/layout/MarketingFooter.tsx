@@ -1,7 +1,15 @@
+'use client';
+
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 
 export function MarketingFooter() {
+  const handleOpenCookieSettings = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('inquestra:open-cookie-settings'));
+    }
+  };
+
   return (
     <footer className="py-14 bg-background text-xs text-muted-foreground border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,6 +78,20 @@ export function MarketingFooter() {
               <li>
                 <Link href="/privacy" className="hover:text-foreground transition-colors">
                   Data Privacy &amp; Confidentiality
+                </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={handleOpenCookieSettings}
+                  className="hover:text-foreground transition-colors text-left"
+                >
+                  Cookie Preferences &amp; Notice
+                </button>
+              </li>
+              <li>
+                <Link href="/.well-known/security.txt" className="hover:text-foreground transition-colors">
+                  Security Disclosure (security.txt)
                 </Link>
               </li>
               <li>

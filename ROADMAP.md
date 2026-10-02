@@ -43,4 +43,17 @@ This document captures upcoming feature pillars and strategic initiatives for In
   - Authentic founder outreach campaign on `r/labrats` and academic lab networks following the non-promotional discovery playbook.
 
 ---
-*Created: September 19, 2026*
+
+## 5. Operational & Security Checkpoints
+- **Target Date**: October 15, 2026 (14-day observation window)
+- **Action Item**: Transition DMARC enforcement policy from monitoring to strict quarantine.
+  - Review Cloudflare DMARC Management dashboard for Resend and team mail volume.
+  - Verify 100% SPF/DKIM alignment and 0 legitimate false-positive rejections.
+  - In Cloudflare DNS records, update `_dmarc` TXT record value:
+    ```text
+    v=DMARC1; p=quarantine; pct=100; rua=mailto:bdce8a7102084d3293bc8f03ff81a100@dmarc-reports.cloudflare.net; aspf=r; adkim=r
+    ```
+
+---
+*Created: September 19, 2026 | Last Updated: October 1, 2026*
+

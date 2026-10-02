@@ -1,16 +1,81 @@
 // src/middleware.ts
-// Next.js Edge Middleware — refreshes Supabase session cookies on every request
-// and enforces route protection for authenticated areas.
+// Next.js Edge Middleware — refreshes Supabase session cookies on every request,
+// enforces route protection, rate limits endpoints, and injects enterprise security headers & CORS policy.
 
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { checkRateLimit, getClientIp, type RateLimitResult } from '@/lib/rateLimit';
 
+const ALLOWED_ORIGINS = new Set([
+  'https://inquestra.org',
+  'https://www.inquestra.org',
+]);
+
+if (process.env.NODE_ENV === 'development') {
+  ALLOWED_ORIGINS.add('http://localhost:3000');
+  ALLOWED_ORIGINS.add('http://127.0.0.1:3000');
+}
+
+const isDev = process.env.NODE_ENV === 'development';
+
+const CSP_HEADER = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' blob: data: https:",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.cloudflarestorage.com" +
+    (isDev ? ' ws://localhost:* http://localhost:*' : ''),
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+  "upgrade-insecure-requests",
+].join('; ');
+
+const PERMISSIONS_POLICY_HEADER =
+  'camera=(), microphone=(), geolocation=(), payment=(self), usb=(), serial=(self), display-capture=()';
+
+function applySecurityHeaders(headers: Headers) {
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('X-Frame-Options', 'SAMEORIGIN');
+  headers.set('X-XSS-Protection', '1; mode=block');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Permissions-Policy', PERMISSIONS_POLICY_HEADER);
+  headers.set('Content-Security-Policy', CSP_HEADER);
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const clientIp = getClientIp(request.headers);
 
-  // 1. Rate Limiting Protection
+  // 1. Explicit CORS Preflight Handling for API Routes
+  if (pathname.startsWith('/api')) {
+    const origin = request.headers.get('origin');
+    if (request.method === 'OPTIONS') {
+      const preflightHeaders = new Headers();
+      if (origin && ALLOWED_ORIGINS.has(origin)) {
+        preflightHeaders.set('Access-Control-Allow-Origin', origin);
+        preflightHeaders.set('Access-Control-Allow-Credentials', 'true');
+      }
+      preflightHeaders.set(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+      );
+      preflightHeaders.set(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, stripe-signature, X-Requested-With'
+      );
+      preflightHeaders.set('Access-Control-Max-Age', '86400');
+      applySecurityHeaders(preflightHeaders);
+      return new NextResponse(null, { status: 204, headers: preflightHeaders });
+    }
+  }
+
+  // 2. Rate Limiting Protection
   let rateLimitResult: RateLimitResult = { success: true, limit: 180, remaining: 180, reset: 0 };
 
   if (pathname.startsWith('/app/login') || pathname.startsWith('/app/signup')) {
@@ -25,6 +90,15 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!rateLimitResult.success) {
+    const rateLimitHeaders = new Headers({
+      'Content-Type': 'application/json',
+      'Retry-After': String(rateLimitResult.retryAfterSeconds || 60),
+      'X-RateLimit-Limit': String(rateLimitResult.limit),
+      'X-RateLimit-Remaining': '0',
+      'X-RateLimit-Reset': String(rateLimitResult.reset),
+    });
+    applySecurityHeaders(rateLimitHeaders);
+
     return new NextResponse(
       JSON.stringify({
         error: 'Too many requests.',
@@ -32,13 +106,7 @@ export async function middleware(request: NextRequest) {
       }),
       {
         status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(rateLimitResult.retryAfterSeconds || 60),
-          'X-RateLimit-Limit': String(rateLimitResult.limit),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(rateLimitResult.reset),
-        },
+        headers: rateLimitHeaders,
       }
     );
   }
@@ -93,11 +161,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(homeUrl);
   }
 
-  // 2. Attach Enterprise Security Headers (Defense in Depth)
-  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff');
-  supabaseResponse.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block');
-  supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // 3. Attach CORS Origin for API requests
+  if (pathname.startsWith('/api')) {
+    const origin = request.headers.get('origin');
+    if (origin && ALLOWED_ORIGINS.has(origin)) {
+      supabaseResponse.headers.set('Access-Control-Allow-Origin', origin);
+      supabaseResponse.headers.set('Access-Control-Allow-Credentials', 'true');
+    }
+    supabaseResponse.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+    );
+    supabaseResponse.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, stripe-signature, X-Requested-With'
+    );
+  }
+
+  // 4. Attach Enterprise Security Headers (Defense in Depth)
+  applySecurityHeaders(supabaseResponse.headers);
 
   return supabaseResponse;
 }
@@ -105,8 +187,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all paths except static assets, _next internals, and API routes
-     * that don't need session refresh.
+     * Match all paths except static assets, _next internals, and static file extensions.
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
