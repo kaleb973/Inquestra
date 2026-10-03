@@ -104,6 +104,7 @@ export function SecuritySettings() {
         setMfaState('inactive');
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Passkey Handlers ──────────────────────────────────────────────

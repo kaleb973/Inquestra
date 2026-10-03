@@ -471,6 +471,7 @@ export function EditorCanvas() {
         editor.commands.setContent(content, false);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTrialId, editor]); // Depend on the reactive ID
   const checksum = useNotebookStore((s) => s.activeTrial.checksum);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);

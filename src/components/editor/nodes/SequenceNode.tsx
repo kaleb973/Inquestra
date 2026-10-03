@@ -136,11 +136,11 @@ function SequenceNode(props: any) {
             <div className="flex flex-col gap-1 w-max">
               {/* 5' -> 3' Strand */}
               <div className="flex font-mono text-xs tracking-[0.2em]">
-                <span className="text-neutral-500 mr-4 select-none">5'</span>
+                <span className="text-neutral-500 mr-4 select-none">5&apos;</span>
                 {sequence.split('').map((char: string, i: number) => (
                   <span key={`f-${i}`} className={getColor(char)}>{char}</span>
                 ))}
-                <span className="text-neutral-500 ml-4 select-none">3'</span>
+                <span className="text-neutral-500 ml-4 select-none">3&apos;</span>
               </div>
               
               {/* Matches */}
@@ -155,12 +155,12 @@ function SequenceNode(props: any) {
               {/* 3' -> 5' Complement */}
               {type === 'DNA' && (
                 <div className="flex font-mono text-xs tracking-[0.2em]">
-                  <span className="text-neutral-500 mr-4 select-none">3'</span>
+                  <span className="text-neutral-500 mr-4 select-none">3&apos;</span>
                   {sequence.split('').map((char: string, i: number) => {
                     const comp = getComplement(char);
                     return <span key={`r-${i}`} className={getColor(comp)}>{comp}</span>;
                   })}
-                  <span className="text-neutral-500 ml-4 select-none">5'</span>
+                  <span className="text-neutral-500 ml-4 select-none">5&apos;</span>
                 </div>
               )}
             </div>

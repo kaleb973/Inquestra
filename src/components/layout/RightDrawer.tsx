@@ -249,7 +249,7 @@ export function RightDrawer() {
                   <p className="text-xs text-muted-foreground italic px-1">Searching inventory...</p>
                 ) : searchResults.length === 0 ? (
                   <div className="p-4 border border-dashed border-border rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">No inventory items found matching "{searchQuery}".</p>
+                    <p className="text-xs text-muted-foreground">No inventory items found matching &quot;{searchQuery}&quot;.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">

@@ -214,7 +214,7 @@ export default function MarketingPage() {
                 </Link>
               </div>
               <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
-                <div className="text-muted-foreground">// Direct Serial Configuration</div>
+                <div className="text-muted-foreground">{''}</div>
                 <div>const port = await navigator.serial.requestPort();</div>
                 <div>await port.open({`{ baudRate: 115200 }`});</div>
                 <div className="text-phosphor">Status: Connected to USB Serial Port</div>
@@ -244,7 +244,7 @@ export default function MarketingPage() {
                 </Link>
               </div>
               <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
-                <div className="text-muted-foreground">// Immutable Audit Ledger</div>
+                <div className="text-muted-foreground">{''}</div>
                 <div>EVENT: TRIAL_SEALED</div>
                 <div>ACTOR: investigator@lab.org</div>
                 <div>HASH: 7a82c40d512a8335b2e...</div>
@@ -275,7 +275,7 @@ export default function MarketingPage() {
                 </Link>
               </div>
               <div className="md:col-span-4 bg-muted/30 p-4 rounded border border-border font-mono text-xs text-foreground space-y-2">
-                <div className="text-muted-foreground">// Reagent Tracking Slash Command</div>
+                <div className="text-muted-foreground">{''}</div>
                 <div>/reagent &quot;Paraformaldehyde 4%&quot; 25mL</div>
                 <div>Deduction: Batch #PF-8841-A</div>
                 <div className="text-foreground">Remaining: 475 mL in Storage Cabinet B</div>
@@ -409,7 +409,7 @@ export default function MarketingPage() {
               Join the first five pilot labs.
             </h2>
             <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              We're selectively onboarding academic and biotech labs for our founding cohort.
+              W&apos;e selectively onboarding academic and biotech labs for our founding cohort.
               You get direct access to the founding team, white-glove deployment support, and a permanent free tier for your lab. No enterprise contract required.
             </p>
           </div>

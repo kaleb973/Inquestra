@@ -82,7 +82,7 @@ export default function HardwarePage() {
 
             <div className="lg:col-span-5 bg-card border border-border rounded p-4 flex flex-col justify-between font-mono text-xs">
               <div className="space-y-3">
-                <div className="text-muted-foreground">// Hardware Serial Handshake</div>
+                <div className="text-muted-foreground">{''}</div>
                 <div className="text-foreground">
                   <span className="text-primary">const</span> port = <span className="text-primary">await</span> navigator.serial.requestPort();
                 </div>

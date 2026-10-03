@@ -255,7 +255,7 @@ export default function ProvenancePage() {
             </div>
 
             <div className="bg-card border border-border rounded-lg p-5 font-mono text-xs text-foreground space-y-3 shadow-sm">
-              <div className="text-muted-foreground">// Terminal Integrity Verification</div>
+              <div className="text-muted-foreground">{''}</div>
               <div className="text-muted-foreground">$ unzip trial_TR-2026-9042_sealed.zip</div>
               <div>$ sha256sum -c checksums.sha256</div>
               <div className="p-2.5 rounded bg-muted/30 border border-border space-y-1 text-[11px]">

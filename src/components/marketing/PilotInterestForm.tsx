@@ -46,9 +46,9 @@ export function PilotInterestForm() {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-        <h3 className="text-lg font-semibold text-foreground">You're on the list.</h3>
+        <h3 className="text-lg font-semibold text-foreground">Yo&apos;e on the list.</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          We'll reach out within 48 hours to schedule your pilot onboarding call. No sales pressure — just a researcher-to-researcher conversation.
+          W&apos;l reach out within 48 hours to schedule your pilot onboarding call. No sales pressure — just a researcher-to-researcher conversation.
         </p>
       </div>
     );

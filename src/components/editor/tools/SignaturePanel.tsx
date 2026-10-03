@@ -84,6 +84,7 @@ export function SignaturePanel({
 
   useEffect(() => {
     if (isSynced && trialId) reload();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trialId, isSynced]);
 
   const alreadySigned = (role: Sig['role']) =>

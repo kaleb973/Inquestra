@@ -155,7 +155,7 @@ export default function ArchitecturePage() {
             </div>
 
             <div className="bg-card border border-border rounded-lg p-6 font-mono text-xs text-foreground space-y-3 shadow-sm">
-              <div className="text-muted-foreground">// Off-Thread Worker Thread Architecture</div>
+              <div className="text-muted-foreground">{''}</div>
               <div className="text-foreground">
                 <span className="text-primary">const</span> worker = <span className="text-primary">new</span> Worker(&apos;/workers/telemetryWorker.js&apos;);
               </div>

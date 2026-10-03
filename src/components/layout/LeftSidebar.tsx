@@ -245,6 +245,7 @@ export function LeftSidebar() {
         }
       })
       .catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load trials whenever active project changes
