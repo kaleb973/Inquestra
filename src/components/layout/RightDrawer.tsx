@@ -4,10 +4,14 @@ import { Tag, Plus, X, Activity, Box, FileKey, History } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
 import { VersionHistory } from '@/components/editor/tools/VersionHistory';
+import { SignaturePanel } from '@/components/editor/tools/SignaturePanel';
 import type { MetadataEntry } from '@/types/inquestra';
+import type { Role } from '@prisma/client';
 
 import { fetchInventoryForSearch } from '@/actions/adminActions';
 import { getTrialInventory } from '@/actions/reagentActions';
+import { getCurrentUserProfile } from '@/actions/adminActions';
+import { sealTrial } from '@/actions/trialActions';
 
 export function RightDrawer() {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
@@ -22,6 +26,19 @@ export function RightDrawer() {
 
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
+
+  // Compliance: current user profile for SignaturePanel
+  const [userRole, setUserRole] = useState<Role | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCurrentUserProfile().then((p) => {
+      if (p) {
+        setUserRole(p.role);
+        setUserEmail(p.email);
+      }
+    }).catch(console.error);
+  }, []);
   
   // Inventory state
   const [searchQuery, setSearchQuery] = useState('');
@@ -297,22 +314,29 @@ export function RightDrawer() {
         )}
 
         {rightDrawerMode === 'COMPLIANCE' && (
-          <div className="p-5 overflow-y-auto flex-1">
-            <h3 className="text-sm font-semibold mb-4 text-foreground">Signatures & Compliance</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              21 CFR Part 11 Electronic Signatures.
-            </p>
-            {isSealed ? (
-               <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded p-3 text-xs">
-                 Document cryptographically sealed.
-               </div>
-            ) : (
-               <button className="w-full bg-primary text-primary-foreground text-xs py-2 rounded font-medium">
-                 Sign & Seal Document
-               </button>
-            )}
-            
-            <div className="mt-8">
+          <div className="p-4 overflow-y-auto flex-1 space-y-6">
+            {/* Electronic Signatures — live SignaturePanel */}
+            <SignaturePanel
+              trialId={cloudTrialId}
+              isSynced={!!cloudTrialId}
+              isSealed={isSealed}
+              currentUserRole={userRole}
+              currentUserEmail={userEmail}
+              onRequestSeal={async () => {
+                if (cloudTrialId) {
+                  try {
+                    await sealTrial(cloudTrialId);
+                    // Reload to reflect sealed state
+                    window.location.reload();
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : 'Seal failed');
+                  }
+                }
+              }}
+            />
+
+            {/* NIH FAIR Metadata */}
+            <div className="border-t border-border/60 pt-5">
               <div className="flex items-center gap-2 mb-4">
                 <Tag className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

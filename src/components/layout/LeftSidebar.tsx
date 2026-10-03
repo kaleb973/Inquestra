@@ -27,6 +27,7 @@ import type { Role } from '@prisma/client';
 const STATUS_DOT: Record<TrialStatus, string> = {
   DRAFT: 'bg-muted-foreground',
   ACTIVE: 'bg-primary',
+  IN_REVIEW: 'bg-caution',
   COMPLETED: 'bg-phosphor',
   FAILED: 'bg-critical',
 };
@@ -505,7 +506,14 @@ export function LeftSidebar() {
           </div>
 
           {/* Lab & Settings link */}
-          <div className="mt-8 border-t border-border/60 pt-4">
+          <div className="mt-8 border-t border-border/60 pt-4 space-y-1">
+            <Link
+              href="/app/protocols"
+              className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
+            >
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
+              Protocol Library
+            </Link>
             <Link
               href="/app/admin"
               className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"

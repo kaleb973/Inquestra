@@ -394,3 +394,53 @@ export async function sealTrial(trialId: string) {
   revalidatePath('/app');
   return updated;
 }
+
+/**
+ * Update the lifecycle status of a trial.
+ * Sealed (checksummed) trials cannot have their status changed.
+ * Each transition is appended to the AuditLog for full traceability.
+ */
+export async function updateTrialStatus(
+  trialId: string,
+  newStatus: 'DRAFT' | 'ACTIVE' | 'IN_REVIEW' | 'COMPLETED' | 'FAILED'
+) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error('User not found');
+
+  const trial = await prisma.trial.findFirst({
+    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+  });
+  if (!trial) throw new Error('Trial not found');
+  if (trial.checksum) throw new Error('Cannot change status of a sealed trial.');
+
+  const validStatus = z
+    .enum(['DRAFT', 'ACTIVE', 'IN_REVIEW', 'COMPLETED', 'FAILED'])
+    .parse(newStatus);
+
+  const updated = await prisma.trial.update({
+    where: { id: trialId },
+    data: { status: validStatus },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: dbUser.id,
+      organizationId: dbUser.organizationId,
+      action: 'TRIAL_STATUS_CHANGED',
+      entityType: 'Trial',
+      entityId: trialId,
+      details: {
+        message: `Status changed from "${trial.status}" to "${validStatus}" on trial "${trial.title}".`,
+        previousStatus: trial.status,
+        newStatus: validStatus,
+      },
+    },
+  });
+
+  revalidatePath('/app');
+  return updated;
+}

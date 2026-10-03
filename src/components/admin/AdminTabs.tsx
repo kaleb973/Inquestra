@@ -29,6 +29,7 @@ import { StorageManager } from '@/components/admin/StorageManager';
 import { EquipmentManager } from '@/components/admin/EquipmentManager';
 import { LabSettings } from '@/components/admin/LabSettings';
 import { TeamManager } from '@/components/admin/TeamManager';
+import { ProtocolLibrary } from '@/components/protocols/ProtocolLibrary';
 import { updateProjectLead, updateProjectStatus } from '@/actions/projectActions';
 import type {
   InventoryItem,
@@ -41,7 +42,7 @@ import type {
   Role,
 } from '@prisma/client';
 
-type TabId = 'overview' | 'projects' | 'inventory' | 'equipment' | 'teams' | 'audit' | 'settings';
+type TabId = 'overview' | 'projects' | 'protocols' | 'inventory' | 'equipment' | 'teams' | 'audit' | 'settings';
 
 type ProjectWithLead = {
   id: string;
@@ -319,6 +320,7 @@ export function AdminTabs({
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: 'overview',  label: 'Overview',   icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
     { id: 'projects',  label: 'Projects',   icon: <FolderOpen className="w-3.5 h-3.5" /> },
+    { id: 'protocols', label: 'Protocols',  icon: <BookOpen className="w-3.5 h-3.5" /> },
     { id: 'inventory', label: 'Inventory',  icon: <Box className="w-3.5 h-3.5" /> },
     { id: 'equipment', label: 'Equipment',  icon: <Wrench className="w-3.5 h-3.5" /> },
     { id: 'teams',     label: 'Teams',      icon: <Users className="w-3.5 h-3.5" /> },
@@ -554,6 +556,18 @@ export function AdminTabs({
             orgUsers={orgUsers}
             currentUser={currentUser}
           />
+        )}
+
+        {/* ── PROTOCOLS ────────────────────────────────────────────── */}
+        {activeTab === 'protocols' && (
+          <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+            <ProtocolLibrary
+              currentUserRole={currentUser?.role ?? 'VIEWER'}
+              onEditProtocol={(_id) => {
+                window.location.href = '/app/protocols';
+              }}
+            />
+          </div>
         )}
 
         {/* ── INVENTORY ────────────────────────────────────────────── */}

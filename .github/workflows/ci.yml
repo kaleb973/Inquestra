@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  # Provide stub env vars so Next.js config and Prisma don't crash during build-time checks.
+  # These are never used to talk to real services in CI — they satisfy module loading only.
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/inquestra_ci
+  DIRECT_URL: postgresql://ci:ci@localhost:5432/inquestra_ci
+  NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder_anon_key
+  NEXT_PUBLIC_APP_URL: https://inquestra.app
+  SUPABASE_SERVICE_ROLE_KEY: placeholder_service_role_key
+  RESEND_API_KEY: placeholder_resend_key
+
+jobs:
+  # ─── Type check ────────────────────────────────────────────────────────────
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run TypeScript type check
+        run: npm run type-check
+
+  # ─── Lint ──────────────────────────────────────────────────────────────────
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+
+  # ─── Build ─────────────────────────────────────────────────────────────────
+  build:
+    name: Next.js Build
+    runs-on: ubuntu-latest
+    # Build depends on type-check and lint passing first
+    needs: [type-check, lint]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        # Skip db push — no real DB in CI. Generate client types only.
+        run: npx prisma generate
+
+      - name: Build Next.js application
+        # Override the package.json build script to skip db push in CI
+        run: npx next build
+        env:
+          # Skip DB migrations in CI — Prisma generate is sufficient for type safety
+          SKIP_DB_PUSH: true

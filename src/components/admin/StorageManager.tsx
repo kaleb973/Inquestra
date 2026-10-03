@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { addStorageLocation } from '@/actions/adminActions';
-import { Loader2, Box, FolderTree } from 'lucide-react';
+import { Loader2, Box, FolderTree, QrCode } from 'lucide-react';
 import type { StorageLocation } from '@prisma/client';
+import { BarcodeLabel, type BarcodeLabelItem } from '@/components/admin/BarcodeLabel';
 
 type PopulatedLocation = StorageLocation & {
   children: StorageLocation[];
@@ -14,6 +15,7 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
   const [isPending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<BarcodeLabelItem | null>(null);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,25 +83,62 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
           </div>
         )}
         {topLevelLocations.map((loc) => (
-          <LocationNode key={loc.id} location={loc} allLocations={locations} />
+          <LocationNode
+            key={loc.id}
+            location={loc}
+            allLocations={locations}
+            onSelectLabel={setSelectedLabel}
+          />
         ))}
       </div>
+
+      {selectedLabel && (
+        <BarcodeLabel
+          item={selectedLabel}
+          onClose={() => setSelectedLabel(null)}
+        />
+      )}
     </div>
   );
 }
 
-function LocationNode({ location, allLocations }: { location: PopulatedLocation; allLocations: PopulatedLocation[] }) {
+function LocationNode({
+  location,
+  allLocations,
+  onSelectLabel,
+}: {
+  location: PopulatedLocation;
+  allLocations: PopulatedLocation[];
+  onSelectLabel: (item: BarcodeLabelItem) => void;
+}) {
   // Find children since our simple prisma include only went one level deep
   const children = allLocations.filter((l) => l.parentId === location.id);
   
   return (
     <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-      <div className="flex items-center gap-2 mb-3 border-b border-border/50 pb-3">
-        <Box className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-        <h3 className="text-sm font-semibold text-foreground">{location.name}</h3>
-        <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-foreground font-mono">
-          {location.type}
-        </span>
+      <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-3">
+        <div className="flex items-center gap-2">
+          <Box className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <h3 className="text-sm font-semibold text-foreground">{location.name}</h3>
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-foreground font-mono">
+            {location.type}
+          </span>
+        </div>
+        <button
+          onClick={() =>
+            onSelectLabel({
+              id: location.id,
+              name: location.name,
+              barcode: location.barcode,
+              subtitle: `${location.type} · ${location.items.length} items`,
+              type: 'storage',
+            })
+          }
+          title="Print Location QR label"
+          className="p-1 rounded text-muted-foreground hover:text-indigo-500 hover:bg-accent transition-colors"
+        >
+          <QrCode className="w-3.5 h-3.5" />
+        </button>
       </div>
       
       {location.items.length > 0 && (
@@ -116,7 +155,12 @@ function LocationNode({ location, allLocations }: { location: PopulatedLocation;
       {children.length > 0 && (
         <div className="space-y-2 pl-4 border-l border-border/40 ml-2 mt-2">
           {children.map((child) => (
-            <LocationNode key={child.id} location={child} allLocations={allLocations} />
+            <LocationNode
+              key={child.id}
+              location={child}
+              allLocations={allLocations}
+              onSelectLabel={onSelectLabel}
+            />
           ))}
         </div>
       )}

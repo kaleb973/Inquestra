@@ -3,13 +3,15 @@
 
 import { useState, useTransition } from 'react';
 import { addEquipment, updateEquipmentStatus } from '@/actions/adminActions';
-import { Loader2, Plus, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, Plus, Calendar, AlertCircle, CheckCircle2, QrCode } from 'lucide-react';
 import type { Equipment } from '@prisma/client';
+import { BarcodeLabel, type BarcodeLabelItem } from '@/components/admin/BarcodeLabel';
 
 export function EquipmentManager({ items }: { items: Equipment[] }) {
   const [isPending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<BarcodeLabelItem | null>(null);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,13 +92,30 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                   <h3 className="font-semibold text-foreground">{item.name}</h3>
                   <p className="text-xs text-muted-foreground font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
                 </div>
-                {item.status === 'BROKEN' ? (
-                  <AlertCircle className="w-5 h-5 text-red-500" />
-                ) : overdue ? (
-                  <Calendar className="w-5 h-5 text-amber-500" />
-                ) : (
-                  <CheckCircle2 className="w-5 h-5 text-indigo-500" />
-                )}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() =>
+                      setSelectedLabel({
+                        id: item.id,
+                        name: item.name,
+                        barcode: item.serialNumber ?? null,
+                        subtitle: `Status: ${item.status}`,
+                        type: 'equipment',
+                      })
+                    }
+                    title="Print Equipment QR label"
+                    className="p-1 rounded text-muted-foreground hover:text-purple-500 hover:bg-accent transition-colors"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                  </button>
+                  {item.status === 'BROKEN' ? (
+                    <AlertCircle className="w-5 h-5 text-red-500" />
+                  ) : overdue ? (
+                    <Calendar className="w-5 h-5 text-amber-500" />
+                  ) : (
+                    <CheckCircle2 className="w-5 h-5 text-indigo-500" />
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1 mb-6 pl-2">
@@ -134,6 +153,13 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
           )
         })}
       </div>
+
+      {selectedLabel && (
+        <BarcodeLabel
+          item={selectedLabel}
+          onClose={() => setSelectedLabel(null)}
+        />
+      )}
     </div>
   );
 }

@@ -3,8 +3,9 @@
 
 import { useState, useTransition } from 'react';
 import { addInventoryItem, updateInventoryStock, deleteInventoryItem } from '@/actions/adminActions';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, QrCode } from 'lucide-react';
 import type { InventoryItem, StorageLocation } from '@prisma/client';
+import { BarcodeLabel, type BarcodeLabelItem } from '@/components/admin/BarcodeLabel';
 
 type PopulatedItem = InventoryItem & { location: { name: string } | null };
 
@@ -12,6 +13,7 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
   const [isPending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<BarcodeLabelItem | null>(null);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -171,15 +173,38 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
                   )}
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <button onClick={() => handleDelete(item.id)} disabled={isPending} className="text-muted-foreground hover:text-red-500 transition-colors p-1">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => setSelectedLabel({
+                        id: item.id,
+                        name: item.name,
+                        barcode: item.barcode,
+                        subtitle: item.location?.name ?? undefined,
+                        type: 'inventory',
+                      })}
+                      title="Print QR label"
+                      className="text-muted-foreground hover:text-indigo-500 transition-colors p-1"
+                    >
+                      <QrCode className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDelete(item.id)} disabled={isPending} className="text-muted-foreground hover:text-red-500 transition-colors p-1">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {selectedLabel && (
+        <BarcodeLabel
+          item={selectedLabel}
+          onClose={() => setSelectedLabel(null)}
+        />
+      )}
     </div>
   );
 }
+

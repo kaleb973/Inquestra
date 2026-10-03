@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Cpu, ShieldCheck, Database, Terminal, FileCode2, Lock, Activity, Check } from "lucide-react";
 import type { Metadata } from "next";
+import { PilotInterestForm } from "@/components/marketing/PilotInterestForm";
 
 export const metadata: Metadata = {
   title: "Inquestra — Hardware DAQ & Electronic Lab Notebook for Biomedical Engineering",
@@ -396,6 +397,46 @@ export default function MarketingPage() {
           </div>
         </div>
       </section>
+
+      {/* Pilot Lab Program — lead capture */}
+      <section className="py-24 border-b border-border" id="pilot">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">
+              Pilot Lab Program
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-5">
+              Join the first five pilot labs.
+            </h2>
+            <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              We're selectively onboarding academic and biotech labs for our founding cohort.
+              You get direct access to the founding team, white-glove deployment support, and a permanent free tier for your lab. No enterprise contract required.
+            </p>
+          </div>
+
+          {/* Value bullets */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            {[
+              { label: 'Free Forever', desc: 'No credit card. Founding cohort keeps the core platform free.' },
+              { label: 'Founder Direct', desc: 'You email the builder, not a sales rep. Fast iteration on your needs.' },
+              { label: 'Deployment Help', desc: 'We configure your Railway / self-hosted instance and import your SOPs.' },
+            ].map((item) => (
+              <div key={item.label} className="bg-card border border-border rounded-xl p-4">
+                <div className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider mb-1">
+                  {item.label}
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Inline lead form */}
+          <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-xl">
+            <PilotInterestForm />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
+

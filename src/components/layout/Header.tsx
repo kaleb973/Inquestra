@@ -19,10 +19,10 @@ import {
 import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { syncTrialToCloud } from '@/actions/syncActions';
-import { exportTrialAsZip } from '@/lib/exportTrial';
+import { exportTrialAsZip, type SignatureExport } from '@/lib/exportTrial';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { signOut } from '@/actions/authActions';
-import { sealTrial } from '@/actions/trialActions';
+import { sealTrial, updateTrialStatus, fetchTrialSignatures } from '@/actions/trialActions';
 import { checkLabCompliance, getCurrentUserProfile } from '@/actions/adminActions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { TrialStatus } from '@/types/inquestra';
@@ -32,6 +32,7 @@ import type { Role } from '@prisma/client';
 const STATUS_COLORS: Record<TrialStatus, string> = {
   DRAFT: 'bg-muted text-muted-foreground border-border',
   ACTIVE: 'bg-primary/10 text-primary border-primary/30',
+  IN_REVIEW: 'bg-caution/10 text-caution border-caution/30',
   COMPLETED: 'bg-phosphor/10 text-phosphor border-phosphor/30',
   FAILED: 'bg-critical/10 text-critical border-critical/30',
 };
@@ -152,6 +153,21 @@ export function Header() {
         new Promise<string>((res) => setTimeout(() => res(''), 200)),
       ]);
 
+      let signatures: SignatureExport[] = [];
+      if (cloudTrialId) {
+        try {
+          const sigs = await fetchTrialSignatures(cloudTrialId);
+          signatures = sigs.map((s) => ({
+            role: s.role as 'AUTHOR' | 'WITNESS' | 'PI_APPROVAL',
+            meaning: s.meaning,
+            signedAt: s.signedAt,
+            user: { email: s.user.email, role: s.user.role },
+          }));
+        } catch (e) {
+          console.error('Failed to fetch signatures for export:', e);
+        }
+      }
+
       await exportTrialAsZip({
         title,
         content,
@@ -160,6 +176,8 @@ export function Header() {
         createdAt: activeTrial.createdAt,
         updatedAt: activeTrial.updatedAt,
         html: resolvedHtml,
+        checksum: activeTrial.checksum,
+        signatures,
       });
     } finally {
       setIsExporting(false);
@@ -216,11 +234,43 @@ export function Header() {
 
       {/* Trial identity */}
       <span className="text-foreground text-sm truncate max-w-xs font-medium tracking-tight">{title}</span>
-      <span
-        className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
-      >
-        {status}
-      </span>
+
+      {/* Status badge — interactive dropdown when trial is not sealed */}
+      {activeTrial.checksum ? (
+        <span
+          className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
+        >
+          {status.replace('_', ' ')}
+        </span>
+      ) : (
+        <select
+          value={status}
+          disabled={!cloudTrialId || isPending}
+          onChange={(e) => {
+            const newStatus = e.target.value as TrialStatus;
+            if (!cloudTrialId) return;
+            startTransition(async () => {
+              try {
+                await updateTrialStatus(cloudTrialId, newStatus);
+                // Optimistically update local store
+                useNotebookStore.setState((s) => ({
+                  activeTrial: { ...s.activeTrial, status: newStatus },
+                }));
+              } catch (err) {
+                alert(err instanceof Error ? err.message : 'Status update failed');
+              }
+            });
+          }}
+          title={cloudTrialId ? 'Change trial status' : 'Sync trial to cloud to change status'}
+          className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border cursor-pointer appearance-none bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
+        >
+          <option value="DRAFT">DRAFT</option>
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="IN_REVIEW">IN REVIEW</option>
+          <option value="COMPLETED">COMPLETED</option>
+          <option value="FAILED">FAILED</option>
+        </select>
+      )}
 
       <div className="ml-auto flex items-center gap-3">
         {/* Sync error */}

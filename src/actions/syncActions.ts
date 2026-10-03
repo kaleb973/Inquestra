@@ -11,7 +11,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 interface SyncPayload {
   title: string;
   content: Record<string, unknown>;
-  status: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'FAILED';
+  status: 'DRAFT' | 'ACTIVE' | 'IN_REVIEW' | 'COMPLETED' | 'FAILED';
   metadata: { key: string; value: string }[];
   cloudTrialId?: string;   // undefined on first save
   cloudProjectId?: string; // undefined on first save

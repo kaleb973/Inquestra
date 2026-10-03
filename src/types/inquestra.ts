@@ -2,7 +2,7 @@
 // Strictly-typed data contracts for Inquestra Phase 1
 // All hardware payloads, API responses, and store shapes must satisfy these types.
 
-export type TrialStatus = "DRAFT" | "ACTIVE" | "COMPLETED" | "FAILED";
+export type TrialStatus = "DRAFT" | "ACTIVE" | "IN_REVIEW" | "COMPLETED" | "FAILED";
 
 export interface TelemetrySample {
   timestamp: number;       // Unix epoch ms
