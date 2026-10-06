@@ -80,9 +80,9 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
-          to: [process.env.PILOT_NOTIFY_EMAIL ?? sanitized.email],
-          subject: `🧪 New Pilot Interest: ${sanitized.institution} — ${sanitized.name}`,
+          from: 'Inquestra Pilot <support@inquestra.org>',
+          to: [process.env.PILOT_NOTIFY_EMAIL ?? 'inquestrasupport@gmail.com'],
+          subject: `🚀 New Pilot Interest: ${sanitized.institution} — ${sanitized.name}`,
           html: `
             <h2>New Pilot Lab Interest</h2>
             <table style="border-collapse:collapse;font-family:monospace">
