@@ -1,10 +1,13 @@
 // src/app/api/pilot-interest/route.ts
 // Pilot Lab Interest capture — stores interest in DB AuditLog or sends email via Resend.
 // No authentication required (public endpoint). Rate-limited to 5 submissions per IP/hour.
+// Hardened with centralized rate-limiting, standardized headers, and outbound fetch timeouts.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import DOMPurify from 'isomorphic-dompurify';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { fetchWithTimeout } from '@/lib/resilience';
 
 const PilotInterestSchema = z.object({
   name: z.string().min(1).max(200),
@@ -14,32 +17,30 @@ const PilotInterestSchema = z.object({
   useCase: z.string().max(1000).optional(),
 });
 
-// Simple in-process rate limit map (resets on server restart, sufficient for low-traffic MVP)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 });
-    return true;
-  }
-  if (entry.count >= 5) return false;
-  entry.count += 1;
-  return true;
-}
-
 export async function POST(req: NextRequest) {
-  // Rate limiting
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    req.headers.get('x-real-ip') ??
-    'unknown';
+  // 1. Centralized Rate Limiting (5 requests per 60 minutes per IP)
+  const clientIp = getClientIp(req.headers);
+  const rateLimitResult = checkRateLimit(`pilot-interest:${clientIp}`, 5, 60 * 60 * 1000);
 
-  if (!checkRateLimit(ip)) {
+  const rateLimitHeaders = {
+    'X-RateLimit-Limit': String(rateLimitResult.limit),
+    'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+    'X-RateLimit-Reset': String(rateLimitResult.reset),
+  };
+
+  if (!rateLimitResult.success) {
     return NextResponse.json(
-      { error: 'Too many submissions. Please try again later.' },
-      { status: 429 }
+      {
+        error: 'Too many submissions.',
+        message: `Rate limit exceeded. Please wait ${rateLimitResult.retryAfterSeconds} seconds before trying again.`,
+      },
+      {
+        status: 429,
+        headers: {
+          ...rateLimitHeaders,
+          'Retry-After': String(rateLimitResult.retryAfterSeconds || 3600),
+        },
+      }
     );
   }
 
@@ -47,20 +48,23 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Invalid request body.' },
+      { status: 400, headers: rateLimitHeaders }
+    );
   }
 
   const parsed = PilotInterestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: 'Validation failed.', details: parsed.error.flatten().fieldErrors },
-      { status: 422 }
+      { status: 422, headers: rateLimitHeaders }
     );
   }
 
   const data = parsed.data;
 
-  // Sanitize string fields
+  // Sanitize string fields against XSS and template injection
   const sanitized = {
     name: DOMPurify.sanitize(data.name),
     email: data.email.toLowerCase().trim(),
@@ -69,14 +73,14 @@ export async function POST(req: NextRequest) {
     useCase: data.useCase ? DOMPurify.sanitize(data.useCase) : null,
   };
 
-  // Send via Resend if configured
+  // Send via Resend if configured, with strict 5-second timeout deadline
   const resendApiKey = process.env.RESEND_API_KEY;
   if (resendApiKey && !resendApiKey.startsWith('placeholder')) {
     try {
-      const res = await fetch('https://api.resend.com/emails', {
+      const res = await fetchWithTimeout('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
+          Authorization: `Bearer ${resendApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -91,22 +95,24 @@ export async function POST(req: NextRequest) {
               <tr><td style="padding:4px 12px 4px 0;color:#6b7280">Institution</td><td>${sanitized.institution}</td></tr>
               ${sanitized.role ? `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">Role</td><td>${sanitized.role}</td></tr>` : ''}
               ${sanitized.useCase ? `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">Use Case</td><td>${sanitized.useCase}</td></tr>` : ''}
-              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">IP</td><td>${ip}</td></tr>
+              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">IP</td><td>${clientIp}</td></tr>
               <tr><td style="padding:4px 12px 4px 0;color:#6b7280">Time</td><td>${new Date().toISOString()}</td></tr>
             </table>
           `,
         }),
+        timeoutMs: 5000,
       });
+
       if (!res.ok) {
         console.error('[pilot-interest] Resend error:', await res.text());
       }
     } catch (err) {
-      console.error('[pilot-interest] Email send failed:', err);
+      console.error('[pilot-interest] Email dispatch failed or timed out:', err);
     }
   } else {
-    // Fallback: log to console (useful for local dev / Railway w/o Resend yet)
+    // Fallback: log to console (useful for local dev / staging w/o Resend yet)
     console.log('[pilot-interest] New submission:', sanitized);
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true }, { headers: rateLimitHeaders });
 }

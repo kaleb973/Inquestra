@@ -2,16 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import crypto from "crypto";
-
-/**
- * Creates a cryptographic hash of the trial content + metadata.
- * This satisfies FDA 21 CFR Part 11 requirements for unalterable electronic records.
- */
-function generateTrialHash(content: any, metadata: any, timestamp: string) {
-  const payload = JSON.stringify({ content, metadata, timestamp });
-  return crypto.createHash('sha256').update(payload).digest('hex');
-}
+import { generateTrialHash } from "@/lib/provenance";
 
 export async function signAndSealTrial(data: {
   trialId: string;

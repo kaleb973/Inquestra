@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { generateTrialHash } from '@/lib/provenance';
 
 // ─── Validation schemas ────────────────────────────────────────────────────────
 
@@ -343,8 +344,6 @@ export async function createNewTrial() {
   return trial;
 }
 
-import crypto from 'crypto';
-
 export async function sealTrial(trialId: string) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -361,21 +360,15 @@ export async function sealTrial(trialId: string) {
   if (!trial) throw new Error('Trial not found');
   if (trial.checksum) throw new Error('Trial is already sealed');
 
-  // Cryptographic seal based on content, title, and metadata
-  const dataToHash = JSON.stringify({
-    title: trial.title,
-    content: trial.content,
-    metadata: trial.metadata,
-    createdAt: trial.createdAt.toISOString()
-  });
-  const checksum = crypto.createHash('sha256').update(dataToHash).digest('hex');
+  const timestamp = new Date().toISOString();
+  const checksum = generateTrialHash(trial.content, trial.metadata, timestamp);
 
   const updated = await prisma.trial.update({
     where: { id: trialId },
     data: {
       status: 'COMPLETED',
       checksum,
-      sealedAt: new Date(),
+      sealedAt: new Date(timestamp),
       sealedBy: dbUser.id
     }
   });

@@ -52,6 +52,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const clientIp = getClientIp(request.headers);
 
+  // 0. Fast-path for Health & Liveness probes (bypasses session refresh & rate limits)
+  if (pathname === '/api/health') {
+    return NextResponse.next();
+  }
+
   // 1. Explicit CORS Preflight Handling for API Routes
   if (pathname.startsWith('/api')) {
     const origin = request.headers.get('origin');

@@ -1,7 +1,9 @@
 // src/lib/mcp-client.ts
-// Phase 4 — Model Context Protocol (MCP) JSON-RPC 2.0 client.
+// Phase 4 & Enterprise Hardening — Model Context Protocol (MCP) JSON-RPC 2.0 client.
 // Connects Inquestra to external LIMS / laboratory database MCP servers.
-// Researchers query historical datasets in natural language from the TipTap canvas.
+// Hardened with timeout deadlines and exponential backoff with full jitter to protect server actions.
+
+import { fetchWithTimeout, withRetry } from '@/lib/resilience';
 
 export interface MCPToolCallParams {
   name: string;
@@ -16,11 +18,14 @@ export interface MCPToolResult {
 export interface MCPServerConfig {
   url: string;
   apiKey?: string;
+  timeoutMs?: number;
 }
+
+const DEFAULT_MCP_TIMEOUT_MS = 10_000;
 
 /**
  * Calls a single tool on an MCP server via JSON-RPC 2.0 over HTTP POST.
- * Designed to be called from a Server Action to keep API keys server-side.
+ * Uses deadline timeouts and automatic retry with exponential backoff on transient failures.
  */
 export async function callMCPTool(
   server: MCPServerConfig,
@@ -37,44 +42,74 @@ export async function callMCPTool(
     headers['Authorization'] = `Bearer ${server.apiKey}`;
   }
 
-  const response = await fetch(server.url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: requestId,
-      method: 'tools/call',
-      params: {
-        name: tool.name,
-        arguments: tool.arguments,
-      },
-    }),
+  const payload = JSON.stringify({
+    jsonrpc: '2.0',
+    id: requestId,
+    method: 'tools/call',
+    params: {
+      name: tool.name,
+      arguments: tool.arguments,
+    },
   });
 
-  if (!response.ok) {
+  try {
+    const response = await withRetry(
+      async () => {
+        const res = await fetchWithTimeout(server.url, {
+          method: 'POST',
+          headers,
+          body: payload,
+          timeoutMs: server.timeoutMs ?? DEFAULT_MCP_TIMEOUT_MS,
+        });
+
+        // 5xx errors are retryable; 4xx errors are client errors and should fail fast
+        if (res.status >= 500) {
+          throw new Error(`MCP server HTTP ${res.status}`);
+        }
+        return res;
+      },
+      {
+        retries: 2,
+        minTimeoutMs: 300,
+        maxTimeoutMs: 2000,
+        retryIf: (err) => {
+          // Retry on network errors, timeouts, and 5xx
+          return err instanceof Error && !err.message.includes('HTTP 4');
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        content: [{ type: 'text', text: `MCP server error: HTTP ${response.status}` }],
+        isError: true,
+      };
+    }
+
+    const json = (await response.json()) as {
+      result?: MCPToolResult;
+      error?: { message: string };
+    };
+
+    if (json.error) {
+      return {
+        content: [{ type: 'text', text: `MCP error: ${json.error.message}` }],
+        isError: true,
+      };
+    }
+
+    return json.result ?? { content: [{ type: 'text', text: 'No result from MCP server.' }] };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown communication error';
     return {
-      content: [{ type: 'text', text: `MCP server error: HTTP ${response.status}` }],
+      content: [{ type: 'text', text: `MCP request failed: ${message}` }],
       isError: true,
     };
   }
-
-  const json = (await response.json()) as {
-    result?: MCPToolResult;
-    error?: { message: string };
-  };
-
-  if (json.error) {
-    return {
-      content: [{ type: 'text', text: `MCP error: ${json.error.message}` }],
-      isError: true,
-    };
-  }
-
-  return json.result ?? { content: [{ type: 'text', text: 'No result from MCP server.' }] };
 }
 
 /**
- * Lists available tools from an MCP server.
+ * Lists available tools from an MCP server with timeout and retry protection.
  */
 export async function listMCPTools(
   server: MCPServerConfig
@@ -84,22 +119,32 @@ export async function listMCPTools(
   };
   if (server.apiKey) headers['Authorization'] = `Bearer ${server.apiKey}`;
 
-  const response = await fetch(server.url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: crypto.randomUUID(),
-      method: 'tools/list',
-      params: {},
-    }),
-  });
+  try {
+    const response = await withRetry(
+      () =>
+        fetchWithTimeout(server.url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: crypto.randomUUID(),
+            method: 'tools/list',
+            params: {},
+          }),
+          timeoutMs: server.timeoutMs ?? DEFAULT_MCP_TIMEOUT_MS,
+        }),
+      { retries: 2, minTimeoutMs: 250, maxTimeoutMs: 1500 }
+    );
 
-  if (!response.ok) return [];
+    if (!response.ok) return [];
 
-  const json = (await response.json()) as {
-    result?: { tools: { name: string; description: string }[] };
-  };
+    const json = (await response.json()) as {
+      result?: { tools: { name: string; description: string }[] };
+    };
 
-  return json.result?.tools ?? [];
+    return json.result?.tools ?? [];
+  } catch (err) {
+    console.error('[mcp-client] Failed to list MCP tools:', err);
+    return [];
+  }
 }

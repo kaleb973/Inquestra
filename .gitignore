@@ -27,3 +27,18 @@ next-env.d.ts
 playwright-report/
 test-results/
 
+# Python & Binaries
+__pycache__/
+*.pyc
+*.exe
+
+# Local Leads & Outreach
+bme_pilot_leads.csv
+scripts/
+
+# Local Agent Skills & Tooling
+.agents/
+.codex/
+.github/agents/
+.github/hooks/
+.github/skills/
