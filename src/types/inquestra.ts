@@ -39,6 +39,21 @@ export interface TrialDocument {
   sealedBy?: string | null;
 }
 
+export interface TrialSummaryItem {
+  id: string;
+  title: string;
+  status: TrialStatus;
+  updatedAt: string | Date;
+  createdAt?: string | Date;
+  projectId?: string;
+  metadata?: MetadataEntry[];
+  _count?: {
+    revisions: number;
+    inventoryUsed: number;
+    signatures: number;
+  };
+}
+
 /**
  * Derived statistics computed by the store from telemetryBuffer.
  * Subscribers should prefer this over the raw buffer to avoid high-freq re-renders.

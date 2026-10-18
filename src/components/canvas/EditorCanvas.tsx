@@ -15,7 +15,7 @@ import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
 import tippy, { type Instance } from 'tippy.js';
-import { BarChart3, Table2, Timer, Heading, FlaskConical, Upload, ClipboardList } from 'lucide-react';
+import { BarChart3, Table2, Timer, Heading, FlaskConical, Upload, ClipboardList, Database } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { InteractiveChartExtension } from '@/components/editor/nodes/InteractiveChartNode';
@@ -25,6 +25,7 @@ import { MoleculeExtension } from '@/components/editor/nodes/MoleculeNode';
 import { MathExtension } from '@/components/editor/nodes/MathNode';
 import { SequenceExtension } from '@/components/editor/nodes/SequenceNode';
 import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
+import { TrialReferenceExtension } from '@/components/editor/nodes/TrialReferenceNode';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
@@ -81,6 +82,14 @@ function buildSlashCommands(): SlashCommand[] {
       icon: <span className="w-4 h-4 font-bold text-indigo-400">EQ</span>,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'equipmentBlock' }).run();
+      },
+    },
+    {
+      title: 'Reference Experiment',
+      description: 'Retrieve & embed parameters from another trial by name',
+      icon: <Database className="w-4 h-4 text-indigo-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
       },
     },
     {
@@ -445,6 +454,7 @@ export function EditorCanvas() {
       MathExtension,
       SequenceExtension,
       EquipmentExtension,
+      TrialReferenceExtension,
       SlashCommandExtension,
     ],
     content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,

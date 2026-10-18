@@ -15,14 +15,16 @@ import {
   X,
   User as UserIcon,
   FolderOpen,
+  Eye,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { SerialControlPanel } from '@/components/hardware/SerialControlPanel';
 import { fetchAllTrials, createNewTrial, getTrial } from '@/actions/trialActions';
 import { fetchProjectsWithLeads, createProject, fetchLabMembersForLeadSelector } from '@/actions/projectActions';
-import type { TrialStatus } from '@/types/inquestra';
+import type { TrialStatus, TrialSummaryItem } from '@/types/inquestra';
 import type { ProjectWithLead } from '@/actions/projectActions';
 import type { Role } from '@prisma/client';
+import { TrialPreviewCard } from '@/components/trials/TrialPreviewCard';
 
 const STATUS_DOT: Record<TrialStatus, string> = {
   DRAFT: 'bg-muted-foreground',
@@ -228,9 +230,8 @@ export function LeftSidebar() {
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
-  const [trials, setTrials] = useState<
-    { id: string; title: string; status: TrialStatus; updatedAt: Date }[]
-  >([]);
+  const [trials, setTrials] = useState<TrialSummaryItem[]>([]);
+  const [previewTrial, setPreviewTrial] = useState<TrialSummaryItem | null>(null);
   const [isLoadingTrials, setIsLoadingTrials] = useState(true);
   const [loadingTrialId, setLoadingTrialId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -252,7 +253,7 @@ export function LeftSidebar() {
   const loadTrials = useCallback(() => {
     setIsLoadingTrials(true);
     fetchAllTrials()
-      .then((ts) => setTrials(ts as typeof trials))
+      .then((ts) => setTrials(ts as unknown as TrialSummaryItem[]))
       .catch(console.error)
       .finally(() => setIsLoadingTrials(false));
   }, []);
@@ -267,7 +268,7 @@ export function LeftSidebar() {
     startTransition(async () => {
       try {
         const newTrial = await createNewTrial();
-        setTrials((prev) => [newTrial as typeof trials[0], ...prev]);
+        setTrials((prev) => [newTrial as unknown as TrialSummaryItem, ...prev]);
         // Normalise Prisma Date objects → ISO strings for the store
         setActiveTrial({
           id: newTrial.id,
@@ -471,30 +472,46 @@ export function LeftSidebar() {
                 const isActive = activeTrial.id === t.id;
                 const isLoading = loadingTrialId === t.id;
                 return (
-                  <button
+                  <div
                     key={t.id}
-                    onClick={() => handleSelectTrial(t.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left transition-all duration-200 border ${
+                    className={`group relative flex items-center justify-between w-full px-2 py-1.5 rounded transition-all duration-200 border ${
                       isActive
-                        ? 'bg-neutral-200/80 dark:bg-neutral-800/80 border-border/80 shadow-sm'
+                        ? 'bg-neutral-200/80 dark:bg-neutral-800/80 border-border/80 shadow-xs'
                         : 'bg-transparent border-transparent hover:bg-muted/50 hover:border-border/50'
                     }`}
                   >
-                    {isLoading ? (
-                      <Loader2 className="w-3 h-3 text-indigo-400 animate-spin shrink-0" />
-                    ) : (
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[t.status as TrialStatus]}`}
-                      />
-                    )}
-                    <span
-                      className={`text-sm truncate flex-1 tracking-tight ${
-                        isActive ? 'text-foreground font-semibold' : 'text-muted-foreground'
-                      }`}
+                    <button
+                      onClick={() => handleSelectTrial(t.id)}
+                      className="flex items-center gap-2 flex-1 min-w-0 text-left"
                     >
-                      {t.title}
-                    </span>
-                  </button>
+                      {isLoading ? (
+                        <Loader2 className="w-3 h-3 text-indigo-400 animate-spin shrink-0" />
+                      ) : (
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[t.status as TrialStatus]}`}
+                        />
+                      )}
+                      <span
+                        className={`text-sm truncate tracking-tight ${
+                          isActive ? 'text-foreground font-semibold' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {t.title}
+                      </span>
+                    </button>
+
+                    {/* Cassini-Style Headless Preview Inspector */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewTrial(t);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0 ml-1"
+                      title="Preview experiment parameters & metadata"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 );
               })}
 
@@ -542,6 +559,18 @@ export function LeftSidebar() {
         <NewProjectModal
           onClose={() => setShowNewProjectModal(false)}
           onCreated={handleProjectCreated}
+        />
+      )}
+
+      {/* Cassini-Style Headless Trial Preview */}
+      {previewTrial && (
+        <TrialPreviewCard
+          trial={previewTrial}
+          onClose={() => setPreviewTrial(null)}
+          onOpen={() => {
+            handleSelectTrial(previewTrial.id);
+            setPreviewTrial(null);
+          }}
         />
       )}
     </>

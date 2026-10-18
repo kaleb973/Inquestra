@@ -4,11 +4,12 @@
 // Supports:
 //   - Adding/removing protocol steps
 //   - Checking off steps at the bench (auto-timestamps)
+//   - Bench Step Timers with auto-duration detection & audio chime (inspired by r/labrats feedback)
 //   - Inline deviation notes per step
 //   - Forking to a fresh run (resets checkboxes, bumps version)
 // All state lives in node attrs (persisted in TipTap JSON → Zustand → localStorage).
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
@@ -21,6 +22,11 @@ import {
   X,
   AlertCircle,
   ClipboardList,
+  Timer,
+  Play,
+  Pause,
+  RotateCcw,
+  Bell,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -31,6 +37,7 @@ interface ProtocolStep {
   checked: boolean;
   checkedAt: string | null;   // ISO timestamp
   deviation: string | null;   // deviation note
+  timerDuration?: number | null; // duration in seconds
 }
 
 interface ProtocolAttrs {
@@ -46,7 +53,210 @@ function makeStep(text = ''): ProtocolStep {
     checked: false,
     checkedAt: null,
     deviation: null,
+    timerDuration: null,
   };
+}
+
+// ─── Duration Parser ──────────────────────────────────────────────────────────
+
+/**
+ * Automatically extract incubation/centrifuge duration from step text.
+ * Matches: "30 minutes", "5 min", "45s", "1 hour", etc.
+ */
+export function parseDurationFromText(text: string): number | null {
+  if (!text) return null;
+  // Match hours: e.g. "1 hour", "1.5 hrs", "2h"
+  const hourMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b/i);
+  if (hourMatch) {
+    const val = parseFloat(hourMatch[1]);
+    if (!isNaN(val) && val > 0) return Math.round(val * 3600);
+  }
+  // Match minutes: e.g. "30 minutes", "30 mins", "5 min", "10m"
+  const minMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|min|m)\b/i);
+  if (minMatch) {
+    const val = parseFloat(minMatch[1]);
+    if (!isNaN(val) && val > 0) return Math.round(val * 60);
+  }
+  // Match seconds: e.g. "45 seconds", "30s", "45 secs"
+  const secMatch = text.match(/(\d+)\s*(?:seconds?|secs?|s)\b/i);
+  if (secMatch) {
+    const val = parseInt(secMatch[1], 10);
+    if (!isNaN(val) && val > 0) return val;
+  }
+  return null;
+}
+
+// ─── Audio Chime (Offline Web Audio API) ──────────────────────────────────────
+
+function playTimerChime() {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch {
+    // AudioContext blocked or not supported
+  }
+}
+
+// ─── Bench Step Timer Component ───────────────────────────────────────────────
+
+function StepTimer({
+  step,
+  onComplete,
+  onSetDuration,
+}: {
+  step: ProtocolStep;
+  onComplete: () => void;
+  onSetDuration: (duration: number | null) => void;
+}) {
+  const detectedSeconds = step.timerDuration ?? parseDurationFromText(step.text);
+  const [isRunning, setIsRunning] = useState(false);
+  const [remaining, setRemaining] = useState<number>(detectedSeconds ?? 0);
+  const [isDone, setIsDone] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    if (!isRunning && !isDone) {
+      setRemaining(detectedSeconds ?? 0);
+    }
+  }, [detectedSeconds, isRunning, isDone]);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => {
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsRunning(false);
+          setIsDone(true);
+          playTimerChime();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  if (!detectedSeconds && !showPicker) {
+    return (
+      <button
+        onClick={() => setShowPicker(true)}
+        className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-violet-500 hover:bg-accent transition-all shrink-0"
+        title="Add countdown bench timer to this step"
+      >
+        <Timer className="w-3.5 h-3.5" />
+      </button>
+    );
+  }
+
+  const formatTime = (secs: number) => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const toggleRun = () => {
+    if (isDone) {
+      setIsDone(false);
+      setRemaining(detectedSeconds ?? 60);
+      setIsRunning(true);
+    } else {
+      setIsRunning(!isRunning);
+    }
+  };
+
+  const resetTimer = () => {
+    setIsRunning(false);
+    setIsDone(false);
+    setRemaining(detectedSeconds ?? 0);
+  };
+
+  return (
+    <div className="flex items-center gap-1.5 shrink-0">
+      {isDone ? (
+        <button
+          onClick={onComplete}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 animate-pulse hover:bg-emerald-500/30 transition-colors"
+          title="Timer finished! Click to complete step with timestamp"
+        >
+          <Bell className="w-3 h-3 animate-bounce" />
+          <span>Done! (Check off)</span>
+        </button>
+      ) : (
+        <div
+          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono border transition-colors ${
+            isRunning
+              ? 'bg-violet-500/10 border-violet-500/40 text-violet-600 dark:text-violet-400 font-bold'
+              : 'bg-muted/70 border-border text-muted-foreground hover:border-violet-500/30'
+          }`}
+        >
+          <Timer className={`w-3 h-3 ${isRunning ? 'animate-spin' : ''}`} style={{ animationDuration: '3s' }} />
+          <span>{formatTime(remaining)}</span>
+
+          <button
+            onClick={toggleRun}
+            className="p-0.5 rounded hover:bg-accent hover:text-foreground transition-colors ml-0.5"
+            title={isRunning ? 'Pause timer' : 'Start countdown'}
+          >
+            {isRunning ? <Pause className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+          </button>
+
+          {isRunning && (
+            <button
+              onClick={resetTimer}
+              className="p-0.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              title="Reset timer"
+            >
+              <RotateCcw className="w-2.5 h-2.5" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {showPicker && (
+        <div className="relative">
+          <div className="absolute right-0 top-full mt-1 z-20 bg-card border border-border rounded-lg shadow-lg p-2 flex items-center gap-1 text-[10px] font-mono whitespace-nowrap">
+            {[30, 60, 300, 900, 1800, 3600].map((sec) => (
+              <button
+                key={sec}
+                onClick={() => {
+                  onSetDuration(sec);
+                  setRemaining(sec);
+                  setShowPicker(false);
+                }}
+                className="px-1.5 py-0.5 rounded hover:bg-accent text-foreground transition-colors"
+              >
+                {sec < 60 ? `${sec}s` : sec < 3600 ? `${sec / 60}m` : `${sec / 3600}h`}
+              </button>
+            ))}
+            <button
+              onClick={() => setShowPicker(false)}
+              className="text-muted-foreground hover:text-foreground ml-1 p-0.5"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── NodeView component ────────────────────────────────────────────────────────
@@ -72,6 +282,11 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
   const editStepText = (id: string, text: string) =>
     update({
       steps: attrs.steps.map((s) => (s.id === id ? { ...s, text } : s)),
+    });
+
+  const setStepTimerDuration = (id: string, timerDuration: number | null) =>
+    update({
+      steps: attrs.steps.map((s) => (s.id === id ? { ...s, timerDuration } : s)),
     });
 
   const toggleStep = (id: string) =>
@@ -209,6 +424,15 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
                     step.checked ? 'line-through text-muted-foreground' : 'text-foreground'
                   }`}
                 />
+
+                {/* Bench Step Timer (Auto or Manual) */}
+                {!step.checked && (
+                  <StepTimer
+                    step={step}
+                    onComplete={() => toggleStep(step.id)}
+                    onSetDuration={(dur) => setStepTimerDuration(step.id, dur)}
+                  />
+                )}
 
                 {/* Deviation + delete (shown on hover or when checked) */}
                 <div className={`flex items-center gap-1 shrink-0 ${step.checked ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>

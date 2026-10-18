@@ -298,7 +298,16 @@ export async function fetchAllTrials() {
   return prisma.trial.findMany({
     where: { project: { organizationId: dbUser.organizationId } },
     orderBy: { updatedAt: 'desc' },
-    select: { id: true, title: true, status: true, updatedAt: true }
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      updatedAt: true,
+      createdAt: true,
+      projectId: true,
+      metadata: { select: { id: true, key: true, value: true } },
+      _count: { select: { revisions: true, inventoryUsed: true, signatures: true } },
+    },
   });
 }
 
