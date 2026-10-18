@@ -15,7 +15,7 @@ import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
 import tippy, { type Instance } from 'tippy.js';
-import { BarChart3, Table2, Timer, Heading, FlaskConical, Upload, ClipboardList, Database } from 'lucide-react';
+import { BarChart3, Table2, Timer, Heading, FlaskConical, Upload, ClipboardList, Database, FileSpreadsheet } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { InteractiveChartExtension } from '@/components/editor/nodes/InteractiveChartNode';
@@ -90,6 +90,19 @@ function buildSlashCommands(): SlashCommand[] {
       icon: <Database className="w-4 h-4 text-indigo-400" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
+      },
+    },
+    {
+      title: 'Lab Dataset (CSV)',
+      description: 'Import multi-column laboratory assay, plate reader, or telemetry data',
+      icon: <FileSpreadsheet className="w-4 h-4 text-blue-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).run();
+        const input = document.getElementById('inquestra-csv-upload-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = '';
+          input.click();
+        }
       },
     },
     {
@@ -549,19 +562,12 @@ export function EditorCanvas() {
 
   const handleDragLeave = useCallback(() => setIsDragOver(false), [setIsDragOver]);
 
-  const handleDrop = useCallback(
-    async (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragOver(false);
-
-      const file = Array.from(e.dataTransfer.files).find(
-        (f) => f.name.endsWith('.csv') || f.type === 'text/csv'
-      );
-      if (!file || !editorRef.current) return;
-
+  const handleCSVUpload = useCallback(
+    async (file: File) => {
+      if (!editorRef.current) return;
       try {
         const parsed = await parseCSVStream(file);
-        // Insert a chart node pre-loaded with CSV data
+        // Insert a dataset / chart node pre-loaded with multi-column CSV data
         editorRef.current
           .chain()
           .focus()
@@ -573,15 +579,36 @@ export function EditorCanvas() {
                 rows: parsed.rows.slice(0, 5000), // Cap at 5000 rows in node attrs
                 numericKeys: parsed.numericKeys,
                 filename: file.name,
+                rowCount: parsed.rowCount,
+                columnsMeta: parsed.columnsMeta,
+                categoryKeys: parsed.categoryKeys,
+                identifierKeys: parsed.identifierKeys,
+                statusKeys: parsed.statusKeys,
+                timestampKeys: parsed.timestampKeys,
               },
             },
           })
           .run();
       } catch (err) {
         console.error('CSV parse error:', err);
+        alert(err instanceof Error ? err.message : 'Failed to parse CSV file');
       }
     },
-    [setIsDragOver]
+    []
+  );
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+
+      const file = Array.from(e.dataTransfer.files).find(
+        (f) => f.name.endsWith('.csv') || f.type === 'text/csv'
+      );
+      if (!file) return;
+      await handleCSVUpload(file);
+    },
+    [handleCSVUpload]
   );
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -623,12 +650,28 @@ export function EditorCanvas() {
         }
       }}
     >
+      {/* Hidden file input for slash-command / button local CSV upload */}
+      <input
+        id="inquestra-csv-upload-input"
+        type="file"
+        accept=".csv"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) {
+            handleCSVUpload(f);
+            e.target.value = '';
+          }
+        }}
+      />
+
       {/* Drag-over overlay */}
       {isDragOver && (
         <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center gap-3 bg-muted/90 border-2 border-dashed border-blue-600 rounded-xl px-12 py-8">
-            <Upload className="w-8 h-8 text-blue-400" />
-            <p className="text-blue-300 text-sm font-medium">Drop CSV to insert chart</p>
+          <div className="flex flex-col items-center gap-3 bg-muted/95 border-2 border-dashed border-blue-500 rounded-xl px-12 py-8 shadow-2xl">
+            <Upload className="w-8 h-8 text-blue-500 animate-bounce" />
+            <p className="text-foreground text-sm font-semibold">Drop CSV to import laboratory dataset & telemetry</p>
+            <p className="text-muted-foreground text-xs font-mono">Auto-detects sample IDs, categories, conditions & measurements</p>
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@
 // All hardware payloads, API responses, and store shapes must satisfy these types.
 
 export type TrialStatus = "DRAFT" | "ACTIVE" | "IN_REVIEW" | "COMPLETED" | "FAILED";
+export type SaveStatus = "IDLE" | "SAVING" | "SAVED" | "ERROR" | "UNSAVED";
 
 export interface TelemetrySample {
   timestamp: number;       // Unix epoch ms
