@@ -400,7 +400,7 @@ export async function fetchTrialSignatures(trialId: string) {
 }
 
 
-export async function fetchAllTrials() {
+export async function fetchAllTrials(projectId?: string | null) {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
@@ -409,7 +409,10 @@ export async function fetchAllTrials() {
   if (!dbUser) throw new Error('User not found');
 
   return prisma.trial.findMany({
-    where: { project: { organizationId: dbUser.organizationId } },
+    where: {
+      project: { organizationId: dbUser.organizationId },
+      ...(projectId && projectId !== 'ALL' ? { projectId } : {}),
+    },
     orderBy: { updatedAt: 'desc' },
     select: {
       id: true,
@@ -438,7 +441,7 @@ export async function getTrial(id: string) {
   });
 }
 
-export async function createNewTrial() {
+export async function createNewTrial(projectId?: string | null, category?: string | null) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
@@ -446,20 +449,45 @@ export async function createNewTrial() {
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
 
-  const project = await prisma.project.findFirst({
-    where: { organizationId: dbUser.organizationId }
-  });
+  let targetProjectId = projectId && projectId !== 'ALL' ? projectId : null;
 
-  if (!project) throw new Error('No project found');
+  if (!targetProjectId) {
+    const project = await prisma.project.findFirst({
+      where: { organizationId: dbUser.organizationId },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!project) throw new Error('No project found');
+    targetProjectId = project.id;
+  } else {
+    const project = await prisma.project.findFirst({
+      where: { id: targetProjectId, organizationId: dbUser.organizationId },
+    });
+    if (!project) throw new Error('Project not found in organization');
+  }
+
+  const initialMetadata: { key: string; value: string }[] = [];
+  if (category && category.trim()) {
+    initialMetadata.push({
+      key: 'category',
+      value: category.trim(),
+    });
+  }
 
   const trial = await prisma.trial.create({
     data: {
-      title: 'Untitled Trial',
+      title: 'Untitled Experiment',
       content: { type: 'doc', content: [] },
-      projectId: project.id,
+      projectId: targetProjectId,
       userId: dbUser.id,
+      ...(initialMetadata.length > 0
+        ? {
+            metadata: {
+              create: initialMetadata,
+            },
+          }
+        : {}),
     },
-    include: { metadata: true }
+    include: { metadata: true },
   });
 
   revalidatePath('/app');

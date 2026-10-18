@@ -434,6 +434,12 @@ export function EditorCanvas() {
     metadata: { key: string; value: string }[];
   } | null>(null);
 
+  const lastSavedRef = useRef<{
+    trialId: string;
+    title: string;
+    contentString: string;
+  } | null>(null);
+
   // Execution function for saving to server
   const executeServerSave = useCallback(
     async (payload: {
@@ -446,6 +452,18 @@ export function EditorCanvas() {
       const currentTrial = useNotebookStore.getState().activeTrial;
       if (currentTrial.checksum) return;
 
+      const contentString = JSON.stringify(payload.content);
+      // Dirty check: skip network and DB transaction if identical to last saved state
+      if (
+        lastSavedRef.current &&
+        lastSavedRef.current.trialId === payload.trialId &&
+        lastSavedRef.current.title === payload.title &&
+        lastSavedRef.current.contentString === contentString
+      ) {
+        setSaveStatus('SAVED');
+        return;
+      }
+
       setSaveStatus('SAVING');
       try {
         const result = await saveTrial({
@@ -457,6 +475,11 @@ export function EditorCanvas() {
         });
 
         if (result.success) {
+          lastSavedRef.current = {
+            trialId: payload.trialId,
+            title: payload.title,
+            contentString,
+          };
           setSaveStatus('SAVED');
           setLastSavedAt(result.savedAt || new Date().toISOString());
           setSaveError(null);
@@ -487,9 +510,11 @@ export function EditorCanvas() {
         updateTitle(newTitle);
       }
 
+      // Mark locally as unsaved immediately
+      setSaveStatus('UNSAVED');
+
       // If trial is not synced yet (no cloudTrialId), store is updated in localStorage
       if (!currentCloudTrialId) {
-        setSaveStatus('UNSAVED');
         return;
       }
 
@@ -506,13 +531,14 @@ export function EditorCanvas() {
         clearTimeout(saveTimeoutRef.current);
       }
 
+      // 2500ms debounce ensures gentle background persistence without flooding the DB
       saveTimeoutRef.current = setTimeout(() => {
         if (pendingSaveRef.current) {
           const payload = pendingSaveRef.current;
           pendingSaveRef.current = null;
           executeServerSave(payload);
         }
-      }, 600);
+      }, 2500);
     },
     [updateContent, updateTitle, setSaveStatus, executeServerSave]
   );
@@ -535,6 +561,19 @@ export function EditorCanvas() {
     return () => {
       flushPendingSave();
     };
+  }, [flushPendingSave]);
+
+  // Global Ctrl+S / Cmd+S shortcut to flush immediately
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        flushPendingSave();
+        window.dispatchEvent(new CustomEvent('inquestra:trigger-snapshot'));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [flushPendingSave]);
 
   const editorRef = useRef<Editor | null>(null);

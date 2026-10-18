@@ -1,0 +1,111 @@
+'use client';
+// src/components/trials/SealConfirmationModal.tsx
+// Two-step verification modal for 21 CFR Part 11 cryptographic experiment sealing.
+// Prevents accidental single-click sealing and ensures deliberate regulatory sign-off.
+
+import { useState } from 'react';
+import { Shield, AlertTriangle, X, Loader2, Lock } from 'lucide-react';
+
+interface SealConfirmationModalProps {
+  trialTitle: string;
+  isOpen: boolean;
+  isSealing: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+export function SealConfirmationModal({
+  trialTitle,
+  isOpen,
+  isSealing,
+  onClose,
+  onConfirm,
+}: SealConfirmationModalProps) {
+  const [confirmText, setConfirmText] = useState('');
+
+  if (!isOpen) return null;
+
+  const isConfirmed = confirmText.trim().toUpperCase() === 'SEAL';
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+      onClick={(e) => e.target === e.currentTarget && !isSealing && onClose()}
+    >
+      <div className="relative w-full max-w-md bg-card border border-destructive/40 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-destructive/10">
+          <div className="flex items-center gap-2.5 text-destructive font-semibold text-sm">
+            <Shield className="w-4 h-4" />
+            <span>Seal Experiment Permanently</span>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={isSealing}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors disabled:opacity-50"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-5 space-y-4 text-xs">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground">21 CFR Part 11 Regulatory Lock</p>
+              <p className="leading-relaxed text-[11px]">
+                Sealing is <strong>strictly permanent and irreversible</strong>. A cryptographic SHA-256 hash will be generated. All further editing, status transitions, and data modifications will be locked.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1 bg-muted/40 p-3 rounded-lg border border-border/60">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground">Experiment Title</span>
+            <p className="font-semibold text-foreground text-sm truncate">{trialTitle}</p>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-border">
+            <label className="block text-muted-foreground text-xs">
+              To confirm, type <span className="font-mono font-bold text-foreground">SEAL</span> below:
+            </label>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="Type SEAL"
+              disabled={isSealing}
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border font-mono text-sm uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-destructive transition-colors"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center gap-2.5 px-5 py-4 bg-muted/30 border-t border-border">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSealing}
+            className="flex-1 px-3 py-2 rounded text-xs font-medium border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={!isConfirmed || isSealing}
+            className="flex-1 px-3 py-2 rounded text-xs font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            {isSealing ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Lock className="w-3.5 h-3.5" />
+            )}
+            {isSealing ? 'Sealing...' : 'Seal Experiment'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

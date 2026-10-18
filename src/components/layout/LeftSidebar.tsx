@@ -2,7 +2,7 @@
 // src/components/layout/LeftSidebar.tsx
 // Left panel: dynamic project switcher, trial list, hardware controls.
 
-import { useEffect, useState, useTransition, useCallback, useRef } from 'react';
+import { useEffect, useState, useTransition, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import {
   FlaskConical,
@@ -16,6 +16,9 @@ import {
   User as UserIcon,
   FolderOpen,
   Eye,
+  Search,
+  Tag,
+  Info,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { SerialControlPanel } from '@/components/hardware/SerialControlPanel';
@@ -26,12 +29,44 @@ import type { ProjectWithLead } from '@/actions/projectActions';
 import type { Role } from '@prisma/client';
 import { TrialPreviewCard } from '@/components/trials/TrialPreviewCard';
 
-const STATUS_DOT: Record<TrialStatus, string> = {
-  DRAFT: 'bg-muted-foreground',
-  ACTIVE: 'bg-primary',
-  IN_REVIEW: 'bg-caution',
-  COMPLETED: 'bg-phosphor',
-  FAILED: 'bg-critical',
+interface StatusConfig {
+  dotClass: string;
+  badgeClass: string;
+  label: string;
+  tooltip: string;
+}
+
+const STATUS_CONFIG: Record<TrialStatus, StatusConfig> = {
+  DRAFT: {
+    dotClass: 'bg-muted-foreground/60',
+    badgeClass: 'bg-muted text-muted-foreground',
+    label: 'Draft',
+    tooltip: 'Lifecycle: Draft (Protocol setup / in planning)',
+  },
+  ACTIVE: {
+    dotClass: 'bg-sky-500 ring-2 ring-sky-500/20 shadow-[0_0_6px_rgba(14,165,233,0.4)]',
+    badgeClass: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30',
+    label: 'Active',
+    tooltip: 'Lifecycle: Active (Live telemetry acquisition / execution in progress)',
+  },
+  IN_REVIEW: {
+    dotClass: 'bg-amber-500 ring-2 ring-amber-500/20 shadow-[0_0_6px_rgba(245,158,11,0.4)]',
+    badgeClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+    label: 'In Review',
+    tooltip: 'Lifecycle: In Review (Pending peer or QA verification)',
+  },
+  COMPLETED: {
+    dotClass: 'bg-emerald-500 ring-2 ring-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.4)]',
+    badgeClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
+    label: 'Completed',
+    tooltip: 'Lifecycle: Completed (Acquisition finished & cryptographically sealed)',
+  },
+  FAILED: {
+    dotClass: 'bg-red-500 ring-2 ring-red-500/20 shadow-[0_0_6px_rgba(239,68,68,0.4)]',
+    badgeClass: 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30',
+    label: 'Failed',
+    tooltip: 'Lifecycle: Failed (Sensor anomaly or protocol deviation)',
+  },
 };
 
 const ROLE_LABEL: Record<Role, string> = {
@@ -230,6 +265,8 @@ export function LeftSidebar() {
 
   const [projects, setProjects] = useState<ProjectWithLead[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  type StatusFilter = 'ALL' | 'ACTIVE' | 'DRAFT' | 'COMPLETED' | 'FAILED';
+
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
@@ -239,8 +276,14 @@ export function LeftSidebar() {
   const [loadingTrialId, setLoadingTrialId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [showInfoPopover, setShowInfoPopover] = useState(false);
+
   const requestSeqRef = useRef(0);
   const hasInitializedRef = useRef(false);
+  const loadingTrialIdRef = useRef<string | null>(null);
 
   // Load projects on mount
   useEffect(() => {
@@ -256,9 +299,10 @@ export function LeftSidebar() {
   }, []);
 
   const handleSelectTrial = useCallback((id: string) => {
-    if (loadingTrialId === id) return;
+    if (loadingTrialIdRef.current === id) return;
 
     const currentSeq = ++requestSeqRef.current;
+    loadingTrialIdRef.current = id;
     setLoadingTrialId(id);
     setIsLoadingTrial(true);
 
@@ -291,47 +335,64 @@ export function LeftSidebar() {
         console.error('Failed to load trial:', err);
       } finally {
         if (requestSeqRef.current === currentSeq) {
+          loadingTrialIdRef.current = null;
           setLoadingTrialId(null);
           setIsLoadingTrial(false);
         }
       }
     });
-  }, [loadingTrialId, setActiveTrial, setCloudIds, setIsLoadingTrial]);
+  }, [setActiveTrial, setCloudIds, setIsLoadingTrial]);
 
-  // Load trials whenever active project changes
-  const loadTrials = useCallback(() => {
-    setIsLoadingTrials(true);
-    fetchAllTrials()
-      .then((ts) => {
-        const trialList = ts as unknown as TrialSummaryItem[];
-        setTrials(trialList);
-
-        // Auto-hydrate the latest cloud trial on initial load if user has existing trials
-        if (!hasInitializedRef.current && trialList.length > 0) {
-          hasInitializedRef.current = true;
-          const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
-          const targetTrial = (currentCloudTrialId && trialList.find((t) => t.id === currentCloudTrialId)) || trialList[0];
-          if (targetTrial) {
-            handleSelectTrial(targetTrial.id);
-          }
-        }
-      })
-      .catch(console.error)
-      .finally(() => setIsLoadingTrials(false));
+  const handleSelectTrialRef = useRef(handleSelectTrial);
+  useEffect(() => {
+    handleSelectTrialRef.current = handleSelectTrial;
   }, [handleSelectTrial]);
 
+  const trialsRef = useRef<TrialSummaryItem[]>([]);
   useEffect(() => {
-    loadTrials();
-  }, [loadTrials]);
+    trialsRef.current = trials;
+  }, [trials]);
+
+  // Load trials whenever active project changes
+  const loadTrials = useCallback(async (projectIdToLoad?: string | null) => {
+    // Only show full skeleton loader on initial cold load
+    if (trialsRef.current.length === 0) {
+      setIsLoadingTrials(true);
+    }
+    try {
+      const ts = await fetchAllTrials(projectIdToLoad);
+      const trialList = ts as unknown as TrialSummaryItem[];
+      setTrials(trialList);
+
+      // Auto-hydrate the latest cloud trial on initial load if user has existing trials
+      if (!hasInitializedRef.current && trialList.length > 0) {
+        hasInitializedRef.current = true;
+        const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
+        const targetTrial = (currentCloudTrialId && trialList.find((t) => t.id === currentCloudTrialId)) || trialList[0];
+        if (targetTrial) {
+          handleSelectTrialRef.current(targetTrial.id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load trials:', err);
+    } finally {
+      setIsLoadingTrials(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTrials(activeProjectId);
+  }, [activeProjectId, loadTrials]);
 
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
-  const handleNewTrial = () => {
+  const handleNewTrial = (cat?: string) => {
     startTransition(async () => {
       try {
         setIsLoadingTrial(true);
-        const newTrial = await createNewTrial();
-        setTrials((prev) => [newTrial as unknown as TrialSummaryItem, ...prev]);
+        const newTrial = await createNewTrial(activeProjectId, cat);
+        const summary = newTrial as unknown as TrialSummaryItem;
+        setTrials((prev) => [summary, ...prev]);
         setActiveTrial({
           id: newTrial.id,
           title: newTrial.title,
@@ -362,6 +423,64 @@ export function LeftSidebar() {
     setShowNewProjectModal(false);
   };
 
+  // Real-time optimistic synchronization of the active trial's title, status, metadata
+  const displayTrials = useMemo(() => {
+    return trials.map((t) => {
+      if (t.id === activeTrial.id) {
+        return {
+          ...t,
+          title: activeTrial.title || t.title,
+          status: activeTrial.status || t.status,
+          metadata: activeTrial.metadata || t.metadata,
+        };
+      }
+      return t;
+    });
+  }, [trials, activeTrial.id, activeTrial.title, activeTrial.status, activeTrial.metadata]);
+
+  // Extract distinct category tags across all trials
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    displayTrials.forEach((t) => {
+      const cat = t.metadata?.find(
+        (m) => m.key.toLowerCase() === 'category' || m.key.toLowerCase() === 'type'
+      )?.value;
+      if (cat && cat.trim()) cats.add(cat.trim());
+    });
+    return Array.from(cats);
+  }, [displayTrials]);
+
+  // Multi-dimensional filtering: Search + Status + Category
+  const filteredTrials = useMemo(() => {
+    return displayTrials.filter((t) => {
+      // Status filter
+      if (statusFilter !== 'ALL' && t.status !== statusFilter) {
+        return false;
+      }
+
+      // Category filter
+      if (categoryFilter !== 'ALL') {
+        const cat = t.metadata?.find(
+          (m) => m.key.toLowerCase() === 'category' || m.key.toLowerCase() === 'type'
+        )?.value?.toLowerCase();
+        if (cat !== categoryFilter.toLowerCase()) return false;
+      }
+
+      // Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchTitle = t.title.toLowerCase().includes(q);
+        const matchStatus = t.status.toLowerCase().includes(q);
+        const matchMeta = t.metadata?.some(
+          (m) => m.key.toLowerCase().includes(q) || m.value.toLowerCase().includes(q)
+        );
+        if (!matchTitle && !matchStatus && !matchMeta) return false;
+      }
+
+      return true;
+    });
+  }, [displayTrials, statusFilter, categoryFilter, searchQuery]);
+
   return (
     <>
       <aside className="w-[260px] bg-background/80 backdrop-blur-md border-r border-border/80 flex flex-col shrink-0 overflow-hidden shadow-2xl">
@@ -380,7 +499,7 @@ export function LeftSidebar() {
                 </div>
                 <div className="min-w-0">
                   <span className="text-sm text-foreground font-medium truncate tracking-tight block">
-                    {activeProject?.name ?? 'Select Project'}
+                    {activeProject?.name ?? 'All Projects'}
                   </span>
                   {activeProject?.lead && (
                     <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
@@ -391,6 +510,11 @@ export function LeftSidebar() {
                   {activeProject?.code && !activeProject.lead && (
                     <span className="text-[10px] text-muted-foreground font-mono truncate block leading-none mt-0.5">
                       {activeProject.code}
+                    </span>
+                  )}
+                  {!activeProject && (
+                    <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
+                      Workspace Overview
                     </span>
                   )}
                 </div>
@@ -414,8 +538,37 @@ export function LeftSidebar() {
           </div>
 
           {/* Project dropdown */}
-          {projectMenuOpen && projects.length > 0 && (
-            <div className="mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+          {projectMenuOpen && (
+            <div className="mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+              {/* All Projects Option */}
+              <button
+                onClick={() => {
+                  setActiveProjectId(null);
+                  setProjectMenuOpen(false);
+                }}
+                className={`w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-accent transition-colors border-b border-border/30 ${
+                  !activeProjectId ? 'bg-muted/60' : ''
+                }`}
+              >
+                <FolderOpen
+                  className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
+                    !activeProjectId ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                />
+                <div className="min-w-0 flex-1">
+                  <span
+                    className={`text-xs font-medium block truncate ${
+                      !activeProjectId ? 'text-primary font-semibold' : 'text-foreground'
+                    }`}
+                  >
+                    All Projects
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    Entire organization workspace
+                  </span>
+                </div>
+              </button>
+
               {projects.map((p) => (
                 <button
                   key={p.id}
@@ -458,20 +611,31 @@ export function LeftSidebar() {
           )}
         </div>
 
-        {/* ── Trial List ────────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto p-3">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <div className="flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Trials
+        {/* ── Experiments & Trials Section ──────────────────────────────── */}
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col min-h-0">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2.5 px-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <BookOpen className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground truncate">
+                Experiments &amp; Trials
               </span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono shrink-0">
+                {filteredTrials.length}
+              </span>
+              <button
+                onClick={() => setShowInfoPopover((v) => !v)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                title="Why 'Trials'? Click for details on Inquestra's BME DAQ + ELN architecture."
+              >
+                <Info className="w-3 h-3" />
+              </button>
             </div>
             <button
-              onClick={handleNewTrial}
+              onClick={() => handleNewTrial()}
               disabled={isPending}
-              className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1 rounded disabled:opacity-50"
-              title="New trial"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1 rounded disabled:opacity-50 shrink-0"
+              title="New experiment"
             >
               {isPending && !loadingTrialId ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -481,9 +645,90 @@ export function LeftSidebar() {
             </button>
           </div>
 
-          <div className="space-y-1">
-            {/* Skeleton loaders while trials fetch */}
-            {isLoadingTrials &&
+          {/* Architecture Explainer Popover */}
+          {showInfoPopover && (
+            <div className="mb-2.5 p-2.5 rounded-lg bg-card border border-border shadow-md text-[11px] text-muted-foreground space-y-1.5 animate-in fade-in-50 zoom-in-95 duration-150">
+              <div className="flex items-center justify-between font-semibold text-foreground">
+                <span className="flex items-center gap-1">
+                  <FlaskConical className="w-3.5 h-3.5 text-primary" />
+                  What is an Experiment / Trial?
+                </span>
+                <button
+                  onClick={() => setShowInfoPopover(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <p className="leading-relaxed">
+                In Biomedical Engineering (BME) and DAQ, a <strong>trial</strong> is an individual data collection cycle or telemetry run.
+              </p>
+              <p className="leading-relaxed">
+                In Inquestra, every entry is also a full <strong>Electronic Research Notebook (ERN)</strong> document that tracks rich hypotheses, protocol executions (SOPs), LIMS reagent deductions, telemetry graphs, and 21 CFR Part 11 seals.
+              </p>
+            </div>
+          )}
+
+          {/* Search Input */}
+          <div className="relative mb-2">
+            <Search className="w-3.5 h-3.5 absolute left-2 top-2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search experiments, tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-background/60 border border-border/80 rounded-md pl-7 pr-6 py-1 text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-1.5 top-1.5 text-muted-foreground hover:text-foreground p-0.5"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          {/* Categorization: Status Filter Pills */}
+          <div className="flex items-center gap-1 mb-2 overflow-x-auto pb-1 scrollbar-none text-[10px]">
+            {(['ALL', 'ACTIVE', 'DRAFT', 'COMPLETED'] as const).map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-2 py-0.5 rounded-full border transition-colors shrink-0 font-medium ${
+                  statusFilter === st
+                    ? 'bg-foreground text-background border-foreground font-semibold shadow-xs'
+                    : 'bg-muted/40 text-muted-foreground border-border/60 hover:bg-accent hover:text-foreground'
+                }`}
+              >
+                {st === 'ALL' ? 'All' : st === 'ACTIVE' ? 'Active' : st === 'DRAFT' ? 'Draft' : 'Completed'}
+              </button>
+            ))}
+          </div>
+
+          {/* Optional Category Filter Dropdown (if tags exist) */}
+          {availableCategories.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-2 px-1 text-[10px] text-muted-foreground">
+              <Tag className="w-3 h-3 shrink-0" />
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="bg-transparent border-0 text-[10px] text-foreground font-medium focus:outline-none cursor-pointer py-0.5"
+              >
+                <option value="ALL">All Categories</option>
+                {availableCategories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Actual trial list */}
+          <div className="space-y-1 flex-1 overflow-y-auto">
+            {/* Skeleton loaders only on initial empty load */}
+            {isLoadingTrials && trials.length === 0 &&
               [...Array(4)].map((_, i) => (
                 <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded">
                   <div className="w-1.5 h-1.5 rounded-full bg-muted animate-pulse shrink-0" />
@@ -494,39 +739,55 @@ export function LeftSidebar() {
                 </div>
               ))}
 
-            {/* Actual trial list */}
-            {!isLoadingTrials &&
-              trials.map((t) => {
-                const isActive = activeTrial.id === t.id;
-                const isLoading = loadingTrialId === t.id;
-                return (
-                  <div
-                    key={t.id}
-                    className={`group relative flex items-center justify-between w-full px-2 py-1.5 rounded transition-all duration-200 border ${
-                      isActive
-                        ? 'bg-neutral-200/80 dark:bg-neutral-800/80 border-border/80 shadow-xs'
-                        : 'bg-transparent border-transparent hover:bg-muted/50 hover:border-border/50'
-                    }`}
+            {filteredTrials.map((t) => {
+              const isActive = activeTrial.id === t.id;
+              const isLoading = loadingTrialId === t.id;
+              const categoryTag = t.metadata?.find(
+                (m) => m.key.toLowerCase() === 'category' || m.key.toLowerCase() === 'type'
+              )?.value;
+
+              return (
+                <div
+                  key={t.id}
+                  className={`group relative flex items-center justify-between w-full px-2 py-1.5 rounded transition-all duration-200 border ${
+                    isActive
+                      ? 'bg-neutral-200/80 dark:bg-neutral-800/80 border-border/80 shadow-xs'
+                      : 'bg-transparent border-transparent hover:bg-muted/50 hover:border-border/50'
+                  }`}
+                >
+                  <button
+                    onClick={() => handleSelectTrial(t.id)}
+                    className="flex items-center gap-2 flex-1 min-w-0 text-left"
                   >
-                    <button
-                      onClick={() => handleSelectTrial(t.id)}
-                      className="flex items-center gap-2 flex-1 min-w-0 text-left"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-3 h-3 text-indigo-400 animate-spin shrink-0" />
-                      ) : (
-                        <div
-                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[t.status as TrialStatus]}`}
-                        />
-                      )}
+                    {isLoading ? (
+                      <Loader2 className="w-3 h-3 text-indigo-400 animate-spin shrink-0" />
+                    ) : (
                       <span
-                        className={`text-sm truncate tracking-tight ${
-                          isActive ? 'text-foreground font-semibold' : 'text-muted-foreground'
-                        }`}
+                        title={STATUS_CONFIG[t.status as TrialStatus]?.tooltip || `Status: ${t.status}`}
+                        className="relative flex items-center justify-center p-0.5 shrink-0"
                       >
-                        {t.title}
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 transition-transform hover:scale-125 ${
+                            STATUS_CONFIG[t.status as TrialStatus]?.dotClass || 'bg-muted-foreground'
+                          }`}
+                        />
                       </span>
-                    </button>
+                    )}
+                    <span
+                      className={`text-sm truncate tracking-tight ${
+                        isActive ? 'text-foreground font-semibold' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {t.title}
+                    </span>
+                  </button>
+
+                  <div className="flex items-center gap-1 shrink-0 ml-1">
+                    {categoryTag && (
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-muted/90 text-muted-foreground font-mono uppercase tracking-wider hidden sm:inline-block">
+                        {categoryTag}
+                      </span>
+                    )}
 
                     {/* Cassini-Style Headless Preview Inspector */}
                     <button
@@ -534,19 +795,37 @@ export function LeftSidebar() {
                         e.stopPropagation();
                         setPreviewTrial(t);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0 ml-1"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
                       title="Preview experiment parameters & metadata"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
 
-            {/* Empty state */}
+            {/* Filtered Empty State */}
+            {!isLoadingTrials && filteredTrials.length === 0 && trials.length > 0 && (
+              <div className="px-2 py-4 text-center">
+                <p className="text-xs text-muted-foreground mb-2">No experiments match filter.</p>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('ALL');
+                    setCategoryFilter('ALL');
+                  }}
+                  className="text-[10px] text-primary hover:underline"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
+
+            {/* Truly Empty State */}
             {!isLoadingTrials && trials.length === 0 && (
               <p className="px-2 py-3 text-xs text-muted-foreground">
-                No trials yet. Hit + to start.
+                No experiments yet. Hit + to start.
               </p>
             )}
           </div>

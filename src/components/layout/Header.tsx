@@ -3,7 +3,7 @@
 // Top navigation bar: workspace identity, trial status badge, simulator toggle,
 // Save to Cloud button, Export (.zip) button, and User Login / Profile status.
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Circle,
@@ -15,9 +15,12 @@ import {
   LogIn,
   LogOut,
   Shield,
+  ShieldCheck,
   AlertCircle,
   Check,
+  Bookmark,
 } from 'lucide-react';
+import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal';
 import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { syncTrialToCloud } from '@/actions/syncActions';
@@ -72,6 +75,8 @@ export function Header() {
   const [isPending, startTransition] = useTransition();
   const [isExporting, setIsExporting] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [showSealModal, setShowSealModal] = useState(false);
+  const [snapshotSuccess, setSnapshotSuccess] = useState(false);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -112,7 +117,7 @@ export function Header() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSync = () => {
+  const handleSaveSnapshot = useCallback(() => {
     setSyncError(null);
     setSaveError(null);
 
@@ -134,7 +139,7 @@ export function Header() {
       });
 
       if (!result.success || result.error) {
-        const err = result.error ?? 'Sync failed.';
+        const err = result.error ?? 'Snapshot save failed.';
         setSyncError(err);
         setSaveError(err);
         setSaveStatus('ERROR');
@@ -146,9 +151,20 @@ export function Header() {
         setSaveStatus('SAVED');
         setLastSavedAt(new Date().toISOString());
         setSaveError(null);
+        setSnapshotSuccess(true);
+        setTimeout(() => setSnapshotSuccess(false), 2500);
       }
     });
-  };
+  }, [user, title, content, status, metadata, cloudTrialId, cloudProjectId, setCloudIds, setSaveStatus, setLastSavedAt, setSaveError, startTransition]);
+
+  // Listen to global shortcut trigger from EditorCanvas or elsewhere
+  useEffect(() => {
+    const handleSnapshotEvent = () => {
+      handleSaveSnapshot();
+    };
+    window.addEventListener('inquestra:trigger-snapshot', handleSnapshotEvent);
+    return () => window.removeEventListener('inquestra:trigger-snapshot', handleSnapshotEvent);
+  }, [handleSaveSnapshot]);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -200,8 +216,11 @@ export function Header() {
   };
 
   const [isSealing, setIsSealing] = useState(false);
-  const handleSealTrial = () => {
-    if (!confirm('Seal this trial? This action is irreversible. The trial will be locked from further edits and cryptographically hashed.')) return;
+  const handleOpenSealModal = () => {
+    setShowSealModal(true);
+  };
+
+  const handleExecuteSeal = () => {
     setIsSealing(true);
     startTransition(async () => {
       try {
@@ -226,10 +245,11 @@ export function Header() {
         }
 
         await sealTrial(targetId);
+        setShowSealModal(false);
         // Force reload to grab latest DB state
         window.location.reload(); 
-      } catch (err: any) {
-        alert(err.message || 'Failed to seal trial');
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Failed to seal trial');
         setIsSealing(false);
       }
     });
@@ -248,44 +268,47 @@ export function Header() {
       <div className="h-4 w-px bg-border shrink-0" />
 
       {/* Trial identity */}
-      <span className="text-foreground text-sm truncate max-w-xs font-medium tracking-tight">{title}</span>
+      <span className="text-foreground text-sm truncate max-w-xs font-medium tracking-tight" title={title}>{title}</span>
 
       {/* Status badge — interactive dropdown when trial is not sealed */}
-      {activeTrial.checksum ? (
-        <span
-          className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
-        >
-          {status.replace('_', ' ')}
-        </span>
-      ) : (
-        <select
-          value={status}
-          disabled={!cloudTrialId || isPending}
-          onChange={(e) => {
-            const newStatus = e.target.value as TrialStatus;
-            if (!cloudTrialId) return;
-            startTransition(async () => {
-              try {
-                await updateTrialStatus(cloudTrialId, newStatus);
-                // Optimistically update local store
-                useNotebookStore.setState((s) => ({
-                  activeTrial: { ...s.activeTrial, status: newStatus },
-                }));
-              } catch (err) {
-                alert(err instanceof Error ? err.message : 'Status update failed');
-              }
-            });
-          }}
-          title={cloudTrialId ? 'Change trial status' : 'Sync trial to cloud to change status'}
-          className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border cursor-pointer appearance-none bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
-        >
-          <option value="DRAFT">DRAFT</option>
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="IN_REVIEW">IN REVIEW</option>
-          <option value="COMPLETED">COMPLETED</option>
-          <option value="FAILED">FAILED</option>
-        </select>
-      )}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="text-[10px] uppercase font-mono text-muted-foreground font-semibold">Status:</span>
+        {activeTrial.checksum ? (
+          <span
+            className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
+          >
+            {status.replace('_', ' ')}
+          </span>
+        ) : (
+          <select
+            value={status}
+            disabled={!cloudTrialId || isPending}
+            onChange={(e) => {
+              const newStatus = e.target.value as TrialStatus;
+              if (!cloudTrialId) return;
+              startTransition(async () => {
+                try {
+                  await updateTrialStatus(cloudTrialId, newStatus);
+                  // Optimistically update local store
+                  useNotebookStore.setState((s) => ({
+                    activeTrial: { ...s.activeTrial, status: newStatus },
+                  }));
+                } catch (err) {
+                  alert(err instanceof Error ? err.message : 'Status update failed');
+                }
+              });
+            }}
+            title={cloudTrialId ? 'Change trial lifecycle status' : 'Save trial to cloud to change status'}
+            className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border cursor-pointer appearance-none bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
+          >
+            <option value="DRAFT">DRAFT</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="IN_REVIEW">IN REVIEW</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="FAILED">FAILED</option>
+          </select>
+        )}
+      </div>
 
       <div className="ml-auto flex items-center gap-3">
         {/* Sync error */}
@@ -295,7 +318,7 @@ export function Header() {
           </span>
         )}
 
-        {/* Real-time Save/Sync status badge */}
+        {/* Real-time Autosave status indicator */}
         {(saveStatus === 'SAVING' || isPending) && (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -303,13 +326,13 @@ export function Header() {
           </span>
         )}
         {saveStatus === 'SAVED' && !syncError && isSynced && !isPending && (
-          <span className="flex items-center gap-1.5 text-xs text-primary font-mono">
-            <Cloud className="w-3.5 h-3.5" />
-            Saved
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono" title="Autosaved to cloud database">
+            <Cloud className="w-3.5 h-3.5 text-primary" />
+            Autosaved
           </span>
         )}
         {saveStatus === 'UNSAVED' && isSynced && !isPending && (
-          <span className="flex items-center gap-1.5 text-xs text-amber-500 font-mono">
+          <span className="flex items-center gap-1.5 text-xs text-amber-500 font-mono" title="Unsaved changes pending autosave">
             <Circle className="w-2 h-2 fill-amber-500" />
             Unsaved
           </span>
@@ -346,48 +369,60 @@ export function Header() {
           {isExporting ? 'Exporting…' : 'Export'}
         </button>
 
-        {/* Seal Trial Button or Lock Badge */}
-        {activeTrial.checksum ? (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution font-mono" title={`Sealed with SHA-256: ${activeTrial.checksum}`}>
-            <Shield className="w-3.5 h-3.5" />
-            Sealed SHA-256
-          </div>
-        ) : (
-          <button
-            onClick={handleSealTrial}
-            disabled={isSealing}
-            title="Seal trial (Irreversible)"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution hover:bg-caution/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSealing ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Shield className="w-3.5 h-3.5" />
-            )}
-            {isSealing ? 'Sealing...' : 'Seal Trial'}
-          </button>
-        )}
-
-        {/* Save to Cloud button */}
+        {/* Save Snapshot button (Ctrl+S) - Creates deliberate audit revision */}
         <button
-          onClick={handleSync}
+          onClick={handleSaveSnapshot}
           disabled={isPending || saveStatus === 'SAVING'}
-          title={isSynced ? 'Push latest trial changes to cloud' : 'Save trial to cloud'}
+          title={isSynced ? 'Create an audit-logged revision milestone snapshot (Ctrl+S)' : 'Save trial to cloud database'}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
-            isSynced
+            snapshotSuccess
+              ? 'bg-phosphor/15 text-phosphor border-phosphor/40 font-semibold'
+              : isSynced
               ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
               : 'bg-muted/60 text-foreground border-border hover:bg-accent'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isPending || saveStatus === 'SAVING' ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : snapshotSuccess ? (
+            <Check className="w-3.5 h-3.5 text-phosphor" />
           ) : isSynced ? (
-            <Cloud className="w-3.5 h-3.5" />
+            <Bookmark className="w-3.5 h-3.5" />
           ) : (
-            <CloudOff className="w-3.5 h-3.5" />
+            <Cloud className="w-3.5 h-3.5" />
           )}
-          {isPending || saveStatus === 'SAVING' ? 'Syncing…' : isSynced ? 'Sync Changes' : 'Save to Cloud'}
+          {isPending || saveStatus === 'SAVING'
+            ? 'Saving…'
+            : snapshotSuccess
+            ? 'Snapshot Saved!'
+            : isSynced
+            ? 'Save Snapshot'
+            : 'Save to Cloud'}
         </button>
+
+        {/* Physical Safety Barrier separating routine actions from regulatory actions */}
+        <div className="h-5 w-px bg-destructive/30 shrink-0" />
+
+        {/* 21 CFR Part 11 Regulatory Sealing Zone */}
+        {activeTrial.checksum ? (
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution font-mono"
+            title={`Sealed with SHA-256: ${activeTrial.checksum}`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Sealed SHA-256
+          </div>
+        ) : (
+          <button
+            onClick={handleOpenSealModal}
+            disabled={isSealing}
+            title="Irreversible 21 CFR Part 11 Cryptographic Lock"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            Seal Trial
+          </button>
+        )}
 
         {/* Live connection badge */}
         {hardwareStatus.isConnected && (
@@ -469,6 +504,14 @@ export function Header() {
           </Link>
         )}
       </div>
+
+      <SealConfirmationModal
+        trialTitle={title}
+        isOpen={showSealModal}
+        isSealing={isSealing}
+        onClose={() => setShowSealModal(false)}
+        onConfirm={handleExecuteSeal}
+      />
     </header>
   );
 }

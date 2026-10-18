@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Tag, Plus, X, Activity, Box, FileKey, History } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
@@ -47,6 +47,11 @@ export function RightDrawer() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingLinked, setIsLoadingLinked] = useState(false);
 
+  const searchQueryRef = useRef(searchQuery);
+  useEffect(() => {
+    searchQueryRef.current = searchQuery;
+  }, [searchQuery]);
+
   // Fetch linked items and listen for live updates from notebook deductions
   useEffect(() => {
     async function loadLinked() {
@@ -66,12 +71,12 @@ export function RightDrawer() {
     const handleInventoryUpdate = () => {
       loadLinked();
       // Also refresh stock levels in search results
-      fetchInventoryForSearch(searchQuery).then(setSearchResults).catch(console.error);
+      fetchInventoryForSearch(searchQueryRef.current).then(setSearchResults).catch(console.error);
     };
 
     window.addEventListener('inquestra:inventory-updated', handleInventoryUpdate);
     return () => window.removeEventListener('inquestra:inventory-updated', handleInventoryUpdate);
-  }, [activeTrial?.id, rightDrawerMode, searchQuery]);
+  }, [activeTrial?.id, rightDrawerMode]);
 
   // Debounced search (and initial load when empty)
   useEffect(() => {
@@ -413,9 +418,27 @@ export function RightDrawer() {
               </div>
               {!isSealed && (
                 <div className="space-y-2.5">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-muted-foreground block font-medium">Quick Categories:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {['DAQ Run', 'Biomarker Assay', 'Protocol Execution', 'Calibration', 'Quality Control'].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => {
+                            setNewKey('category');
+                            setNewValue(cat);
+                          }}
+                          className="text-[10px] px-2 py-0.5 rounded bg-muted/80 hover:bg-accent border border-border/60 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          +{cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <input
                     type="text"
-                    placeholder="Key (e.g. organism)"
+                    placeholder="Key (e.g. category, organism)"
                     value={newKey}
                     onChange={(e) => setNewKey(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -423,7 +446,7 @@ export function RightDrawer() {
                   />
                   <input
                     type="text"
-                    placeholder="Value (e.g. Homo sapiens)"
+                    placeholder="Value (e.g. DAQ Run, Homo sapiens)"
                     value={newValue}
                     onChange={(e) => setNewValue(e.target.value)}
                     onKeyDown={handleKeyDown}
