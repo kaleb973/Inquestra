@@ -10,6 +10,7 @@ import type {
   MetadataEntry,
   TrialDocument,
   TelemetryStats,
+  SaveStatus,
 } from '@/types/inquestra';
 
 const BUFFER_MAX = 500;
@@ -51,6 +52,11 @@ interface NotebookState {
   cloudTrialId: string | null;
   /** Supabase-side UUID for the auto-provisioned project */
   cloudProjectId: string | null;
+  /** Global real-time save state */
+  saveStatus: SaveStatus;
+  lastSavedAt: string | null;
+  saveError: string | null;
+  isLoadingTrial: boolean;
   /** Rolling window of the last BUFFER_MAX telemetry samples (transient, not persisted). */
   telemetryBuffer: TelemetrySample[];
   /** Derived stats recomputed on each append — cheap for subscribers to read. */
@@ -62,6 +68,10 @@ interface NotebookActions {
   setRightDrawerMode: (mode: RightDrawerMode) => void;
   setActiveTrial: (trial: TrialDocument) => void;
   setCloudIds: (ids: { cloudTrialId: string; cloudProjectId: string }) => void;
+  setSaveStatus: (status: SaveStatus) => void;
+  setLastSavedAt: (time: string | null) => void;
+  setSaveError: (error: string | null) => void;
+  setIsLoadingTrial: (loading: boolean) => void;
   /**
    * Append one or many samples to the rolling buffer (cap: BUFFER_MAX).
    * Also recomputes telemetryStats in the same set() call.
@@ -87,15 +97,32 @@ export const useNotebookStore = create<NotebookStore>()(
       activeTrial: makeDefaultTrial(),
       cloudTrialId: null,
       cloudProjectId: null,
+      saveStatus: 'SAVED' as SaveStatus,
+      lastSavedAt: null,
+      saveError: null,
+      isLoadingTrial: false,
       telemetryBuffer: [],
       telemetryStats: DEFAULT_STATS,
       hardwareStatus: DEFAULT_HARDWARE,
 
       setRightDrawerMode: (mode) => set({ rightDrawerMode: mode }),
-      setActiveTrial: (trial) => set({ activeTrial: trial, cloudTrialId: trial.id }),
+      setActiveTrial: (trial) =>
+        set({
+          activeTrial: trial,
+          cloudTrialId: trial.id,
+          saveStatus: 'SAVED',
+          saveError: null,
+          isLoadingTrial: false,
+          lastSavedAt: trial.updatedAt || new Date().toISOString(),
+        }),
 
       setCloudIds: ({ cloudTrialId, cloudProjectId }) =>
         set({ cloudTrialId, cloudProjectId }),
+
+      setSaveStatus: (status) => set({ saveStatus: status }),
+      setLastSavedAt: (time) => set({ lastSavedAt: time }),
+      setSaveError: (error) => set({ saveError: error }),
+      setIsLoadingTrial: (loading) => set({ isLoadingTrial: loading }),
 
       appendTelemetry: (point) =>
         set((state) => {
@@ -121,6 +148,7 @@ export const useNotebookStore = create<NotebookStore>()(
             content: json,
             updatedAt: new Date().toISOString(),
           },
+          saveStatus: 'UNSAVED',
         })),
 
       updateTitle: (title) =>
@@ -130,6 +158,7 @@ export const useNotebookStore = create<NotebookStore>()(
             title,
             updatedAt: new Date().toISOString(),
           },
+          saveStatus: 'UNSAVED',
         })),
 
       setHardwareStatus: (status) =>
@@ -144,6 +173,7 @@ export const useNotebookStore = create<NotebookStore>()(
             metadata: [...state.activeTrial.metadata, entry],
             updatedAt: new Date().toISOString(),
           },
+          saveStatus: 'UNSAVED',
         })),
 
       removeMetadata: (id) =>
@@ -153,6 +183,7 @@ export const useNotebookStore = create<NotebookStore>()(
             metadata: state.activeTrial.metadata.filter((m) => m.id !== id),
             updatedAt: new Date().toISOString(),
           },
+          saveStatus: 'UNSAVED',
         })),
 
       resetTelemetry: () =>
@@ -161,11 +192,12 @@ export const useNotebookStore = create<NotebookStore>()(
     {
       name: 'inquestra-notebook-v1',
       storage: createJSONStorage(() => localStorage),
-      // Persist document + cloud IDs — hardware status and telemetry are transient.
+      // Persist document + cloud IDs + lastSavedAt — hardware status and telemetry are transient.
       partialize: (state) => ({
         activeTrial: state.activeTrial,
         cloudTrialId: state.cloudTrialId,
         cloudProjectId: state.cloudProjectId,
+        lastSavedAt: state.lastSavedAt,
       }),
     }
   )
