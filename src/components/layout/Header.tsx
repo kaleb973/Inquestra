@@ -15,6 +15,8 @@ import {
   LogIn,
   LogOut,
   Shield,
+  AlertCircle,
+  Check,
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
@@ -47,6 +49,11 @@ export function Header() {
   const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
   const setCloudIds = useNotebookStore((s) => s.setCloudIds);
   const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
+  const saveStatus = useNotebookStore((s) => s.saveStatus);
+  const saveError = useNotebookStore((s) => s.saveError);
+  const setSaveStatus = useNotebookStore((s) => s.setSaveStatus);
+  const setSaveError = useNotebookStore((s) => s.setSaveError);
+  const setLastSavedAt = useNotebookStore((s) => s.setLastSavedAt);
 
   const isSynced = cloudTrialId !== null;
 
@@ -107,6 +114,7 @@ export function Header() {
 
   const handleSync = () => {
     setSyncError(null);
+    setSaveError(null);
 
     // If user is not logged in, direct them to login
     if (!user) {
@@ -114,6 +122,7 @@ export function Header() {
       return;
     }
 
+    setSaveStatus('SAVING');
     startTransition(async () => {
       const result = await syncTrialToCloud({
         title,
@@ -125,12 +134,18 @@ export function Header() {
       });
 
       if (!result.success || result.error) {
-        setSyncError(result.error ?? 'Sync failed.');
+        const err = result.error ?? 'Sync failed.';
+        setSyncError(err);
+        setSaveError(err);
+        setSaveStatus('ERROR');
       } else if (result.cloudTrialId && result.cloudProjectId) {
         setCloudIds({
           cloudTrialId: result.cloudTrialId,
           cloudProjectId: result.cloudProjectId,
         });
+        setSaveStatus('SAVED');
+        setLastSavedAt(new Date().toISOString());
+        setSaveError(null);
       }
     });
   };
@@ -280,11 +295,29 @@ export function Header() {
           </span>
         )}
 
-        {/* Cloud sync badge when synced */}
-        {isSynced && !syncError && (
+        {/* Real-time Save/Sync status badge */}
+        {(saveStatus === 'SAVING' || isPending) && (
+          <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            Saving…
+          </span>
+        )}
+        {saveStatus === 'SAVED' && !syncError && isSynced && !isPending && (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono">
             <Cloud className="w-3.5 h-3.5" />
             Saved
+          </span>
+        )}
+        {saveStatus === 'UNSAVED' && isSynced && !isPending && (
+          <span className="flex items-center gap-1.5 text-xs text-amber-500 font-mono">
+            <Circle className="w-2 h-2 fill-amber-500" />
+            Unsaved
+          </span>
+        )}
+        {(saveStatus === 'ERROR' || syncError) && (
+          <span className="flex items-center gap-1.5 text-xs text-critical font-mono" title={saveError || syncError || 'Sync failed'}>
+            <AlertCircle className="w-3.5 h-3.5 text-critical" />
+            Save Error
           </span>
         )}
 
@@ -338,7 +371,7 @@ export function Header() {
         {/* Save to Cloud button */}
         <button
           onClick={handleSync}
-          disabled={isPending}
+          disabled={isPending || saveStatus === 'SAVING'}
           title={isSynced ? 'Push latest trial changes to cloud' : 'Save trial to cloud'}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
             isSynced
@@ -346,14 +379,14 @@ export function Header() {
               : 'bg-muted/60 text-foreground border-border hover:bg-accent'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {isPending ? (
+          {isPending || saveStatus === 'SAVING' ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : isSynced ? (
             <Cloud className="w-3.5 h-3.5" />
           ) : (
             <CloudOff className="w-3.5 h-3.5" />
           )}
-          {isPending ? 'Syncing…' : isSynced ? 'Sync Changes' : 'Save to Cloud'}
+          {isPending || saveStatus === 'SAVING' ? 'Syncing…' : isSynced ? 'Sync Changes' : 'Save to Cloud'}
         </button>
 
         {/* Live connection badge */}

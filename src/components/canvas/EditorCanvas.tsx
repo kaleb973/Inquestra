@@ -15,7 +15,21 @@ import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
 import tippy, { type Instance } from 'tippy.js';
-import { BarChart3, Table2, Timer, Heading, FlaskConical, Upload, ClipboardList, Database, FileSpreadsheet } from 'lucide-react';
+import {
+  BarChart3,
+  Table2,
+  Timer,
+  Heading,
+  FlaskConical,
+  Upload,
+  ClipboardList,
+  Database,
+  FileSpreadsheet,
+  Loader2,
+  Check,
+  AlertCircle,
+  Circle,
+} from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { InteractiveChartExtension } from '@/components/editor/nodes/InteractiveChartNode';
@@ -30,23 +44,12 @@ import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
 import { SignaturePanel } from '@/components/editor/tools/SignaturePanel';
-import { updateTrialContent, sealTrial } from '@/actions/trialActions';
+import { saveTrial, sealTrial } from '@/actions/trialActions';
 import { getCurrentUserProfile } from '@/actions/adminActions';
 import type { Role } from '@prisma/client';
 
 
-// ─── Debounce utility ─────────────────────────────────────────────────────────
 
-function debounce<T extends (...args: Parameters<T>) => void>(
-  fn: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  let timer: ReturnType<typeof setTimeout>;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
-}
 
 // ─── Slash command definitions ────────────────────────────────────────────────
 
@@ -402,45 +405,137 @@ const SlashCommandExtension = Extension.create({
 // ─── Editor Canvas Component ───────────────────────────────────────────────────
 
 export function EditorCanvas() {
-  const content = useNotebookStore((s) => s.activeTrial.content);
+  const activeTrial = useNotebookStore((s) => s.activeTrial);
+  const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   const updateContent = useNotebookStore((s) => s.updateContent);
   const updateTitle = useNotebookStore((s) => s.updateTitle);
   const title = useNotebookStore((s) => s.activeTrial.title);
-  const updatedAt = useNotebookStore((s) => s.activeTrial.updatedAt);
+  const content = useNotebookStore((s) => s.activeTrial.content);
+  const checksum = useNotebookStore((s) => s.activeTrial.checksum);
+  const activeTrialId = useNotebookStore((s) => s.activeTrial.id);
+  const saveStatus = useNotebookStore((s) => s.saveStatus);
+  const saveError = useNotebookStore((s) => s.saveError);
+  const lastSavedAt = useNotebookStore((s) => s.lastSavedAt);
+  const isLoadingTrial = useNotebookStore((s) => s.isLoadingTrial);
+  const setSaveStatus = useNotebookStore((s) => s.setSaveStatus);
+  const setSaveError = useNotebookStore((s) => s.setSaveError);
+  const setLastSavedAt = useNotebookStore((s) => s.setLastSavedAt);
 
-  // Stable ref to always call the latest updateContent without recreating debounce
-  const updateContentRef = useRef(updateContent);
+  // Track if TipTap editor update is programmatic (from setContent on trial switch) vs user typing
+  const isProgrammaticUpdateRef = useRef(false);
+  const loadedTrialIdRef = useRef<string | null>(null);
+
+  // Debounced save timer & pending save payload
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef<{
+    trialId: string;
+    title: string;
+    content: Record<string, unknown>;
+    metadata: { key: string; value: string }[];
+  } | null>(null);
+
+  // Execution function for saving to server
+  const executeServerSave = useCallback(
+    async (payload: {
+      trialId: string;
+      title: string;
+      content: Record<string, unknown>;
+      metadata: { key: string; value: string }[];
+    }) => {
+      // If trial is sealed, don't attempt to save
+      const currentTrial = useNotebookStore.getState().activeTrial;
+      if (currentTrial.checksum) return;
+
+      setSaveStatus('SAVING');
+      try {
+        const result = await saveTrial({
+          trialId: payload.trialId,
+          title: payload.title,
+          content: payload.content,
+          metadata: payload.metadata,
+          createRevision: false,
+        });
+
+        if (result.success) {
+          setSaveStatus('SAVED');
+          setLastSavedAt(result.savedAt || new Date().toISOString());
+          setSaveError(null);
+        } else {
+          setSaveStatus('ERROR');
+          setSaveError(result.error || 'Autosave failed');
+        }
+      } catch (err) {
+        setSaveStatus('ERROR');
+        setSaveError(err instanceof Error ? err.message : 'Network error');
+      }
+    },
+    [setSaveStatus, setLastSavedAt, setSaveError]
+  );
+
+  // Trigger debounced autosave
+  const triggerDebouncedSave = useCallback(
+    (newContent?: Record<string, unknown>, newTitle?: string) => {
+      const state = useNotebookStore.getState();
+      const currentCloudTrialId = state.cloudTrialId;
+      const targetTrialId = currentCloudTrialId || state.activeTrial.id;
+
+      // Update in-memory state
+      if (newContent) {
+        updateContent(newContent);
+      }
+      if (newTitle !== undefined) {
+        updateTitle(newTitle);
+      }
+
+      // If trial is not synced yet (no cloudTrialId), store is updated in localStorage
+      if (!currentCloudTrialId) {
+        setSaveStatus('UNSAVED');
+        return;
+      }
+
+      // Record pending save targeted explicitly to this trialId
+      const latestTrial = useNotebookStore.getState().activeTrial;
+      pendingSaveRef.current = {
+        trialId: targetTrialId,
+        title: newTitle !== undefined ? newTitle : latestTrial.title,
+        content: newContent || latestTrial.content,
+        metadata: (latestTrial.metadata || []).map((m) => ({ key: m.key, value: m.value })),
+      };
+
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = setTimeout(() => {
+        if (pendingSaveRef.current) {
+          const payload = pendingSaveRef.current;
+          pendingSaveRef.current = null;
+          executeServerSave(payload);
+        }
+      }, 600);
+    },
+    [updateContent, updateTitle, setSaveStatus, executeServerSave]
+  );
+
+  // Flush pending save before switching trials or unmounting
+  const flushPendingSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    if (pendingSaveRef.current) {
+      const payload = pendingSaveRef.current;
+      pendingSaveRef.current = null;
+      executeServerSave(payload);
+    }
+  }, [executeServerSave]);
+
+  // Clean up timer on unmount
   useEffect(() => {
-    updateContentRef.current = updateContent;
-  }, [updateContent]);
-
-  const debouncedSave = useRef(
-    debounce((json: Record<string, unknown>) => {
-      updateContentRef.current(json);
-      const cloudTrialId = useNotebookStore.getState().cloudTrialId;
-      if (cloudTrialId) {
-        updateTrialContent(
-          cloudTrialId,
-          JSON.parse(JSON.stringify(json)),
-          useNotebookStore.getState().activeTrial.title
-        ).catch(console.error);
-      }
-    }, 500)
-  ).current;
-
-  const debouncedTitleSave = useRef(
-    debounce((newTitle: string) => {
-      const cloudTrialId = useNotebookStore.getState().cloudTrialId;
-      const currentContent = useNotebookStore.getState().activeTrial.content;
-      if (cloudTrialId) {
-        updateTrialContent(
-          cloudTrialId,
-          JSON.parse(JSON.stringify(currentContent || {})),
-          newTitle
-        ).catch(console.error);
-      }
-    }, 500)
-  ).current;
+    return () => {
+      flushPendingSave();
+    };
+  }, [flushPendingSave]);
 
   const editorRef = useRef<Editor | null>(null);
 
@@ -472,8 +567,9 @@ export function EditorCanvas() {
     ],
     content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,
     onUpdate: ({ editor: ed }) => {
+      if (isProgrammaticUpdateRef.current) return;
       const json = ed.getJSON() as Record<string, unknown>;
-      debouncedSave(json);
+      triggerDebouncedSave(json);
     },
     editorProps: {
       attributes: {
@@ -484,20 +580,29 @@ export function EditorCanvas() {
     immediatelyRender: false,
   });
 
-  const activeTrialId = useNotebookStore((s) => s.activeTrial.id);
-
-  // Keep editor content in sync when switching trials
+  // Keep editor content in sync when switching trials or when initial load finishes
   useEffect(() => {
-    if (editor && content) {
-      const currentJson = editor.getJSON();
-      if (JSON.stringify(currentJson) !== JSON.stringify(content)) {
-        editor.commands.setContent(content, false);
-      }
+    if (!editor) return;
+
+    // Do not mutate editor while a trial is fetching over the network
+    if (isLoadingTrial) return;
+
+    // Check if this trial has not yet been loaded into this editor instance
+    if (loadedTrialIdRef.current !== activeTrialId) {
+      flushPendingSave();
+      loadedTrialIdRef.current = activeTrialId;
+
+      isProgrammaticUpdateRef.current = true;
+      const targetContent =
+        content && typeof content === 'object' && Object.keys(content).length > 0
+          ? content
+          : { type: 'doc', content: [] };
+
+      editor.commands.setContent(targetContent, false);
+      isProgrammaticUpdateRef.current = false;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTrialId, editor]); // Depend on the reactive ID
-  const checksum = useNotebookStore((s) => s.activeTrial.checksum);
-  const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
+  }, [activeTrialId, content, editor, isLoadingTrial, flushPendingSave]);
+
   useEffect(() => {
     if (editor) {
       editor.setEditable(!checksum, false);
@@ -627,8 +732,9 @@ export function EditorCanvas() {
     }).catch(console.error);
   }, []);
 
-  const formattedTime = isMounted && updatedAt 
-    ? new Date(updatedAt).toLocaleTimeString([], {
+  const displayTime = lastSavedAt || activeTrial.updatedAt;
+  const formattedTime = isMounted && displayTime 
+    ? new Date(displayTime).toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
@@ -697,21 +803,58 @@ export function EditorCanvas() {
               disabled={!!checksum}
               onChange={(e) => {
                 const newTitle = e.target.value;
-                updateTitle(newTitle);
-                debouncedTitleSave(newTitle);
+                triggerDebouncedSave(undefined, newTitle);
               }}
               placeholder="Untitled Trial"
               className="w-full bg-transparent text-3xl font-bold text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-70"
             />
             <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-2 font-mono">
-              <span suppressHydrationWarning>
-                {formattedTime ? `Auto-saved · ${formattedTime}` : 'Auto-save active'}
-              </span>
+              <div className="flex items-center gap-2" suppressHydrationWarning>
+                {saveStatus === 'SAVING' && (
+                  <span className="text-primary flex items-center gap-1.5 font-medium animate-pulse">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Saving…
+                  </span>
+                )}
+                {saveStatus === 'SAVED' && (
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-500" />
+                    {formattedTime ? `Saved · ${formattedTime}` : 'All changes saved'}
+                  </span>
+                )}
+                {saveStatus === 'UNSAVED' && (
+                  <span className="text-amber-500/90 flex items-center gap-1.5">
+                    <Circle className="w-2 h-2 fill-amber-500" />
+                    Unsaved changes
+                  </span>
+                )}
+                {saveStatus === 'ERROR' && (
+                  <button
+                    type="button"
+                    onClick={() => triggerDebouncedSave()}
+                    className="text-red-500 hover:text-red-400 flex items-center gap-1.5 font-medium transition-colors cursor-pointer"
+                    title={saveError || 'Autosave failed. Click to retry.'}
+                  >
+                    <AlertCircle className="w-3 h-3" />
+                    Save error — click to retry
+                  </button>
+                )}
+              </div>
               <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground">
                 Type <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-foreground font-mono text-[10px]">/</kbd> for commands, reagents, charts
               </span>
             </div>
           </div>
+
+          {/* Loading overlay when switching trials */}
+          {isLoadingTrial && (
+            <div className="absolute inset-0 bg-card/80 backdrop-blur-xs z-30 flex items-center justify-center rounded-2xl">
+              <div className="flex items-center gap-2.5 px-4 py-2.5 bg-background border border-border rounded-lg shadow-xl text-xs font-mono text-foreground">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span>Loading experiment notebook…</span>
+              </div>
+            </div>
+          )}
 
           {/* TipTap editor content */}
           <div className="pl-2">

@@ -11,7 +11,7 @@ import type { Role } from '@prisma/client';
 import { fetchInventoryForSearch } from '@/actions/adminActions';
 import { getTrialInventory } from '@/actions/reagentActions';
 import { getCurrentUserProfile } from '@/actions/adminActions';
-import { sealTrial } from '@/actions/trialActions';
+import { saveTrial, sealTrial } from '@/actions/trialActions';
 
 export function RightDrawer() {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
@@ -102,7 +102,7 @@ export function RightDrawer() {
     }
   };
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     const key = newKey.trim();
     const value = newValue.trim();
     if (!key || !value) return;
@@ -115,6 +115,53 @@ export function RightDrawer() {
     addMetadata(entry);
     setNewKey('');
     setNewValue('');
+
+    if (cloudTrialId) {
+      const nextMetadata = [...metadata, entry];
+      const setSaveStatus = useNotebookStore.getState().setSaveStatus;
+      const setLastSavedAt = useNotebookStore.getState().setLastSavedAt;
+      setSaveStatus('SAVING');
+      try {
+        const res = await saveTrial({
+          trialId: cloudTrialId,
+          title: activeTrial.title,
+          content: activeTrial.content,
+          metadata: nextMetadata,
+          createRevision: false,
+        });
+        if (res.success) {
+          setSaveStatus('SAVED');
+          setLastSavedAt(res.savedAt || new Date().toISOString());
+        }
+      } catch (e) {
+        console.error('Failed to persist metadata tag:', e);
+      }
+    }
+  };
+
+  const handleRemoveTag = async (id: string) => {
+    removeMetadata(id);
+    if (cloudTrialId) {
+      const nextMetadata = metadata.filter((m) => m.id !== id);
+      const setSaveStatus = useNotebookStore.getState().setSaveStatus;
+      const setLastSavedAt = useNotebookStore.getState().setLastSavedAt;
+      setSaveStatus('SAVING');
+      try {
+        const res = await saveTrial({
+          trialId: cloudTrialId,
+          title: activeTrial.title,
+          content: activeTrial.content,
+          metadata: nextMetadata,
+          createRevision: false,
+        });
+        if (res.success) {
+          setSaveStatus('SAVED');
+          setLastSavedAt(res.savedAt || new Date().toISOString());
+        }
+      } catch (e) {
+        console.error('Failed to remove metadata tag on server:', e);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -355,7 +402,7 @@ export function RightDrawer() {
                     </div>
                     {!isSealed && (
                       <button
-                        onClick={() => removeMetadata(entry.id)}
+                        onClick={() => handleRemoveTag(entry.id)}
                         className="mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1"
                       >
                         <X className="w-3.5 h-3.5" />

@@ -62,6 +62,7 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
   const trialStatus = (node.attrs.trialStatus as TrialStatus | null) ?? null;
   const trialMetadata = (node.attrs.trialMetadata as MetadataEntry[] | undefined) ?? [];
   const setActiveTrial = useNotebookStore((s) => s.setActiveTrial);
+  const setCloudIds = useNotebookStore((s) => s.setCloudIds);
 
   const [isSelecting, setIsSelecting] = useState(!trialId);
   const [availableTrials, setAvailableTrials] = useState<TrialSummaryItem[]>([]);
@@ -105,6 +106,11 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
           checksum: fullTrial.checksum ?? null,
           sealedAt: fullTrial.sealedAt instanceof Date ? fullTrial.sealedAt.toISOString() : (fullTrial.sealedAt ?? null),
           sealedBy: fullTrial.sealedBy ?? null,
+        });
+
+        setCloudIds({
+          cloudTrialId: fullTrial.id,
+          cloudProjectId: fullTrial.projectId,
         });
       }
     } catch (err) {

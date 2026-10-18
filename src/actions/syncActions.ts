@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { saveTrial } from '@/actions/trialActions';
 
 interface SyncPayload {
   title: string;
@@ -78,23 +79,20 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
 
     // Create or update
     if (payload.cloudTrialId) {
-      const existing = await prisma.trial.findUnique({
-        where: { id: payload.cloudTrialId, userId: dbUser.id },
-        select: { checksum: true }
+      const saveResult = await saveTrial({
+        trialId: payload.cloudTrialId,
+        title: payload.title,
+        content: payload.content,
+        status: payload.status,
+        metadata: payload.metadata,
+        createRevision: true,
+        revisionNote: 'Manual cloud sync',
       });
-      if (existing?.checksum) {
-        throw new Error("Cannot sync changes: This trial is cryptographically sealed and locked.");
+
+      if (!saveResult.success) {
+        return { success: false, error: saveResult.error };
       }
 
-      await prisma.trial.update({
-        where: { id: payload.cloudTrialId, userId: dbUser.id },
-        data: {
-          title: payload.title,
-          content: contentValue,
-          status: payload.status,
-          updatedAt: new Date(),
-        },
-      });
       revalidatePath(`/projects/${cloudProjectId}`);
       return { success: true, cloudTrialId: payload.cloudTrialId, cloudProjectId };
     } else {
@@ -106,10 +104,24 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
           projectId: cloudProjectId,
           userId: dbUser.id,
           metadata: {
-            create: payload.metadata,
+            create: (payload.metadata || [])
+              .filter((m) => m.key.trim().length > 0 && m.value.trim().length > 0)
+              .map((m) => ({ key: m.key.trim(), value: m.value.trim() })),
           },
         },
       });
+
+      // Initial revision snapshot
+      await prisma.trialRevision.create({
+        data: {
+          trialId: trial.id,
+          title: payload.title,
+          content: contentValue,
+          savedById: dbUser.id,
+          note: 'Initial cloud sync',
+        },
+      });
+
       revalidatePath(`/projects/${cloudProjectId}`);
       return { success: true, cloudTrialId: trial.id, cloudProjectId };
     }

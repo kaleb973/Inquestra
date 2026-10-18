@@ -2,7 +2,7 @@
 // src/components/layout/LeftSidebar.tsx
 // Left panel: dynamic project switcher, trial list, hardware controls.
 
-import { useEffect, useState, useTransition, useCallback } from 'react';
+import { useEffect, useState, useTransition, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
   FlaskConical,
@@ -223,7 +223,10 @@ function NewProjectModal({
 
 export function LeftSidebar() {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
+  const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   const setActiveTrial = useNotebookStore((s) => s.setActiveTrial);
+  const setCloudIds = useNotebookStore((s) => s.setCloudIds);
+  const setIsLoadingTrial = useNotebookStore((s) => s.setIsLoadingTrial);
 
   const [projects, setProjects] = useState<ProjectWithLead[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -235,6 +238,9 @@ export function LeftSidebar() {
   const [isLoadingTrials, setIsLoadingTrials] = useState(true);
   const [loadingTrialId, setLoadingTrialId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const requestSeqRef = useRef(0);
+  const hasInitializedRef = useRef(false);
 
   // Load projects on mount
   useEffect(() => {
@@ -249,63 +255,19 @@ export function LeftSidebar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load trials whenever active project changes
-  const loadTrials = useCallback(() => {
-    setIsLoadingTrials(true);
-    fetchAllTrials()
-      .then((ts) => setTrials(ts as unknown as TrialSummaryItem[]))
-      .catch(console.error)
-      .finally(() => setIsLoadingTrials(false));
-  }, []);
-
-  useEffect(() => {
-    loadTrials();
-  }, [loadTrials]);
-
-  const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
-
-  const handleNewTrial = () => {
-    startTransition(async () => {
-      try {
-        const newTrial = await createNewTrial();
-        setTrials((prev) => [newTrial as unknown as TrialSummaryItem, ...prev]);
-        // Normalise Prisma Date objects → ISO strings for the store
-        setActiveTrial({
-          id: newTrial.id,
-          title: newTrial.title,
-          content: (newTrial.content ?? { type: 'doc', content: [] }) as Record<string, unknown>,
-          status: newTrial.status as import('@/types/inquestra').TrialStatus,
-          metadata: (newTrial.metadata ?? []) as import('@/types/inquestra').MetadataEntry[],
-          createdAt: newTrial.createdAt instanceof Date ? newTrial.createdAt.toISOString() : String(newTrial.createdAt),
-          updatedAt: newTrial.updatedAt instanceof Date ? newTrial.updatedAt.toISOString() : String(newTrial.updatedAt),
-          checksum: null,
-          sealedAt: null,
-          sealedBy: null,
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  };
-
-  const handleSelectTrial = (id: string) => {
+  const handleSelectTrial = useCallback((id: string) => {
     if (loadingTrialId === id) return;
-    const localTrial = trials.find((t) => t.id === id);
-    if (localTrial) {
-      setActiveTrial({
-        id: localTrial.id,
-        title: localTrial.title,
-        content: { type: 'doc', content: [] },
-        status: localTrial.status as import('@/types/inquestra').TrialStatus,
-        metadata: [],
-        createdAt: '',
-        updatedAt: localTrial.updatedAt instanceof Date ? localTrial.updatedAt.toISOString() : String(localTrial.updatedAt),
-      });
-    }
+
+    const currentSeq = ++requestSeqRef.current;
     setLoadingTrialId(id);
+    setIsLoadingTrial(true);
+
     startTransition(async () => {
       try {
         const fullTrial = await getTrial(id);
+        // Ignore stale responses if the user clicked another trial in the meantime
+        if (requestSeqRef.current !== currentSeq) return;
+
         if (fullTrial) {
           setActiveTrial({
             id: fullTrial.id,
@@ -319,11 +281,77 @@ export function LeftSidebar() {
             sealedAt: fullTrial.sealedAt instanceof Date ? fullTrial.sealedAt.toISOString() : (fullTrial.sealedAt ?? null),
             sealedBy: fullTrial.sealedBy ?? null,
           });
+
+          setCloudIds({
+            cloudTrialId: fullTrial.id,
+            cloudProjectId: fullTrial.projectId,
+          });
         }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load trial:', err);
       } finally {
-        setLoadingTrialId(null);
+        if (requestSeqRef.current === currentSeq) {
+          setLoadingTrialId(null);
+          setIsLoadingTrial(false);
+        }
+      }
+    });
+  }, [loadingTrialId, setActiveTrial, setCloudIds, setIsLoadingTrial]);
+
+  // Load trials whenever active project changes
+  const loadTrials = useCallback(() => {
+    setIsLoadingTrials(true);
+    fetchAllTrials()
+      .then((ts) => {
+        const trialList = ts as unknown as TrialSummaryItem[];
+        setTrials(trialList);
+
+        // Auto-hydrate the latest cloud trial on initial load if user has existing trials
+        if (!hasInitializedRef.current && trialList.length > 0) {
+          hasInitializedRef.current = true;
+          const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
+          const targetTrial = (currentCloudTrialId && trialList.find((t) => t.id === currentCloudTrialId)) || trialList[0];
+          if (targetTrial) {
+            handleSelectTrial(targetTrial.id);
+          }
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingTrials(false));
+  }, [handleSelectTrial]);
+
+  useEffect(() => {
+    loadTrials();
+  }, [loadTrials]);
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
+
+  const handleNewTrial = () => {
+    startTransition(async () => {
+      try {
+        setIsLoadingTrial(true);
+        const newTrial = await createNewTrial();
+        setTrials((prev) => [newTrial as unknown as TrialSummaryItem, ...prev]);
+        setActiveTrial({
+          id: newTrial.id,
+          title: newTrial.title,
+          content: (newTrial.content ?? { type: 'doc', content: [] }) as Record<string, unknown>,
+          status: newTrial.status as import('@/types/inquestra').TrialStatus,
+          metadata: (newTrial.metadata ?? []) as import('@/types/inquestra').MetadataEntry[],
+          createdAt: newTrial.createdAt instanceof Date ? newTrial.createdAt.toISOString() : String(newTrial.createdAt),
+          updatedAt: newTrial.updatedAt instanceof Date ? newTrial.updatedAt.toISOString() : String(newTrial.updatedAt),
+          checksum: null,
+          sealedAt: null,
+          sealedBy: null,
+        });
+        setCloudIds({
+          cloudTrialId: newTrial.id,
+          cloudProjectId: newTrial.projectId,
+        });
+      } catch (err) {
+        console.error('Failed to create new trial:', err);
+      } finally {
+        setIsLoadingTrial(false);
       }
     });
   };

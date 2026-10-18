@@ -69,60 +69,173 @@ export async function createTrial(payload: TrialPayload) {
   return { success: true, trialId: trial.id };
 }
 
+export interface SaveTrialInput {
+  trialId: string;
+  title: string;
+  content: Record<string, unknown>;
+  status?: 'DRAFT' | 'ACTIVE' | 'IN_REVIEW' | 'COMPLETED' | 'FAILED';
+  metadata?: { id?: string; key: string; value: string }[];
+  createRevision?: boolean;
+  revisionNote?: string;
+}
+
+export interface SaveTrialResult {
+  success: boolean;
+  savedAt?: string;
+  error?: string;
+}
+
+const SaveTrialSchema = z.object({
+  trialId: z.string().uuid(),
+  title: z.string().min(1, 'Title is required').max(255).transform((val) => DOMPurify.sanitize(val)),
+  content: z.record(z.string(), z.unknown()),
+  status: z.enum(['DRAFT', 'ACTIVE', 'IN_REVIEW', 'COMPLETED', 'FAILED']).optional(),
+  metadata: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        key: z.string().max(100).transform((val) => DOMPurify.sanitize(val)),
+        value: z.string().max(500).transform((val) => DOMPurify.sanitize(val)),
+      })
+    )
+    .optional(),
+  createRevision: z.boolean().optional().default(false),
+  revisionNote: z.string().max(500).optional(),
+});
+
 /**
- * Update trial content and metadata.
- * Appends new metadata entries; never silently removes existing ones.
- * Writes a TrialRevision snapshot every time the trial is saved to cloud.
+ * Atomic save for trial content, metadata, and status.
+ * Enforces organization tenant boundary, 21 CFR Part 11 immutability (sealed trials rejected),
+ * and creates a TrialRevision snapshot only when explicitly requested (manual save or milestone).
+ */
+export async function saveTrial(input: SaveTrialInput): Promise<SaveTrialResult> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return { success: false, error: 'Unauthorized: active session required.' };
+    }
+
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) {
+      return { success: false, error: 'User profile not found.' };
+    }
+
+    const validated = SaveTrialSchema.parse(input);
+
+    const trial = await prisma.trial.findFirst({
+      where: {
+        id: validated.trialId,
+        project: {
+          organizationId: dbUser.organizationId,
+        },
+      },
+    });
+
+    if (!trial) {
+      return { success: false, error: 'Trial not found or access denied.' };
+    }
+
+    if (trial.checksum) {
+      return {
+        success: false,
+        error: 'Cannot edit a sealed trial. This experiment is cryptographically locked.',
+      };
+    }
+
+    const contentValue =
+      typeof validated.content === 'object' && validated.content !== null
+        ? (JSON.parse(JSON.stringify(validated.content)) as Prisma.InputJsonValue)
+        : ({} as Prisma.InputJsonValue);
+
+    const savedTimestamp = new Date();
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Update trial record
+      await tx.trial.update({
+        where: { id: validated.trialId },
+        data: {
+          title: validated.title,
+          content: contentValue,
+          ...(validated.status ? { status: validated.status } : {}),
+          updatedAt: savedTimestamp,
+        },
+      });
+
+      // 2. Synchronize metadata if provided
+      if (validated.metadata !== undefined) {
+        await tx.metadataEntry.deleteMany({
+          where: { trialId: validated.trialId },
+        });
+
+        const cleanMetadata = validated.metadata
+          .map((m) => ({
+            key: m.key.trim(),
+            value: m.value.trim(),
+            trialId: validated.trialId,
+          }))
+          .filter((m) => m.key.length > 0 && m.value.length > 0);
+
+        if (cleanMetadata.length > 0) {
+          await tx.metadataEntry.createMany({
+            data: cleanMetadata,
+          });
+        }
+      }
+
+      // 3. Snapshot revision if explicitly requested (e.g., manual save / milestone)
+      if (validated.createRevision) {
+        const cleanNote = validated.revisionNote
+          ? DOMPurify.sanitize(validated.revisionNote.trim())
+          : null;
+
+        await tx.trialRevision.create({
+          data: {
+            trialId: validated.trialId,
+            title: validated.title,
+            content: contentValue,
+            savedById: dbUser.id,
+            note: cleanNote,
+            savedAt: savedTimestamp,
+          },
+        });
+      }
+    });
+
+    revalidatePath(`/projects/${trial.projectId}`);
+    return { success: true, savedAt: savedTimestamp.toISOString() };
+  } catch (err) {
+    console.error('saveTrial error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Database save failed.',
+    };
+  }
+}
+
+/**
+ * Backwards-compatible updateTrialContent wrapper.
+ * Calls saveTrial with createRevision: false so keystroke autosaves don't clutter TrialRevision.
  */
 export async function updateTrialContent(
   trialId: string,
   content: Record<string, unknown>,
   title: string
 ) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) throw new Error('Unauthorized');
-
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
-
-  const trial = await prisma.trial.findFirst({
-    where: {
-      id: trialId,
-      project: {
-        organizationId: dbUser.organizationId,
-      },
-    },
-  });
-  if (!trial) throw new Error('Trial not found');
-  if (trial.checksum) throw new Error('Cannot edit a sealed trial. This trial is cryptographically locked.');
-
-  const contentValue = (typeof content === 'object' && content !== null)
-    ? (JSON.parse(JSON.stringify(content)) as Prisma.InputJsonValue)
-    : ({} as Prisma.InputJsonValue);
-
-  const validTitle = z.string().min(1).max(255).parse(title);
-
-  const updated = await prisma.trial.update({
-    where: { id: trialId },
-    data: {
-      title: validTitle,
-      content: contentValue,
-      updatedAt: new Date(),
-    },
+  const result = await saveTrial({
+    trialId,
+    content,
+    title,
+    createRevision: false,
   });
 
-  // Snapshot revision for version history (append-only, never modifies originals)
-  await prisma.trialRevision.create({
-    data: {
-      trialId,
-      title: validTitle,
-      content: contentValue,
-      savedById: dbUser.id,
-    },
-  });
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to update trial content');
+  }
 
-  revalidatePath(`/projects/${updated.projectId}`);
   return { success: true };
 }
 
