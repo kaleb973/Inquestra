@@ -1,12 +1,12 @@
 'use client';
 // src/components/editor/nodes/TimerBlock.tsx
 // TipTap standalone block NodeView for /timer slash command.
-// Real interactive countdown bench timer with audio chime, presets, and label.
+// Real interactive countdown bench timer with typed custom duration, audio chime, mute, presets, and label.
 
 import { useState, useEffect } from 'react';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { Timer, Play, Pause, RotateCcw, Bell, X, Check, Volume2, VolumeX } from 'lucide-react';
+import { Timer, Play, Pause, RotateCcw, Bell, X, Check, Volume2, VolumeX, Edit2 } from 'lucide-react';
 
 export const TimerExtension = Node.create({
   name: 'timerBlock',
@@ -32,6 +32,60 @@ export const TimerExtension = Node.create({
     return ReactNodeViewRenderer(TimerNodeView);
   },
 });
+
+export function parseUserInputTime(str: string): number | null {
+  const clean = str.trim().toLowerCase();
+  if (!clean) return null;
+
+  // HH:MM:SS
+  const hmsMatch = clean.match(/^(\d+):(\d{1,2}):(\d{1,2})$/);
+  if (hmsMatch) {
+    const h = parseInt(hmsMatch[1], 10);
+    const m = parseInt(hmsMatch[2], 10);
+    const s = parseInt(hmsMatch[3], 10);
+    return h * 3600 + m * 60 + s;
+  }
+
+  // MM:SS
+  const msMatch = clean.match(/^(\d+):(\d{1,2})$/);
+  if (msMatch) {
+    const m = parseInt(msMatch[1], 10);
+    const s = parseInt(msMatch[2], 10);
+    return m * 60 + s;
+  }
+
+  // Natural units e.g. 1h 30m, 45s, 12m
+  let total = 0;
+  let matched = false;
+
+  const hMatch = clean.match(/(\d+(?:\.\d+)?)\s*(?:h|hours?)/);
+  if (hMatch) {
+    total += Math.round(parseFloat(hMatch[1]) * 3600);
+    matched = true;
+  }
+
+  const mMatch = clean.match(/(\d+(?:\.\d+)?)\s*(?:m|mins?|minutes?)/);
+  if (mMatch) {
+    total += Math.round(parseFloat(mMatch[1]) * 60);
+    matched = true;
+  }
+
+  const sMatch = clean.match(/(\d+)\s*(?:s|secs?|seconds?)/);
+  if (sMatch) {
+    total += parseInt(sMatch[1], 10);
+    matched = true;
+  }
+
+  if (matched) return total > 0 ? total : null;
+
+  // Pure number fallback (treat as minutes)
+  const num = parseFloat(clean);
+  if (!isNaN(num) && num > 0) {
+    return Math.round(num * 60);
+  }
+
+  return null;
+}
 
 function playChime() {
   if (typeof window === 'undefined') return;
@@ -66,6 +120,10 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
   const [labelText, setLabelText] = useState(label);
   const [isMuted, setIsMuted] = useState(false);
 
+  // Direct typed time input state
+  const [editingTime, setEditingTime] = useState(false);
+  const [timeInput, setTimeInput] = useState('');
+
   useEffect(() => {
     if (!isRunning && !isDone) {
       setRemaining(duration);
@@ -87,7 +145,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, isMuted]);
 
   const formatTime = (secs: number) => {
     const h = Math.floor(secs / 3600);
@@ -100,6 +158,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
   };
 
   const handleToggle = () => {
+    if (editingTime) handleSaveTimeInput();
     if (isDone) {
       setIsDone(false);
       setRemaining(duration);
@@ -112,14 +171,24 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
   const handleReset = () => {
     setIsRunning(false);
     setIsDone(false);
+    setEditingTime(false);
     setRemaining(duration);
   };
 
   const handleSetPreset = (secs: number) => {
     setIsRunning(false);
     setIsDone(false);
+    setEditingTime(false);
     setRemaining(secs);
     updateAttributes({ duration: secs });
+  };
+
+  const handleSaveTimeInput = () => {
+    const parsed = parseUserInputTime(timeInput);
+    if (parsed && parsed > 0) {
+      handleSetPreset(parsed);
+    }
+    setEditingTime(false);
   };
 
   const saveLabel = () => {
@@ -163,10 +232,11 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
             ) : (
               <span
                 onClick={() => setEditingLabel(true)}
-                className="text-xs font-semibold text-foreground truncate cursor-pointer hover:underline"
+                className="text-xs font-semibold text-foreground truncate cursor-pointer hover:underline flex items-center gap-1"
                 title="Click to rename timer"
               >
                 {label}
+                <Edit2 className="w-2.5 h-2.5 opacity-40 hover:opacity-100" />
               </span>
             )}
           </div>
@@ -180,16 +250,59 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
           </button>
         </div>
 
-        {/* Digital Countdown Display */}
+        {/* Digital Countdown Display (Click to type directly) */}
         <div className="flex items-center justify-between mb-4">
-          <div className="font-mono text-3xl font-bold tracking-tight text-foreground select-none">
-            {formatTime(remaining)}
-          </div>
+          {editingTime && !isRunning ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={timeInput}
+                onChange={(e) => setTimeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveTimeInput();
+                  if (e.key === 'Escape') setEditingTime(false);
+                }}
+                onBlur={handleSaveTimeInput}
+                autoFocus
+                placeholder="e.g. 12:30 or 45s"
+                className="font-mono text-3xl font-bold tracking-tight text-foreground bg-background border-2 border-indigo-500 rounded-lg px-2 py-0.5 w-40 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+              />
+              <button
+                onClick={handleSaveTimeInput}
+                className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-xs"
+              >
+                Set
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => {
+                if (!isRunning) {
+                  setTimeInput(formatTime(remaining));
+                  setEditingTime(true);
+                }
+              }}
+              className={`font-mono text-3xl font-bold tracking-tight text-foreground select-none rounded-lg px-1.5 py-0.5 transition-all flex items-baseline gap-2 ${
+                !isRunning
+                  ? 'cursor-pointer hover:bg-muted/80 hover:ring-1 hover:ring-border'
+                  : ''
+              }`}
+              title={!isRunning ? 'Click to type custom time (e.g. 12:30, 45s, 1h)' : undefined}
+            >
+              <span>{formatTime(remaining)}</span>
+              {!isRunning && (
+                <span className="text-[11px] text-muted-foreground font-sans font-normal opacity-60 hover:opacity-100 flex items-center gap-0.5">
+                  <Edit2 className="w-2.5 h-2.5" />
+                  click to type
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleToggle}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-xs ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-xs ${
                 isDone
                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white animate-pulse'
                   : isRunning
@@ -230,36 +343,57 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                   ? 'border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted'
                   : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-500 hover:text-indigo-600 dark:text-indigo-400'
               }`}
-              title={isMuted ? 'Alarm audio muted' : 'Alarm audio active'}
+              title={isMuted ? 'Alarm audio muted (click to unmute)' : 'Alarm audio active (click to mute)'}
             >
               {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
 
-        {/* Preset Duration Buttons */}
-        <div className="flex items-center gap-1.5 pt-2 border-t border-border/60">
-          <span className="text-[10px] text-muted-foreground font-mono mr-1 uppercase">Presets:</span>
-          {[
-            { label: '30s', secs: 30 },
-            { label: '1m', secs: 60 },
-            { label: '5m', secs: 300 },
-            { label: '15m', secs: 900 },
-            { label: '30m', secs: 1800 },
-            { label: '1h', secs: 3600 },
-          ].map((preset) => (
-            <button
-              key={preset.secs}
-              onClick={() => handleSetPreset(preset.secs)}
-              className={`text-[10px] font-mono px-2 py-0.5 rounded transition-colors ${
-                duration === preset.secs
-                  ? 'bg-muted text-foreground font-bold border border-border'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }`}
-            >
-              {preset.label}
-            </button>
-          ))}
+        {/* Preset Duration Buttons & Custom Input */}
+        <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-border/60 flex-wrap">
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-muted-foreground font-mono mr-1 uppercase">Presets:</span>
+            {[
+              { label: '30s', secs: 30 },
+              { label: '1m', secs: 60 },
+              { label: '5m', secs: 300 },
+              { label: '15m', secs: 900 },
+              { label: '30m', secs: 1800 },
+              { label: '1h', secs: 3600 },
+            ].map((preset) => (
+              <button
+                key={preset.secs}
+                onClick={() => handleSetPreset(preset.secs)}
+                className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${
+                  duration === preset.secs && !editingTime
+                    ? 'bg-muted text-foreground font-bold border border-border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Quick custom text entry input */}
+          <div className="flex items-center gap-1">
+            <input
+              type="text"
+              placeholder="Custom (e.g. 12m)"
+              disabled={isRunning}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const val = parseUserInputTime((e.target as HTMLInputElement).value);
+                  if (val && val > 0) {
+                    handleSetPreset(val);
+                    (e.target as HTMLInputElement).value = '';
+                  }
+                }
+              }}
+              className="text-[10px] font-mono px-2 py-0.5 rounded bg-background border border-border text-foreground placeholder:text-muted-foreground w-28 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+            />
+          </div>
         </div>
       </div>
     </NodeViewWrapper>

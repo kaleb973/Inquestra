@@ -10,6 +10,7 @@
 // All state lives in node attrs (persisted in TipTap JSON → Zustand → localStorage).
 
 import { useState, useCallback, useEffect } from 'react';
+import { parseUserInputTime } from './TimerBlock';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
@@ -212,7 +213,13 @@ function StepTimer({
           }`}
         >
           <Timer className={`w-3 h-3 ${isRunning ? 'animate-spin' : ''}`} style={{ animationDuration: '3s' }} />
-          <span>{formatTime(remaining)}</span>
+          <span
+            onClick={() => { if (!isRunning) setShowPicker(true); }}
+            className={!isRunning ? 'cursor-pointer hover:underline' : ''}
+            title={!isRunning ? 'Click to change or type duration' : undefined}
+          >
+            {formatTime(remaining)}
+          </span>
 
           <button
             onClick={toggleRun}
@@ -250,6 +257,25 @@ function StepTimer({
                 {sec < 60 ? `${sec}s` : sec < 3600 ? `${sec / 60}m` : `${sec / 3600}h`}
               </button>
             ))}
+            <div className="border-l border-border pl-1.5 ml-1 flex items-center gap-1">
+              <input
+                type="text"
+                autoFocus
+                placeholder="Type (e.g. 12m)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const parsed = parseUserInputTime((e.target as HTMLInputElement).value);
+                    if (parsed && parsed > 0) {
+                      onSetDuration(parsed);
+                      setRemaining(parsed);
+                      setShowPicker(false);
+                    }
+                  }
+                  if (e.key === 'Escape') setShowPicker(false);
+                }}
+                className="w-24 px-1.5 py-0.5 rounded bg-background border border-border text-[10px] text-foreground focus:outline-none focus:border-violet-500 font-mono"
+              />
+            </div>
             <button
               onClick={() => setShowPicker(false)}
               className="text-muted-foreground hover:text-foreground ml-1 p-0.5"
