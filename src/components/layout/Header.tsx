@@ -30,9 +30,11 @@ import { signOut } from '@/actions/authActions';
 import { sealTrial, updateTrialStatus, fetchTrialSignatures } from '@/actions/trialActions';
 import { checkLabCompliance, getCurrentUserProfile } from '@/actions/adminActions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import type { TrialStatus } from '@/types/inquestra';
+import type { TrialStatus, MetadataEntry } from '@/types/inquestra';
 import type { User } from '@supabase/supabase-js';
 import type { Role } from '@prisma/client';
+
+const EMPTY_METADATA: MetadataEntry[] = [];
 
 const STATUS_COLORS: Record<TrialStatus, string> = {
   DRAFT: 'bg-muted text-muted-foreground border-border',
@@ -45,9 +47,9 @@ const STATUS_COLORS: Record<TrialStatus, string> = {
 export function Header() {
   const title = useNotebookStore((s) => s.activeTrial.title);
   const status = useNotebookStore((s) => s.activeTrial.status);
-  const content = useNotebookStore((s) => s.activeTrial.content);
-  const metadata = useNotebookStore((s) => s.activeTrial?.metadata || []);
-  const activeTrial = useNotebookStore((s) => s.activeTrial);
+  const metadata = useNotebookStore((s) => s.activeTrial?.metadata ?? EMPTY_METADATA);
+  const checksum = useNotebookStore((s) => s.activeTrial.checksum);
+  const activeTrialId = useNotebookStore((s) => s.activeTrial.id);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
   const setCloudIds = useNotebookStore((s) => s.setCloudIds);
@@ -129,9 +131,10 @@ export function Header() {
 
     setSaveStatus('SAVING');
     startTransition(async () => {
+      const currentContent = useNotebookStore.getState().activeTrial.content;
       const result = await syncTrialToCloud({
         title,
-        content: JSON.parse(JSON.stringify(content || {})),
+        content: JSON.parse(JSON.stringify(currentContent || {})),
         status,
         metadata: metadata.map(({ key, value }) => ({ key, value })),
         cloudTrialId: cloudTrialId ?? undefined,
@@ -155,7 +158,7 @@ export function Header() {
         setTimeout(() => setSnapshotSuccess(false), 2500);
       }
     });
-  }, [user, title, content, status, metadata, cloudTrialId, cloudProjectId, setCloudIds, setSaveStatus, setLastSavedAt, setSaveError, startTransition]);
+  }, [user, title, status, metadata, cloudTrialId, cloudProjectId, setCloudIds, setSaveStatus, setLastSavedAt, setSaveError, startTransition]);
 
   // Listen to global shortcut trigger from EditorCanvas or elsewhere
   useEffect(() => {
@@ -199,15 +202,16 @@ export function Header() {
         }
       }
 
+      const currentTrial = useNotebookStore.getState().activeTrial;
       await exportTrialAsZip({
         title,
-        content,
+        content: currentTrial.content,
         metadata: metadata.map(({ key, value }) => ({ key, value })),
         status,
-        createdAt: activeTrial.createdAt,
-        updatedAt: activeTrial.updatedAt,
+        createdAt: currentTrial.createdAt,
+        updatedAt: currentTrial.updatedAt,
         html: resolvedHtml,
-        checksum: activeTrial.checksum,
+        checksum: currentTrial.checksum,
         signatures,
       });
     } finally {
@@ -224,12 +228,13 @@ export function Header() {
     setIsSealing(true);
     startTransition(async () => {
       try {
-        let targetId = cloudTrialId || activeTrial.id;
+        let targetId = cloudTrialId || activeTrialId;
+        const currentTrial = useNotebookStore.getState().activeTrial;
         
         // Ensure trial exists in DB by syncing first
         const syncResult = await syncTrialToCloud({
           title,
-          content: JSON.parse(JSON.stringify(content || {})),
+          content: JSON.parse(JSON.stringify(currentTrial.content || {})),
           status,
           metadata: metadata.map(({ key, value }) => ({ key, value })),
           cloudTrialId: targetId ?? undefined,
@@ -273,7 +278,7 @@ export function Header() {
       {/* Status badge — interactive dropdown when trial is not sealed */}
       <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-[10px] uppercase font-mono text-muted-foreground font-semibold">Status:</span>
-        {activeTrial.checksum ? (
+        {checksum ? (
           <span
             className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
           >
@@ -404,10 +409,10 @@ export function Header() {
         <div className="h-5 w-px bg-destructive/30 shrink-0" />
 
         {/* 21 CFR Part 11 Regulatory Sealing Zone */}
-        {activeTrial.checksum ? (
+        {checksum ? (
           <div
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution font-mono"
-            title={`Sealed with SHA-256: ${activeTrial.checksum}`}
+            title={`Sealed with SHA-256: ${checksum}`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
             Sealed SHA-256

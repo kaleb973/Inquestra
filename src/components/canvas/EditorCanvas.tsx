@@ -540,15 +540,62 @@ const SlashCommandExtension = Extension.create({
     ];
   },
 });
+
+// ─── Static TipTap Extensions & Options ─────────────────────────────────────────
+// Memoized at module level so TipTap's internal compareOptions doesn't trigger
+// setOptions / createView infinite loops on every component render in React 19.
+
+const EDITOR_EXTENSIONS = [
+  StarterKit,
+  Placeholder.configure({
+    placeholder: ({ node }) => {
+      if (node.type.name === 'heading') {
+        return 'Heading…';
+      }
+      return "Type '/' for commands, reagents, charts… or start typing notes";
+    },
+    includeChildren: true,
+  }),
+  Underline,
+  Highlight.configure({ multicolor: true }),
+  TaskList,
+  TaskItem.configure({ nested: true }),
+  Subscript,
+  Superscript,
+  TextAlign.configure({ types: ['heading', 'paragraph'] }),
+  Table.configure({ resizable: true }),
+  TableRow,
+  TableHeader,
+  TableCell,
+  InteractiveChartExtension,
+  ReagentExtension,
+  ProtocolExtension,
+  MoleculeExtension,
+  MathExtension,
+  SequenceExtension,
+  EquipmentExtension,
+  TrialReferenceExtension,
+  CitationExtension,
+  TimerExtension,
+  SlashCommandExtension,
+  BlockGuardExtension,
+];
+
+const EDITOR_PROPS = {
+  attributes: {
+    class:
+      'prose dark:prose-invert prose-sm max-w-none focus:outline-none min-h-[calc(100vh-14rem)] px-2 py-4 text-foreground',
+  },
+};
+
 // ─── Editor Canvas Component ───────────────────────────────────────────────────
 
 export function EditorCanvas() {
-  const activeTrial = useNotebookStore((s) => s.activeTrial);
+  const trialUpdatedAt = useNotebookStore((s) => s.activeTrial.updatedAt);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   const updateContent = useNotebookStore((s) => s.updateContent);
   const updateTitle = useNotebookStore((s) => s.updateTitle);
   const title = useNotebookStore((s) => s.activeTrial.title);
-  const content = useNotebookStore((s) => s.activeTrial.content);
   const checksum = useNotebookStore((s) => s.activeTrial.checksum);
   const activeTrialId = useNotebookStore((s) => s.activeTrial.id);
   const saveStatus = useNotebookStore((s) => s.saveStatus);
@@ -558,6 +605,14 @@ export function EditorCanvas() {
   const setSaveStatus = useNotebookStore((s) => s.setSaveStatus);
   const setSaveError = useNotebookStore((s) => s.setSaveError);
   const setLastSavedAt = useNotebookStore((s) => s.setLastSavedAt);
+
+  // Initial document content for TipTap instantiation (stable ref)
+  const initialContentRef = useRef(
+    (() => {
+      const c = useNotebookStore.getState().activeTrial.content;
+      return c && typeof c === 'object' && Object.keys(c).length > 0 ? c : undefined;
+    })()
+  );
 
   // Track if TipTap editor update is programmatic (from setContent on trial switch) vs user typing
   const isProgrammaticUpdateRef = useRef(false);
@@ -717,62 +772,20 @@ export function EditorCanvas() {
   const editorRef = useRef<Editor | null>(null);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return 'Heading…';
-          }
-          return "Type '/' for commands, reagents, charts… or start typing notes";
-        },
-        includeChildren: true,
-      }),
-      Underline,
-      Highlight.configure({ multicolor: true }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Subscript,
-      Superscript,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      InteractiveChartExtension,
-      ReagentExtension,
-      ProtocolExtension,
-      MoleculeExtension,
-      MathExtension,
-      SequenceExtension,
-      EquipmentExtension,
-      TrialReferenceExtension,
-      CitationExtension,
-      TimerExtension,
-      SlashCommandExtension,
-      BlockGuardExtension,
-    ],
-    content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,
+    extensions: EDITOR_EXTENSIONS,
+    content: initialContentRef.current,
     onUpdate: ({ editor: ed }) => {
       if (isProgrammaticUpdateRef.current) return;
       const json = ed.getJSON() as Record<string, unknown>;
       triggerDebouncedSave(json);
     },
-    editorProps: {
-      attributes: {
-        class:
-          'prose dark:prose-invert prose-sm max-w-none focus:outline-none min-h-[calc(100vh-14rem)] px-2 py-4 text-foreground',
-      },
-    },
+    editorProps: EDITOR_PROPS,
     immediatelyRender: false,
   });
 
   // Keep editor content in sync when switching trials or when initial load finishes
   useEffect(() => {
-    if (!editor) return;
-
-    // Do not mutate editor while a trial is fetching over the network
-    if (isLoadingTrial) return;
+    if (!editor || isLoadingTrial) return;
 
     // Check if this trial has not yet been loaded into this editor instance
     if (loadedTrialIdRef.current !== activeTrialId) {
@@ -780,15 +793,16 @@ export function EditorCanvas() {
       loadedTrialIdRef.current = activeTrialId;
 
       isProgrammaticUpdateRef.current = true;
+      const currentContent = useNotebookStore.getState().activeTrial.content;
       const targetContent =
-        content && typeof content === 'object' && Object.keys(content).length > 0
-          ? content
+        currentContent && typeof currentContent === 'object' && Object.keys(currentContent).length > 0
+          ? currentContent
           : { type: 'doc', content: [] };
 
       editor.commands.setContent(targetContent, false);
       isProgrammaticUpdateRef.current = false;
     }
-  }, [activeTrialId, content, editor, isLoadingTrial, flushPendingSave]);
+  }, [activeTrialId, editor, isLoadingTrial, flushPendingSave]);
 
   useEffect(() => {
     if (editor) {
@@ -953,7 +967,7 @@ export function EditorCanvas() {
     }).catch(console.error);
   }, []);
 
-  const displayTime = lastSavedAt || activeTrial.updatedAt;
+  const displayTime = lastSavedAt || trialUpdatedAt;
   const formattedTime = isMounted && displayTime 
     ? new Date(displayTime).toLocaleTimeString([], {
         hour: '2-digit',

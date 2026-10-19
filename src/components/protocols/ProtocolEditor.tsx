@@ -99,6 +99,30 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
   );
 }
 
+// ─── Static Protocol Editor Extensions & Props ────────────────────────────────
+// Extracted to module scope so TipTap compareOptions reference checks stay stable
+// across component re-renders in React 19.
+
+const PROTOCOL_EXTENSIONS = [
+  StarterKit,
+  Placeholder.configure({
+    placeholder:
+      'Write your Standard Operating Procedure here…\n\nTip: Use heading 2 for sections, ordered lists for steps, and tables for reagent quantities.',
+    includeChildren: true,
+  }),
+  Table.configure({ resizable: true }),
+  TableRow,
+  TableHeader,
+  TableCell,
+];
+
+const PROTOCOL_EDITOR_PROPS = {
+  attributes: {
+    class:
+      'prose dark:prose-invert prose-sm max-w-none focus:outline-none min-h-[calc(100vh-22rem)] px-2 py-4 text-foreground',
+  },
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 interface ProtocolEditorProps {
@@ -119,6 +143,9 @@ export function ProtocolEditor({ protocolId, currentUserRole, onBack }: Protocol
 
   const canManage = currentUserRole === 'PI' || currentUserRole === 'ADMIN';
 
+  // Guard against programmatic updates triggering debounced save
+  const isProgrammaticUpdateRef = useRef(false);
+
   // Stable refs for debounced save
   const nameRef = useRef(name);
   useEffect(() => { nameRef.current = name; }, [name]);
@@ -138,28 +165,13 @@ export function ProtocolEditor({ protocolId, currentUserRole, onBack }: Protocol
   ).current;
 
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder:
-          'Write your Standard Operating Procedure here…\n\nTip: Use heading 2 for sections, ordered lists for steps, and tables for reagent quantities.',
-        includeChildren: true,
-      }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableHeader,
-      TableCell,
-    ],
+    extensions: PROTOCOL_EXTENSIONS,
     onUpdate: ({ editor: ed }) => {
+      if (isProgrammaticUpdateRef.current) return;
       const json = ed.getJSON() as Record<string, unknown>;
       debouncedSave(json);
     },
-    editorProps: {
-      attributes: {
-        class:
-          'prose dark:prose-invert prose-sm max-w-none focus:outline-none min-h-[calc(100vh-22rem)] px-2 py-4 text-foreground',
-      },
-    },
+    editorProps: PROTOCOL_EDITOR_PROPS,
     immediatelyRender: false,
   });
 
@@ -178,7 +190,9 @@ export function ProtocolEditor({ protocolId, currentUserRole, onBack }: Protocol
           typeof protocol.content === 'object' &&
           Object.keys(protocol.content).length > 0
         ) {
+          isProgrammaticUpdateRef.current = true;
           editor.commands.setContent(protocol.content as Record<string, unknown>, false);
+          isProgrammaticUpdateRef.current = false;
         }
       })
       .catch(console.error)
