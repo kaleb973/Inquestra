@@ -3,7 +3,7 @@
 // Rich formatting toolbar for Inquestra Electronic Research Notebook (ERN).
 // Provides 1-click access to headings, marks, scripts, lists, checklists, tables, and lab widgets.
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Editor } from '@tiptap/core';
 import {
   Bold,
@@ -43,6 +43,41 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   const [showHighlightPalette, setShowHighlightPalette] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
 
+  const tableMenuContainerRef = useRef<HTMLDivElement>(null);
+  const highlightPaletteContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close menus on outside click or Escape key
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        tableMenuContainerRef.current &&
+        !tableMenuContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowTableMenu(false);
+      }
+      if (
+        highlightPaletteContainerRef.current &&
+        !highlightPaletteContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowHighlightPalette(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setShowTableMenu(false);
+        setShowHighlightPalette(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   if (!editor) return null;
 
   const HIGHLIGHT_COLORS = [
@@ -54,7 +89,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   ];
 
   return (
-    <div className="sticky top-0 z-20 bg-card/95 backdrop-blur border-b border-border/80 px-3 py-1.5 flex items-center gap-1 flex-wrap text-foreground select-none">
+    <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border/80 px-3 py-1.5 flex items-center gap-1 flex-wrap text-foreground select-none">
       {/* ── Headings & Paragraph ── */}
       <div className="flex items-center gap-0.5 border-r border-border/60 pr-1.5 mr-1">
         <button
@@ -210,7 +245,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </button>
 
         {/* Highlight Color Picker */}
-        <div className="relative">
+        <div ref={highlightPaletteContainerRef} className="relative">
           <button
             type="button"
             onClick={() => {
@@ -233,7 +268,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           </button>
 
           {showHighlightPalette && (
-            <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-xl p-1.5 flex items-center gap-1 z-30">
+            <div className="absolute top-full left-0 mt-1.5 bg-card border border-border rounded-lg shadow-2xl p-1.5 flex items-center gap-1 z-50">
               {HIGHLIGHT_COLORS.map((c) => (
                 <button
                   key={c.label}
@@ -375,7 +410,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </div>
 
       {/* ── Tables ── */}
-      <div className="relative flex items-center border-r border-border/60 pr-1.5 mr-1">
+      <div ref={tableMenuContainerRef} className="relative flex items-center border-r border-border/60 pr-1.5 mr-1">
         <button
           type="button"
           onClick={() => {
@@ -398,7 +433,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </button>
 
         {showTableMenu && editor.isActive('table') && (
-          <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-xl p-1.5 space-y-1 w-40 z-30 text-xs">
+          <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-1.5 bg-card border border-border rounded-lg shadow-2xl p-1.5 space-y-1 w-44 z-50 text-xs">
             <button
               type="button"
               onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTableMenu(false); }}

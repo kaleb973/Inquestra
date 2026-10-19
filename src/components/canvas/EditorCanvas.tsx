@@ -45,6 +45,8 @@ import {
   ListTodo,
   Code as CodeIcon,
   Minus as MinusIcon,
+  ShieldAlert,
+  X,
 } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
@@ -58,6 +60,7 @@ import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
 import { TrialReferenceExtension } from '@/components/editor/nodes/TrialReferenceNode';
 import { CitationExtension } from '@/components/editor/nodes/CitationNode';
 import { TimerExtension } from '@/components/editor/nodes/TimerBlock';
+import { BlockGuardExtension } from '@/components/editor/extensions/BlockGuardExtension';
 import { EditorToolbar } from '@/components/editor/EditorToolbar';
 import { EditorBubbleMenu } from '@/components/editor/EditorBubbleMenu';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
@@ -558,6 +561,43 @@ export function EditorCanvas() {
   const setSaveError = useNotebookStore((s) => s.setSaveError);
   const setLastSavedAt = useNotebookStore((s) => s.setLastSavedAt);
 
+  // Floating banner for protected block deletion notifications
+  const [blockNotice, setBlockNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    let noticeTimer: ReturnType<typeof setTimeout> | null = null;
+    const handleNotice = (e: Event) => {
+      const custom = e as CustomEvent<{ nodeName: string; action: string }>;
+      const nameMap: Record<string, string> = {
+        table: 'Table',
+        interactiveChart: 'Telemetry Chart',
+        reagentBlock: 'Reagent Record',
+        protocolBlock: 'Protocol SOP',
+        moleculeBlock: '2D Molecule',
+        mathBlock: 'Equation',
+        sequenceBlock: 'Sequence Block',
+        equipmentBlock: 'Equipment Block',
+        timerBlock: 'Timer Block',
+        citationBlock: 'Citation Block',
+        trialReferenceBlock: 'Trial Reference',
+      };
+      const friendlyName = nameMap[custom.detail?.nodeName] || 'Research block';
+      setBlockNotice(
+        `${friendlyName} protected. Press Ctrl+Backspace or Delete key (or click 🗑) to remove.`
+      );
+      if (noticeTimer) clearTimeout(noticeTimer);
+      noticeTimer = setTimeout(() => {
+        setBlockNotice(null);
+      }, 4500);
+    };
+
+    window.addEventListener('inquestra:block-protected-notice', handleNotice);
+    return () => {
+      window.removeEventListener('inquestra:block-protected-notice', handleNotice);
+      if (noticeTimer) clearTimeout(noticeTimer);
+    };
+  }, []);
+
   // Track if TipTap editor update is programmatic (from setContent on trial switch) vs user typing
   const isProgrammaticUpdateRef = useRef(false);
   const loadedTrialIdRef = useRef<string | null>(null);
@@ -749,6 +789,7 @@ export function EditorCanvas() {
       CitationExtension,
       TimerExtension,
       SlashCommandExtension,
+      BlockGuardExtension,
     ],
     content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,
     onUpdate: ({ editor: ed }) => {
@@ -1084,9 +1125,25 @@ export function EditorCanvas() {
           )}
 
           {/* Rich Note-Taking Formatting Toolbar */}
-          <div className="mb-4 rounded-lg overflow-hidden border border-border/60 bg-muted/20">
+          <div className="mb-4 rounded-lg border border-border/60 bg-muted/20 relative z-20">
             <EditorToolbar editor={editor} />
           </div>
+
+          {/* Floating Notice when accidental block deletion is prevented */}
+          {blockNotice && (
+            <div className="fixed bottom-6 right-6 z-50 bg-card/95 backdrop-blur border border-amber-500/40 text-xs px-3.5 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-amber-500" />
+              <span className="font-medium text-foreground">{blockNotice}</span>
+              <button
+                type="button"
+                onClick={() => setBlockNotice(null)}
+                className="ml-2 text-muted-foreground hover:text-foreground p-0.5 rounded cursor-pointer transition-colors"
+                title="Dismiss"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Floating Bubble Menu on text selection */}
           <EditorBubbleMenu editor={editor} />

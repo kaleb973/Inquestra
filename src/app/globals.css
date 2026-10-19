@@ -68,16 +68,49 @@
   }
 }
 
+/* High-visibility caret indicator across dark & light themes */
 .ProseMirror {
   outline: none;
-  caret-color: hsl(var(--primary));
+  caret-color: #38bdf8;
+}
+
+.ProseMirror,
+.ProseMirror p,
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror td,
+.ProseMirror th {
+  caret-color: #38bdf8;
+}
+
+:root:not(.dark) .ProseMirror,
+:root:not(.dark) .ProseMirror * {
+  caret-color: #0284c7;
+}
+
+input, textarea {
+  caret-color: #38bdf8;
+}
+
+:root:not(.dark) input,
+:root:not(.dark) textarea {
+  caret-color: #0284c7;
+}
+
+/* NodeSelection visual indicator when a research block or table is selected */
+.ProseMirror .ProseMirror-selectednode {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 2px !important;
+  border-radius: 0.5rem;
+  transition: outline 0.15s ease-in-out;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before,
 .ProseMirror p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: rgb(163 163 163 / 0.6);
+  color: hsl(var(--muted-foreground) / 0.85);
   pointer-events: none;
   height: 0;
   font-style: normal;

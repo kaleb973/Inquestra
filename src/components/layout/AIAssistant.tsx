@@ -102,14 +102,15 @@ export function AIAssistant() {
           </div>
         ))}
         {isTyping && (
-          <div className="flex gap-2 justify-start">
+          <div className="flex gap-2 justify-start items-center">
             <div className="w-6 h-6 rounded bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
               <Bot className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
             </div>
-            <div className="text-xs px-3 py-2 rounded-lg bg-card text-muted-foreground border border-border rounded-tl-sm flex items-center gap-1 shadow-sm">
-              <span className="animate-bounce">.</span>
-              <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
-              <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+            <div className="px-3.5 py-2 rounded-lg bg-card text-foreground border border-border rounded-tl-sm flex items-center gap-1.5 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="text-[11px] font-mono text-muted-foreground ml-1">Analyzing experiment…</span>
             </div>
           </div>
         )}
