@@ -27,6 +27,8 @@ import {
   Pause,
   RotateCcw,
   Bell,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -114,10 +116,12 @@ function playTimerChime() {
 
 function StepTimer({
   step,
+  isMuted = false,
   onComplete,
   onSetDuration,
 }: {
   step: ProtocolStep;
+  isMuted?: boolean;
   onComplete: () => void;
   onSetDuration: (duration: number | null) => void;
 }) {
@@ -141,7 +145,7 @@ function StepTimer({
           clearInterval(interval);
           setIsRunning(false);
           setIsDone(true);
-          playTimerChime();
+          if (!isMuted) playTimerChime();
           return 0;
         }
         return prev - 1;
@@ -265,6 +269,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
   const attrs = node.attrs as ProtocolAttrs;
   const [showDeviation, setShowDeviation] = useState<string | null>(null);
   const [deviationDraft, setDeviationDraft] = useState('');
+  const [isMuted, setIsMuted] = useState(false);
 
   const update = useCallback(
     (patch: Partial<ProtocolAttrs>) => updateAttributes({ ...attrs, ...patch }),
@@ -359,6 +364,15 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
               {completedCount}/{totalCount}
             </span>
             <button
+              onClick={() => setIsMuted(!isMuted)}
+              title={isMuted ? 'Step alarms muted (click to unmute)' : 'Step alarms audio enabled (click to mute)'}
+              className={`p-1 rounded hover:bg-accent transition-colors ${
+                isMuted ? 'text-muted-foreground' : 'text-violet-500 dark:text-violet-400'
+              }`}
+            >
+              {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+            </button>
+            <button
               onClick={forkProtocol}
               title="Fork — new run with same steps"
               className="text-muted-foreground hover:text-violet-500 p-1 rounded hover:bg-accent transition-colors"
@@ -429,6 +443,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
                 {!step.checked && (
                   <StepTimer
                     step={step}
+                    isMuted={isMuted}
                     onComplete={() => toggleStep(step.id)}
                     onSetDuration={(dur) => setStepTimerDuration(step.id, dur)}
                   />

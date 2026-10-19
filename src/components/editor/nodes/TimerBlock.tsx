@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { Timer, Play, Pause, RotateCcw, Bell, X, Check } from 'lucide-react';
+import { Timer, Play, Pause, RotateCcw, Bell, X, Check, Volume2, VolumeX } from 'lucide-react';
 
 export const TimerExtension = Node.create({
   name: 'timerBlock',
@@ -64,6 +64,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
   const [isDone, setIsDone] = useState(false);
   const [editingLabel, setEditingLabel] = useState(false);
   const [labelText, setLabelText] = useState(label);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     if (!isRunning && !isDone) {
@@ -79,7 +80,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
           clearInterval(interval);
           setIsRunning(false);
           setIsDone(true);
-          playChime();
+          if (!isMuted) playChime();
           return 0;
         }
         return prev - 1;
@@ -220,6 +221,18 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
               title="Reset"
             >
               <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={() => setIsMuted(!isMuted)}
+              className={`p-1.5 rounded-lg border transition-colors ${
+                isMuted
+                  ? 'border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted'
+                  : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-500 hover:text-indigo-600 dark:text-indigo-400'
+              }`}
+              title={isMuted ? 'Alarm audio muted' : 'Alarm audio active'}
+            >
+              {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
