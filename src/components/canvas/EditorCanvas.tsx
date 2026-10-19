@@ -1018,9 +1018,9 @@ export function EditorCanvas() {
       )}
 
       {/* Notebook Paper Sheet */}
-      <div className="max-w-4xl mx-auto my-6 px-4 md:px-8">
+      <div className="max-w-5xl mx-auto my-3 sm:my-6 px-2 sm:px-4 md:px-8 transition-all">
         <div 
-          className="bg-card border border-border/80 rounded-2xl shadow-xl p-6 md:p-10 transition-all cursor-text relative"
+          className="bg-card border border-border/80 rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 lg:p-10 transition-all cursor-text relative"
           onClick={(e) => {
             if (e.target === e.currentTarget && editor && !editor.isFocused) {
               editor.commands.focus('end');

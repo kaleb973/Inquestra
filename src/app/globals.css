@@ -250,3 +250,12 @@ mark {
   * { border-color: #e5e5e5 !important; }
   ::-webkit-scrollbar { display: none; }
 }
+
+/* Hide scrollbar for Chrome, Safari, Edge, Firefox */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

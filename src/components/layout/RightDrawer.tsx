@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
-import { Tag, Plus, X, Activity, Box, FileKey, History, Quote } from 'lucide-react';
+import { Tag, Plus, X, Activity, Box, FileKey, History, Quote, PanelRightClose } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
 import { VersionHistory } from '@/components/editor/tools/VersionHistory';
@@ -15,6 +15,8 @@ import { getCurrentUserProfile } from '@/actions/adminActions';
 import { saveTrial, sealTrial } from '@/actions/trialActions';
 
 export function RightDrawer() {
+  const isRightDrawerOpen = useNotebookStore((s) => s.isRightDrawerOpen);
+  const toggleRightDrawer = useNotebookStore((s) => s.toggleRightDrawer);
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const metadata = activeTrial?.metadata || [];
   const addMetadata = useNotebookStore((s) => s.addMetadata);
@@ -175,9 +177,15 @@ export function RightDrawer() {
   };
 
   return (
-    <aside className="w-[360px] bg-background/80 backdrop-blur-md border-l border-border flex flex-col shrink-0 overflow-hidden z-10">
+    <aside
+      className={`bg-background/80 backdrop-blur-md border-l border-border flex flex-col shrink-0 overflow-hidden z-10 transition-all duration-300 ease-in-out ${
+        isRightDrawerOpen
+          ? 'w-[360px]'
+          : 'w-0 border-l-0 opacity-0 pointer-events-none'
+      }`}
+    >
       {/* Drawer Mode Tabs */}
-      <div className="flex border-b border-border bg-muted/30">
+      <div className="flex border-b border-border bg-muted/30 items-center">
         <button 
           onClick={() => setRightDrawerMode('TELEMETRY')}
           className={`flex-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'TELEMETRY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
@@ -213,6 +221,15 @@ export function RightDrawer() {
         >
           <History className="w-3.5 h-3.5" />
           History
+        </button>
+        {/* Close drawer button */}
+        <button
+          onClick={toggleRightDrawer}
+          className="px-2.5 py-2.5 text-muted-foreground hover:text-foreground hover:bg-muted/80 border-b-2 border-transparent transition-colors flex items-center justify-center shrink-0"
+          title="Close telemetry drawer (Ctrl+J)"
+          aria-label="Close telemetry drawer"
+        >
+          <PanelRightClose className="w-3.5 h-3.5" />
         </button>
       </div>
 

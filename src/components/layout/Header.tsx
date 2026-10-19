@@ -19,6 +19,8 @@ import {
   AlertCircle,
   Check,
   Bookmark,
+  PanelLeft,
+  PanelRight,
 } from 'lucide-react';
 import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal';
 import { Logo } from '@/components/ui/Logo';
@@ -45,6 +47,11 @@ const STATUS_COLORS: Record<TrialStatus, string> = {
 };
 
 export function Header() {
+  const isLeftSidebarOpen = useNotebookStore((s) => s.isLeftSidebarOpen);
+  const isRightDrawerOpen = useNotebookStore((s) => s.isRightDrawerOpen);
+  const toggleLeftSidebar = useNotebookStore((s) => s.toggleLeftSidebar);
+  const toggleRightDrawer = useNotebookStore((s) => s.toggleRightDrawer);
+
   const title = useNotebookStore((s) => s.activeTrial.title);
   const status = useNotebookStore((s) => s.activeTrial.status);
   const metadata = useNotebookStore((s) => s.activeTrial?.metadata ?? EMPTY_METADATA);
@@ -169,6 +176,31 @@ export function Header() {
     return () => window.removeEventListener('inquestra:trigger-snapshot', handleSnapshotEvent);
   }, [handleSaveSnapshot]);
 
+  // Global shortcuts for sidebar (Ctrl+B) and telemetry drawer (Ctrl+J)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleLeftSidebar();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        toggleRightDrawer();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleLeftSidebar, toggleRightDrawer]);
+
   const handleExport = async () => {
     setIsExporting(true);
     try {
@@ -261,11 +293,26 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-border bg-background/90 backdrop-blur-md flex items-center px-5 gap-4 shrink-0 z-50 sticky top-0 shadow-sm font-sans">
+    <header className="h-14 border-b border-border bg-background/90 backdrop-blur-md flex items-center px-4 sm:px-5 gap-3 sm:gap-4 shrink-0 z-50 sticky top-0 shadow-sm font-sans">
+      {/* Left Sidebar Toggle Button */}
+      <button
+        type="button"
+        onClick={toggleLeftSidebar}
+        title={isLeftSidebarOpen ? "Collapse sidebar (Ctrl+B)" : "Expand sidebar (Ctrl+B)"}
+        className={`p-1.5 rounded-lg transition-colors shrink-0 ${
+          isLeftSidebarOpen
+            ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            : 'bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25'
+        }`}
+        aria-label="Toggle left sidebar"
+      >
+        <PanelLeft className="w-4 h-4" />
+      </button>
+
       {/* Brand */}
-      <Link href="/app" className="flex items-center gap-2.5 shrink-0 group">
+      <Link href="/app" className="flex items-center gap-2 shrink-0 group">
         <Logo className="text-foreground group-hover:text-primary transition-colors w-5 h-5" />
-        <span className="text-foreground font-semibold text-sm tracking-tight">
+        <span className="text-foreground font-semibold text-sm tracking-tight hidden sm:inline">
           Inquestra
         </span>
       </Link>
@@ -440,6 +487,22 @@ export function Header() {
         )}
 
         <div className="h-5 w-px bg-border shrink-0" />
+
+        {/* Telemetry drawer toggle button */}
+        <button
+          type="button"
+          onClick={toggleRightDrawer}
+          title={isRightDrawerOpen ? "Close telemetry drawer (Ctrl+J)" : "Open telemetry drawer (Ctrl+J)"}
+          className={`p-1.5 rounded-lg transition-colors shrink-0 flex items-center gap-1.5 ${
+            isRightDrawerOpen
+              ? 'bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+          }`}
+          aria-label="Toggle telemetry drawer"
+        >
+          <PanelRight className="w-4 h-4" />
+          <span className="hidden xl:inline text-xs font-medium">Telemetry</span>
+        </button>
 
         <ThemeToggle />
 

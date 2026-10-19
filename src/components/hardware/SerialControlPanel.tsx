@@ -72,7 +72,8 @@ export function SerialControlPanel() {
               alert(res.reason);
               return;
             }
-            connect(selectedBaud);
+            await connect(selectedBaud);
+            useNotebookStore.getState().setRightDrawerMode('TELEMETRY');
           }
         }}
         disabled={!isWebSerialSupported}

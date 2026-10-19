@@ -21,6 +21,7 @@ import {
   Info,
   MoreVertical,
   Quote,
+  PanelLeftClose,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { SerialControlPanel } from '@/components/hardware/SerialControlPanel';
@@ -270,6 +271,8 @@ function NewProjectModal({
 // ─── Main Sidebar ─────────────────────────────────────────────────────────────
 
 export function LeftSidebar() {
+  const isLeftSidebarOpen = useNotebookStore((s) => s.isLeftSidebarOpen);
+  const toggleLeftSidebar = useNotebookStore((s) => s.toggleLeftSidebar);
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
   const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
@@ -625,7 +628,13 @@ export function LeftSidebar() {
 
   return (
     <>
-      <aside className="w-[260px] bg-background/80 backdrop-blur-md border-r border-border/80 flex flex-col shrink-0 overflow-hidden shadow-2xl">
+      <aside
+        className={`bg-background/80 backdrop-blur-md border-r border-border/80 flex flex-col shrink-0 overflow-hidden shadow-2xl transition-all duration-300 ease-in-out ${
+          isLeftSidebarOpen
+            ? 'w-[260px]'
+            : 'w-0 border-r-0 opacity-0 pointer-events-none'
+        }`}
+      >
 
         {/* ── Project Switcher ──────────────────────────────────────────── */}
         <div className="px-3 py-3 border-b border-border/60 bg-muted/20">
@@ -676,6 +685,16 @@ export function LeftSidebar() {
               title="New project"
             >
               <Plus className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Collapse sidebar button */}
+            <button
+              onClick={toggleLeftSidebar}
+              className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
+              title="Collapse sidebar (Ctrl+B)"
+              aria-label="Collapse sidebar"
+            >
+              <PanelLeftClose className="w-3.5 h-3.5" />
             </button>
           </div>
 

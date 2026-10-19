@@ -48,6 +48,8 @@ const DEFAULT_STATS: TelemetryStats = {
 export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'LITERATURE' | 'COMPLIANCE' | 'HISTORY';
 
 interface NotebookState {
+  isLeftSidebarOpen: boolean;
+  isRightDrawerOpen: boolean;
   rightDrawerMode: RightDrawerMode;
   activeTrial: TrialDocument;
   /** Supabase-side UUID for the synced trial (null = never synced) */
@@ -70,6 +72,10 @@ interface NotebookState {
 }
 
 interface NotebookActions {
+  toggleLeftSidebar: () => void;
+  toggleRightDrawer: () => void;
+  setLeftSidebarOpen: (open: boolean) => void;
+  setRightDrawerOpen: (open: boolean) => void;
   setRightDrawerMode: (mode: RightDrawerMode) => void;
   setActiveTrial: (trial: TrialDocument) => void;
   setCloudIds: (ids: { cloudTrialId: string; cloudProjectId: string }) => void;
@@ -100,6 +106,8 @@ type NotebookStore = NotebookState & NotebookActions;
 export const useNotebookStore = create<NotebookStore>()(
   persist(
     (set) => ({
+      isLeftSidebarOpen: true,
+      isRightDrawerOpen: false,
       rightDrawerMode: 'TELEMETRY' as RightDrawerMode,
       activeTrial: makeDefaultTrial(),
       cloudTrialId: null,
@@ -114,7 +122,11 @@ export const useNotebookStore = create<NotebookStore>()(
       telemetryStats: DEFAULT_STATS,
       hardwareStatus: DEFAULT_HARDWARE,
 
-      setRightDrawerMode: (mode) => set({ rightDrawerMode: mode }),
+      toggleLeftSidebar: () => set((state) => ({ isLeftSidebarOpen: !state.isLeftSidebarOpen })),
+      toggleRightDrawer: () => set((state) => ({ isRightDrawerOpen: !state.isRightDrawerOpen })),
+      setLeftSidebarOpen: (open) => set({ isLeftSidebarOpen: open }),
+      setRightDrawerOpen: (open) => set({ isRightDrawerOpen: open }),
+      setRightDrawerMode: (mode) => set({ rightDrawerMode: mode, isRightDrawerOpen: true }),
       setCachedProjects: (projects) => set({ cachedProjects: projects }),
       setCachedTrials: (trials) => set({ cachedTrials: trials }),
       setActiveTrial: (trial) =>
@@ -211,6 +223,8 @@ export const useNotebookStore = create<NotebookStore>()(
         lastSavedAt: state.lastSavedAt,
         cachedProjects: state.cachedProjects,
         cachedTrials: state.cachedTrials,
+        isLeftSidebarOpen: state.isLeftSidebarOpen,
+        isRightDrawerOpen: state.isRightDrawerOpen,
       }),
     }
   )
