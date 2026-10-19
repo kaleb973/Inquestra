@@ -292,10 +292,12 @@ export function LiteratureLibrary({
           <div className="flex items-center gap-4">
             <Link
               href="/app"
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center gap-1.5 text-xs font-medium"
+              prefetch={true}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted border border-border/80 font-medium text-xs shadow-xs hover:border-primary/50 transition-all cursor-pointer group"
+              title="Return to active experiment notebook"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Notebook
+              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 text-primary" />
+              <span>Back to Notebook</span>
             </Link>
             <div className="h-4 w-px bg-border" />
             <div>

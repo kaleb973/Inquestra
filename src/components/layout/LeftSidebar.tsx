@@ -986,6 +986,7 @@ export function LeftSidebar() {
           <div className="mt-8 border-t border-border/60 pt-4 space-y-1">
             <Link
               href="/app/literature"
+              prefetch={true}
               className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
             >
               <Quote className="w-3.5 h-3.5 shrink-0" />

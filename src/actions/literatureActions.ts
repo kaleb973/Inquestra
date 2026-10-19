@@ -48,6 +48,27 @@ export interface PaperPayload {
   tags?: string[];
 }
 
+// ─── In-Memory Acceleration Caches ──────────────────────────────────────────
+interface SearchCacheEntry {
+  data: { success: boolean; results: LiteratureItem[]; total: number };
+  expiresAt: number;
+}
+const searchCache = new Map<string, SearchCacheEntry>();
+
+interface TrialPapersCacheEntry {
+  data: any[];
+  expiresAt: number;
+}
+const trialPapersCache = new Map<string, TrialPapersCacheEntry>();
+
+function invalidateTrialPapersCache(trialId?: string) {
+  if (trialId) {
+    trialPapersCache.delete(trialId);
+  } else {
+    trialPapersCache.clear();
+  }
+}
+
 /**
  * Search external biomedical literature using Europe PMC REST API.
  * Free, public, zero-auth endpoint with 44M+ life science & BME records.
@@ -68,31 +89,52 @@ export async function searchExternalLiterature(
     const size = typeof pageOrOptions === 'object' && pageOrOptions.pageSize ? pageOrOptions.pageSize : pageSize;
     const targetTrialId = typeof pageOrOptions === 'object' && pageOrOptions.trialId ? pageOrOptions.trialId : trialId;
 
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    let orgId: string | null = null;
-    if (user) {
-      const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-      if (dbUser) orgId = dbUser.organizationId;
+    // 1. Fast Cache Check
+    const cacheKey = `${cleanQuery.toLowerCase()}:${page}:${size}:${targetTrialId || ''}`;
+    const cached = searchCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.data;
     }
 
-    const endpoint = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(
-      cleanQuery
-    )}&format=json&pageSize=${pageSize}&page=${page}&resultType=core`;
+    // 2. Run Europe PMC fetch and Supabase/Prisma organization lookup in PARALLEL
+    const orgPromise = (async () => {
+      try {
+        const supabase = await createSupabaseServerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+        const dbUser = await prisma.user.findUnique({
+          where: { authId: user.id },
+          select: { organizationId: true },
+        });
+        return dbUser?.organizationId || null;
+      } catch {
+        return null;
+      }
+    })();
 
-    const res = await fetch(endpoint, {
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'Inquestra-BME-Platform/1.0 (https://inquestra.app)',
-      },
-      next: { revalidate: 3600 }, // Cache search queries for 1 hour
-    });
+    const fetchPromise = (async () => {
+      const endpoint = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(
+        cleanQuery
+      )}&format=json&pageSize=${size}&page=${page}&resultType=core`;
 
-    if (!res.ok) {
-      throw new Error(`Europe PMC API returned status ${res.status}`);
-    }
+      const res = await fetch(endpoint, {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'Inquestra-BME-Platform/1.0 (https://inquestra.app)',
+        },
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(9000),
+      });
 
-    const json = await res.json();
+      if (!res.ok) {
+        throw new Error(`Europe PMC API returned status ${res.status}`);
+      }
+
+      return res.json();
+    })();
+
+    const [json, orgId] = await Promise.all([fetchPromise, orgPromise]);
+
     const hitCount = json.hitCount || 0;
     const rawList = json.resultList?.result || [];
 
@@ -101,8 +143,8 @@ export async function searchExternalLiterature(
       .map((r: any) => r.doi)
       .filter((d: any): d is string => typeof d === 'string' && d.length > 0);
 
-    let savedDoiSet = new Set<string>();
-    let citedDoiSet = new Set<string>();
+    const savedDoiSet = new Set<string>();
+    const citedDoiSet = new Set<string>();
 
     if (orgId && dois.length > 0) {
       const savedPapers = await prisma.researchPaper.findMany({
@@ -111,13 +153,13 @@ export async function searchExternalLiterature(
           doi: { in: dois },
         },
         include: {
-          trials: trialId ? { where: { trialId } } : false,
+          trials: targetTrialId ? { where: { trialId: targetTrialId } } : false,
         },
       });
 
       savedPapers.forEach((p) => {
         if (p.doi) savedDoiSet.add(p.doi.toLowerCase());
-        if (trialId && p.trials && p.trials.length > 0 && p.doi) {
+        if (targetTrialId && p.trials && p.trials.length > 0 && p.doi) {
           citedDoiSet.add(p.doi.toLowerCase());
         }
       });
@@ -166,7 +208,9 @@ export async function searchExternalLiterature(
       };
     });
 
-    return { success: true, results, total: hitCount };
+    const payload = { success: true, results, total: hitCount };
+    searchCache.set(cacheKey, { data: payload, expiresAt: Date.now() + 15 * 60 * 1000 });
+    return payload;
   } catch (err) {
     console.error('Europe PMC Search Error:', err);
     return {
@@ -334,6 +378,7 @@ export async function linkPaperToTrial(
     },
   });
 
+  invalidateTrialPapersCache(trialId);
   revalidatePath('/app');
   return { success: true, trialPaper };
 }
@@ -370,6 +415,7 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
         details: { paperId },
       },
     });
+    invalidateTrialPapersCache(trialIdOrId);
   } else {
     // Single trialPaper ID passed
     const existing = await prisma.trialPaper.findFirst({
@@ -393,6 +439,7 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
         details: { paperId: existing.paperId },
       },
     });
+    invalidateTrialPapersCache(existing.trialId);
   }
 
   revalidatePath('/app');
@@ -403,14 +450,22 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
  * Fetch all papers linked to a specific trial.
  */
 export async function fetchTrialPapers(trialId: string) {
+  const cached = trialPapersCache.get(trialId);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.data;
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    select: { organizationId: true },
+  });
   if (!dbUser) return [];
 
-  return prisma.trialPaper.findMany({
+  const papers = await prisma.trialPaper.findMany({
     where: {
       trialId,
       trial: { project: { organizationId: dbUser.organizationId } },
@@ -418,6 +473,9 @@ export async function fetchTrialPapers(trialId: string) {
     include: { paper: true },
     orderBy: { citationIndex: 'asc' },
   });
+
+  trialPapersCache.set(trialId, { data: papers, expiresAt: Date.now() + 60_000 });
+  return papers;
 }
 
 /**

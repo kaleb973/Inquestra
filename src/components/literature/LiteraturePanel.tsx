@@ -38,6 +38,9 @@ const QUICK_TAGS = [
   'Biomarkers',
 ];
 
+// In-memory client cache to make switching between drawer tabs instantaneous
+const trialPapersClientCache = new Map<string, any[]>();
+
 export function LiteraturePanel() {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
@@ -49,20 +52,35 @@ export function LiteraturePanel() {
   const [searchResults, setSearchResults] = useState<LiteratureSearchResult[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const [trialPapers, setTrialPapers] = useState<any[]>([]);
-  const [isLoadingTrialPapers, setIsLoadingTrialPapers] = useState(false);
+  const [trialPapers, setTrialPapers] = useState<any[]>(() => {
+    return cloudTrialId && trialPapersClientCache.has(cloudTrialId)
+      ? trialPapersClientCache.get(cloudTrialId)!
+      : [];
+  });
+  const [isLoadingTrialPapers, setIsLoadingTrialPapers] = useState(() => {
+    return !!cloudTrialId && !trialPapersClientCache.has(cloudTrialId);
+  });
   const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
 
-  // Load trial citations
+  // Load trial citations with SWR (instant cached render + background refresh)
   const loadTrialPapers = useCallback(async () => {
     if (!cloudTrialId) {
       setTrialPapers([]);
       return;
     }
-    setIsLoadingTrialPapers(true);
+
+    const cached = trialPapersClientCache.get(cloudTrialId);
+    if (cached) {
+      setTrialPapers(cached);
+      setIsLoadingTrialPapers(false);
+    } else {
+      setIsLoadingTrialPapers(true);
+    }
+
     try {
       const papers = await fetchTrialPapers(cloudTrialId);
+      trialPapersClientCache.set(cloudTrialId, papers);
       setTrialPapers(papers);
     } catch (e) {
       console.error('Failed to load trial papers:', e);
@@ -119,6 +137,7 @@ export function LiteraturePanel() {
             tags: [],
           },
         });
+        if (cloudTrialId) trialPapersClientCache.delete(cloudTrialId);
         await loadTrialPapers();
         // Update local search result state
         setSearchResults((prev) =>
@@ -138,6 +157,7 @@ export function LiteraturePanel() {
     startTransition(async () => {
       try {
         await unlinkPaperFromTrial(trialPaperId);
+        if (cloudTrialId) trialPapersClientCache.delete(cloudTrialId);
         await loadTrialPapers();
       } catch (err) {
         alert(err instanceof Error ? err.message : 'Failed to remove citation');

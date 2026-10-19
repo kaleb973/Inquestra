@@ -20,7 +20,11 @@ export default async function LiteraturePage() {
 
   const dbUser = await prisma.user.findUnique({
     where: { authId: user.id },
-    include: { organization: true },
+    select: {
+      role: true,
+      organizationId: true,
+      organization: { select: { name: true } },
+    },
   });
 
   if (!dbUser) {
