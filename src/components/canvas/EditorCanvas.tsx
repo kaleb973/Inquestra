@@ -14,12 +14,22 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
+import Underline from '@tiptap/extension-underline';
+import Highlight from '@tiptap/extension-highlight';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import TextAlign from '@tiptap/extension-text-align';
 import tippy, { type Instance } from 'tippy.js';
 import {
   BarChart3,
   Table2,
   Timer,
   Heading,
+  Heading1,
+  Heading2,
+  Heading3,
   FlaskConical,
   Upload,
   ClipboardList,
@@ -30,6 +40,11 @@ import {
   AlertCircle,
   Circle,
   Quote,
+  List,
+  ListOrdered,
+  ListTodo,
+  Code as CodeIcon,
+  Minus as MinusIcon,
 } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
@@ -43,6 +58,8 @@ import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
 import { TrialReferenceExtension } from '@/components/editor/nodes/TrialReferenceNode';
 import { CitationExtension } from '@/components/editor/nodes/CitationNode';
 import { TimerExtension } from '@/components/editor/nodes/TimerBlock';
+import { EditorToolbar } from '@/components/editor/EditorToolbar';
+import { EditorBubbleMenu } from '@/components/editor/EditorBubbleMenu';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
@@ -289,7 +306,7 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Heading 1',
       description: 'Large section heading',
-      icon: <Heading className="w-4 h-4" />,
+      icon: <Heading1 className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
           .chain()
@@ -302,13 +319,104 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Heading 2',
       description: 'Medium section heading',
-      icon: <Heading className="w-4 h-4 opacity-70" />,
+      icon: <Heading2 className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
           .chain()
           .focus()
           .deleteRange(range)
           .setHeading({ level: 2 })
+          .run();
+      },
+    },
+    {
+      title: 'Heading 3',
+      description: 'Small subsection heading',
+      icon: <Heading3 className="w-4 h-4" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setHeading({ level: 3 })
+          .run();
+      },
+    },
+    {
+      title: 'Task Checklist',
+      description: 'To-do checklist with interactive checkboxes',
+      icon: <ListTodo className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleTaskList()
+          .run();
+      },
+    },
+    {
+      title: 'Bulleted List',
+      description: 'Standard unordered bullet list',
+      icon: <List className="w-4 h-4" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleBulletList()
+          .run();
+      },
+    },
+    {
+      title: 'Numbered List',
+      description: 'Ordered sequential step list',
+      icon: <ListOrdered className="w-4 h-4" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleOrderedList()
+          .run();
+      },
+    },
+    {
+      title: 'Callout Note',
+      description: 'Highlighted observation or hypothesis blockquote',
+      icon: <Quote className="w-4 h-4 text-primary" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleBlockquote()
+          .run();
+      },
+    },
+    {
+      title: 'Code Block',
+      description: 'Preformatted code or protocol script',
+      icon: <CodeIcon className="w-4 h-4 text-indigo-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleCodeBlock()
+          .run();
+      },
+    },
+    {
+      title: 'Divider Line',
+      description: 'Horizontal section divider',
+      icon: <MinusIcon className="w-4 h-4 opacity-70" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setHorizontalRule()
           .run();
       },
     },
@@ -373,6 +481,23 @@ const SlashCommandExtension = Extension.create({
                 trigger: 'manual',
                 placement: 'bottom-start',
                 animation: false,
+                popperOptions: {
+                  modifiers: [
+                    {
+                      name: 'preventOverflow',
+                      options: {
+                        boundary: 'viewport',
+                        padding: 12,
+                      },
+                    },
+                    {
+                      name: 'flip',
+                      options: {
+                        fallbackPlacements: ['top-start', 'bottom-end', 'top-end'],
+                      },
+                    },
+                  ],
+                },
               });
             },
 
@@ -602,6 +727,13 @@ export function EditorCanvas() {
         },
         includeChildren: true,
       }),
+      Underline,
+      Highlight.configure({ multicolor: true }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Subscript,
+      Superscript,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Table.configure({ resizable: true }),
       TableRow,
       TableHeader,
@@ -950,6 +1082,14 @@ export function EditorCanvas() {
               </div>
             </div>
           )}
+
+          {/* Rich Note-Taking Formatting Toolbar */}
+          <div className="mb-4 rounded-lg overflow-hidden border border-border/60 bg-muted/20">
+            <EditorToolbar editor={editor} />
+          </div>
+
+          {/* Floating Bubble Menu on text selection */}
+          <EditorBubbleMenu editor={editor} />
 
           {/* TipTap editor content */}
           <div className="pl-2">

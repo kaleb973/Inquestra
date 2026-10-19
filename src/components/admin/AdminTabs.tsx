@@ -337,6 +337,7 @@ export function AdminTabs({
           <div className="flex items-center gap-4 pt-5 pb-3">
             <Link
               href="/app"
+              prefetch={true}
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />

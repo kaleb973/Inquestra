@@ -25,6 +25,7 @@ import {
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { SerialControlPanel } from '@/components/hardware/SerialControlPanel';
 import {
+  fetchWorkspaceBootstrap,
   fetchAllTrials,
   createNewTrial,
   getTrial,
@@ -271,25 +272,33 @@ function NewProjectModal({
 export function LeftSidebar() {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
+  const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
   const setActiveTrial = useNotebookStore((s) => s.setActiveTrial);
   const setCloudIds = useNotebookStore((s) => s.setCloudIds);
   const setIsLoadingTrial = useNotebookStore((s) => s.setIsLoadingTrial);
+  const cachedProjects = useNotebookStore((s) => s.cachedProjects);
+  const cachedTrials = useNotebookStore((s) => s.cachedTrials);
+  const setCachedProjects = useNotebookStore((s) => s.setCachedProjects);
+  const setCachedTrials = useNotebookStore((s) => s.setCachedTrials);
 
-  const [projects, setProjects] = useState<ProjectWithLead[]>([]);
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  // Instant restoration from in-memory cache — zero layout flash or skeleton wait
+  const [projects, setProjects] = useState<ProjectWithLead[]>(cachedProjects || []);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(
+    cloudProjectId || (cachedProjects && cachedProjects.length > 0 ? cachedProjects[0].id : null)
+  );
   type StatusFilter = 'ALL' | 'ACTIVE' | 'DRAFT' | 'COMPLETED' | 'FAILED';
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
-  const [trials, setTrials] = useState<TrialSummaryItem[]>([]);
+  const [trials, setTrials] = useState<TrialSummaryItem[]>(cachedTrials || []);
   const [previewTrial, setPreviewTrial] = useState<TrialSummaryItem | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     trial: TrialSummaryItem;
     x: number;
     y: number;
   } | null>(null);
-  const [isLoadingTrials, setIsLoadingTrials] = useState(true);
+  const [isLoadingTrials, setIsLoadingTrials] = useState(cachedTrials.length === 0);
   const [loadingTrialId, setLoadingTrialId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -302,20 +311,13 @@ export function LeftSidebar() {
   const hasInitializedRef = useRef(false);
   const loadingTrialIdRef = useRef<string | null>(null);
 
-  // Load projects on mount
-  useEffect(() => {
-    fetchProjectsWithLeads()
-      .then((ps) => {
-        setProjects(ps);
-        if (ps.length > 0 && !activeProjectId) {
-          setActiveProjectId(ps[0].id);
-        }
-      })
-      .catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleSelectTrial = useCallback((id: string) => {
+    // If user is already on this exact trial, don't trigger a full network reload
+    const storeActiveId = useNotebookStore.getState().cloudTrialId;
+    if (storeActiveId === id && useNotebookStore.getState().activeTrial.id === id) {
+      return;
+    }
+
     if (loadingTrialIdRef.current === id) return;
 
     const currentSeq = ++requestSeqRef.current;
@@ -365,41 +367,59 @@ export function LeftSidebar() {
     handleSelectTrialRef.current = handleSelectTrial;
   }, [handleSelectTrial]);
 
-  const trialsRef = useRef<TrialSummaryItem[]>([]);
+  // Consolidated single-roundtrip workspace bootstrap on mount
   useEffect(() => {
-    trialsRef.current = trials;
-  }, [trials]);
+    let isCancelled = false;
+    const initialProjectId = activeProjectId || cloudProjectId;
 
-  // Load trials whenever active project changes
-  const loadTrials = useCallback(async (projectIdToLoad?: string | null) => {
-    // Only show full skeleton loader on initial cold load
-    if (trialsRef.current.length === 0) {
-      setIsLoadingTrials(true);
-    }
+    fetchWorkspaceBootstrap(initialProjectId)
+      .then((res) => {
+        if (isCancelled) return;
+        setProjects(res.projects);
+        setCachedProjects(res.projects);
+
+        if (res.activeProjectId) {
+          setActiveProjectId(res.activeProjectId);
+        }
+
+        const trialList = res.trials as unknown as TrialSummaryItem[];
+        setTrials(trialList);
+        setCachedTrials(trialList);
+        setIsLoadingTrials(false);
+
+        // Auto-hydrate first trial ONLY if the store has no active trial yet
+        const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
+        if (!currentCloudTrialId && trialList.length > 0 && !hasInitializedRef.current) {
+          hasInitializedRef.current = true;
+          handleSelectTrialRef.current(trialList[0].id);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to bootstrap workspace:', err);
+        setIsLoadingTrials(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handler for manual project switcher
+  const handleSelectProject = useCallback(async (newProjectId: string) => {
+    setActiveProjectId(newProjectId);
+    setIsLoadingTrials(true);
     try {
-      const ts = await fetchAllTrials(projectIdToLoad);
+      const ts = await fetchAllTrials(newProjectId);
       const trialList = ts as unknown as TrialSummaryItem[];
       setTrials(trialList);
-
-      // Auto-hydrate the latest cloud trial on initial load if user has existing trials
-      if (!hasInitializedRef.current && trialList.length > 0) {
-        hasInitializedRef.current = true;
-        const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
-        const targetTrial = (currentCloudTrialId && trialList.find((t) => t.id === currentCloudTrialId)) || trialList[0];
-        if (targetTrial) {
-          handleSelectTrialRef.current(targetTrial.id);
-        }
-      }
+      setCachedTrials(trialList);
     } catch (err) {
-      console.error('Failed to load trials:', err);
+      console.error('Failed to load trials for project:', err);
     } finally {
       setIsLoadingTrials(false);
     }
-  }, []);
-
-  useEffect(() => {
-    loadTrials(activeProjectId);
-  }, [activeProjectId, loadTrials]);
+  }, [setCachedTrials]);
 
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
@@ -665,22 +685,22 @@ export function LeftSidebar() {
               {/* All Projects Option */}
               <button
                 onClick={() => {
-                  setActiveProjectId(null);
+                  handleSelectProject('ALL');
                   setProjectMenuOpen(false);
                 }}
                 className={`w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-accent transition-colors border-b border-border/30 ${
-                  !activeProjectId ? 'bg-muted/60' : ''
+                  !activeProjectId || activeProjectId === 'ALL' ? 'bg-muted/60' : ''
                 }`}
               >
                 <FolderOpen
                   className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                    !activeProjectId ? 'text-primary' : 'text-muted-foreground'
+                    !activeProjectId || activeProjectId === 'ALL' ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 />
                 <div className="min-w-0 flex-1">
                   <span
                     className={`text-xs font-medium block truncate ${
-                      !activeProjectId ? 'text-primary font-semibold' : 'text-foreground'
+                      !activeProjectId || activeProjectId === 'ALL' ? 'text-primary font-semibold' : 'text-foreground'
                     }`}
                   >
                     All Projects
@@ -695,7 +715,7 @@ export function LeftSidebar() {
                 <button
                   key={p.id}
                   onClick={() => {
-                    setActiveProjectId(p.id);
+                    handleSelectProject(p.id);
                     setProjectMenuOpen(false);
                   }}
                   className={`w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-accent transition-colors border-b border-border/30 last:border-0 ${
@@ -973,6 +993,7 @@ export function LeftSidebar() {
             </Link>
             <Link
               href="/app/protocols"
+              prefetch={true}
               className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
             >
               <BookOpen className="w-3.5 h-3.5 shrink-0" />
@@ -980,6 +1001,7 @@ export function LeftSidebar() {
             </Link>
             <Link
               href="/app/admin"
+              prefetch={true}
               className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
             >
               <Settings2 className="w-3.5 h-3.5 shrink-0" />

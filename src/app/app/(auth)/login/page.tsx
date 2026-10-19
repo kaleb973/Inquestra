@@ -99,10 +99,10 @@ export default function LoginPage() {
       }
 
       // Security Guard: Prevent account mismatch / spoofing via Windows PIN
-      if (data?.user?.email && data.user.email.toLowerCase() !== email.trim().toLowerCase()) {
+      if (email.trim() && data?.user?.email && data.user.email.toLowerCase() !== email.trim().toLowerCase()) {
         await supabase.auth.signOut();
         setError(
-          `Security mismatch: The selected passkey belongs to ${data.user.email}, not ${email.trim()}. Please choose the matching account or use your password.`
+          'Security mismatch: The selected passkey is associated with a different account. Please choose the matching account or use your password.'
         );
         setIsPasskeyPending(false);
         return;
@@ -171,7 +171,30 @@ export default function LoginPage() {
           {step === 'email' && (
             <>
               <h1 className="text-foreground text-xl font-semibold mb-1">Sign in</h1>
-              <p className="text-muted-foreground text-xs mb-6">Enter your lab email to continue.</p>
+              <p className="text-muted-foreground text-xs mb-6">Enter your lab email or use a passkey to continue.</p>
+
+              {/* Quick Passkey Login */}
+              <div className="space-y-4 mb-5">
+                <button
+                  type="button"
+                  onClick={handlePasskeySignIn}
+                  disabled={isPending || isPasskeyPending}
+                  className="w-full flex items-center justify-center gap-2 bg-muted hover:bg-accent border border-border disabled:opacity-50 disabled:cursor-not-allowed text-foreground text-xs font-semibold py-2.5 rounded transition-colors"
+                >
+                  {isPasskeyPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  ) : (
+                    <Fingerprint className="w-4 h-4 text-primary" />
+                  )}
+                  {isPasskeyPending ? 'Awaiting passkey…' : 'Sign in with Passkey'}
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">Or continue with email</span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+              </div>
 
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div>

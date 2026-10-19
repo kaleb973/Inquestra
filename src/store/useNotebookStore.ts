@@ -11,7 +11,9 @@ import type {
   TrialDocument,
   TelemetryStats,
   SaveStatus,
+  TrialSummaryItem,
 } from '@/types/inquestra';
+import type { ProjectWithLead } from '@/actions/projectActions';
 
 const BUFFER_MAX = 500;
 
@@ -57,6 +59,9 @@ interface NotebookState {
   lastSavedAt: string | null;
   saveError: string | null;
   isLoadingTrial: boolean;
+  /** In-memory / persisted project and trial caches for instant zero-lag navigation */
+  cachedProjects: ProjectWithLead[];
+  cachedTrials: TrialSummaryItem[];
   /** Rolling window of the last BUFFER_MAX telemetry samples (transient, not persisted). */
   telemetryBuffer: TelemetrySample[];
   /** Derived stats recomputed on each append — cheap for subscribers to read. */
@@ -72,6 +77,8 @@ interface NotebookActions {
   setLastSavedAt: (time: string | null) => void;
   setSaveError: (error: string | null) => void;
   setIsLoadingTrial: (loading: boolean) => void;
+  setCachedProjects: (projects: ProjectWithLead[]) => void;
+  setCachedTrials: (trials: TrialSummaryItem[]) => void;
   /**
    * Append one or many samples to the rolling buffer (cap: BUFFER_MAX).
    * Also recomputes telemetryStats in the same set() call.
@@ -101,11 +108,15 @@ export const useNotebookStore = create<NotebookStore>()(
       lastSavedAt: null,
       saveError: null,
       isLoadingTrial: false,
+      cachedProjects: [],
+      cachedTrials: [],
       telemetryBuffer: [],
       telemetryStats: DEFAULT_STATS,
       hardwareStatus: DEFAULT_HARDWARE,
 
       setRightDrawerMode: (mode) => set({ rightDrawerMode: mode }),
+      setCachedProjects: (projects) => set({ cachedProjects: projects }),
+      setCachedTrials: (trials) => set({ cachedTrials: trials }),
       setActiveTrial: (trial) =>
         set({
           activeTrial: trial,
@@ -192,12 +203,14 @@ export const useNotebookStore = create<NotebookStore>()(
     {
       name: 'inquestra-notebook-v1',
       storage: createJSONStorage(() => localStorage),
-      // Persist document + cloud IDs + lastSavedAt — hardware status and telemetry are transient.
+      // Persist document + cloud IDs + lastSavedAt + project/trial caches for instant 0ms restoration
       partialize: (state) => ({
         activeTrial: state.activeTrial,
         cloudTrialId: state.cloudTrialId,
         cloudProjectId: state.cloudProjectId,
         lastSavedAt: state.lastSavedAt,
+        cachedProjects: state.cachedProjects,
+        cachedTrials: state.cachedTrials,
       }),
     }
   )

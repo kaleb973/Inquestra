@@ -5,10 +5,11 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { generateTrialHash } from '@/lib/provenance';
+import type { ProjectWithLead } from '@/actions/projectActions';
 
 // ─── Validation schemas ────────────────────────────────────────────────────────
 
@@ -399,6 +400,105 @@ export async function fetchTrialSignatures(trialId: string) {
   });
 }
 
+
+export interface WorkspaceBootstrapResult {
+  projects: ProjectWithLead[];
+  activeProjectId: string | null;
+  trials: {
+    id: string;
+    title: string;
+    status: import('@/types/inquestra').TrialStatus;
+    updatedAt: Date;
+    createdAt: Date;
+    projectId: string;
+    metadata: { id: string; key: string; value: string }[];
+    _count: { revisions: number; inventoryUsed: number; signatures: number };
+  }[];
+  userProfile: {
+    id: string;
+    email: string;
+    role: Role;
+    organizationId: string;
+    orgName: string;
+    strictMode: boolean;
+  } | null;
+}
+
+/**
+ * Consolidated single-roundtrip workspace bootstrap action.
+ * Performs a single Supabase auth check and parallel Prisma queries,
+ * eliminating 4 sequential waterfall roundtrips on initial load.
+ */
+export async function fetchWorkspaceBootstrap(
+  preferredProjectId?: string | null
+): Promise<WorkspaceBootstrapResult> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    return { projects: [], activeProjectId: null, trials: [], userProfile: null };
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    include: { organization: true },
+  });
+
+  if (!dbUser) {
+    return { projects: [], activeProjectId: null, trials: [], userProfile: null };
+  }
+
+  // Fetch all projects for the organization in one query
+  const projects = await prisma.project.findMany({
+    where: { organizationId: dbUser.organizationId },
+    include: {
+      lead: { select: { id: true, email: true, role: true } },
+      _count: { select: { trials: true } },
+    },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  // Determine active project: preferred if valid, otherwise first available
+  const targetProjectId =
+    preferredProjectId && projects.some((p) => p.id === preferredProjectId)
+      ? preferredProjectId
+      : projects[0]?.id ?? null;
+
+  // Fetch trials for the determined project
+  const trials = targetProjectId
+    ? await prisma.trial.findMany({
+        where: { projectId: targetProjectId },
+        orderBy: { updatedAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          updatedAt: true,
+          createdAt: true,
+          projectId: true,
+          metadata: { select: { id: true, key: true, value: true } },
+          _count: { select: { revisions: true, inventoryUsed: true, signatures: true } },
+        },
+      })
+    : [];
+
+  return {
+    projects: projects as ProjectWithLead[],
+    activeProjectId: targetProjectId,
+    trials: trials as WorkspaceBootstrapResult['trials'],
+    userProfile: {
+      id: dbUser.id,
+      email: dbUser.email,
+      role: dbUser.role,
+      organizationId: dbUser.organizationId,
+      orgName: dbUser.organization.name,
+      strictMode: dbUser.organization.strictMode,
+    },
+  };
+}
 
 export async function fetchAllTrials(projectId?: string | null) {
   const supabase = await createSupabaseServerClient();
