@@ -62,11 +62,11 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">Last Calibrated</label>
-            <input required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <input required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">Freq (Days)</label>
-            <input required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            <input required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
           </div>
           <div className="hidden">
             <input type="hidden" name="status" value="OPERATIONAL" />

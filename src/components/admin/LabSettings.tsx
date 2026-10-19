@@ -76,7 +76,7 @@ export function LabSettings({ org }: { org: Organization }) {
         </div>
 
         {error && (
-          <div className="m-5 p-3 bg-red-950/50 border border-red-900 text-red-400 text-xs rounded">
+          <div className="m-5 p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs rounded">
             {error}
           </div>
         )}
@@ -159,23 +159,23 @@ export function LabSettings({ org }: { org: Organization }) {
                 <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
                   <Lock className="w-3.5 h-3.5" /> DAQ Hardware Gate
                 </span>
-                Serial port data acquisition is locked if connected instrument is marked <span className="font-mono text-[9px] bg-amber-950/40 text-amber-400 px-1 py-0.5 rounded border border-amber-900/50">NEEDS_CALIBRATION</span> or <span className="font-mono text-[9px] bg-red-950/40 text-red-400 px-1 py-0.5 rounded border border-red-900/50">BROKEN</span>.
+                Serial port data acquisition is locked if connected instrument is marked <span className="font-mono text-[9px] bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1 py-0.5 rounded border border-amber-500/30">NEEDS_CALIBRATION</span> or <span className="font-mono text-[9px] bg-red-500/10 text-red-700 dark:text-red-300 px-1 py-0.5 rounded border border-red-500/30">BROKEN</span>.
               </div>
             </div>
 
             {/* Row 4: Audit Trail */}
-            <div className="grid grid-cols-1 md:grid-cols-3 hover:bg-neutral-900/20 transition-colors">
-              <div className="p-3 flex items-start gap-2 font-medium text-white">
-                <ShieldAlert className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+            <div className="grid grid-cols-1 md:grid-cols-3 hover:bg-muted/20 transition-colors">
+              <div className="p-3 flex items-start gap-2 font-medium text-foreground">
+                <ShieldAlert className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                 <div>
                   <div>21 CFR Part 11 Audit Trail</div>
                   <div className="text-[10px] text-muted-foreground font-normal">Regulatory inspection readiness</div>
                 </div>
               </div>
-              <div className="p-3 border-l border-border/50 text-neutral-300">
+              <div className="p-3 border-l border-border/50 text-foreground">
                 Standard audit events recorded for user accountability.
               </div>
-              <div className="p-3 border-l border-border/50 text-neutral-300 bg-indigo-950/10">
+              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
                 Full regulatory audit trail with cryptographic trial sealing and strict discrepancy prevention.
               </div>
             </div>
@@ -185,17 +185,17 @@ export function LabSettings({ org }: { org: Organization }) {
 
       {/* Practical Guidance Box */}
       <div className="p-5 bg-background/50 border border-border rounded-xl space-y-3">
-        <h4 className="text-xs font-semibold text-white flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-400" />
+        <h4 className="text-xs font-semibold text-foreground flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           Which mode should my lab use?
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground leading-relaxed">
-          <div className="p-3 bg-muted/30 border border-border/50 rounded-lg">
-            <span className="text-white font-medium block mb-1">Choose Flexible Mode if:</span>
+          <div className="p-3 bg-muted/40 border border-border/60 rounded-lg">
+            <span className="text-foreground font-medium block mb-1">Choose Flexible Mode if:</span>
             You are an early-stage research lab, university group, or discovery incubator where moving fast at the bench is prioritized and lab members frequently introduce novel chemicals before logging them in digital inventory.
           </div>
-          <div className="p-3 bg-indigo-950/20 border border-indigo-900/30 rounded-lg">
-            <span className="text-indigo-300 font-medium block mb-1">Choose Strict Mode if:</span>
+          <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/30 rounded-lg">
+            <span className="text-indigo-700 dark:text-indigo-300 font-medium block mb-1">Choose Strict Mode if:</span>
             You are operating in regulated biopharma, clinical trials, GMP/GLP manufacturing, or pre-clinical safety studies where FDA 21 CFR Part 11 requires immutable material verification and zero unverified chemical usage.
           </div>
         </div>

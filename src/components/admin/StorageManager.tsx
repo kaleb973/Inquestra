@@ -63,14 +63,14 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
           </div>
           <div className="w-48">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Parent Location (Optional)</label>
-            <select name="parentId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+            <select name="parentId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500">
               <option value="">None (Top Level)</option>
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>{loc.name} ({loc.type})</option>
               ))}
             </select>
           </div>
-          <button disabled={isPending} type="submit" className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 border border-border text-white text-sm font-medium rounded transition-colors disabled:opacity-50">
+          <button disabled={isPending} type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
           </button>
         </form>

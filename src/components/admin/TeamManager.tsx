@@ -210,24 +210,24 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
     <div className="space-y-6">
       {/* Alert banner */}
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-red-950/40 text-red-400 border border-red-900 text-xs flex items-center justify-between">
+        <div className="p-3 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
-          <button onClick={() => setErrorMsg(null)} className="hover:text-white">
+          <button onClick={() => setErrorMsg(null)} className="hover:text-foreground">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3 rounded-lg bg-indigo-950/40 text-indigo-300 border border-indigo-900 text-xs flex items-center justify-between">
+        <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="hover:text-white">
+          <button onClick={() => setSuccessMsg(null)} className="hover:text-foreground">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
