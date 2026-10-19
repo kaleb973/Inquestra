@@ -4,6 +4,7 @@
 // Saves content debounced to Postgres via updateProtocolContent server action.
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -206,13 +207,25 @@ export function ProtocolEditor({ protocolId, currentUserRole, onBack }: Protocol
     <div className="flex flex-col h-full">
       {/* Toolbar header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background/95 backdrop-blur-md shrink-0">
-        <button
-          onClick={onBack}
-          className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          title="Back to library"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={onBack}
+            className="px-2 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted border border-border/60 transition-colors flex items-center gap-1 text-xs font-medium"
+            title="Back to protocol library"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Library</span>
+          </button>
+          <Link
+            href="/app"
+            className="px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted border border-border/60 transition-colors text-xs font-medium"
+            title="Return to active notebook"
+          >
+            Notebook
+          </Link>
+        </div>
+
+        <div className="h-4 w-px bg-border/80" />
 
         <div className="flex-1 min-w-0">
           <input

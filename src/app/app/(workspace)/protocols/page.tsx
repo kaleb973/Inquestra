@@ -1,63 +1,57 @@
-'use client';
 // src/app/app/(workspace)/protocols/page.tsx
 // Protocol & SOP Library — full-page view.
-// Switches between the library browser and the protocol editor in-place (no navigation).
+// Pre-fetches organization protocols directly on the server for instant zero-latency loading.
 
-import { useEffect, useState } from 'react';
-import { ProtocolLibrary } from '@/components/protocols/ProtocolLibrary';
-import { ProtocolEditor } from '@/components/protocols/ProtocolEditor';
-import { getCurrentUserProfile } from '@/actions/adminActions';
-import type { Role } from '@prisma/client';
-import { Loader2 } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import prisma from '@/lib/prisma';
+import { ProtocolManager } from '@/components/protocols/ProtocolManager';
+import type { ProtocolSummary } from '@/components/protocols/ProtocolLibrary';
 
-export default function ProtocolsPage() {
-  const [userRole, setUserRole] = useState<Role | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [editingProtocolId, setEditingProtocolId] = useState<string | null>(null);
+export const metadata = {
+  title: 'Protocol & SOP Library | Inquestra',
+  description: 'Standard Operating Procedures, lab protocols, and verified assay templates.',
+};
 
-  useEffect(() => {
-    getCurrentUserProfile()
-      .then((profile) => {
-        if (profile) setUserRole(profile.role);
-      })
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, []);
+export default async function ProtocolsPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center h-screen">
-        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-      </div>
-    );
+  if (!user) {
+    redirect('/app/login');
   }
 
-  if (!userRole) {
-    return (
-      <div className="flex-1 flex items-center justify-center h-screen">
-        <p className="text-sm text-muted-foreground">Unable to load user profile.</p>
-      </div>
-    );
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    include: { organization: true },
+  });
+
+  if (!dbUser) {
+    redirect('/app');
   }
 
-  if (editingProtocolId) {
-    return (
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <ProtocolEditor
-          protocolId={editingProtocolId}
-          currentUserRole={userRole}
-          onBack={() => setEditingProtocolId(null)}
-        />
-      </div>
-    );
-  }
+  // Pre-fetch all protocol templates on the server in a single fast query
+  const rawProtocols = await prisma.protocolTemplate.findMany({
+    where: { organizationId: dbUser.organizationId },
+    orderBy: [{ isPublished: 'desc' }, { updatedAt: 'desc' }],
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      version: true,
+      isPublished: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
 
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden">
-      <ProtocolLibrary
-        currentUserRole={userRole}
-        onEditProtocol={(id) => setEditingProtocolId(id)}
-      />
-    </div>
+    <ProtocolManager
+      initialProtocols={rawProtocols as unknown as ProtocolSummary[]}
+      orgName={dbUser.organization.name}
+      currentUserRole={dbUser.role}
+    />
   );
 }

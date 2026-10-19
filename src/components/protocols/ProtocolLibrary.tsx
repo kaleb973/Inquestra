@@ -4,6 +4,7 @@
 // Admin/PI users see publish and delete controls; researchers see read-only published protocols.
 
 import { useEffect, useState, useTransition, useCallback } from 'react';
+import Link from 'next/link';
 import {
   ClipboardList,
   Plus,
@@ -15,6 +16,7 @@ import {
   X,
   CheckCircle2,
   AlertTriangle,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   listProtocols,
@@ -26,7 +28,7 @@ import type { Role } from '@prisma/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ProtocolSummary = {
+export type ProtocolSummary = {
   id: string;
   name: string;
   description: string | null;
@@ -155,6 +157,8 @@ function NewProtocolModal({
 
 interface ProtocolLibraryProps {
   currentUserRole: Role;
+  initialProtocols?: ProtocolSummary[];
+  orgName?: string;
   onEditProtocol?: (protocolId: string) => void;
   /** Optional: if provided, clicking a published protocol inserts it at this callback */
   onInsertProtocol?: (protocol: ProtocolSummary) => void;
@@ -164,12 +168,14 @@ interface ProtocolLibraryProps {
 
 export function ProtocolLibrary({
   currentUserRole,
+  initialProtocols,
+  orgName,
   onEditProtocol,
   onInsertProtocol,
   pickerMode = false,
 }: ProtocolLibraryProps) {
-  const [protocols, setProtocols] = useState<ProtocolSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [protocols, setProtocols] = useState<ProtocolSummary[]>(initialProtocols || []);
+  const [isLoading, setIsLoading] = useState(!initialProtocols);
   const [showNewModal, setShowNewModal] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -191,8 +197,10 @@ export function ProtocolLibrary({
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!initialProtocols) {
+      load();
+    }
+  }, [load, initialProtocols]);
 
   const showSuccess = (msg: string) => {
     setSuccessMsg(msg);
@@ -248,19 +256,37 @@ export function ProtocolLibrary({
       {/* Header */}
       {!pickerMode && (
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20 shrink-0">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-indigo-500" />
-            <h2 className="text-sm font-semibold text-foreground tracking-tight">
-              Protocol & SOP Library
-            </h2>
-            <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded font-mono">
-              {protocols.length} templates
-            </span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/app"
+              className="px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted border border-border/60 transition-colors flex items-center gap-1.5 text-xs font-medium shrink-0 shadow-xs"
+              title="Return to notebook workspace"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Notebook</span>
+            </Link>
+
+            <div className="h-4 w-px bg-border/80" />
+
+            <div className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4 text-indigo-500" />
+              <h2 className="text-sm font-semibold text-foreground tracking-tight">
+                Protocol &amp; SOP Library
+              </h2>
+              {orgName && (
+                <span className="text-[10px] text-muted-foreground font-mono bg-muted border border-border px-1.5 py-0.5 rounded">
+                  {orgName}
+                </span>
+              )}
+              <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded font-mono">
+                {protocols.length} templates
+              </span>
+            </div>
           </div>
           {canManage && (
             <button
               onClick={() => setShowNewModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               New Protocol
