@@ -63,8 +63,11 @@ export function SecurityChallenge({
         <div className="space-y-0.5">
           <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             Security Verification Required
-            {riskScore !== null && (
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+            {process.env.NODE_ENV !== 'production' && riskScore !== null && (
+              <span
+                title="Visible in development mode only (hidden in production to prevent telemetry probing)"
+                className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400"
+              >
                 Risk Score: {riskScore}
               </span>
             )}
@@ -79,7 +82,11 @@ export function SecurityChallenge({
         {isSolved ? (
           <div className="flex items-center gap-2 text-xs font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded py-2 px-3">
             <ShieldCheck className="w-4 h-4" />
-            <span>Verification token generated. Authorizing request…</span>
+            <span>
+              {isPending
+                ? 'Verification token generated. Authorizing request…'
+                : 'Human Researcher Verified ✓'}
+            </span>
           </div>
         ) : (
           <button

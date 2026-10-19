@@ -72,8 +72,9 @@ export async function POST(req: NextRequest) {
       {
         error: 'Access denied: high threat score detected',
         code: 'ACCESS_DENIED',
-        riskScore: risk.score,
-        reasons: risk.reasons,
+        ...(process.env.NODE_ENV !== 'production'
+          ? { riskScore: risk.score, reasons: risk.reasons }
+          : {}),
       },
       { status: 403 }
     );
@@ -88,9 +89,10 @@ export async function POST(req: NextRequest) {
         {
           code: 'CHALLENGE_REQUIRED',
           status: 'CHALLENGE_REQUIRED',
-          riskScore: risk.score,
-          reasons: risk.reasons,
           message: 'Human verification required due to risk telemetry.',
+          ...(process.env.NODE_ENV !== 'production'
+            ? { riskScore: risk.score, reasons: risk.reasons }
+            : {}),
         },
         { status: 428 }
       );
