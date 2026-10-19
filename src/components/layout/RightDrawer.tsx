@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
-import { Tag, Plus, X, Activity, Box, FileKey, History, Quote, PanelRightClose } from 'lucide-react';
+import { Tag, Plus, X, Activity, Box, FileKey, History, Quote, PanelRightClose, MapPin } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
 import { VersionHistory } from '@/components/editor/tools/VersionHistory';
@@ -355,8 +355,9 @@ export function RightDrawer() {
                           </span>
                           
                           {item.location && (
-                            <span className="text-indigo-600 dark:text-indigo-400">
-                              📍 {item.location.name}
+                            <span className="text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                              <MapPin className="w-2.5 h-2.5" />
+                              {item.location.name}
                             </span>
                           )}
                           

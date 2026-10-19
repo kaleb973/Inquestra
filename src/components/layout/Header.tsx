@@ -3,7 +3,7 @@
 // Top navigation bar: workspace identity, trial status badge, simulator toggle,
 // Save to Cloud button, Export (.zip) button, and User Login / Profile status.
 
-import { useState, useTransition, useEffect, useCallback } from 'react';
+import { useState, useTransition, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
   Circle,
@@ -21,6 +21,7 @@ import {
   Bookmark,
   PanelLeft,
   PanelRight,
+  MoreVertical,
 } from 'lucide-react';
 import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal';
 import { Logo } from '@/components/ui/Logo';
@@ -86,6 +87,21 @@ export function Header() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSealModal, setShowSealModal] = useState(false);
   const [snapshotSuccess, setSnapshotSuccess] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close more menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    }
+    if (showMoreMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMoreMenu]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -320,11 +336,15 @@ export function Header() {
       <div className="h-4 w-px bg-border shrink-0" />
 
       {/* Trial identity */}
-      <span className="text-foreground text-sm truncate max-w-xs font-medium tracking-tight" title={title}>{title}</span>
+      <div className="flex items-center min-w-0 max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md shrink">
+        <span className="text-foreground text-sm font-semibold tracking-tight truncate" title={title}>
+          {title}
+        </span>
+      </div>
 
       {/* Status badge — interactive dropdown when trial is not sealed */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-[10px] uppercase font-mono text-muted-foreground font-semibold">Status:</span>
+        <span className="text-[10px] uppercase font-mono text-muted-foreground font-semibold hidden md:inline">Status:</span>
         {checksum ? (
           <span
             className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLORS[status]}`}
@@ -362,10 +382,10 @@ export function Header() {
         )}
       </div>
 
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
         {/* Sync error */}
         {syncError && (
-          <span className="text-[11px] text-critical font-mono max-w-[200px] truncate" title={syncError}>
+          <span className="text-[11px] text-critical font-mono max-w-[140px] sm:max-w-[200px] truncate" title={syncError}>
             {syncError}
           </span>
         )}
@@ -374,59 +394,34 @@ export function Header() {
         {(saveStatus === 'SAVING' || isPending) && (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            Saving…
+            <span className="hidden sm:inline">Saving…</span>
           </span>
         )}
         {saveStatus === 'SAVED' && !syncError && isSynced && !isPending && (
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono" title="Autosaved to cloud database">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono" title="Continuous background autosave is active">
             <Cloud className="w-3.5 h-3.5 text-primary" />
-            Autosaved
+            <span className="hidden sm:inline">Autosaved</span>
           </span>
         )}
         {saveStatus === 'UNSAVED' && isSynced && !isPending && (
           <span className="flex items-center gap-1.5 text-xs text-amber-500 font-mono" title="Unsaved changes pending autosave">
             <Circle className="w-2 h-2 fill-amber-500" />
-            Unsaved
+            <span className="hidden sm:inline">Unsaved</span>
           </span>
         )}
         {(saveStatus === 'ERROR' || syncError) && (
           <span className="flex items-center gap-1.5 text-xs text-critical font-mono" title={saveError || syncError || 'Sync failed'}>
             <AlertCircle className="w-3.5 h-3.5 text-critical" />
-            Save Error
+            <span className="hidden sm:inline">Save Error</span>
           </span>
         )}
-
-        {/* Print button */}
-        <button
-          onClick={() => window.print()}
-          title="Print to PDF"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors"
-        >
-          <Printer className="w-3.5 h-3.5" />
-          Print
-        </button>
-
-        {/* Export button */}
-        <button
-          onClick={handleExport}
-          disabled={isExporting}
-          title="Export trial as ZIP (Markdown + JSON + CSV)"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isExporting ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Download className="w-3.5 h-3.5" />
-          )}
-          {isExporting ? 'Exporting…' : 'Export'}
-        </button>
 
         {/* Save Snapshot button (Ctrl+S) - Creates deliberate audit revision */}
         <button
           onClick={handleSaveSnapshot}
           disabled={isPending || saveStatus === 'SAVING'}
-          title={isSynced ? 'Create an audit-logged revision milestone snapshot (Ctrl+S)' : 'Save trial to cloud database'}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
+          title={isSynced ? 'Autosave is active. Click or press Ctrl+S to save a numbered revision checkpoint.' : 'Save trial to cloud database'}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors ${
             snapshotSuccess
               ? 'bg-phosphor/15 text-phosphor border-phosphor/40 font-semibold'
               : isSynced
@@ -443,44 +438,165 @@ export function Header() {
           ) : (
             <Cloud className="w-3.5 h-3.5" />
           )}
-          {isPending || saveStatus === 'SAVING'
-            ? 'Saving…'
-            : snapshotSuccess
-            ? 'Snapshot Saved!'
-            : isSynced
-            ? 'Save Snapshot'
-            : 'Save to Cloud'}
+          <span>
+            {isPending || saveStatus === 'SAVING'
+              ? 'Saving…'
+              : snapshotSuccess
+              ? 'Saved!'
+              : isSynced
+              ? 'Snapshot'
+              : 'Save'}
+          </span>
         </button>
 
-        {/* Physical Safety Barrier separating routine actions from regulatory actions */}
-        <div className="h-5 w-px bg-destructive/30 shrink-0" />
+        {/* Export button (desktop/tablet) */}
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          title="Export trial archive as ZIP (Markdown + JSON + CSV)"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isExporting ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Download className="w-3.5 h-3.5" />
+          )}
+          <span className="hidden lg:inline">{isExporting ? 'Exporting…' : 'Export'}</span>
+        </button>
 
-        {/* 21 CFR Part 11 Regulatory Sealing Zone */}
-        {checksum ? (
+        {/* Print button (desktop) */}
+        <button
+          onClick={() => window.print()}
+          title="Print trial to PDF (Ctrl+P)"
+          className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors"
+        >
+          <Printer className="w-3.5 h-3.5" />
+          <span>Print</span>
+        </button>
+
+        {/* Sealed indicator badge if experiment is cryptographically locked */}
+        {checksum && (
           <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution font-mono"
-            title={`Sealed with SHA-256: ${checksum}`}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border border-caution/30 bg-caution/10 text-caution font-mono"
+            title={`Sealed with SHA-256: ${checksum}. Experiment is cryptographically locked and read-only.`}
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Sealed SHA-256
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">Sealed</span>
+            <span className="sm:hidden font-mono text-[10px]">LOCKED</span>
           </div>
-        ) : (
-          <button
-            onClick={handleOpenSealModal}
-            disabled={isSealing}
-            title="Irreversible 21 CFR Part 11 Cryptographic Lock"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            Seal Trial
-          </button>
         )}
+
+        {/* More Actions Dropdown (contains Print, Export, and dangerous 21 CFR Part 11 Seal action) */}
+        <div className="relative" ref={moreMenuRef}>
+          <button
+            type="button"
+            onClick={() => setShowMoreMenu((prev) => !prev)}
+            title="More actions and regulatory tools"
+            aria-expanded={showMoreMenu}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              showMoreMenu
+                ? 'bg-accent text-foreground border-border'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted border-transparent hover:border-border'
+            }`}
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+
+          {showMoreMenu && (
+            <div className="absolute right-0 mt-2 w-72 rounded-lg border border-border bg-popover text-popover-foreground shadow-xl p-1.5 z-50 text-xs animate-in fade-in-50 zoom-in-95 duration-100">
+              {/* Export in dropdown */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMoreMenu(false);
+                  handleExport();
+                }}
+                disabled={isExporting}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors disabled:opacity-50"
+              >
+                <Download className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div>
+                  <div className="font-medium text-foreground">Export Trial Archive</div>
+                  <div className="text-[10px] text-muted-foreground">Download ZIP with Markdown, CSV, and JSON</div>
+                </div>
+              </button>
+
+              {/* Print in dropdown */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMoreMenu(false);
+                  window.print();
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors"
+              >
+                <Printer className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div>
+                  <div className="font-medium text-foreground">Print to PDF</div>
+                  <div className="text-[10px] text-muted-foreground">Formatted paper or PDF output (Ctrl+P)</div>
+                </div>
+              </button>
+
+              <div className="my-1.5 h-px bg-border" />
+
+              {/* 21 CFR Part 11 Regulatory Sealing Option */}
+              {checksum ? (
+                <div className="px-2.5 py-2 rounded-md bg-muted/40 text-muted-foreground">
+                  <div className="flex items-center gap-1.5 font-medium text-foreground">
+                    <ShieldCheck className="w-4 h-4 text-caution" />
+                    <span>Trial Sealed (SHA-256)</span>
+                  </div>
+                  <div className="text-[10px] font-mono mt-0.5 truncate text-muted-foreground" title={checksum}>
+                    Hash: {checksum.slice(0, 16)}...
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMoreMenu(false);
+                    handleOpenSealModal();
+                  }}
+                  className="w-full flex items-start gap-2.5 px-2.5 py-2 rounded-md hover:bg-destructive/10 text-left transition-colors group"
+                >
+                  <Shield className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-destructive group-hover:underline">
+                      Seal Trial (21 CFR Part 11)
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-snug">
+                      Irreversible cryptographic lock. All data becomes permanently read-only.
+                    </div>
+                  </div>
+                </button>
+              )}
+
+              <div className="my-1.5 h-px bg-border" />
+
+              {/* Shortcut reference */}
+              <div className="px-2.5 py-1 text-[10px] text-muted-foreground font-mono space-y-1">
+                <div className="flex justify-between items-center">
+                  <span>Toggle Sidebar</span>
+                  <kbd className="bg-muted px-1.5 py-0.5 rounded text-[9px] border border-border">Ctrl+B</kbd>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Toggle Telemetry</span>
+                  <kbd className="bg-muted px-1.5 py-0.5 rounded text-[9px] border border-border">Ctrl+J</kbd>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Save Snapshot</span>
+                  <kbd className="bg-muted px-1.5 py-0.5 rounded text-[9px] border border-border">Ctrl+S</kbd>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Live connection badge */}
         {hardwareStatus.isConnected && (
-          <span className="flex items-center gap-1.5 text-xs text-phosphor font-mono bg-phosphor/10 border border-phosphor/30 px-2.5 py-1 rounded">
+          <span className="hidden sm:flex items-center gap-1.5 text-xs text-phosphor font-mono bg-phosphor/10 border border-phosphor/30 px-2 py-1 rounded">
             <Circle className="w-2 h-2 fill-phosphor animate-pulse" />
-            {hardwareStatus.portName || 'USB Serial'}
+            <span className="truncate max-w-[90px]">{hardwareStatus.portName || 'Serial'}</span>
             &nbsp;·&nbsp;
             {hardwareStatus.packetsPerSec} Hz
           </span>
@@ -523,7 +639,7 @@ export function Header() {
                       : 'text-indigo-700 dark:text-indigo-300'
                   }`}
                 >
-                  {profile.role === 'PI' ? '★ LAB PI' : profile.role}
+                  {profile.role === 'PI' ? 'LAB PI' : profile.role}
                 </span>
                 <span className="text-muted-foreground">·</span>
                 <span className="truncate">{user.email?.split('@')[0]}</span>

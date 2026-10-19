@@ -450,7 +450,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                             <option value="RESEARCHER">Researcher (Lvl 2)</option>
                             <option value="ADMIN">Admin (Lvl 3)</option>
                             <option value="PI" disabled={!isPI}>
-                              PI (Lvl 4) {!isPI ? '🔒 (PI sign-off needed)' : ''}
+                              PI (Lvl 4) {!isPI ? '[Locked - PI sign-off needed]' : ''}
                             </option>
                           </select>
                         </div>

@@ -9,12 +9,17 @@ import { signIn, verifyMfaLogin } from '@/actions/authActions';
 import type { SignInResult } from '@/actions/authActions';
 import { ShieldCheck, Smartphone, Fingerprint, Loader2, Eye, EyeOff } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { SecurityChallenge } from '@/components/auth/SecurityChallenge';
 
 type LoginStep = 'email' | 'authenticate' | 'mfa' | 'redirecting';
 
 export default function LoginPage() {
   const [step, setStep] = useState<LoginStep>('email');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [challengeRequired, setChallengeRequired] = useState(false);
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [riskScore, setRiskScore] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -48,28 +53,89 @@ export default function LoginPage() {
     setStep('authenticate');
   };
 
-  // ── Step 2: Password ──────────────────────────────────────────────
+  // ── Step 2: Password & Shield Routing ────────────────────────────
+  const executeLogin = async (token?: string) => {
+    setError(null);
+    const effectiveToken = token ?? challengeToken;
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(effectiveToken ? { 'x-turnstile-token': effectiveToken } : {}),
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          challengeToken: effectiveToken || undefined,
+        }),
+      });
+
+      // HTTP 428: Step-Up Challenge required
+      if (response.status === 428) {
+        const data = await response.json().catch(() => ({}));
+        setChallengeRequired(true);
+        setRiskScore(data.riskScore ?? 35);
+        setError('Security verification required. Please complete the quick verification below.');
+        return;
+      }
+
+      // HTTP 403: Blocked by risk engine
+      if (response.status === 403) {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || 'Access denied by automated security shields.');
+        return;
+      }
+
+      // HTTP 401: Invalid credentials
+      if (response.status === 401) {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || 'Invalid email or password.');
+        return;
+      }
+
+      // HTTP 503: Bcrypt semaphore throttle
+      if (response.status === 503) {
+        setError('Authentication server currently handling peak load. Please retry in a few seconds.');
+        return;
+      }
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || `Authentication failed (status ${response.status})`);
+        return;
+      }
+
+      const data = await response.json().catch(() => ({}));
+
+      // Check if MFA is required
+      if (data.mfaRequired && data.factorId) {
+        setFactorId(data.factorId);
+        setStep('mfa');
+        return;
+      }
+
+      if (data.success) {
+        setStep('redirecting');
+        window.location.href = '/app';
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    }
+  };
+
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-    const formData = new FormData(e.currentTarget);
-    formData.set('email', email.trim());
-
     startTransition(async () => {
-      try {
-        const result: SignInResult = await signIn(formData);
-        if ('error' in result) {
-          setError(result.error);
-        } else if ('mfaRequired' in result && result.mfaRequired) {
-          setFactorId(result.factorId);
-          setStep('mfa');
-        } else if ('success' in result && result.success) {
-          setStep('redirecting');
-          window.location.href = '/app';
-        }
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
-      }
+      await executeLogin();
+    });
+  };
+
+  const handleChallengeSolved = (token: string) => {
+    setChallengeToken(token);
+    startTransition(async () => {
+      await executeLogin(token);
     });
   };
 
@@ -305,6 +371,8 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       required
                       autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       disabled={isPending || isPasskeyPending}
                       className="w-full bg-background border border-border rounded px-3 py-2 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                       placeholder="••••••••"
@@ -321,6 +389,15 @@ export default function LoginPage() {
                   </div>
                 </div>
 
+                {/* Inline Step-Up Security Challenge */}
+                {challengeRequired && (
+                  <SecurityChallenge
+                    riskScore={riskScore}
+                    isPending={isPending}
+                    onSolved={handleChallengeSolved}
+                  />
+                )}
+
                 {error && (
                   <p className="text-critical text-xs bg-critical/10 border border-critical/20 rounded px-3 py-2">
                     {error}
@@ -329,7 +406,7 @@ export default function LoginPage() {
 
                 <button
                   type="submit"
-                  disabled={isPending || isPasskeyPending}
+                  disabled={isPending || isPasskeyPending || !password}
                   className="w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold py-2.5 rounded transition-colors"
                 >
                   {isPending ? 'Signing in…' : 'Sign in with Password'}
@@ -341,6 +418,9 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => {
                     setError(null);
+                    setPassword('');
+                    setChallengeRequired(false);
+                    setChallengeToken(null);
                     setStep('email');
                   }}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
