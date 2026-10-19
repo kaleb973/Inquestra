@@ -43,7 +43,7 @@ const DEFAULT_STATS: TelemetryStats = {
 
 // ─── State shape ───────────────────────────────────────────────────────────────
 
-export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'COMPLIANCE' | 'HISTORY';
+export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'LITERATURE' | 'COMPLIANCE' | 'HISTORY';
 
 interface NotebookState {
   rightDrawerMode: RightDrawerMode;

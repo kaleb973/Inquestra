@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
-import { Tag, Plus, X, Activity, Box, FileKey, History } from 'lucide-react';
+import { Tag, Plus, X, Activity, Box, FileKey, History, Quote } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
 import { VersionHistory } from '@/components/editor/tools/VersionHistory';
 import { SignaturePanel } from '@/components/editor/tools/SignaturePanel';
+import { LiteraturePanel } from '@/components/literature/LiteraturePanel';
 import type { MetadataEntry } from '@/types/inquestra';
 import type { Role } from '@prisma/client';
 
@@ -174,35 +175,43 @@ export function RightDrawer() {
   };
 
   return (
-    <aside className="w-[340px] bg-background/80 backdrop-blur-md border-l border-border flex flex-col shrink-0 overflow-hidden z-10">
+    <aside className="w-[360px] bg-background/80 backdrop-blur-md border-l border-border flex flex-col shrink-0 overflow-hidden z-10">
       {/* Drawer Mode Tabs */}
       <div className="flex border-b border-border bg-muted/30">
         <button 
           onClick={() => setRightDrawerMode('TELEMETRY')}
-          className={`flex-1 py-3 text-[11px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'TELEMETRY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'TELEMETRY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
         >
-          <Activity className="w-4 h-4" />
+          <Activity className="w-3.5 h-3.5" />
           Live DAQ
         </button>
         <button 
           onClick={() => setRightDrawerMode('INVENTORY')}
-          className={`flex-1 py-3 text-[11px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'INVENTORY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'INVENTORY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
         >
-          <Box className="w-4 h-4" />
+          <Box className="w-3.5 h-3.5" />
           LIMS
         </button>
         <button 
-          onClick={() => setRightDrawerMode('COMPLIANCE')}
-          className={`flex-1 py-3 text-[11px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'COMPLIANCE' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          onClick={() => setRightDrawerMode('LITERATURE')}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'LITERATURE' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          title="Literature & Citations (Europe PMC)"
         >
-          <FileKey className="w-4 h-4" />
+          <Quote className="w-3.5 h-3.5" />
+          Papers
+        </button>
+        <button 
+          onClick={() => setRightDrawerMode('COMPLIANCE')}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'COMPLIANCE' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        >
+          <FileKey className="w-3.5 h-3.5" />
           Compliance
         </button>
         <button 
           onClick={() => setRightDrawerMode('HISTORY')}
-          className={`flex-1 py-3 text-[11px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'HISTORY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 flex flex-col items-center gap-1 ${rightDrawerMode === 'HISTORY' ? 'border-primary text-primary bg-muted' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
         >
-          <History className="w-4 h-4" />
+          <History className="w-3.5 h-3.5" />
           History
         </button>
       </div>
@@ -363,6 +372,10 @@ export function RightDrawer() {
               </div>
             </div>
           </div>
+        )}
+
+        {rightDrawerMode === 'LITERATURE' && (
+          <LiteraturePanel />
         )}
 
         {rightDrawerMode === 'COMPLIANCE' && (

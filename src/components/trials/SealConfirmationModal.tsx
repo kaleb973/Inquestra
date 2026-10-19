@@ -23,9 +23,14 @@ export function SealConfirmationModal({
 }: SealConfirmationModalProps) {
   const [confirmText, setConfirmText] = useState('');
 
+  // Reset input when modal closes
+  if (!isOpen && confirmText !== '') {
+    setConfirmText('');
+  }
+
   if (!isOpen) return null;
 
-  const isConfirmed = confirmText.trim().toUpperCase() === 'SEAL';
+  const isConfirmed = confirmText.trim() === 'SEAL';
 
   return (
     <div
@@ -67,17 +72,34 @@ export function SealConfirmationModal({
 
           <div className="space-y-2 pt-2 border-t border-border">
             <label className="block text-muted-foreground text-xs">
-              To confirm, type <span className="font-mono font-bold text-foreground">SEAL</span> below:
+              To confirm, type <span className="font-mono font-bold text-foreground">SEAL</span> in capital letters below:
             </label>
             <input
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
-              placeholder="Type SEAL"
+              placeholder="SEAL"
               disabled={isSealing}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border font-mono text-sm uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-destructive transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-destructive transition-colors"
               autoFocus
             />
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              {confirmText.length === 0 ? (
+                <span className="text-muted-foreground font-mono">Case-sensitive: type &quot;SEAL&quot;</span>
+              ) : confirmText === 'SEAL' ? (
+                <span className="text-emerald-500 font-mono font-medium flex items-center gap-1">
+                  ✓ Confirmation verified
+                </span>
+              ) : confirmText.toLowerCase() === 'seal' ? (
+                <span className="text-amber-500 font-mono">
+                  Must be capital letters: type &quot;SEAL&quot;
+                </span>
+              ) : (
+                <span className="text-destructive font-mono">
+                  Text must match &quot;SEAL&quot;
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

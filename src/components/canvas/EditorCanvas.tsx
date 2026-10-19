@@ -29,6 +29,7 @@ import {
   Check,
   AlertCircle,
   Circle,
+  Quote,
 } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
@@ -40,10 +41,12 @@ import { MathExtension } from '@/components/editor/nodes/MathNode';
 import { SequenceExtension } from '@/components/editor/nodes/SequenceNode';
 import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
 import { TrialReferenceExtension } from '@/components/editor/nodes/TrialReferenceNode';
+import { CitationExtension } from '@/components/editor/nodes/CitationNode';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
 import { SignaturePanel } from '@/components/editor/tools/SignaturePanel';
+import { CanvasContextMenu } from './CanvasContextMenu';
 import { saveTrial, sealTrial } from '@/actions/trialActions';
 import { getCurrentUserProfile } from '@/actions/adminActions';
 import type { Role } from '@prisma/client';
@@ -93,6 +96,14 @@ function buildSlashCommands(): SlashCommand[] {
       icon: <Database className="w-4 h-4 text-indigo-400" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
+      },
+    },
+    {
+      title: 'Literature Citation',
+      description: 'Search & cite peer-reviewed papers from Europe PMC / PubMed',
+      icon: <Quote className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'citationBlock' }).run();
       },
     },
     {
@@ -602,6 +613,7 @@ export function EditorCanvas() {
       SequenceExtension,
       EquipmentExtension,
       TrialReferenceExtension,
+      CitationExtension,
       SlashCommandExtension,
     ],
     content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,
@@ -690,6 +702,39 @@ export function EditorCanvas() {
     return () => window.removeEventListener('inquestra:insert-reagent', handler);
   }, []);
 
+  // Listen for citation insert events (e.g. clicked from Literature panel)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<any>).detail;
+      if (editorRef.current && detail) {
+        editorRef.current
+          .chain()
+          .focus('end')
+          .insertContent({
+            type: 'citationBlock',
+            attrs: {
+              paperId: detail.paperId || detail.id || null,
+              title: detail.title || '',
+              authors: detail.authors || [],
+              journal: detail.journal || null,
+              pubYear: detail.pubYear || null,
+              doi: detail.doi || null,
+              pmid: detail.pmid || null,
+              pmcid: detail.pmcid || null,
+              url: detail.url || null,
+              pdfUrl: detail.pdfUrl || null,
+              isOpenAccess: !!detail.isOpenAccess,
+              citationCount: detail.citationCount || 0,
+              notes: detail.notes || '',
+            },
+          })
+          .run();
+      }
+    };
+    window.addEventListener('inquestra:insert-citation', handler);
+    return () => window.removeEventListener('inquestra:insert-citation', handler);
+  }, []);
+
   // ─── Drag-and-drop CSV handler ─────────────────────────────────────────────
 
   const [isDragOver, setIsDragOver] = useState(false);
@@ -760,6 +805,7 @@ export function EditorCanvas() {
   const [isMounted, setIsMounted] = useState(false);
   const [userRole, setUserRole] = useState<Role | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [canvasContextMenu, setCanvasContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -829,6 +875,14 @@ export function EditorCanvas() {
             if (e.target === e.currentTarget && editor && !editor.isFocused) {
               editor.commands.focus('end');
             }
+          }}
+          onContextMenu={(e) => {
+            const selection = window.getSelection();
+            if (selection && selection.toString().trim().length > 0) {
+              return; // Allow native browser context menu for text selection / copying
+            }
+            e.preventDefault();
+            setCanvasContextMenu({ x: e.clientX, y: e.clientY });
           }}
         >
           {/* Subtle notebook binder margin indicator on the left */}
@@ -921,6 +975,17 @@ export function EditorCanvas() {
           )}
         </div>
       </div>
+
+      {canvasContextMenu && (
+        <CanvasContextMenu
+          x={canvasContextMenu.x}
+          y={canvasContextMenu.y}
+          isOpen={true}
+          onClose={() => setCanvasContextMenu(null)}
+          editor={editor}
+          onTriggerSave={flushPendingSave}
+        />
+      )}
     </div>
   );
 }

@@ -19,15 +19,27 @@ import {
   Search,
   Tag,
   Info,
+  MoreVertical,
+  Quote,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { SerialControlPanel } from '@/components/hardware/SerialControlPanel';
-import { fetchAllTrials, createNewTrial, getTrial } from '@/actions/trialActions';
+import {
+  fetchAllTrials,
+  createNewTrial,
+  getTrial,
+  renameTrial,
+  duplicateTrial,
+  deleteTrial,
+  setTrialCategory,
+  updateTrialStatus,
+} from '@/actions/trialActions';
 import { fetchProjectsWithLeads, createProject, fetchLabMembersForLeadSelector } from '@/actions/projectActions';
 import type { TrialStatus, TrialSummaryItem } from '@/types/inquestra';
 import type { ProjectWithLead } from '@/actions/projectActions';
 import type { Role } from '@prisma/client';
 import { TrialPreviewCard } from '@/components/trials/TrialPreviewCard';
+import { TrialContextMenu } from '@/components/trials/TrialContextMenu';
 
 interface StatusConfig {
   dotClass: string;
@@ -272,6 +284,11 @@ export function LeftSidebar() {
 
   const [trials, setTrials] = useState<TrialSummaryItem[]>([]);
   const [previewTrial, setPreviewTrial] = useState<TrialSummaryItem | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    trial: TrialSummaryItem;
+    x: number;
+    y: number;
+  } | null>(null);
   const [isLoadingTrials, setIsLoadingTrials] = useState(true);
   const [loadingTrialId, setLoadingTrialId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -421,6 +438,111 @@ export function LeftSidebar() {
     setProjects((prev) => [...prev, newProject]);
     setActiveProjectId(newProject.id);
     setShowNewProjectModal(false);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, targetTrial: TrialSummaryItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ trial: targetTrial, x: e.clientX, y: e.clientY });
+  };
+
+  const handleOpenMenuFromButton = (e: React.MouseEvent, targetTrial: TrialSummaryItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setContextMenu({ trial: targetTrial, x: rect.right, y: rect.bottom });
+  };
+
+  const handleRenameTrial = async (targetTrial: TrialSummaryItem, newTitle: string) => {
+    try {
+      await renameTrial(targetTrial.id, newTitle);
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, title: newTitle } : t))
+      );
+      if (activeTrial.id === targetTrial.id) {
+        useNotebookStore.getState().updateTitle(newTitle);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to rename experiment');
+    }
+  };
+
+  const handleDuplicateTrial = async (targetTrial: TrialSummaryItem) => {
+    try {
+      const res = await duplicateTrial(targetTrial.id);
+      if (res.success && res.trial) {
+        const summary = res.trial as unknown as TrialSummaryItem;
+        setTrials((prev) => [summary, ...prev]);
+        handleSelectTrial(res.trial.id);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to duplicate experiment');
+    }
+  };
+
+  const handleDeleteTrial = async (targetTrial: TrialSummaryItem) => {
+    try {
+      await deleteTrial(targetTrial.id);
+      setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
+      if (activeTrial.id === targetTrial.id) {
+        const remaining = trials.filter((t) => t.id !== targetTrial.id);
+        if (remaining.length > 0) {
+          handleSelectTrial(remaining[0].id);
+        } else {
+          handleNewTrial();
+        }
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete experiment');
+    }
+  };
+
+  const handleSetCategory = async (targetTrial: TrialSummaryItem, category: string) => {
+    try {
+      await setTrialCategory(targetTrial.id, category);
+      setTrials((prev) =>
+        prev.map((t) => {
+          if (t.id !== targetTrial.id) return t;
+          const filteredMeta = (t.metadata || []).filter(
+            (m) => !['category', 'type'].includes(m.key.toLowerCase())
+          );
+          return {
+            ...t,
+            metadata: category ? [...filteredMeta, { id: 'cat', key: 'category', value: category }] : filteredMeta,
+          };
+        })
+      );
+      if (activeTrial.id === targetTrial.id) {
+        const currentMeta = activeTrial.metadata || [];
+        const filteredMeta = currentMeta.filter(
+          (m) => !['category', 'type'].includes(m.key.toLowerCase())
+        );
+        useNotebookStore.setState((s) => ({
+          activeTrial: {
+            ...s.activeTrial,
+            metadata: category ? [...filteredMeta, { id: 'cat', key: 'category', value: category }] : filteredMeta,
+          },
+        }));
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to set category');
+    }
+  };
+
+  const handleChangeStatus = async (targetTrial: TrialSummaryItem, newStatus: TrialStatus) => {
+    try {
+      await updateTrialStatus(targetTrial.id, newStatus);
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, status: newStatus } : t))
+      );
+      if (activeTrial.id === targetTrial.id) {
+        useNotebookStore.setState((s) => ({
+          activeTrial: { ...s.activeTrial, status: newStatus },
+        }));
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update status');
+    }
   };
 
   // Real-time optimistic synchronization of the active trial's title, status, metadata
@@ -749,6 +871,7 @@ export function LeftSidebar() {
               return (
                 <div
                   key={t.id}
+                  onContextMenu={(e) => handleContextMenu(e, t)}
                   className={`group relative flex items-center justify-between w-full px-2 py-1.5 rounded transition-all duration-200 border ${
                     isActive
                       ? 'bg-neutral-200/80 dark:bg-neutral-800/80 border-border/80 shadow-xs'
@@ -782,7 +905,7 @@ export function LeftSidebar() {
                     </span>
                   </button>
 
-                  <div className="flex items-center gap-1 shrink-0 ml-1">
+                  <div className="flex items-center gap-0.5 shrink-0 ml-1">
                     {categoryTag && (
                       <span className="text-[9px] px-1.5 py-0.2 rounded bg-muted/90 text-muted-foreground font-mono uppercase tracking-wider hidden sm:inline-block">
                         {categoryTag}
@@ -799,6 +922,15 @@ export function LeftSidebar() {
                       title="Preview experiment parameters & metadata"
                     >
                       <Eye className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Specialized Actions Context Menu Trigger */}
+                    <button
+                      onClick={(e) => handleOpenMenuFromButton(e, t)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
+                      title="Experiment menu (Right-click)"
+                    >
+                      <MoreVertical className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -832,6 +964,13 @@ export function LeftSidebar() {
 
           {/* Lab & Settings link */}
           <div className="mt-8 border-t border-border/60 pt-4 space-y-1">
+            <Link
+              href="/app/literature"
+              className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
+            >
+              <Quote className="w-3.5 h-3.5 shrink-0" />
+              Literature &amp; Citations
+            </Link>
             <Link
               href="/app/protocols"
               className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
@@ -878,6 +1017,22 @@ export function LeftSidebar() {
             handleSelectTrial(previewTrial.id);
             setPreviewTrial(null);
           }}
+        />
+      )}
+
+      {/* Specialized Right-Click & Action Context Menu */}
+      {contextMenu && (
+        <TrialContextMenu
+          trial={contextMenu.trial}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          isOpen={true}
+          onClose={() => setContextMenu(null)}
+          onRename={handleRenameTrial}
+          onDuplicate={handleDuplicateTrial}
+          onDelete={handleDeleteTrial}
+          onSetCategory={handleSetCategory}
+          onChangeStatus={handleChangeStatus}
         />
       )}
     </>

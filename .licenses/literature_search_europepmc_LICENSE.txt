@@ -1,0 +1,11 @@
+# Europe PMC & Scientific Literature Data Notice
+
+Timestamp: 2026-10-18T20:05:00-04:00
+System: Inquestra BME Electronic Research Notebook
+
+Terms & Conditions Notice:
+Data, abstracts, metadata, and open-access links retrieved through the Inquestra Literature & Citations subsystem are queried via the Europe PMC REST API (https://europepmc.org/) and PubMed Central / NLM.
+
+- Bibliographic metadata (Titles, Authors, Journal, Year, DOI, PMID, Abstracts) are non-copyrightable factual data provided under open public domain / CC0 equivalent guidelines.
+- Full-text articles and PDFs provided via Open Access flags are subject to their respective Creative Commons licenses (such as CC-BY, CC-BY-NC, or CC-BY-ND) or Open Access publisher mandates as specified by the respective journal publisher.
+- Users of Inquestra must review and comply with specific paper licenses and terms at https://europepmc.org/terms when reproducing or redistributing full-text content.
