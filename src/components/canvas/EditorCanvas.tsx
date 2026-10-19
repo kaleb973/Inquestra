@@ -42,6 +42,7 @@ import { SequenceExtension } from '@/components/editor/nodes/SequenceNode';
 import { EquipmentExtension } from '@/components/editor/nodes/EquipmentBlock';
 import { TrialReferenceExtension } from '@/components/editor/nodes/TrialReferenceNode';
 import { CitationExtension } from '@/components/editor/nodes/CitationNode';
+import { TimerExtension } from '@/components/editor/nodes/TimerBlock';
 import { SlashMenu, type SlashMenuRef, type SlashCommand } from './SlashMenu';
 import { parseCSVStream } from '@/lib/csvParser';
 import { ReviewerOverlay } from '@/components/editor/tools/ReviewerOverlay';
@@ -313,16 +314,16 @@ function buildSlashCommands(): SlashCommand[] {
     },
     {
       title: 'Timer',
-      description: 'Insert a protocol incubation timer',
-      icon: <Timer className="w-4 h-4" />,
+      description: 'Insert an interactive countdown incubation timer',
+      icon: <Timer className="w-4 h-4 text-amber-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
           .chain()
           .focus()
           .deleteRange(range)
           .insertContent({
-            type: 'paragraph',
-            content: [{ type: 'text', text: '⏱ Protocol Timer — 00:00' }],
+            type: 'timerBlock',
+            attrs: { duration: 300, label: 'Incubation Timer' },
           })
           .run();
       },
@@ -614,6 +615,7 @@ export function EditorCanvas() {
       EquipmentExtension,
       TrialReferenceExtension,
       CitationExtension,
+      TimerExtension,
       SlashCommandExtension,
     ],
     content: content && typeof content === 'object' && Object.keys(content).length > 0 ? content : undefined,
