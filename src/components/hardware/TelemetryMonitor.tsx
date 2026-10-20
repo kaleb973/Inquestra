@@ -100,10 +100,13 @@ export function TelemetryMonitor() {
 
   const handleExportCsv = () => {
     if (buffer.length === 0) return;
-    const header = 'timestamp_ms,value,unit';
-    const rows = buffer.map(
-      (p) => `${formatSafeCsvCell(p.timestamp)},${formatSafeCsvCell(p.value)},${formatSafeCsvCell(p.unit ?? '')}`
-    );
+    const t0 = buffer[0]?.timestamp ?? Date.now();
+    const header = 'time_s,value,unit,timestamp_iso';
+    const rows = buffer.map((p) => {
+      const elapsedSec = ((p.timestamp - t0) / 1000).toFixed(3);
+      const iso = new Date(p.timestamp).toISOString();
+      return `${formatSafeCsvCell(elapsedSec)},${formatSafeCsvCell(p.value)},${formatSafeCsvCell(p.unit ?? '')},${formatSafeCsvCell(iso)}`;
+    });
     const csv = [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

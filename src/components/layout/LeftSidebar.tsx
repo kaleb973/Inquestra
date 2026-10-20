@@ -22,9 +22,9 @@ import {
   MoreVertical,
   Quote,
   PanelLeftClose,
+  Activity,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
-import { SerialControlPanel } from '@/components/hardware/SerialControlPanel';
 import {
   fetchWorkspaceBootstrap,
   fetchAllTrials,
@@ -283,6 +283,7 @@ export function LeftSidebar() {
   const cachedTrials = useNotebookStore((s) => s.cachedTrials);
   const setCachedProjects = useNotebookStore((s) => s.setCachedProjects);
   const setCachedTrials = useNotebookStore((s) => s.setCachedTrials);
+  const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
 
   // Instant restoration from in-memory cache — zero layout flash or skeleton wait
   const [projects, setProjects] = useState<ProjectWithLead[]>(cachedProjects || []);
@@ -1030,15 +1031,36 @@ export function LeftSidebar() {
           </div>
         </div>
 
-        {/* ── Hardware Controls ─────────────────────────────────────────── */}
-        <div className="border-t border-border p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <HardDrive className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Hardware
-            </span>
-          </div>
-          <SerialControlPanel />
+        {/* ── Telemetry & DAQ Drawer Trigger ───────────────────────────── */}
+        <div className="border-t border-border p-3">
+          <button
+            onClick={() => useNotebookStore.getState().setRightDrawerMode('TELEMETRY')}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-xs text-foreground transition-all duration-200 group shadow-2xs"
+            title="Open Live DAQ Telemetry Drawer"
+          >
+            <div className="flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-indigo-500" />
+              <span className="font-medium text-xs">DAQ Telemetry</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  hardwareStatus.isConnected
+                    ? hardwareStatus.isSimulated
+                      ? 'bg-amber-500 animate-pulse'
+                      : 'bg-emerald-500 animate-pulse'
+                    : 'bg-muted-foreground/30'
+                }`}
+              />
+              <span className="text-[10px] font-mono text-muted-foreground">
+                {hardwareStatus.isConnected
+                  ? hardwareStatus.isSimulated
+                    ? 'Sim'
+                    : 'USB'
+                  : 'Idle'}
+              </span>
+            </div>
+          </button>
         </div>
       </aside>
 

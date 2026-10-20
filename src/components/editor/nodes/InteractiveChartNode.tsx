@@ -273,12 +273,22 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
   // ─── Chart View State (Multi-Channel & Categorical X-Axis) ────────────────────
 
   const [chartType, setChartType] = useState<ChartType>('line');
-  const [xAxisKey, setXAxisKey] = useState<string>('__row_index__');
-  const [selectedYChannels, setSelectedYChannels] = useState<string[]>(() =>
-    csvAttr?.numericKeys && csvAttr.numericKeys.length > 0
-      ? [csvAttr.numericKeys[0]!]
-      : []
-  );
+  const [xAxisKey, setXAxisKey] = useState<string>(() => {
+    if (csvAttr?.timestampKeys && csvAttr.timestampKeys.length > 0) {
+      return csvAttr.timestampKeys[0]!;
+    }
+    const timeCandidate = csvAttr?.headers.find((h) =>
+      /^(time|time_s|time_ms|timestamp|timestamp_ms|date|datetime)/i.test(h)
+    );
+    return timeCandidate || '__row_index__';
+  });
+  const [selectedYChannels, setSelectedYChannels] = useState<string[]>(() => {
+    if (!csvAttr?.numericKeys || csvAttr.numericKeys.length === 0) return [];
+    const measurementCandidate = csvAttr.numericKeys.find(
+      (k) => !/^(time|timestamp|date|id)/i.test(k)
+    );
+    return measurementCandidate ? [measurementCandidate] : [csvAttr.numericKeys[0]!];
+  });
 
   // Live polling (only active when NOT in CSV mode)
   useEffect(() => {
@@ -335,12 +345,15 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
 
   const handleExportCsv = useCallback(() => {
     if (!csvAttr) {
-      // Export live buffer
+      // Export live buffer with elapsed time in seconds and ISO timestamp
       const liveData = paused ? frozenData : displayData;
-      const header = 'timestamp_ms,value';
-      const rows = liveData.map(
-        (p) => `${formatSafeCsvCell(p.xKey)},${formatSafeCsvCell(p.value)}`
-      );
+      const t0 = liveData[0]?.xKey ?? Date.now();
+      const header = 'time_s,value,timestamp_iso';
+      const rows = liveData.map((p) => {
+        const elapsedSec = ((p.xKey - t0) / 1000).toFixed(3);
+        const iso = new Date(p.xKey).toISOString();
+        return `${formatSafeCsvCell(elapsedSec)},${formatSafeCsvCell(p.value)},${formatSafeCsvCell(iso)}`;
+      });
       const csv = [header, ...rows].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -404,7 +417,17 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
             timestampKeys: parsed.timestampKeys,
           },
         });
-        setSelectedYChannels(parsed.numericKeys.slice(0, 1));
+        const defaultX =
+          parsed.timestampKeys[0] ||
+          parsed.headers.find((h) => /^(time|time_s|time_ms|timestamp|date)/i.test(h)) ||
+          '__row_index__';
+        const defaultY =
+          parsed.numericKeys.find((k) => k !== defaultX && !/^(time|timestamp|date|id)/i.test(k)) ||
+          parsed.numericKeys[0];
+        setXAxisKey(defaultX);
+        if (defaultY) {
+          setSelectedYChannels([defaultY]);
+        }
         setCurrentPage(1);
       } catch (err) {
         console.error('Failed to replace CSV:', err);
@@ -1082,6 +1105,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                         interval="preserveStartEnd"
                       />
                       <YAxis
+                        domain={['auto', 'auto']}
                         tick={{ fill: '#888888', fontSize: 10 }}
                         tickLine={false}
                         axisLine={false}
@@ -1104,7 +1128,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                           dataKey={yKey}
                           stroke={COLOR_PALETTE[i % COLOR_PALETTE.length]}
                           strokeWidth={1.8}
-                          dot={{ r: 2 }}
+                          dot={chartData.length < 60 ? { r: 2 } : false}
                           isAnimationActive={false}
                         />
                       ))}
@@ -1125,6 +1149,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                         interval="preserveStartEnd"
                       />
                       <YAxis
+                        domain={['auto', 'auto']}
                         tick={{ fill: '#888888', fontSize: 10 }}
                         tickLine={false}
                         axisLine={false}

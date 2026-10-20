@@ -205,7 +205,26 @@ export function inferLabColumnType(
     };
   }
 
-  // 2. Numeric measurement
+  // 2. Timestamp / Elapsed Time check (Checked before generic numeric check)
+  const isTimeName =
+    /^(timestamp|timestamp_ms|timestamp_iso|time|time_s|time_ms|datetime|date|elapsed_?time|time_?elapsed|runtime|run_?time|created_?at|epoch)/i.test(
+      lower
+    );
+  const hasIsoDates = nonNullValues.some((v) =>
+    /\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2}/.test(String(v))
+  );
+
+  if (isTimeName || hasIsoDates) {
+    return {
+      key: cleanHeader,
+      label: cleanHeader,
+      type: 'timestamp',
+      unit: unit || (lower.includes('_ms') ? 'ms' : lower.includes('_s') ? 's' : undefined),
+      categoryStats: calculateCategoryStats(sampleValues),
+    };
+  }
+
+  // 3. Numeric measurement
   if (isPredominantlyNumeric) {
     return {
       key: cleanHeader,
@@ -216,7 +235,7 @@ export function inferLabColumnType(
     };
   }
 
-  // 3. Status / QC Flag check
+  // 4. Status / QC Flag check
   const isStatusName =
     /(qc|status|flag|call|result|evaluation|verdict|pass_?fail)/i.test(lower);
   const statusTokens = new Set([
@@ -244,22 +263,6 @@ export function inferLabColumnType(
       key: cleanHeader,
       label: cleanHeader,
       type: 'status',
-      categoryStats: calculateCategoryStats(sampleValues),
-    };
-  }
-
-  // 4. Timestamp check
-  const isTimeName =
-    /(timestamp|date|datetime|time_?elapsed|run_?time|created_?at)/i.test(lower);
-  const hasIsoDates = nonNullValues.some((v) =>
-    /\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2}/.test(String(v))
-  );
-
-  if (isTimeName || hasIsoDates) {
-    return {
-      key: cleanHeader,
-      label: cleanHeader,
-      type: 'timestamp',
       categoryStats: calculateCategoryStats(sampleValues),
     };
   }
@@ -350,11 +353,6 @@ export function parseCSVStream(file: File): Promise<ParsedTelemetryData> {
         const rows = results.data;
         const rowCount = rows.length;
 
-        // Auto-detect numeric columns — at least one row must have a number value
-        const numericKeys = headers.filter((header) =>
-          rows.some((row) => typeof row[header] === 'number')
-        );
-
         // Classify all columns with laboratory semantic heuristics
         const columnsMeta = headers.map((header) => {
           const sampleValues = rows.map((r) => r[header]);
@@ -376,6 +374,14 @@ export function parseCSVStream(file: File): Promise<ParsedTelemetryData> {
         const timestampKeys = columnsMeta
           .filter((c) => c.type === 'timestamp')
           .map((c) => c.key);
+
+        // Auto-detect numeric measurement columns (exclude time, timestamp, and identifier columns)
+        const numericKeys = headers.filter(
+          (header) =>
+            !timestampKeys.includes(header) &&
+            !identifierKeys.includes(header) &&
+            rows.some((row) => typeof row[header] === 'number')
+        );
 
         resolve({
           headers,
