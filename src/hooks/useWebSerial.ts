@@ -8,11 +8,45 @@ import { useNotebookStore } from '@/store/useNotebookStore';
 
 export function useWebSerial() {
   const portRef = useRef<SerialPort | null>(null);
-  const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const activeRef = useRef(false);
 
   const appendTelemetry = useNotebookStore((s) => s.appendTelemetry);
   const setHardwareStatus = useNotebookStore((s) => s.setHardwareStatus);
+
+  const disconnect = useCallback(async () => {
+    activeRef.current = false;
+
+    if (readerRef.current) {
+      try {
+        await readerRef.current.cancel();
+      } catch {
+        /* no-op */
+      }
+      try {
+        readerRef.current.releaseLock();
+      } catch {
+        /* no-op */
+      }
+      readerRef.current = null;
+    }
+
+    if (portRef.current) {
+      try {
+        await portRef.current.close();
+      } catch (err) {
+        console.warn('[Inquestra] Error closing serial port:', err);
+      }
+      portRef.current = null;
+    }
+
+    setHardwareStatus({
+      isConnected: false,
+      portName: null,
+      packetsPerSec: 0,
+      isSimulated: false,
+    });
+  }, [setHardwareStatus]);
 
   const connect = useCallback(
     async (baudRate = 115200) => {
@@ -28,6 +62,13 @@ export function useWebSerial() {
         portRef.current = port;
         activeRef.current = true;
 
+        if (!port.readable) {
+          throw new Error('Selected serial port does not provide a readable stream.');
+        }
+
+        const reader = port.readable.getReader();
+        readerRef.current = reader;
+
         setHardwareStatus({
           isConnected: true,
           portName: 'USB Serial',
@@ -37,19 +78,7 @@ export function useWebSerial() {
           totalBytes: 0,
         });
 
-        // Pipe raw bytes → UTF-8 text via TransformStream
-        const textDecoder = new TextDecoderStream();
-        // Fire-and-forget pipe; cancellation is handled by reader.cancel()
-        // Cast needed because our ambient SerialPort.readable is declared as
-        // ReadableStream<Uint8Array>, but TextDecoderStream.writable expects
-        // ReadableStream<BufferSource>. Uint8Array IS a BufferSource, so safe.
-        void (port.readable as ReadableStream<BufferSource>)
-          .pipeTo(textDecoder.writable)
-          .catch(() => undefined);
-
-        const reader = textDecoder.readable.getReader();
-        readerRef.current = reader;
-
+        const decoder = new TextDecoder();
         let packetCount = 0;
         let lastHzTick = Date.now();
         let byteTotal = 0;
@@ -60,8 +89,8 @@ export function useWebSerial() {
             const { value, done } = await reader.read();
             if (done || value === undefined) break;
 
-            byteTotal += value.length;
-            lineBuffer += value;
+            byteTotal += value.byteLength;
+            lineBuffer += decoder.decode(value, { stream: true });
 
             // Split on newline; keep any partial trailing line for the next chunk
             const lines = lineBuffer.split('\n');
@@ -85,10 +114,17 @@ export function useWebSerial() {
               lastHzTick = now;
             }
           }
-        } catch {
-          // Stream ended or reader cancelled — fall through to finally
+        } catch (readErr) {
+          if (activeRef.current) {
+            console.warn('[Inquestra] Stream reading interrupted:', readErr);
+          }
         } finally {
-          try { reader.releaseLock(); } catch { /* no-op */ }
+          try {
+            reader.releaseLock();
+          } catch {
+            /* no-op */
+          }
+          readerRef.current = null;
         }
       } catch (err) {
         // NotFoundError means the user cancelled the port picker dialog — not an error
@@ -97,22 +133,24 @@ export function useWebSerial() {
         }
       } finally {
         activeRef.current = false;
-        portRef.current = null;
-        readerRef.current = null;
-        setHardwareStatus({ isConnected: false, portName: null, packetsPerSec: 0, isSimulated: false });
+        if (portRef.current) {
+          try {
+            await portRef.current.close();
+          } catch {
+            /* no-op */
+          }
+          portRef.current = null;
+        }
+        setHardwareStatus({
+          isConnected: false,
+          portName: null,
+          packetsPerSec: 0,
+          isSimulated: false,
+        });
       }
     },
     [appendTelemetry, setHardwareStatus]
   );
-
-  const disconnect = useCallback(async () => {
-    activeRef.current = false;
-    try { await readerRef.current?.cancel(); } catch { /* no-op */ }
-    try { await portRef.current?.close(); } catch { /* no-op */ }
-    portRef.current = null;
-    readerRef.current = null;
-    setHardwareStatus({ isConnected: false, portName: null, packetsPerSec: 0, isSimulated: false });
-  }, [setHardwareStatus]);
 
   // Clean up on unmount to prevent memory leaks and dangling hardware locks
   useEffect(() => {

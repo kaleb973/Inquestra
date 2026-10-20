@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Plug, PlugZap } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { useWebSerial } from '@/hooks/useWebSerial';
+import { useTelemetrySim } from '@/hooks/useTelemetrySim';
 import { checkLabCompliance } from '@/actions/adminActions';
 
 const BAUD_RATES = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600] as const;
@@ -13,6 +14,7 @@ const BAUD_RATES = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600] a
 export function SerialControlPanel() {
   const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
   const { connect, disconnect } = useWebSerial();
+  const { stopSimulation } = useTelemetrySim();
   const [selectedBaud, setSelectedBaud] = useState<number>(115200);
   const [isWebSerialSupported, setIsWebSerialSupported] = useState(true);
 
@@ -20,7 +22,7 @@ export function SerialControlPanel() {
     setIsWebSerialSupported(typeof navigator !== 'undefined' && 'serial' in navigator);
   }, []);
 
-  const isPhysicallyConnected = hardwareStatus.isConnected;
+  const isConnected = hardwareStatus.isConnected;
 
   return (
     <div className="space-y-2">
@@ -36,7 +38,7 @@ export function SerialControlPanel() {
         <select
           value={selectedBaud}
           onChange={(e) => setSelectedBaud(Number(e.target.value))}
-          disabled={isPhysicallyConnected}
+          disabled={isConnected}
           className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {BAUD_RATES.map((rate) => (
@@ -51,11 +53,15 @@ export function SerialControlPanel() {
       <div className="flex items-center gap-2">
         <div
           className={`w-2 h-2 rounded-full shrink-0 ${
-            isPhysicallyConnected ? 'bg-indigo-400 animate-pulse' : 'bg-muted-foreground/40'
+            isConnected
+              ? hardwareStatus.isSimulated
+                ? 'bg-amber-400 animate-pulse'
+                : 'bg-indigo-400 animate-pulse'
+              : 'bg-muted-foreground/40'
           }`}
         />
         <span className="text-[10px] text-muted-foreground truncate">
-          {isPhysicallyConnected
+          {isConnected
             ? (hardwareStatus.portName ?? 'Connected')
             : 'No device'}
         </span>
@@ -64,8 +70,12 @@ export function SerialControlPanel() {
       {/* Connect / Disconnect */}
       <button
         onClick={async () => {
-          if (isPhysicallyConnected) {
-            disconnect();
+          if (isConnected) {
+            if (hardwareStatus.isSimulated) {
+              stopSimulation();
+            } else {
+              await disconnect();
+            }
           } else {
             const res = await checkLabCompliance();
             if (!res.compliant) {
@@ -78,12 +88,12 @@ export function SerialControlPanel() {
         }}
         disabled={!isWebSerialSupported}
         className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-          isPhysicallyConnected
+          isConnected
             ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20'
             : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
         }`}
       >
-        {isPhysicallyConnected ? (
+        {isConnected ? (
           <>
             <PlugZap className="w-3.5 h-3.5" />
             Disconnect

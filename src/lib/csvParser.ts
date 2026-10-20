@@ -397,12 +397,27 @@ export function parseCSVStream(file: File): Promise<ParsedTelemetryData> {
 
 /**
  * Sanitizes a CSV cell value against CSV / Formula Injection (CWE-1236).
- * Prepends a single quote if the string begins with formula trigger characters (=, +, -, @, \t, \r).
+ * Prepends a single quote if the string begins with formula trigger characters (=, +, -, @, \t, \r),
+ * while preserving valid numeric integers and floats (e.g. -0.17, +1.5) without corruption.
  */
 export function sanitizeCsvCell(value: unknown): string {
   if (value === null || value === undefined) return '';
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? String(value) : '';
+  }
   const str = String(value);
-  // OWASP CSV Formula Injection defense: escape leading formula triggers
+  const trimmed = str.trim();
+  // Legitimate numeric values (e.g. biopotential readings, temperatures) are safe from formula execution
+  if (
+    trimmed !== '' &&
+    !trimmed.startsWith('=') &&
+    !trimmed.startsWith('@') &&
+    !isNaN(Number(trimmed)) &&
+    Number.isFinite(Number(trimmed))
+  ) {
+    return str;
+  }
+  // OWASP CSV Formula Injection defense: escape leading formula triggers for non-numeric text
   if (/^[=\+\-@\t\r]/.test(str)) {
     return `'${str}`;
   }

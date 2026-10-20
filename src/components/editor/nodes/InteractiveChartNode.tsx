@@ -55,7 +55,7 @@ import {
   type GroupAggregation,
 } from '@/lib/csvParser';
 
-const CHART_WINDOW = 100;
+const CHART_WINDOW = 300;
 const POLL_INTERVAL_MS = 100;
 const COLOR_PALETTE = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4'];
 
@@ -1152,38 +1152,42 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                         />
                       ))}
                     </AreaChart>
-                  ) : (
+                  ) : chartType === 'area' ? (
                     <AreaChart
                       data={paused ? frozenData : displayData}
                       margin={{ top: 8, right: 12, left: -10, bottom: 0 }}
                     >
                       <defs>
                         <linearGradient id="chartGradientLive" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.02} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border/60" vertical={false} />
                       <XAxis
                         dataKey="xKey"
                         tick={{ fill: '#888888', fontSize: 10 }}
                         tickLine={false}
                         interval="preserveStartEnd"
-                        tickFormatter={(ts: number) =>
-                          new Date(ts).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                          })
-                        }
+                        tickFormatter={(ts: number) => {
+                          const d = new Date(ts);
+                          const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                          const ms = String(d.getMilliseconds()).padStart(3, '0').slice(0, 2);
+                          return `${time}.${ms}`;
+                        }}
                       />
                       <YAxis
+                        domain={['auto', 'auto']}
                         tick={{ fill: '#888888', fontSize: 10 }}
                         tickLine={false}
                         axisLine={false}
                         width={45}
                       />
                       <Tooltip
+                        labelFormatter={(ts) => {
+                          const d = new Date(Number(ts));
+                          return `${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+                        }}
                         contentStyle={{
                           background: 'var(--card, #ffffff)',
                           border: '1px solid var(--border, #e5e7eb)',
@@ -1193,15 +1197,62 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                         }}
                       />
                       <Area
-                        type="monotone"
+                        type="linear"
                         dataKey="value"
                         stroke="#6366f1"
-                        strokeWidth={1.8}
+                        strokeWidth={2}
                         fill="url(#chartGradientLive)"
                         dot={false}
                         isAnimationActive={false}
                       />
                     </AreaChart>
+                  ) : (
+                    <LineChart
+                      data={paused ? frozenData : displayData}
+                      margin={{ top: 8, right: 12, left: -10, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border/60" vertical={false} />
+                      <XAxis
+                        dataKey="xKey"
+                        tick={{ fill: '#888888', fontSize: 10 }}
+                        tickLine={false}
+                        interval="preserveStartEnd"
+                        tickFormatter={(ts: number) => {
+                          const d = new Date(ts);
+                          const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                          const ms = String(d.getMilliseconds()).padStart(3, '0').slice(0, 2);
+                          return `${time}.${ms}`;
+                        }}
+                      />
+                      <YAxis
+                        domain={['auto', 'auto']}
+                        tick={{ fill: '#888888', fontSize: 10 }}
+                        tickLine={false}
+                        axisLine={false}
+                        width={45}
+                      />
+                      <Tooltip
+                        labelFormatter={(ts) => {
+                          const d = new Date(Number(ts));
+                          return `${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+                        }}
+                        contentStyle={{
+                          background: 'var(--card, #ffffff)',
+                          border: '1px solid var(--border, #e5e7eb)',
+                          borderRadius: 8,
+                          fontSize: 11,
+                          color: 'var(--foreground, #000000)',
+                        }}
+                      />
+                      <Line
+                        type="linear"
+                        dataKey="value"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </LineChart>
                   )}
                 </ResponsiveContainer>
               )}

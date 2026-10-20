@@ -6,10 +6,10 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 
-const SIM_INTERVAL_MS = 20; // 50 Hz
-const BASE_TEMP = 37.0;
-const AMPLITUDE = 0.5;
-const NOISE_SCALE = 0.025;
+export type SimMode = 'ecg' | 'thermistor';
+
+const ECG_INTERVAL_MS = 10; // 100 Hz for biopotentials
+const THERM_INTERVAL_MS = 20; // 50 Hz
 const HZ_REPORT_INTERVAL = 1000;
 
 export function useTelemetrySim() {
@@ -17,43 +17,68 @@ export function useTelemetrySim() {
   const phaseRef = useRef(0);
   const packetCountRef = useRef(0);
   const lastHzRef = useRef(Date.now());
+  const activeModeRef = useRef<SimMode>('ecg');
 
   const appendTelemetry = useNotebookStore((s) => s.appendTelemetry);
   const setHardwareStatus = useNotebookStore((s) => s.setHardwareStatus);
 
-  const startSimulation = useCallback(() => {
+  const startSimulation = useCallback((mode: SimMode = 'ecg') => {
     if (intervalRef.current !== null) return;
+    activeModeRef.current = mode;
 
     setHardwareStatus({
       isConnected: true,
-      portName: 'Simulator',
+      portName: mode === 'ecg' ? 'ESP32 (Simulated ECG)' : 'Simulator (Thermistor)',
       baudRate: 115200,
       isSimulated: true,
       packetsPerSec: 0,
       totalBytes: 0,
     });
 
+    const isEcg = mode === 'ecg';
+    const intervalMs = isEcg ? ECG_INTERVAL_MS : THERM_INTERVAL_MS;
+    const startTime = Date.now();
+
     intervalRef.current = setInterval(() => {
-      const noise = (Math.random() - 0.5) * 2 * NOISE_SCALE;
-      const value = BASE_TEMP + AMPLITUDE * Math.sin(phaseRef.current) + noise;
-      phaseRef.current += 0.1;
+      const now = Date.now();
+      let value = 0;
+
+      if (isEcg) {
+        // Standard Lead-II ECG waveform: 75 bpm (800ms cardiac cycle)
+        const cycleMs = 800;
+        const t = ((now - startTime) % cycleMs) / cycleMs; // 0.0 to 1.0
+
+        // Gaussian components: P, Q, R, S, T waves
+        const pWave = 0.15 * Math.exp(-Math.pow(t - 0.20, 2) / (2 * Math.pow(0.035, 2)));
+        const qWave = -0.18 * Math.exp(-Math.pow(t - 0.36, 2) / (2 * Math.pow(0.012, 2)));
+        const rPeak = 1.45 * Math.exp(-Math.pow(t - 0.40, 2) / (2 * Math.pow(0.015, 2)));
+        const sWave = -0.32 * Math.exp(-Math.pow(t - 0.44, 2) / (2 * Math.pow(0.014, 2)));
+        const tWave = 0.35 * Math.exp(-Math.pow(t - 0.65, 2) / (2 * Math.pow(0.055, 2)));
+        const noise = (Math.random() - 0.5) * 0.015;
+
+        value = pWave + qWave + rPeak + sWave + tWave + noise;
+      } else {
+        // Thermistor 37.0 °C physiological bath
+        const noise = (Math.random() - 0.5) * 0.05;
+        value = 37.0 + 0.5 * Math.sin(phaseRef.current) + noise;
+        phaseRef.current += 0.1;
+      }
 
       appendTelemetry({
-        timestamp: Date.now(),
+        timestamp: now,
         value: parseFloat(value.toFixed(4)),
-        sensorId: 'thermistor-sim',
-        unit: '°C',
+        sensorId: isEcg ? 'ad8232-ecg-sim' : 'thermistor-sim',
+        unit: isEcg ? 'mV' : '°C',
       });
 
       packetCountRef.current++;
 
-      const now = Date.now();
       if (now - lastHzRef.current >= HZ_REPORT_INTERVAL) {
         setHardwareStatus({ packetsPerSec: packetCountRef.current });
         packetCountRef.current = 0;
         lastHzRef.current = now;
       }
-    }, SIM_INTERVAL_MS);
+    }, intervalMs);
   }, [appendTelemetry, setHardwareStatus]);
 
   const stopSimulation = useCallback(() => {
