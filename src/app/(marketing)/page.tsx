@@ -21,7 +21,6 @@ import {
   Microscope,
   Atom,
   Building2,
-  Zap,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { ScientificWorkspacePreview } from '@/components/marketing/ScientificWorkspacePreview';
@@ -580,164 +579,7 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 7. Transparent Tier Structure (Free Open-Core vs Pro / Enterprise) ─────── */}
-      <section id="pricing" className="py-24 border-b border-border bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-16">
-            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
-              Transparent Access
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Free open-core for individual researchers. Scalable for teams.
-            </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Individual researchers and students retain full free access to the core notebook, LIMS, and local DAQ environment forever.
-              Commercial cloud collaboration and institutional regulatory modules are available as your lab grows.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Tier 1: Free Open-Core */}
-            <div className="bg-card border border-border p-6 rounded-xl flex flex-col justify-between space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground font-semibold">
-                    Free Open-Core
-                  </span>
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-foreground">
-                    Available Now
-                  </span>
-                </div>
-                <div className="text-3xl font-mono font-semibold text-foreground mb-1">$0</div>
-                <div className="text-xs text-muted-foreground mb-6">Free forever for individual bench researchers</div>
-
-                <ul className="space-y-2.5 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Complete Scientific Protocol Canvas</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>SMILES molecules &amp; DNA/RNA sequences</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Local Web Serial DAQ (unlimited Hz)</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Local IndexedDB cache (zero cloud lock-in)</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Full data export (Markdown, CSV, JSON)</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                href="/app"
-                className="w-full text-center py-2.5 rounded bg-foreground text-background hover:bg-foreground/90 text-xs font-semibold transition-colors"
-              >
-                Launch Free Workspace
-              </Link>
-            </div>
-
-            {/* Tier 2: Pro Lab */}
-            <div className="bg-card border border-primary ring-1 ring-primary/30 p-6 rounded-xl flex flex-col justify-between space-y-6 relative">
-              <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] font-mono font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                For Research Teams
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-mono uppercase tracking-wider text-primary font-semibold">
-                    Pro Lab
-                  </span>
-                </div>
-                <div className="text-3xl font-mono font-semibold text-foreground mb-1">
-                  $15 <span className="text-xs font-normal text-muted-foreground font-sans">/ seat / mo</span>
-                </div>
-                <div className="text-xs text-muted-foreground mb-6">For academic groups, startups, and core labs</div>
-
-                <ul className="space-y-2.5 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-primary" />
-                    <span>Everything in Free Open-Core</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-primary" />
-                    <span>Encrypted cloud synchronization &amp; backups</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-primary" />
-                    <span>Shared lab inventory &amp; low-stock alerts</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-primary" />
-                    <span>Team SOP library &amp; multi-trial versioning</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-primary" />
-                    <span>Role-based access control (RBAC)</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                href="#pilot"
-                className="w-full text-center py-2.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold transition-colors"
-              >
-                Request Lab Preview
-              </Link>
-            </div>
-
-            {/* Tier 3: Enterprise & Institutional */}
-            <div className="bg-card border border-border p-6 rounded-xl flex flex-col justify-between space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground font-semibold">
-                    Enterprise / Institutional
-                  </span>
-                </div>
-                <div className="text-3xl font-mono font-semibold text-foreground mb-1">Custom</div>
-                <div className="text-xs text-muted-foreground mb-6">For biopharma, hospitals, and university departments</div>
-
-                <ul className="space-y-2.5 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Everything in Pro Lab</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>21 CFR Part 11 Regulatory Compliance Module</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Institutional Single Sign-On (SSO / SAML 2.0)</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>Equipment calibration dossiers &amp; maintenance logs</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-foreground">
-                    <Check className="w-3.5 h-3.5 text-phosphor" />
-                    <span>On-premise or private cloud deployment</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                href="/contact"
-                className="w-full text-center py-2.5 rounded border border-border text-foreground hover:bg-muted/40 text-xs font-semibold transition-colors"
-              >
-                Contact Institutional Sales
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 8. Pilot Lab Program — Direct Collaboration ─────────────────────────────── */}
+      {/* ── 7. Pilot Lab Program — Direct Collaboration ─────────────────────────────── */}
       <section className="py-24 border-b border-border bg-card" id="pilot">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -802,7 +644,7 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 9. Final Call to Action ─────────────────────────────────────────────────── */}
+      {/* ── 8. Final Call to Action ─────────────────────────────────────────────────── */}
       <section className="py-20 bg-muted/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-4">
