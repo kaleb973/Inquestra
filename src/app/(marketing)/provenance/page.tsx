@@ -66,14 +66,14 @@ export default function ProvenancePage() {
                 <div className="flex items-start justify-between border-b border-border pb-3">
                   <div>
                     <div className="text-foreground font-semibold">Author Execution Signature</div>
-                    <div className="text-muted-foreground text-[11px]">Dr. Eleanor Vance, PhD · Senior Research Scientist</div>
+                    <div className="text-muted-foreground text-[11px]">Research Specialist · Bench Station 01 Lead</div>
                   </div>
                   <span className="text-phosphor text-[11px]">SEAL APPLIED</span>
                 </div>
                 <div className="flex items-start justify-between border-b border-border pb-3">
                   <div>
                     <div className="text-foreground font-semibold">Principal Investigator Counter-Sign</div>
-                    <div className="text-muted-foreground text-[11px]">Prof. Marcus Sterling, MD, PhD · Lab Director</div>
+                    <div className="text-muted-foreground text-[11px]">Principal Investigator · Lab Director [ID: PI-7021 · Verified ECDSA]</div>
                   </div>
                   <span className="text-phosphor text-[11px]">CO-SIGNED</span>
                 </div>

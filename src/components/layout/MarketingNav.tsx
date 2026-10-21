@@ -8,8 +8,9 @@ import { ArrowRight, Menu, X, Cpu, ShieldCheck, Database, PlayCircle, Mail } fro
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
+  { label: 'Features', href: '/#features', icon: Database },
+  { label: 'Provenance', href: '/provenance', icon: ShieldCheck },
   { label: 'Hardware DAQ', href: '/hardware', icon: Cpu },
-  { label: 'Cryptographic Provenance', href: '/provenance', icon: ShieldCheck },
   { label: 'Architecture', href: '/architecture', icon: Database },
   { label: 'Live Demo', href: '/demo', icon: PlayCircle },
   { label: 'Contact', href: '/contact', icon: Mail },

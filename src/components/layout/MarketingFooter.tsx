@@ -21,8 +21,8 @@ export function MarketingFooter() {
               <span className="font-semibold text-base text-foreground tracking-tight">Inquestra</span>
             </div>
             <p className="text-muted-foreground text-xs leading-relaxed max-w-sm">
-              Enterprise Data Acquisition and Electronic Research Notebook built strictly for Biomedical Engineering.
-              Bridging hardware instrumentation and tamper-evident data provenance.
+              The modern Electronic Research Notebook and Laboratory Intelligence Platform for Life Sciences, Chemistry, Biotech, and Engineering.
+              Unifying protocols, chemical inventory, literature citations, and bench instrumentation.
             </p>
             <div className="flex items-center gap-2 text-[11px] font-mono text-phosphor">
               <span className="inline-block w-2 h-2 rounded-full bg-phosphor animate-pulse" />
@@ -107,7 +107,7 @@ export function MarketingFooter() {
         <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-muted-foreground/80">
           <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved. Cryptographic provenance for scientific reproducibility.</p>
           <div className="flex items-center gap-4 font-mono">
-            <span>FDA 21 CFR § 11 Validated</span>
+            <span>21 CFR § 11 Technical Controls</span>
             <span>·</span>
             <span>NIH FAIR Directives</span>
             <span>·</span>

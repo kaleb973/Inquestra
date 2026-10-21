@@ -48,7 +48,7 @@ export function PilotInterestForm() {
         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         <h3 className="text-lg font-semibold text-foreground">You&apos;re on the list.</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          I&apos;ll send you an email within 48 hours with access instructions. No sales pressure, no required calls &mdash; just researcher-to-researcher.
+          Our engineering team will review your bench requirements and follow up within 48 hours with access instructions. No sales pressure &mdash; strictly technical lab onboarding.
         </p>
       </div>
     );
@@ -66,7 +66,7 @@ export function PilotInterestForm() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Dr. Jane Chen"
+            placeholder="e.g. Alex Morgan"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
           />
         </div>
@@ -79,7 +79,7 @@ export function PilotInterestForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="jchen@university.edu"
+            placeholder="e.g. alex.morgan@institution.edu"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
           />
         </div>
@@ -95,7 +95,7 @@ export function PilotInterestForm() {
             required
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
-            placeholder="MIT Biomedical Engineering Lab"
+            placeholder="e.g. Department of Biomedical Engineering"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
           />
         </div>
@@ -107,7 +107,7 @@ export function PilotInterestForm() {
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            placeholder="Principal Investigator, PhD Student…"
+            placeholder="Principal Investigator, Postdoc, Lab Manager…"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
           />
         </div>
@@ -121,7 +121,7 @@ export function PilotInterestForm() {
         <textarea
           value={useCase}
           onChange={(e) => setUseCase(e.target.value)}
-          placeholder="e.g. EMG / ECG waveform acquisition from custom Arduino sensors, linked to in-notebook protocol SOPs for muscle fatigue studies…"
+          placeholder="e.g. Enzyme kinetic assays, molecular cloning SOPs, chemical reagent lot tracking, live sensor logging, or mechanical testing…"
           rows={3}
           className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
         />

@@ -187,7 +187,7 @@ export default function DemoPage() {
                   <div className="bg-background p-2.5 rounded border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px]">Electronic Signature</span>
                     <span className="text-foreground">
-                      {isSealed ? "Verified: Dr. K. Vance (Lead PI)" : "Awaiting Sealing Signature"}
+                      {isSealed ? "Verified: Principal Investigator [PI Attestation Verified]" : "Awaiting Sealing Signature"}
                     </span>
                   </div>
                 </div>
