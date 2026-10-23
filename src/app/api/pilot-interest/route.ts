@@ -76,9 +76,18 @@ export async function POST(req: NextRequest) {
   };
 
   // Send via Resend if configured, with strict 5-second timeout deadline
-  const rawKey = process.env.RESEND_API_KEY;
+  const rawKey =
+    process.env.RESEND_API_KEY ??
+    process.env.Resend_API ??
+    process.env.RESEND_API ??
+    process.env.RESEND_KEY;
   const resendApiKey = rawKey?.trim().replace(/^["']|["']$/g, '');
-  const notifyEmail = (process.env.PILOT_NOTIFY_EMAIL ?? 'inquestrasupport@gmail.com').trim().replace(/^["']|["']$/g, '');
+  const rawNotify =
+    process.env.PILOT_NOTIFY_EMAIL ??
+    process.env.Pilot_notify_email ??
+    process.env.PILOT_EMAIL ??
+    'inquestrasupport@gmail.com';
+  const notifyEmail = rawNotify.trim().replace(/^["']|["']$/g, '');
 
   let emailDispatchStatus = 'unconfigured';
   let emailDispatchError: string | null = null;

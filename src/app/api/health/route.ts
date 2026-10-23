@@ -24,7 +24,12 @@ export async function GET(req: NextRequest) {
         status: 'healthy',
         probe: 'liveness',
         uptime: process.uptime(),
-        resendConfigured: Boolean(process.env.RESEND_API_KEY),
+        resendConfigured: Boolean(
+          process.env.RESEND_API_KEY ||
+          process.env.Resend_API ||
+          process.env.RESEND_API ||
+          process.env.RESEND_KEY
+        ),
         detectedMatchingKeys: resendKeys,
         timestamp: new Date().toISOString(),
       },
