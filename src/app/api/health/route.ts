@@ -18,12 +18,14 @@ export async function GET(req: NextRequest) {
 
   // 1. Liveness Probe (process check)
   if (probeType === 'live') {
+    const resendKeys = Object.keys(process.env).filter(k => k.toLowerCase().includes('resend') || k.toLowerCase().includes('pilot'));
     return NextResponse.json(
       {
         status: 'healthy',
         probe: 'liveness',
         uptime: process.uptime(),
         resendConfigured: Boolean(process.env.RESEND_API_KEY),
+        detectedMatchingKeys: resendKeys,
         timestamp: new Date().toISOString(),
       },
       {
