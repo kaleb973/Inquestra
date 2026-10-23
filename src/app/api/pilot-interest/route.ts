@@ -76,10 +76,14 @@ export async function POST(req: NextRequest) {
   };
 
   // Send via Resend if configured, with strict 5-second timeout deadline
-  const resendApiKey = process.env.RESEND_API_KEY;
-  if (resendApiKey && !resendApiKey.startsWith('placeholder')) {
-    const notifyEmail = process.env.PILOT_NOTIFY_EMAIL ?? 'inquestrasupport@gmail.com';
+  const rawKey = process.env.RESEND_API_KEY;
+  const resendApiKey = rawKey?.trim().replace(/^["']|["']$/g, '');
+  const notifyEmail = (process.env.PILOT_NOTIFY_EMAIL ?? 'inquestrasupport@gmail.com').trim().replace(/^["']|["']$/g, '');
 
+  let emailDispatchStatus = 'unconfigured';
+  let emailDispatchError: string | null = null;
+
+  if (resendApiKey && !resendApiKey.startsWith('placeholder')) {
     // 1. Internal notification to Inquestra team
     const adminNotificationPayload = {
       from: 'Inquestra Pilot <support@inquestra.org>',
@@ -162,24 +166,44 @@ export async function POST(req: NextRequest) {
         sendEmail(applicantConfirmationPayload),
       ]);
 
+      const errors: string[] = [];
       if (adminRes.status === 'fulfilled' && !adminRes.value.ok) {
-        console.error('[pilot-interest] Admin notification failed:', await adminRes.value.text());
+        const text = await adminRes.value.text();
+        errors.push(`Admin (${adminRes.value.status}): ${text}`);
       } else if (adminRes.status === 'rejected') {
-        console.error('[pilot-interest] Admin notification error:', adminRes.reason);
+        errors.push(`Admin dispatch error: ${String(adminRes.reason)}`);
       }
 
       if (applicantRes.status === 'fulfilled' && !applicantRes.value.ok) {
-        console.error('[pilot-interest] Applicant confirmation failed:', await applicantRes.value.text());
+        const text = await applicantRes.value.text();
+        errors.push(`Applicant (${applicantRes.value.status}): ${text}`);
       } else if (applicantRes.status === 'rejected') {
-        console.error('[pilot-interest] Applicant confirmation error:', applicantRes.reason);
+        errors.push(`Applicant dispatch error: ${String(applicantRes.reason)}`);
+      }
+
+      if (errors.length > 0) {
+        emailDispatchStatus = 'partial_or_failed';
+        emailDispatchError = errors.join(' | ');
+        console.error('[pilot-interest] Dispatch errors:', emailDispatchError);
+      } else {
+        emailDispatchStatus = 'sent';
       }
     } catch (err) {
+      emailDispatchStatus = 'exception';
+      emailDispatchError = String(err);
       console.error('[pilot-interest] Unexpected dispatch error:', err);
     }
   } else {
-    // Fallback: log to console (useful for local dev / staging w/o Resend yet)
-    console.log('[pilot-interest] New submission (Resend disabled or missing key):', sanitized);
+    emailDispatchStatus = 'missing_resend_api_key';
+    console.log('[pilot-interest] RESEND_API_KEY missing or placeholder');
   }
 
-  return NextResponse.json({ success: true }, { headers: rateLimitHeaders });
+  return NextResponse.json(
+    {
+      success: true,
+      dispatchStatus: emailDispatchStatus,
+      dispatchError: emailDispatchError,
+    },
+    { headers: rateLimitHeaders }
+  );
 }

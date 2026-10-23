@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
         status: 'healthy',
         probe: 'liveness',
         uptime: process.uptime(),
+        resendConfigured: Boolean(process.env.RESEND_API_KEY),
         timestamp: new Date().toISOString(),
       },
       {
