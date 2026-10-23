@@ -14,9 +14,6 @@ export default function TermsOfServicePage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 border-b border-border pb-8">
-          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-3">
-            Legal &amp; Regulatory Framework
-          </p>
           <h1 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-3">
             Terms of Service
           </h1>

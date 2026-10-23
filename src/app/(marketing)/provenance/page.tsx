@@ -122,11 +122,8 @@ export default function ProvenancePage() {
       {/* Feature Section 1: The Cryptographic Hash Pipeline */}
       <section className="py-16 border-t border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Mathematical Foundation
-            </span>
-            <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
+          <div className="max-w-3xl mb-10">
+            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
               How Inquestra seals experimental trials.
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">
@@ -135,34 +132,32 @@ export default function ProvenancePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="bg-card border border-border p-5 rounded-lg space-y-2">
-              <span className="text-xs font-mono text-muted-foreground">STEP 01</span>
-              <h3 className="text-sm font-semibold text-foreground">Sensor Ingestion Buffer</h3>
+          {/* Horizontal stepped flow */}
+          <div className="border-t border-b border-border py-8 flex flex-wrap gap-y-8">
+            <div className="flex-1 min-w-40 pr-6 border-r border-border last:border-r-0">
+              <p className="text-[10px] font-mono text-muted-foreground mb-2">STEP 01</p>
+              <p className="text-sm font-medium text-foreground mb-1">Sensor Ingestion Buffer</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Raw serial byte arrays and microsecond timestamps are frozen in the Web Worker memory ring.
               </p>
             </div>
-
-            <div className="bg-card border border-border p-5 rounded-lg space-y-2">
-              <span className="text-xs font-mono text-muted-foreground">STEP 02</span>
-              <h3 className="text-sm font-semibold text-foreground">Protocol Notes &amp; LIMS</h3>
+            <div className="flex-1 min-w-40 px-6 border-r border-border last:border-r-0">
+              <p className="text-[10px] font-mono text-muted-foreground mb-2">STEP 02</p>
+              <p className="text-sm font-medium text-foreground mb-1">Protocol Notes &amp; LIMS</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Experimental observations, math formulas, chemical lot numbers, and author metadata are normalized to JSON.
               </p>
             </div>
-
-            <div className="bg-card border border-border p-5 rounded-lg space-y-2">
-              <span className="text-xs font-mono text-muted-foreground">STEP 03</span>
-              <h3 className="text-sm font-semibold text-foreground">Deterministic Digest</h3>
+            <div className="flex-1 min-w-40 px-6 border-r border-border last:border-r-0">
+              <p className="text-[10px] font-mono text-muted-foreground mb-2">STEP 03</p>
+              <p className="text-sm font-medium text-foreground mb-1">Deterministic Digest</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                A deterministic SHA-256 hash is computed across all concatenated streams, creating a unique digital fingerprint.
+                A SHA-256 hash is computed across all concatenated streams, creating a unique digital fingerprint.
               </p>
             </div>
-
-            <div className="bg-card border border-border p-5 rounded-lg space-y-2">
-              <span className="text-xs font-mono text-muted-foreground">STEP 04</span>
-              <h3 className="text-sm font-semibold text-foreground">Immutable Ledger Anchor</h3>
+            <div className="flex-1 min-w-40 pl-6">
+              <p className="text-[10px] font-mono text-muted-foreground mb-2">STEP 04</p>
+              <p className="text-sm font-medium text-foreground mb-1">Immutable Ledger Anchor</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 The trial transitions to COMPLETED. Any subsequent modification attempt triggers an integrity alarm and invalidates the seal.
               </p>
@@ -174,11 +169,8 @@ export default function ProvenancePage() {
       {/* Feature Section 2: FDA 21 CFR Part 11 Compliance Table */}
       <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Regulatory Verification
-            </span>
-            <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
+          <div className="max-w-3xl mb-10">
+            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
               FDA 21 CFR Part 11 Alignment Matrix.
             </h2>
             <p className="text-sm text-muted-foreground mt-2">
@@ -238,9 +230,6 @@ export default function ProvenancePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="space-y-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-                Zero Vendor Lock-In
-              </span>
               <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
                 Inspect and verify exports in standard terminal tools.
               </h2>

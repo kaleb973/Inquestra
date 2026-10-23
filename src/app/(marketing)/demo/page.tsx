@@ -44,9 +44,6 @@ export default function DemoPage() {
       {/* Main Interactive Demo Container */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-8">
-          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
-            Interactive System Preview
-          </p>
           <h1 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-3">
             Hardware Acquisition &amp; Protocol Sealing In Real Time
           </h1>

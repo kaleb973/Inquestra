@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Database, Server, Layers, Cpu, ShieldCheck, Activity, HardDrive, WifiOff, RefreshCw } from 'lucide-react';
+import { ArrowRight, Database } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -42,104 +42,74 @@ export default function ArchitecturePage() {
           </div>
         </div>
 
-        {/* 4-Tier Pipeline Architecture Visual */}
+        {/* 4-Tier Pipeline — horizontal flow diagram */}
         <div className="mt-14 bg-card border border-border rounded-lg overflow-hidden shadow-xl p-8">
-          <div className="flex items-center justify-between border-b border-border pb-4 mb-8">
-            <div>
-              <span className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
-                Full-Stack Ingestion Pipeline
-              </span>
-              <h3 className="text-base font-semibold text-foreground mt-1">
-                From Physical Transducer to Cryptographic Ledger
-              </h3>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-phosphor">
-              <span className="w-2 h-2 rounded-full bg-phosphor animate-pulse" />
-              <span>Pipeline: ACTIVE &amp; STABLE</span>
-            </div>
+          <div className="border-b border-border pb-4 mb-8">
+            <span className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
+              Full-Stack Ingestion Pipeline
+            </span>
+            <h3 className="text-base font-semibold text-foreground mt-1">
+              From Physical Transducer to Cryptographic Ledger
+            </h3>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6 relative">
+          {/* Horizontal stepped flow */}
+          <div className="flex flex-wrap items-start gap-0">
             {/* Tier 1 */}
-            <div className="bg-background border border-border rounded-lg p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-muted-foreground">TIER 01</span>
-                  <Cpu className="w-4 h-4 text-primary" />
-                </div>
-                <h4 className="font-semibold text-sm text-foreground">Silicon &amp; ADC</h4>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Microcontrollers (ESP32-S3, Teensy 4.1, Arduino) capture analog sensor biopotentials and emit structured UART byte frames.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-border font-mono text-[10px] text-muted-foreground">
-                Transport: USB-CDC / UART
-              </div>
+            <div className="flex-1 min-w-40 pr-4 border-r border-border">
+              <span className="text-[10px] font-mono text-muted-foreground">TIER 01</span>
+              <h4 className="font-semibold text-sm text-foreground mt-1 mb-2">Silicon &amp; ADC</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Microcontrollers (ESP32-S3, Teensy 4.1, Arduino) capture analog sensor biopotentials and emit structured UART byte frames.
+              </p>
+              <p className="mt-3 font-mono text-[10px] text-muted-foreground">Transport: USB-CDC / UART</p>
             </div>
+
+            <div className="self-start pt-4 px-3 text-muted-foreground text-lg font-light select-none">→</div>
 
             {/* Tier 2 */}
-            <div className="bg-background border border-border rounded-lg p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-muted-foreground">TIER 02</span>
-                  <Activity className="w-4 h-4 text-phosphor" />
-                </div>
-                <h4 className="font-semibold text-sm text-foreground">Worker Ring Buffer</h4>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Native Web Serial API streams bytes into a dedicated HTML5 Web Worker thread. Fixed ring buffers prevent garbage collection spikes.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-border font-mono text-[10px] text-phosphor">
-                Latency: &lt; 0.5 ms
-              </div>
+            <div className="flex-1 min-w-40 px-4 border-r border-border">
+              <span className="text-[10px] font-mono text-muted-foreground">TIER 02</span>
+              <h4 className="font-semibold text-sm text-foreground mt-1 mb-2">Worker Ring Buffer</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Native Web Serial API streams bytes into a dedicated HTML5 Web Worker thread. Fixed ring buffers prevent garbage collection spikes.
+              </p>
+              <p className="mt-3 font-mono text-[10px] text-phosphor">Latency: &lt; 0.5 ms</p>
             </div>
+
+            <div className="self-start pt-4 px-3 text-muted-foreground text-lg font-light select-none">→</div>
 
             {/* Tier 3 */}
-            <div className="bg-background border border-border rounded-lg p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-muted-foreground">TIER 03</span>
-                  <Layers className="w-4 h-4 text-caution" />
-                </div>
-                <h4 className="font-semibold text-sm text-foreground">Reactive Workspace</h4>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Zustand state slices render 60fps HTML5 Canvas sweeps while researchers log observations and LIMS deductions in Tiptap.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-border font-mono text-[10px] text-muted-foreground">
-                Rendering: 60 FPS Canvas
-              </div>
+            <div className="flex-1 min-w-40 px-4 border-r border-border">
+              <span className="text-[10px] font-mono text-muted-foreground">TIER 03</span>
+              <h4 className="font-semibold text-sm text-foreground mt-1 mb-2">Reactive Workspace</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Zustand state slices render 60fps HTML5 Canvas sweeps while researchers log observations and LIMS deductions in Tiptap.
+              </p>
+              <p className="mt-3 font-mono text-[10px] text-muted-foreground">Rendering: 60 FPS Canvas</p>
             </div>
 
+            <div className="self-start pt-4 px-3 text-muted-foreground text-lg font-light select-none">→</div>
+
             {/* Tier 4 */}
-            <div className="bg-background border border-border rounded-lg p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-muted-foreground">TIER 04</span>
-                  <ShieldCheck className="w-4 h-4 text-primary" />
-                </div>
-                <h4 className="font-semibold text-sm text-foreground">Immutable Persistence</h4>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Local IndexedDB provides offline resilience. Finalized trials sync to PostgreSQL via Prisma ORM with SHA-256 seals.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-border font-mono text-[10px] text-primary">
-                Integrity: 21 CFR § 11
-              </div>
+            <div className="flex-1 min-w-40 pl-4">
+              <span className="text-[10px] font-mono text-muted-foreground">TIER 04</span>
+              <h4 className="font-semibold text-sm text-foreground mt-1 mb-2">Immutable Persistence</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Local IndexedDB provides offline resilience. Finalized trials sync to PostgreSQL via Prisma ORM with SHA-256 seals.
+              </p>
+              <p className="mt-3 font-mono text-[10px] text-primary">Integrity: 21 CFR § 11</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature Section 1: Off-Main-Thread Architecture */}
+      {/* Off-Main-Thread Architecture */}
       <section className="py-16 border-t border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-                Zero Frame Drops
-              </span>
-              <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
+              <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
                 Why off-main-thread Web Workers are essential for BME DAQ.
               </h2>
               <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
@@ -173,54 +143,47 @@ export default function ArchitecturePage() {
         </div>
       </section>
 
-      {/* Feature Section 2: Offline-First Laboratory Resilience */}
+      {/* Offline Resilience — prose + table */}
       <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Fault Tolerance
-            </span>
-            <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
-              Offline-first resilience for critical lab benches.
-            </h2>
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              Hospital basements, wet labs, and Faraday cages often suffer from intermittent or blocked Wi-Fi connections.
-              Inquestra is designed to never lose a trial when connectivity drops.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-lg border border-border bg-card space-y-3">
-              <div className="w-8 h-8 rounded bg-caution/10 text-caution flex items-center justify-center">
-                <WifiOff className="w-4 h-4" />
-              </div>
-              <h3 className="text-sm font-semibold text-foreground">Local IndexedDB Caching</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Telemetry packets and protocol edits are persisted locally to browser IndexedDB in real time. If the laboratory
-                network disconnects, recording continues seamlessly.
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            <div>
+              <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+                Offline-first resilience for critical lab benches.
+              </h2>
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                Hospital basements, wet labs, and Faraday cages often suffer from intermittent or blocked Wi-Fi connections.
+                Inquestra is designed to never lose a trial when connectivity drops.
               </p>
             </div>
 
-            <div className="p-6 rounded-lg border border-border bg-card space-y-3">
-              <div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center">
-                <RefreshCw className="w-4 h-4" />
-              </div>
-              <h3 className="text-sm font-semibold text-foreground">Automatic Reconnection Sync</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                As soon as laboratory connectivity is re-established, Inquestra validates the local trial buffer against
-                the server state and syncs to PostgreSQL without data collisions.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-lg border border-border bg-card space-y-3">
-              <div className="w-8 h-8 rounded bg-phosphor/10 text-phosphor flex items-center justify-center">
-                <HardDrive className="w-4 h-4" />
-              </div>
-              <h3 className="text-sm font-semibold text-foreground">Air-Gapped Standalone Mode</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                For restricted military, biosecurity, or high-containment laboratories, Inquestra can operate in full air-gapped
-                mode with local cryptographic export to USB storage.
-              </p>
+            <div className="border border-border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/20">
+                    <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Mode</th>
+                    <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Storage</th>
+                    <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Network</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <tr className="hover:bg-muted/5 transition-colors">
+                    <td className="px-5 py-4 font-medium text-foreground align-top text-xs">Local IndexedDB Caching</td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">Browser IndexedDB — packets and protocol edits persisted in real time</td>
+                    <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">None required</td>
+                  </tr>
+                  <tr className="hover:bg-muted/5 transition-colors">
+                    <td className="px-5 py-4 font-medium text-foreground align-top text-xs">Automatic Reconnection Sync</td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">PostgreSQL via Prisma — validated local buffer synced on reconnect without data collisions</td>
+                    <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">Restored automatically</td>
+                  </tr>
+                  <tr className="hover:bg-muted/5 transition-colors">
+                    <td className="px-5 py-4 font-medium text-foreground align-top text-xs">Air-Gapped Standalone Mode</td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">Local cryptographic export to USB storage for restricted military, biosecurity, or high-containment laboratories</td>
+                    <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">Not required</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

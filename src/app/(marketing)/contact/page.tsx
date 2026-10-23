@@ -23,9 +23,6 @@ export default function ContactPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-3">
-            Institutional Communications
-          </p>
           <h1 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-4">
             Direct communication channels
           </h1>

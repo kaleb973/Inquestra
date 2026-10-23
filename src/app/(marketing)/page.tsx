@@ -1,26 +1,9 @@
 import Link from 'next/link';
 import {
   ArrowRight,
-  FlaskConical,
-  Boxes,
-  BookOpen,
-  ShieldCheck,
-  Activity,
-  Check,
-  CheckCircle2,
-  Clock,
-  Dna,
-  Sigma,
-  FileCode2,
-  Scale,
-  HeartPulse,
   Lock,
   Database,
-  Sparkles,
-  Layers,
-  Microscope,
-  Atom,
-  Building2,
+  Activity,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { ScientificWorkspacePreview } from '@/components/marketing/ScientificWorkspacePreview';
@@ -58,22 +41,15 @@ export default function MarketingPage() {
       />
 
       {/* ── 1. Hero Section ────────────────────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-20 lg:pt-38 lg:pb-28 border-b border-border bg-gradient-to-b from-background via-background to-muted/20">
+      <section className="relative pt-32 pb-20 lg:pt-38 lg:pb-28 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Scientific Category Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-muted/80 border border-border text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-6">
-            <span className="w-2 h-2 rounded-full bg-phosphor animate-pulse" />
-            <span>Electronic Lab Notebook · Life Sciences, Chemistry &amp; Engineering · Open-Core</span>
-          </div>
-
           <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-foreground mb-6 leading-[1.12] text-balance">
             One unified notebook for your protocols, molecules, inventory, and data.
           </h1>
 
-          <p className="max-w-3xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
-            Replace the tangle of paper binders, generic document apps, disconnected spreadsheets, and one-off logging tools.
-            Inquestra brings protocol execution, chemical and biological inventory, molecular structures, literature citations,
-            and optional bench instrument data acquisition into one reproducible, audit-ready research environment.
+          <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
+            Protocol execution, chemical inventory, molecular structures, literature citations, and
+            bench DAQ — in one reproducible, audit-ready research environment.
           </p>
 
           {/* Primary Action Buttons */}
@@ -93,44 +69,6 @@ export default function MarketingPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-
-          {/* Multi-Disciplinary Domain Badges */}
-          <div className="pt-8 border-t border-border/60">
-            <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-4">
-              Built for Modern Scientific Research Across Disciplines
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs font-mono text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Microscope className="w-3.5 h-3.5 text-primary" />
-                Molecular &amp; Cell Biology
-              </span>
-              <span>·</span>
-              <span className="flex items-center gap-1.5">
-                <Atom className="w-3.5 h-3.5 text-primary" />
-                Chemistry &amp; Biochemistry
-              </span>
-              <span>·</span>
-              <span className="flex items-center gap-1.5">
-                <FlaskConical className="w-3.5 h-3.5 text-primary" />
-                Biotech &amp; Pharma R&amp;D
-              </span>
-              <span>·</span>
-              <span className="flex items-center gap-1.5">
-                <Scale className="w-3.5 h-3.5 text-primary" />
-                Materials Science &amp; Physics
-              </span>
-              <span>·</span>
-              <span className="flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-primary" />
-                Bioengineering &amp; Medical Devices
-              </span>
-              <span>·</span>
-              <span className="flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-primary" />
-                Academic Core Facilities
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Live Interactive Workspace Preview */}
@@ -140,256 +78,150 @@ export default function MarketingPage() {
       </section>
 
       {/* ── 2. The 6 Core Pillars of Inquestra ────────────────────────────────────────── */}
-      <section id="features" className="py-24 border-b border-border bg-card">
+      <section id="features" className="py-24 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-16">
-            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
-              Platform Architecture
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Every stage of the scientific lifecycle in one place.
-            </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Scientific discoveries happen across wet lab synthesis, molecular assays, mathematical modeling,
-              inventory management, and physical measurements. Inquestra provides native scientific tools for every phase.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Pillar 1: Research Canvas */}
-            <div className="bg-background border border-border p-6 rounded-xl space-y-3 flex flex-col justify-between">
-              <div>
-                <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <FlaskConical className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground font-sans">
-                  Scientific Protocol Canvas
-                </h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  TipTap/ProseMirror block editor tailored for science. Embed 2D molecular structures from SMILES strings,
-                  DNA/RNA sequences with nucleotide coloring, KaTeX mathematical equations, and interactive execution timers.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-border font-mono text-[11px] text-primary">
-                Commands: /molecule · /sequence · /math
-              </div>
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+            {/* Left: primary callout */}
+            <div>
+              <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
+                Every stage of the scientific lifecycle in one place.
+              </h2>
+              <p className="text-muted-foreground text-sm mt-4 leading-relaxed">
+                Scientific discoveries happen across wet lab synthesis, molecular assays, mathematical
+                modeling, inventory management, and physical measurements. Inquestra provides native
+                scientific tools for every phase — without stitching together a five-app stack.
+              </p>
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-foreground hover:text-foreground/70 transition-colors"
+              >
+                Open the workspace <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
 
-            {/* Pillar 2: SOP & Protocol Management */}
-            <div className="bg-background border border-border p-6 rounded-xl space-y-3 flex flex-col justify-between">
+            {/* Right: vertical feature list */}
+            <div className="border-l border-border pl-8 space-y-6">
               <div>
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground font-sans">
-                  SOPs &amp; Interactive Step Timers
-                </h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Turn static protocols into reproducible checklists. Synchronized incubation, centrifuge, and wash timers
-                  keep bench procedures disciplined across your entire lab with audio alerts and step validation.
+                <p className="text-sm font-medium text-foreground">Scientific Protocol Canvas</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  TipTap block editor with native SMILES structures, nucleotide sequences, KaTeX
+                  equations, and live execution timers. Commands: /molecule · /sequence · /math
                 </p>
               </div>
-              <div className="pt-3 border-t border-border font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
-                Commands: /protocol · /timer · /checklist
-              </div>
-            </div>
-
-            {/* Pillar 3: LIMS & Inventory */}
-            <div className="bg-background border border-border p-6 rounded-xl space-y-3 flex flex-col justify-between">
               <div>
-                <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
-                  <Boxes className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground font-sans">
-                  LIMS &amp; Chemical Inventory
-                </h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Track chemicals, reagents, antibodies, primers, cell lines, and consumable lots. Use inline slash commands to
-                  deduct volumes directly inside protocol notes, preventing expired reagent usage and automating chain-of-custody.
+                <p className="text-sm font-medium text-foreground">SOPs &amp; Interactive Step Timers</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Reproducible checklists with synchronized incubation, centrifuge, and wash timers.
+                  Commands: /protocol · /timer · /checklist
                 </p>
               </div>
-              <div className="pt-3 border-t border-border font-mono text-[11px] text-amber-600 dark:text-amber-400">
-                Commands: /reagent · Storage Tracking · Barcodes
-              </div>
-            </div>
-
-            {/* Pillar 4: Literature & DOI Citations */}
-            <div className="bg-background border border-border p-6 rounded-xl space-y-3 flex flex-col justify-between">
               <div>
-                <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground font-sans">
-                  PubMed &amp; Europe PMC Discovery
-                </h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Search millions of peer-reviewed articles without leaving your experiment. Insert verified DOIs, link
-                  theoretical rationale to protocols, and generate formatted bibliographies (Nature, APA, IEEE) automatically.
+                <p className="text-sm font-medium text-foreground">LIMS &amp; Chemical Inventory</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Track reagents, antibodies, primers, and cell lines. Inline /reagent deduction
+                  automates chain-of-custody at bench execution.
                 </p>
               </div>
-              <div className="pt-3 border-t border-border font-mono text-[11px] text-blue-600 dark:text-blue-400">
-                Commands: /citation · Europe PMC · PubMed
-              </div>
-            </div>
-
-            {/* Pillar 5: Cryptographic Provenance */}
-            <div className="bg-background border border-border p-6 rounded-xl space-y-3 flex flex-col justify-between">
               <div>
-                <div className="w-9 h-9 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground font-sans">
-                  Cryptographic Provenance
-                </h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  Deterministic SHA-256 trial sealing locks raw data, protocol procedures, and timestamps into an immutable ledger.
-                  Supports 21 CFR Part 11 audit trails and dual-attestation electronic signatures (Author + PI review).
+                <p className="text-sm font-medium text-foreground">PubMed &amp; Europe PMC Citations</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Search peer-reviewed literature in context. Insert verified DOIs and generate
+                  formatted bibliographies (Nature, APA, IEEE). Commands: /citation
                 </p>
               </div>
-              <div className="pt-3 border-t border-border font-mono text-[11px] text-purple-600 dark:text-purple-400">
-                Standards: 21 CFR § 11 · SHA-256 · RFC 3161
-              </div>
-            </div>
-
-            {/* Pillar 6: Integrated Bench DAQ */}
-            <div className="bg-background border border-border p-6 rounded-xl space-y-3 flex flex-col justify-between">
               <div>
-                <div className="w-9 h-9 rounded-lg bg-phosphor/10 text-phosphor flex items-center justify-center mb-4">
-                  <Activity className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground font-sans">
-                  Integrated Instrument DAQ (Optional)
-                </h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  When your study requires physical instrumentation &mdash; biopotentials, load cells, pressure sensors, spectrophotometers,
-                  or thermocouples &mdash; connect directly in the browser via Web Serial with zero drivers or logging scripts.
+                <p className="text-sm font-medium text-foreground">Audit Trails &amp; Version History</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Time-stamped versioning captures procedure edits, reagent calibrations, and author attestation.
+                  Standards: 21 CFR § 11 · RFC 3161
                 </p>
               </div>
-              <div className="pt-3 border-t border-border font-mono text-[11px] text-phosphor">
-                Transports: W3C Web Serial · CSV Ingestion
+              <div>
+                <p className="text-sm font-medium text-foreground">Integrated Instrument DAQ (Optional)</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Connect biopotentials, load cells, and pressure sensors via W3C Web Serial — no
+                  drivers or terminal scripts. Transports: Web Serial · CSV Ingestion
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 3. Dedicated Disciplines: How Your Field Uses Inquestra ──────────────────── */}
-      <section className="py-24 border-b border-border bg-background">
+      {/* ── 3. Dedicated Disciplines ──────────────────────────────────────────────────── */}
+      <section className="py-24 border-b border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-16">
-            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
-              Tailored for Your Science
-            </p>
+          <div className="max-w-2xl mb-12">
             <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
               Purpose-built for your laboratory workflow.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Whether you are running PCR gels, synthesizing compounds, testing polymer mechanics, or measuring electrical biopotentials,
-              Inquestra adapts to your domain.
+              Whether you are running PCR gels, synthesizing compounds, testing polymer mechanics, or
+              measuring electrical biopotentials, Inquestra adapts to your domain.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Domain 1: Molecular Biology */}
-            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <Dna className="w-4 h-4 text-purple-400" />
-                <span>Molecular &amp; Cell Biology</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Log plasmid cloning, verify DNA/RNA sequences, manage antibody aliquots across -80°C freezers,
-                and keep cell culture feeding and incubation protocols on disciplined timers.
-              </p>
-              <div className="pt-2 text-[11px] font-mono text-muted-foreground">
-                Primer design · Cell passaging · Western blots
-              </div>
-            </div>
-
-            {/* Domain 2: Chemistry */}
-            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <FlaskConical className="w-4 h-4 text-primary" />
-                <span>Chemistry &amp; Biochemistry</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Render 2D chemical structures directly from SMILES, compute stoichiometry, track reagent lot numbers,
-                and maintain GHS chemical safety data sheets linked to your bench notes.
-              </p>
-              <div className="pt-2 text-[11px] font-mono text-muted-foreground">
-                SMILES structures · Enzyme kinetics · GHS safety
-              </div>
-            </div>
-
-            {/* Domain 3: Biotechnology */}
-            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>Biotech &amp; Biopharma R&amp;D</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Standardize batch records, enforce SOP checklists, log deviations in real time, and generate
-                21 CFR Part 11 compliant audit trails with dual-signature sign-offs for regulatory filings.
-              </p>
-              <div className="pt-2 text-[11px] font-mono text-muted-foreground">
-                SOP management · Deviation logs · 21 CFR § 11
-              </div>
-            </div>
-
-            {/* Domain 4: Materials Science */}
-            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <Scale className="w-4 h-4 text-amber-500" />
-                <span>Materials Science &amp; Physics</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Analyze tensile test stress-strain curves, record load cell deformation, model continuum mechanics with KaTeX,
-                and archive sensor datasets with permanent cryptographic verification.
-              </p>
-              <div className="pt-2 text-[11px] font-mono text-muted-foreground">
-                Stress-strain curves · Load cells · KaTeX modeling
-              </div>
-            </div>
-
-            {/* Domain 5: Bioengineering & Devices */}
-            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <Activity className="w-4 h-4 text-phosphor" />
-                <span>Bioengineering &amp; Devices</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Stream biopotential telemetry (EMG, ECG), hemodynamic waveforms, or sensor arrays directly into protocols.
-                Maintain clean design history records (DHF) with zero loose CSV files.
-              </p>
-              <div className="pt-2 text-[11px] font-mono text-muted-foreground">
-                Web Serial DAQ · Biopotentials · Design history files
-              </div>
-            </div>
-
-            {/* Domain 6: Academic & Core Facilities */}
-            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <Building2 className="w-4 h-4 text-blue-500" />
-                <span>Academic Core Facilities</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Streamline graduate student onboarding, share standardized lab protocols, manage shared equipment clearances,
-                and maintain institutional research provenance across multiple research grants.
-              </p>
-              <div className="pt-2 text-[11px] font-mono text-muted-foreground">
-                Equipment tracking · Protocol sharing · Grant archives
-              </div>
-            </div>
+          <div className="border border-border rounded overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/20">
+                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider w-1/3">Domain</th>
+                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Example workflows &amp; signals</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Molecular &amp; Cell Biology</td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                    Plasmid cloning, DNA/RNA sequence verification, antibody aliquot management (-80°C), cell culture feeding timers.
+                    <span className="block mt-1 font-mono">Primer design · Cell passaging · Western blots</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Chemistry &amp; Biochemistry</td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                    2D chemical structures from SMILES, stoichiometry computation, reagent lot tracking, GHS safety data sheets.
+                    <span className="block mt-1 font-mono">SMILES structures · Enzyme kinetics · GHS safety</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Biotech &amp; Biopharma R&amp;D</td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                    Batch records, SOP checklists, real-time deviation logging, 21 CFR Part 11 audit trails with dual-signature sign-offs.
+                    <span className="block mt-1 font-mono">SOP management · Deviation logs · 21 CFR § 11</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Materials Science &amp; Physics</td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                    Tensile test stress-strain curves, load cell deformation recording, continuum mechanics modeling with KaTeX.
+                    <span className="block mt-1 font-mono">Stress-strain curves · Load cells · KaTeX modeling</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Bioengineering &amp; Devices</td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                    Biopotential telemetry (EMG, ECG), hemodynamic waveforms, design history files (DHF) with zero loose CSV files.
+                    <span className="block mt-1 font-mono">Web Serial DAQ · Biopotentials · Design history files</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Academic Core Facilities</td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                    Graduate student onboarding, shared equipment clearances, institutional research provenance across grants.
+                    <span className="block mt-1 font-mono">Equipment tracking · Protocol sharing · Grant archives</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
 
       {/* ── 4. The Fragmented Reality vs Inquestra ─────────────────────────────────── */}
-      <section className="py-24 border-b border-border bg-muted/10">
+      <section className="py-24 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-16">
-            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
-              Why Inquestra
-            </p>
             <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
               Eliminate the five-app shuffle in your lab.
             </h2>
@@ -476,10 +308,10 @@ export default function MarketingPage() {
                 </div>
                 <div className="p-3.5 bg-background border border-border rounded-lg">
                   <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Deterministic SHA-256 Cryptographic Provenance
+                    Tamper-Evident Record of Execution
                   </span>
-                  Completed trials are sealed with an irreversible SHA-256 digest binding protocol text, reagent lots, and raw
-                  telemetry into an immutable, 21 CFR Part 11 compliant audit ledger.
+                  Completed trials seal protocol text, reagent lots, and raw telemetry into an immutable,
+                  21 CFR Part 11 compliant audit log with non-repudiation.
                 </div>
               </div>
             </div>
@@ -487,64 +319,62 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 5. Cryptographic Provenance & Regulatory Assurance ──────────────────────── */}
-      <section id="provenance" className="py-24 border-b border-border bg-background">
+      {/* ── 5. Regulatory Compliance & Data Integrity ──────────────────────── */}
+      <section id="provenance" className="py-24 border-b border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-14">
-            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
-              Data Integrity &amp; Provenance
-            </p>
             <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Cryptographic proof of research reproducibility.
+              Regulatory compliance &amp; verifiable integrity.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Scientific trust is earned through verification, not assertions. Inquestra cryptographically seals every completed
-              trial, ensuring that protocol procedures, chemical lots, and telemetry samples cannot be silently modified after the fact.
+              Scientific trust is earned through verification. Inquestra seals completed trials so protocol procedures,
+              chemical lots, and telemetry samples maintain an unalterable chain of custody.
             </p>
           </div>
 
           <ProvenanceInteractiveDemo />
 
-          {/* 21 CFR Part 11 Technical Controls Breakdown */}
-          <div className="mt-14 pt-10 border-t border-border grid md:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <Lock className="w-4 h-4 text-primary" />
-                <span>21 CFR § 11.10(b) Audit Trails</span>
-              </div>
+          {/* 21 CFR Part 11 Technical Controls — horizontal spec strip */}
+          <div className="mt-14 border-t border-b border-border py-8 flex flex-wrap gap-y-8">
+            <div className="flex-1 min-w-56 pr-8 border-r border-border last:border-r-0">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                21 CFR § 11.10(b)
+              </p>
+              <p className="text-sm font-medium text-foreground mb-1">Audit Trails</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Computer-generated, time-stamped audit trails independently record the date, time, and operator of all
+                Computer-generated, time-stamped records independently log the date, time, and operator of all
                 trial additions, calibrations, and seals. Modifications preserve complete differential histories.
               </p>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <ShieldCheck className="w-4 h-4 text-phosphor" />
-                <span>21 CFR § 11.50 Electronic Signatures</span>
-              </div>
+            <div className="flex-1 min-w-56 px-8 border-r border-border last:border-r-0">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5" />
+                21 CFR § 11.50
+              </p>
+              <p className="text-sm font-medium text-foreground mb-1">Electronic Signatures</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Manifests display the printed name of the signer, date/time stamp, and the explicit meaning of the signature
-                (Author Execution, Technical Review, or Principal Investigator Sign-Off).
+                Manifests display the printed name of the signer, date/time stamp, and the explicit meaning of the
+                signature (Author Execution, Technical Review, or Principal Investigator Sign-Off).
               </p>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                <Database className="w-4 h-4 text-primary" />
-                <span>Local-First &amp; FAIR Data Principles</span>
-              </div>
+            <div className="flex-1 min-w-56 pl-8">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5" />
+                FAIR Data Principles
+              </p>
+              <p className="text-sm font-medium text-foreground mb-1">Local-First &amp; Offline</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Full offline operational continuity inside Faraday cages and basement labs via browser IndexedDB.
-                Export data to open formats (CSV, EDF, JSON with cryptographic manifest) with zero platform lock-in.
+                Full offline continuity inside Faraday cages and basement labs via browser IndexedDB.
+                Export to open formats (CSV, EDF, JSON with cryptographic manifest) with zero platform lock-in.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 6. Integrated Bench DAQ (Sized Appropriately as a Feature) ──────────────── */}
-      <section id="hardware" className="py-24 border-b border-border bg-card">
+      {/* ── 6. Integrated Bench DAQ ──────────────────────────────────────────────────── */}
+      <section id="hardware" className="py-24 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-14">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-muted text-muted-foreground text-xs font-mono uppercase tracking-wider mb-4">
@@ -563,7 +393,7 @@ export default function MarketingPage() {
 
           <FirmwareShowcase />
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-background border border-border text-xs font-mono">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-muted/10 border border-border text-xs font-mono">
             <div className="flex items-center gap-3 text-muted-foreground">
               <span className="text-foreground font-semibold">Supported Modalities:</span>
               <span>Load Cells · Temperature Probes · Biopotentials (EMG/ECG) · Pressure Sensors · Bench Meters</span>
@@ -579,13 +409,10 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 7. Pilot Lab Program — Direct Collaboration ─────────────────────────────── */}
-      <section className="py-24 border-b border-border bg-card" id="pilot">
+      {/* ── 7. Pilot Lab Program ─────────────────────────────────────────────────────── */}
+      <section className="py-24 border-b border-border bg-muted/10" id="pilot">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-4">
-              <span>Scientific Research Collaboration</span>
-            </div>
             <h2 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-4">
               Partner with Inquestra on your bench.
             </h2>
@@ -594,42 +421,15 @@ export default function MarketingPage() {
               Work directly with our engineering team to import your existing protocols, calibrate custom instrument profiles,
               and configure team workspace permissions.
             </p>
+            {/* Pilot value — plain list, no cards */}
+            <ul className="mt-8 text-sm text-muted-foreground space-y-2 text-left max-w-md mx-auto">
+              <li>— Individual researchers retain full free access to the core notebook, LIMS, and local DAQ tools.</li>
+              <li>— Collaborate directly with the engineers building Inquestra to tailor custom protocol blocks and data export schemas.</li>
+              <li>— Assistance setting up self-hosted institutional PostgreSQL instances, team SSO, and importing existing lab SOPs.</li>
+            </ul>
           </div>
 
-          {/* Value Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-            <div className="bg-background border border-border rounded-xl p-5 text-left">
-              <div className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-phosphor" />
-                <span>Open Core Free Tier</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                Individual researchers retain full free access to the core notebook, LIMS, and local DAQ tools forever.
-              </p>
-            </div>
-
-            <div className="bg-background border border-border rounded-xl p-5 text-left">
-              <div className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-phosphor" />
-                <span>Direct Engineering</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                Collaborate directly with the engineers building Inquestra to tailor custom protocol blocks and data export schemas.
-              </p>
-            </div>
-
-            <div className="bg-background border border-border rounded-xl p-5 text-left">
-              <div className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-phosphor" />
-                <span>Deployment Support</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                Assistance setting up self-hosted institutional PostgreSQL instances, team SSO, and importing existing lab SOPs.
-              </p>
-            </div>
-          </div>
-
-          {/* Clean Intake Form (No Fake Personas) */}
+          {/* Clean Intake Form */}
           <div className="bg-background border border-border rounded-2xl p-6 sm:p-8 shadow-xl">
             <div className="mb-6 pb-4 border-b border-border text-left">
               <h3 className="text-base font-semibold text-foreground">
@@ -645,7 +445,7 @@ export default function MarketingPage() {
       </section>
 
       {/* ── 8. Final Call to Action ─────────────────────────────────────────────────── */}
-      <section className="py-20 bg-muted/20">
+      <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-4">
             Start organizing your research in one unified notebook.

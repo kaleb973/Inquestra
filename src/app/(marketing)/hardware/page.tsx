@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Cpu, Zap, Activity, CheckCircle2, Shield, Terminal, ArrowUpRight, Gauge, Layers } from 'lucide-react';
+import { ArrowRight, Cpu } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -47,7 +47,7 @@ export default function HardwarePage() {
         <div className="mt-14 bg-card border border-border rounded-lg overflow-hidden shadow-xl">
           <div className="bg-muted/70 px-4 py-2.5 border-b border-border flex items-center justify-between font-mono text-xs">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-phosphor animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-phosphor" />
               <span className="font-semibold text-foreground">Web Serial Telemetry Stream</span>
               <span className="text-muted-foreground">/dev/ttyACM0 · USB CDC · 921,600 baud</span>
             </div>
@@ -105,14 +105,11 @@ export default function HardwarePage() {
         </div>
       </section>
 
-      {/* Feature Section 1: The Zero-Driver Architecture */}
-      <section className="py-16 border-t border-border bg-muted/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Architecture &amp; Connectivity
-            </span>
-            <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
+      {/* Architecture Section — spec strip replaces 3-col card grid */}
+      <section className="border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="max-w-3xl mb-10">
+            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
               Eliminating the fragile workstation bridge.
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">
@@ -122,103 +119,93 @@ export default function HardwarePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-card border border-border p-6 rounded-lg">
-              <div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center mb-4">
-                <Zap className="w-4 h-4" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground mb-2">Native USB-CDC &amp; UART</h3>
+          {/* Horizontal spec strip */}
+          <div className="border-t border-b border-border py-8 flex flex-wrap gap-y-8">
+            <div className="flex-1 min-w-48 pr-8 border-r border-border last:border-r-0">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">Transport</p>
+              <p className="text-sm font-medium text-foreground mb-1">Native USB-CDC &amp; UART</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Connects directly to Silicon Labs CP2102, WCH CH340, FTDI FT232R, and native microcontroller USB-OTG
-                controllers without requiring administrative driver installs or kernel extensions.
+                Connects to CP2102, CH340, FTDI FT232R, and native USB-OTG controllers without administrative
+                driver installs or kernel extensions.
               </p>
             </div>
-
-            <div className="bg-card border border-border p-6 rounded-lg">
-              <div className="w-8 h-8 rounded bg-phosphor/10 text-phosphor flex items-center justify-center mb-4">
-                <Layers className="w-4 h-4" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground mb-2">Worker Ring Buffering</h3>
+            <div className="flex-1 min-w-48 px-8 border-r border-border last:border-r-0">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">Threading</p>
+              <p className="text-sm font-medium text-foreground mb-1">Worker Ring Buffering</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Raw byte parsing and packet validation execute inside a dedicated HTML5 Web Worker. High-speed 1 kHz
-                sampling streams never cause UI frame drops or notebook interface stutter.
+                Byte parsing and packet validation execute inside a dedicated HTML5 Web Worker. 1 kHz sampling
+                never causes UI frame drops or notebook stutter.
               </p>
             </div>
-
-            <div className="bg-card border border-border p-6 rounded-lg">
-              <div className="w-8 h-8 rounded bg-caution/10 text-caution flex items-center justify-center mb-4">
-                <Gauge className="w-4 h-4" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground mb-2">Up to 921,600 Baud</h3>
+            <div className="flex-1 min-w-48 pl-8">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">Throughput</p>
+              <p className="text-sm font-medium text-foreground mb-1">Up to 921,600 Baud</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Supports standard laboratory baud rates from 9,600 up to 921,600 baud with hardware flow control (RTS/CTS),
-                enabling synchronous acquisition across multiple high-gain analog sensor channels.
+                Standard laboratory baud rates from 9,600 to 921,600 with hardware flow control (RTS/CTS)
+                for synchronous multi-channel acquisition.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature Section 2: Microcontroller Compatibility Matrix */}
-      <section className="py-20 border-t border-border">
+      {/* Microcontroller Compatibility Table */}
+      <section className="py-20 border-t border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Hardware Compatibility
-            </span>
-            <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
+          <div className="max-w-3xl mb-10">
+            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
               Validated silicon targets &amp; benchmarks.
             </h2>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
               Every microcontroller firmware driver is benchmarked for packet stability, buffer overrun resistance, and clock drift.
             </p>
           </div>
 
-          <div className="border border-border rounded-lg overflow-x-auto bg-card">
+          <div className="border border-border rounded-lg overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-muted/50 border-b border-border text-foreground font-mono">
+              <thead className="bg-muted/20 border-b border-border text-foreground font-mono">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">Silicon Platform</th>
-                  <th className="py-3.5 px-4 font-semibold">Clock &amp; Core</th>
-                  <th className="py-3.5 px-4 font-semibold">Max Tested Baud</th>
-                  <th className="py-3.5 px-4 font-semibold">Max Sample Rate</th>
-                  <th className="py-3.5 px-4 font-semibold">Recommended Application</th>
+                  <th className="py-3.5 px-4 font-normal text-muted-foreground uppercase tracking-wider">Silicon Platform</th>
+                  <th className="py-3.5 px-4 font-normal text-muted-foreground uppercase tracking-wider">Clock &amp; Core</th>
+                  <th className="py-3.5 px-4 font-normal text-muted-foreground uppercase tracking-wider">Max Tested Baud</th>
+                  <th className="py-3.5 px-4 font-normal text-muted-foreground uppercase tracking-wider">Max Sample Rate</th>
+                  <th className="py-3.5 px-4 font-normal text-muted-foreground uppercase tracking-wider">Recommended Application</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border font-sans text-muted-foreground">
-                <tr className="hover:bg-muted/20">
+              <tbody className="divide-y divide-border text-muted-foreground">
+                <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Espressif ESP32-S3</td>
                   <td className="py-3.5 px-4">240 MHz Dual-Core Xtensa LX7</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">921,600 baud</td>
-                  <td className="py-3.5 px-4 font-mono">1,000 Hz / 8 channels</td>
+                  <td className="py-3.5 px-4 font-mono">921,600 baud</td>
+                  <td className="py-3.5 px-4 font-mono">1,000 Hz / 8 ch</td>
                   <td className="py-3.5 px-4">High-speed biopotential DAQ, wearable sensor arrays</td>
                 </tr>
-                <tr className="hover:bg-muted/20">
+                <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">PJRC Teensy 4.1</td>
                   <td className="py-3.5 px-4">600 MHz ARM Cortex-M7</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">High-Speed 480 Mbps</td>
-                  <td className="py-3.5 px-4 font-mono">2,500 Hz / 16 channels</td>
+                  <td className="py-3.5 px-4 font-mono">480 Mbps USB HS</td>
+                  <td className="py-3.5 px-4 font-mono">2,500 Hz / 16 ch</td>
                   <td className="py-3.5 px-4">Ultra-fast electrophysiology, multi-electrode arrays</td>
                 </tr>
-                <tr className="hover:bg-muted/20">
+                <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Arduino Uno R4 / Mega</td>
                   <td className="py-3.5 px-4">48 MHz Renesas RA4M1 / 16 MHz AVR</td>
                   <td className="py-3.5 px-4 font-mono">115,200 baud</td>
-                  <td className="py-3.5 px-4 font-mono">250 Hz / 4 channels</td>
+                  <td className="py-3.5 px-4 font-mono">250 Hz / 4 ch</td>
                   <td className="py-3.5 px-4">Classroom biomechanics, standard bench prototyping</td>
                 </tr>
-                <tr className="hover:bg-muted/20">
+                <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Nordic nRF52840</td>
                   <td className="py-3.5 px-4">64 MHz ARM Cortex-M4F</td>
                   <td className="py-3.5 px-4 font-mono">460,800 baud</td>
-                  <td className="py-3.5 px-4 font-mono">500 Hz / 6 channels</td>
+                  <td className="py-3.5 px-4 font-mono">500 Hz / 6 ch</td>
                   <td className="py-3.5 px-4">In vivo telemetry, implantable telemetry models</td>
                 </tr>
-                <tr className="hover:bg-muted/20">
+                <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Raspberry Pi RP2040</td>
                   <td className="py-3.5 px-4">133 MHz Dual-Core Cortex-M0+</td>
                   <td className="py-3.5 px-4 font-mono">921,600 baud</td>
-                  <td className="py-3.5 px-4 font-mono">1,000 Hz / 4 channels</td>
+                  <td className="py-3.5 px-4 font-mono">1,000 Hz / 4 ch</td>
                   <td className="py-3.5 px-4">Microfluidic pressure feedback, automated syringes</td>
                 </tr>
               </tbody>
@@ -227,55 +214,72 @@ export default function HardwarePage() {
         </div>
       </section>
 
-      {/* Feature Section 3: Supported Biomedical Sensors */}
-      <section className="py-20 border-t border-border bg-muted/10">
+      {/* Supported Biomedical Sensors */}
+      <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Sensor Transduction
-            </span>
-            <h2 className="font-display text-3xl font-normal text-foreground mt-2 tracking-tight">
+          <div className="max-w-3xl mb-10">
+            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
               Pre-calibrated for physiological transducers.
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-5 rounded-lg border border-border bg-card space-y-3">
-              <span className="text-xs font-mono text-muted-foreground">01 / BIOPOTENTIAL</span>
-              <h4 className="text-sm font-semibold text-foreground">ECG, EMG &amp; EEG</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Direct integration with AD8232, ADS1298, and custom instrumentation amplifier front-ends with software notch filtering.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-lg border border-border bg-card space-y-3">
-              <span className="text-xs font-mono text-muted-foreground">02 / HEMODYNAMICS</span>
-              <h4 className="text-sm font-semibold text-foreground">PPG &amp; Pulse Oximetry</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Dual red/infrared photoplethysmography sensor decoding for peripheral capillary oxygen saturation and arterial wave contour.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-lg border border-border bg-card space-y-3">
-              <span className="text-xs font-mono text-muted-foreground">03 / BIOMECHANICS</span>
-              <h4 className="text-sm font-semibold text-foreground">Force Plates &amp; Load Cells</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Full-bridge Wheatstone strain gauge telemetry (HX711, INA125) with zero-tare and dynamic calibration curves.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-lg border border-border bg-card space-y-3">
-              <span className="text-xs font-mono text-muted-foreground">04 / MICROFLUIDICS</span>
-              <h4 className="text-sm font-semibold text-foreground">Pressure &amp; Temperature</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Piezoresistive pressure transducers and PT100/PT1000 RTD resistance probes for continuous bioreactor monitoring.
-              </p>
-            </div>
+          <div className="border border-border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/20">
+                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider w-1/4">Modality</th>
+                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Signal &amp; Interface</th>
+                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Reference ICs</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">01 / BIOPOTENTIAL</span>
+                    ECG, EMG &amp; EEG
+                  </td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
+                    Direct integration with instrumentation amplifier front-ends. Software 50/60 Hz notch filtering and 0.5–500 Hz bandpass.
+                  </td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">AD8232, ADS1298</td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">02 / HEMODYNAMICS</span>
+                    PPG &amp; Pulse Oximetry
+                  </td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
+                    Dual red/infrared photoplethysmography decoding for SpO₂ and arterial waveform contour analysis.
+                  </td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">MAX30102, AFE4490</td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">03 / BIOMECHANICS</span>
+                    Force Plates &amp; Load Cells
+                  </td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
+                    Full-bridge Wheatstone strain gauge telemetry with zero-tare and dynamic calibration curves.
+                  </td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">HX711, INA125</td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">04 / MICROFLUIDICS</span>
+                    Pressure &amp; Temperature
+                  </td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
+                    Piezoresistive pressure transducers and PT100/PT1000 RTD resistance probes for continuous bioreactor monitoring.
+                  </td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">MS5803, MAX31865</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
 
-      {/* CTA Box */}
+      {/* CTA */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 text-center">
         <div className="p-10 rounded-xl bg-card border border-border shadow-sm">
           <h3 className="font-display text-2xl sm:text-3xl text-foreground mb-3 font-normal">
@@ -292,10 +296,10 @@ export default function HardwarePage() {
               Test Live Simulator
             </Link>
             <Link
-              href="/provenance"
+              href="/architecture"
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded text-xs font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
             >
-              Next: Cryptographic Provenance
+              Explore System Architecture
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

@@ -40,7 +40,7 @@ export function ScientificWorkspacePreview() {
       <div className="px-4 py-3 bg-muted/60 border-b border-border flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
         {/* Project Breadcrumb */}
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-phosphor animate-pulse" />
+          <span className="w-2 rounded-full h-2 bg-phosphor" />
           <span className="text-foreground font-semibold">Molecular_&amp;_Biotech_Core</span>
           <span className="text-muted-foreground">/</span>
           <span className="text-muted-foreground">Protocols</span>

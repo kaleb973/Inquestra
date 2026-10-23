@@ -24,9 +24,8 @@ export function MarketingFooter() {
               The modern Electronic Research Notebook and Laboratory Intelligence Platform for Life Sciences, Chemistry, Biotech, and Engineering.
               Unifying protocols, chemical inventory, literature citations, and bench instrumentation.
             </p>
-            <div className="flex items-center gap-2 text-[11px] font-mono text-phosphor">
-              <span className="inline-block w-2 h-2 rounded-full bg-phosphor animate-pulse" />
-              <span>Chromium Web Serial Engine · SHA-256 Protocol Seals</span>
+            <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+              <span>Chromium Web Serial Engine · Audit-Logged Research OS</span>
             </div>
           </div>
 
@@ -105,7 +104,7 @@ export function MarketingFooter() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-muted-foreground/80">
-          <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved. Cryptographic provenance for scientific reproducibility.</p>
+          <p>&copy; {new Date().getFullYear()} Inquestra. All rights reserved.</p>
           <div className="flex items-center gap-4 font-mono">
             <span>21 CFR § 11 Technical Controls</span>
             <span>·</span>
