@@ -8,8 +8,8 @@ Configuration and guidelines for agents working in this project.
 
 ## Core Identity
 **Project:** Inquestra
-**Mission:** A scalable, enterprise-grade Data Acquisition (DAQ) and Electronic Research Notebook (ERN) environment built strictly for Biomedical Engineering (BME).
-**Objective:** Bridge the gap between hardware control (ESP32/Arduino sensors) and immutable data provenance, ensuring high-speed telemetry ingestion and strict research reproducibility.
+**Mission:** A modern, unified Electronic Lab Notebook (ELN/ERN) and scientific research platform for Life Sciences, Chemistry, Biotech, and Engineering.
+**Objective:** Unify protocol execution, chemical inventory LIMS, molecular structures, literature citations, 21 CFR Part 11 provenance, and bench DAQ in one reproducible, audit-ready research workspace.
 
 ## Technology Stack
 - **Framework:** Next.js (App Router)
@@ -19,7 +19,7 @@ Configuration and guidelines for agents working in this project.
 - **Database/Backend:** PostgreSQL via Prisma ORM (for structured, relational research data)
 
 ## Operational Directives & Guardrails
-1. **Never Hallucinate Context:** You are building an enterprise BME platform. Accuracy is paramount. If you lack context on a hardware integration or a database schema, ask for clarification before generating code.
+1. **Never Hallucinate Context:** You are building an enterprise scientific research platform. Accuracy is paramount. If you lack context on a hardware integration or a database schema, ask for clarification before generating code.
 2. **Immutable Data Provenance:** Research data must be treated as sacred. Never write code that allows a user to silently overwrite logged telemetry or timestamped observations. Implement strict append-only or audit-logged data mutations.
 3. **TypeScript Strictly Enforced:** Do not use `any` types. All hardware payloads, API responses, and database schemas must be strongly typed.
 4. **Artifact Generation First:** Before executing massive refactors or writing complex integrations (like serial port reading or WebSockets), you must output an implementation plan artifact for review.

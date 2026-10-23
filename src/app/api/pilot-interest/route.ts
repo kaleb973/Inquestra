@@ -1,6 +1,6 @@
 // src/app/api/pilot-interest/route.ts
-// Pilot Lab Interest capture — stores interest in DB AuditLog or sends email via Resend.
-// No authentication required (public endpoint). Rate-limited to 5 submissions per IP/hour.
+// Pilot Lab Interest capture — sends notification to team and confirmation to applicant via Resend.
+// No authentication required (public endpoint). Rate-limited to 5 submissions per IP/hour (relaxed in dev).
 // Hardened with centralized rate-limiting, standardized headers, and outbound fetch timeouts.
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,9 +18,11 @@ const PilotInterestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  // 1. Centralized Rate Limiting (5 requests per 60 minutes per IP)
+  // 1. Centralized Rate Limiting (5 requests per 60 minutes per IP in prod, 100 in dev)
+  const isDev = process.env.NODE_ENV === 'development';
+  const maxRequests = isDev ? 100 : 5;
   const clientIp = getClientIp(req.headers);
-  const rateLimitResult = checkRateLimit(`pilot-interest:${clientIp}`, 5, 60 * 60 * 1000);
+  const rateLimitResult = checkRateLimit(`pilot-interest:${clientIp}`, maxRequests, 60 * 60 * 1000);
 
   const rateLimitHeaders = {
     'X-RateLimit-Limit': String(rateLimitResult.limit),
@@ -76,42 +78,107 @@ export async function POST(req: NextRequest) {
   // Send via Resend if configured, with strict 5-second timeout deadline
   const resendApiKey = process.env.RESEND_API_KEY;
   if (resendApiKey && !resendApiKey.startsWith('placeholder')) {
-    try {
-      const res = await fetchWithTimeout('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Inquestra Pilot <support@inquestra.org>',
-          to: [process.env.PILOT_NOTIFY_EMAIL ?? 'inquestrasupport@gmail.com'],
-          subject: `New Pilot Interest: ${sanitized.institution} — ${sanitized.name}`,
-          html: `
-            <h2>New Pilot Lab Interest</h2>
-            <table style="border-collapse:collapse;font-family:monospace">
-              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">Name</td><td><strong>${sanitized.name}</strong></td></tr>
-              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">Email</td><td><a href="mailto:${sanitized.email}">${sanitized.email}</a></td></tr>
-              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">Institution</td><td>${sanitized.institution}</td></tr>
-              ${sanitized.role ? `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">Role</td><td>${sanitized.role}</td></tr>` : ''}
-              ${sanitized.useCase ? `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">Use Case</td><td>${sanitized.useCase}</td></tr>` : ''}
-              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">IP</td><td>${clientIp}</td></tr>
-              <tr><td style="padding:4px 12px 4px 0;color:#6b7280">Time</td><td>${new Date().toISOString()}</td></tr>
-            </table>
-          `,
-        }),
-        timeoutMs: 5000,
-      });
+    const notifyEmail = process.env.PILOT_NOTIFY_EMAIL ?? 'inquestrasupport@gmail.com';
 
-      if (!res.ok) {
-        console.error('[pilot-interest] Resend error:', await res.text());
+    // 1. Internal notification to Inquestra team
+    const adminNotificationPayload = {
+      from: 'Inquestra Pilot <support@inquestra.org>',
+      to: [notifyEmail],
+      reply_to: sanitized.email,
+      subject: `New Pilot Interest: ${sanitized.institution} — ${sanitized.name}`,
+      html: `
+        <h2>New Pilot Lab Interest</h2>
+        <table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;line-height:1.6">
+          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Name</td><td><strong>${sanitized.name}</strong></td></tr>
+          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Email</td><td><a href="mailto:${sanitized.email}">${sanitized.email}</a></td></tr>
+          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Institution</td><td>${sanitized.institution}</td></tr>
+          ${sanitized.role ? `<tr><td style="padding:6px 12px 6px 0;color:#6b7280">Role</td><td>${sanitized.role}</td></tr>` : ''}
+          ${sanitized.useCase ? `<tr><td style="padding:6px 12px 6px 0;color:#6b7280">Use Case / Targets</td><td>${sanitized.useCase}</td></tr>` : ''}
+          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">IP</td><td>${clientIp}</td></tr>
+          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Submitted At</td><td>${new Date().toISOString()}</td></tr>
+        </table>
+      `,
+    };
+
+    // 2. Direct confirmation to the applicant
+    const applicantConfirmationPayload = {
+      from: 'Inquestra Pilot Program <support@inquestra.org>',
+      to: [sanitized.email],
+      reply_to: 'support@inquestra.org',
+      subject: `Inquestra Pilot Lab Access — Application Received (${sanitized.institution})`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#18181b;line-height:1.6">
+          <div style="border-bottom:1px solid #e4e4e7;padding-bottom:16px;margin-bottom:20px">
+            <h1 style="font-size:18px;margin:0;font-weight:700;letter-spacing:-0.02em;color:#09090b">INQUESTRA</h1>
+            <p style="font-size:12px;color:#71717a;margin:4px 0 0">Electronic Lab Notebook for Life Sciences, Chemistry & Engineering</p>
+          </div>
+
+          <p style="font-size:15px;margin-bottom:16px">Dear ${sanitized.name},</p>
+
+          <p style="font-size:14px;color:#27272a;margin-bottom:16px">
+            Thank you for requesting access to the Inquestra Pilot Lab program for <strong>${sanitized.institution}</strong>. We have received your lab specifications and onboarding request.
+          </p>
+
+          <div style="background-color:#f4f4f5;border-radius:6px;padding:16px;margin-bottom:20px;font-size:13px">
+            <p style="font-weight:600;margin:0 0 8px;color:#09090b">Submission Summary:</p>
+            <ul style="margin:0;padding-left:18px;color:#3f3f46">
+              <li><strong>Institution / Lab:</strong> ${sanitized.institution}</li>
+              ${sanitized.role ? `<li><strong>Role:</strong> ${sanitized.role}</li>` : ''}
+              ${sanitized.useCase ? `<li><strong>Research & Protocol Scope:</strong> ${sanitized.useCase}</li>` : ''}
+            </ul>
+          </div>
+
+          <p style="font-size:14px;color:#27272a;margin-bottom:16px">
+            <strong>What happens next?</strong><br/>
+            Our team is reviewing your research focus and protocol requirements. We will follow up within 48 hours with access instructions and to help configure your workspace.
+          </p>
+
+          <p style="font-size:14px;color:#27272a;margin-bottom:24px">
+            If you have questions or specific protocol notes to share in advance, you can reply directly to this email or reach us at <a href="mailto:support@inquestra.org" style="color:#2563eb">support@inquestra.org</a>.
+          </p>
+
+          <div style="border-top:1px solid #e4e4e7;padding-top:16px;font-size:12px;color:#71717a">
+            <p style="margin:0"><strong>Inquestra Engineering Team</strong></p>
+            <p style="margin:2px 0 0"><a href="https://inquestra.org" style="color:#71717a;text-decoration:none">inquestra.org</a> &bull; <a href="mailto:support@inquestra.org" style="color:#71717a;text-decoration:none">support@inquestra.org</a></p>
+          </div>
+        </div>
+      `,
+    };
+
+    try {
+      const sendEmail = (payload: object) =>
+        fetchWithTimeout('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          timeoutMs: 5000,
+        });
+
+      const [adminRes, applicantRes] = await Promise.allSettled([
+        sendEmail(adminNotificationPayload),
+        sendEmail(applicantConfirmationPayload),
+      ]);
+
+      if (adminRes.status === 'fulfilled' && !adminRes.value.ok) {
+        console.error('[pilot-interest] Admin notification failed:', await adminRes.value.text());
+      } else if (adminRes.status === 'rejected') {
+        console.error('[pilot-interest] Admin notification error:', adminRes.reason);
+      }
+
+      if (applicantRes.status === 'fulfilled' && !applicantRes.value.ok) {
+        console.error('[pilot-interest] Applicant confirmation failed:', await applicantRes.value.text());
+      } else if (applicantRes.status === 'rejected') {
+        console.error('[pilot-interest] Applicant confirmation error:', applicantRes.reason);
       }
     } catch (err) {
-      console.error('[pilot-interest] Email dispatch failed or timed out:', err);
+      console.error('[pilot-interest] Unexpected dispatch error:', err);
     }
   } else {
     // Fallback: log to console (useful for local dev / staging w/o Resend yet)
-    console.log('[pilot-interest] New submission:', sanitized);
+    console.log('[pilot-interest] New submission (Resend disabled or missing key):', sanitized);
   }
 
   return NextResponse.json({ success: true }, { headers: rateLimitHeaders });
