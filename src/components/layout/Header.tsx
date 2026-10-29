@@ -192,6 +192,19 @@ export function Header() {
     return () => window.removeEventListener('inquestra:trigger-snapshot', handleSnapshotEvent);
   }, [handleSaveSnapshot]);
 
+  // Listen for slash-command triggered export and seal events
+  useEffect(() => {
+    const handleExportEvent = () => { handleExport(); };
+    const handleSealEvent = () => { handleOpenSealModal(); };
+    window.addEventListener('inquestra:trigger-export', handleExportEvent);
+    window.addEventListener('inquestra:trigger-seal', handleSealEvent);
+    return () => {
+      window.removeEventListener('inquestra:trigger-export', handleExportEvent);
+      window.removeEventListener('inquestra:trigger-seal', handleSealEvent);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Global shortcuts for sidebar (Ctrl+B) and telemetry drawer (Ctrl+J)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

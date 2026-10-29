@@ -7,7 +7,7 @@ const ReagentSchema = z.object({
   chemical: z.string().min(1).max(200),
   quantity: z.number().positive(),
   unit: z.string().min(1).max(20),
-  trialId: z.string().uuid(),
+  trialId: z.string(),
 });
 
 export type ReagentPayload = z.infer<typeof ReagentSchema>;

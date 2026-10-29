@@ -19,6 +19,10 @@ export interface SlashCommand {
   title: string;
   description: string;
   icon: ReactNode;
+  /** Category grouping (e.g. 'Scientific', 'Protocols & SOPs', 'Data & DAQ', 'Actions & Compliance', 'Formatting') */
+  category?: string;
+  /** Alias keywords used for fuzzy search (e.g. 'chem', 'molecule', 'smiles') */
+  keywords?: string[];
   command: (params: { editor: Editor; range: Range }) => void;
 }
 
@@ -87,28 +91,42 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
           Commands &amp; Blocks
         </div>
         <div className="py-1">
-          {items.map((item, index) => (
-            <button
-              key={item.title}
-              ref={(el) => { itemRefs.current[index] = el; }}
-              role="option"
-              aria-selected={index === selectedIndex}
-              onClick={() => selectItem(index)}
-              className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors cursor-pointer ${
-                index === selectedIndex
-                  ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-muted/60 text-foreground'
-              }`}
-            >
-              <span className="p-1.5 rounded-md bg-muted border border-border/60 text-foreground shrink-0 flex items-center justify-center">
-                {item.icon}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold tracking-tight">{item.title}</p>
-                <p className="text-[10px] text-muted-foreground truncate leading-relaxed">{item.description}</p>
+          {items.map((item, index) => {
+            const showCategoryHeader =
+              Boolean(item.category) && (!index || item.category !== items[index - 1]?.category);
+            return (
+              <div key={item.title}>
+                {showCategoryHeader && (
+                  <div className="px-3 pt-2 pb-1 text-[9px] uppercase font-mono font-semibold tracking-wider text-muted-foreground/70">
+                    {item.category}
+                  </div>
+                )}
+                <button
+                  ref={(el) => {
+                    itemRefs.current[index] = el;
+                  }}
+                  role="option"
+                  aria-selected={index === selectedIndex}
+                  onClick={() => selectItem(index)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors cursor-pointer ${
+                    index === selectedIndex
+                      ? 'bg-accent text-accent-foreground'
+                      : 'hover:bg-muted/60 text-foreground'
+                  }`}
+                >
+                  <span className="p-1.5 rounded-md bg-muted border border-border/60 text-foreground shrink-0 flex items-center justify-center">
+                    {item.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold tracking-tight">{item.title}</p>
+                    <p className="text-[10px] text-muted-foreground truncate leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </button>
               </div>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

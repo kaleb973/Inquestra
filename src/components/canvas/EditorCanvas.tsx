@@ -45,6 +45,11 @@ import {
   ListTodo,
   Code as CodeIcon,
   Minus as MinusIcon,
+  Download,
+  FileLock2,
+  ScrollText,
+  Sigma,
+  Dna,
 } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
@@ -73,37 +78,156 @@ import type { Role } from '@prisma/client';
 
 
 
+// ─── Slash command helpers ───────────────────────────────────────────────────
+
+function parseCommandArg(editor: Editor, range: Range): string {
+  try {
+    const raw = editor.state.doc.textBetween(range.from, range.to);
+    return raw.replace(/^\/?[^\s]+\s*/, '').trim();
+  } catch {
+    return '';
+  }
+}
+
+function parseTimerSeconds(arg: string): number {
+  if (!arg) return 300;
+  const combinedMatch = arg.match(/^(\d+)m\s*(\d+)s$/i);
+  if (combinedMatch) {
+    return parseInt(combinedMatch[1], 10) * 60 + parseInt(combinedMatch[2], 10);
+  }
+  const hMatch = arg.match(/^(\d+(?:\.\d+)?)\s*(h|hr|hrs|hours)$/i);
+  if (hMatch) return Math.round(parseFloat(hMatch[1]) * 3600);
+  const sMatch = arg.match(/^(\d+)\s*(s|sec|secs|seconds)$/i);
+  if (sMatch) return parseInt(sMatch[1], 10);
+  const mMatch = arg.match(/^(\d+(?:\.\d+)?)\s*(m|min|mins|minutes)?$/i);
+  if (mMatch) return Math.round(parseFloat(mMatch[1]) * 60);
+  const num = parseInt(arg, 10);
+  return isNaN(num) || num <= 0 ? 300 : num;
+}
+
+function parseReagentAttrs(arg: string): { initialChemical: string; initialQuantity: string; initialUnit: string } {
+  let initialChemical = '';
+  let initialQuantity = '';
+  let initialUnit = 'mL';
+  if (!arg) return { initialChemical, initialQuantity, initialUnit };
+
+  const parsed = arg.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Zµμ]+)?\s*(.*)$/);
+  if (parsed && parsed[1]) {
+    initialQuantity = parsed[1];
+    if (parsed[2]) initialUnit = parsed[2];
+    if (parsed[3]) initialChemical = parsed[3].trim();
+  } else {
+    initialChemical = arg;
+  }
+  return { initialChemical, initialQuantity, initialUnit };
+}
+
 // ─── Slash command definitions ────────────────────────────────────────────────
 
 function buildSlashCommands(): SlashCommand[] {
   return [
+    // ── Scientific Blocks ──
     {
       title: 'Molecule (SMILES)',
       description: 'Draw 2D chemical structure',
+      category: 'Scientific',
+      keywords: ['molecule', 'smiles', 'chemical', 'structure', 'compound', 'chem', 'formula', 'draw', 'benzene', 'organic'],
       icon: <FlaskConical className="w-4 h-4 text-indigo-400" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'moleculeBlock' }).run();
+        const arg = parseCommandArg(editor, range);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'moleculeBlock',
+            attrs: {
+              smiles: arg || 'c1ccccc1',
+              name: arg ? 'Custom Compound' : 'Benzene',
+            },
+          })
+          .run();
       },
     },
     {
       title: 'Math Equation',
       description: 'Insert KaTeX formula',
+      category: 'Scientific',
+      keywords: ['math', 'equation', 'formula', 'latex', 'katex', 'sigma', 'calculus', 'integral', 'kinetics', 'nernst'],
       icon: <span className="w-4 h-4 font-serif italic font-bold">∑</span>,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'mathBlock' }).run();
+        const arg = parseCommandArg(editor, range);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'mathBlock',
+            attrs: {
+              latex: arg || 'E = mc^2',
+            },
+          })
+          .run();
       },
     },
     {
       title: 'Sequence (DNA/RNA)',
       description: 'Biological sequence alignment',
+      category: 'Scientific',
+      keywords: ['sequence', 'dna', 'rna', 'protein', 'nucleotide', 'genome', 'fasta', 'pcr', 'primer', 'atgc', 'alignment', 'bio'],
       icon: <span className="w-4 h-4 font-mono font-bold text-purple-400">GC</span>,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'sequenceBlock' }).run();
+        const arg = parseCommandArg(editor, range);
+        const cleanSeq = arg ? arg.replace(/[^a-zA-Z]/g, '').toUpperCase() : '';
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'sequenceBlock',
+            attrs: {
+              sequence: cleanSeq || 'ATGCGTACGTAGCTAGCTAGCTGATCG',
+              name: 'Sequence 1',
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Reagent',
+      description: 'Log a chemical deduction from inventory',
+      category: 'Scientific',
+      keywords: ['reagent', 'chemical', 'inventory', 'deduct', 'stock', 'ethanol', 'buffer', 'solution', 'lims', 'consume'],
+      icon: <FlaskConical className="w-4 h-4 text-emerald-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        const attrs = parseReagentAttrs(arg);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'reagentBlock',
+            attrs,
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Literature Citation',
+      description: 'Search & cite peer-reviewed papers from Europe PMC / PubMed',
+      category: 'Scientific',
+      keywords: ['citation', 'literature', 'pubmed', 'paper', 'reference', 'doi', 'journal', 'cite', 'bibliogr', 'ncbi', 'pmid'],
+      icon: <Quote className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'citationBlock' }).run();
       },
     },
     {
       title: 'Equipment Link',
-      description: 'Link an instrument to this trial',
+      description: 'Link an instrument or sensor to this trial',
+      category: 'Scientific',
+      keywords: ['equipment', 'eq', 'instrument', 'device', 'hardware', 'link', 'sensor', 'potentiostat'],
       icon: <span className="w-4 h-4 font-bold text-indigo-400">EQ</span>,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'equipmentBlock' }).run();
@@ -112,36 +236,21 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Reference Experiment',
       description: 'Retrieve & embed parameters from another trial by name',
+      category: 'Scientific',
+      keywords: ['reference', 'trial', 'experiment', 'parameter', 'ref'],
       icon: <Database className="w-4 h-4 text-indigo-400" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
       },
     },
-    {
-      title: 'Literature Citation',
-      description: 'Search & cite peer-reviewed papers from Europe PMC / PubMed',
-      icon: <Quote className="w-4 h-4 text-emerald-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'citationBlock' }).run();
-      },
-    },
-    {
-      title: 'Lab Dataset (CSV)',
-      description: 'Import multi-column laboratory assay, plate reader, or telemetry data',
-      icon: <FileSpreadsheet className="w-4 h-4 text-blue-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).run();
-        const input = document.getElementById('inquestra-csv-upload-input') as HTMLInputElement | null;
-        if (input) {
-          input.value = '';
-          input.click();
-        }
-      },
-    },
+
+    // ── Data & DAQ ──
     {
       title: 'Chart',
       description: 'Insert a live telemetry chart node',
-      icon: <BarChart3 className="w-4 h-4" />,
+      category: 'Data & DAQ',
+      keywords: ['chart', 'graph', 'plot', 'telemetry', 'visualization', 'data', 'bar', 'line', 'daq'],
+      icon: <BarChart3 className="w-4 h-4 text-sky-400" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
           .chain()
@@ -152,30 +261,37 @@ function buildSlashCommands(): SlashCommand[] {
       },
     },
     {
-      title: 'Reagent',
-      description: 'Log a chemical deduction from inventory',
-      icon: <FlaskConical className="w-4 h-4" />,
+      title: 'Lab Dataset (CSV)',
+      description: 'Import multi-column laboratory assay, plate reader, or telemetry data',
+      category: 'Data & DAQ',
+      keywords: ['lab dataset (csv)', 'csv', 'dataset', 'import', 'spreadsheet', 'data', 'upload', 'plate'],
+      icon: <FileSpreadsheet className="w-4 h-4 text-blue-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({ type: 'reagentBlock' })
-          .run();
+        editor.chain().focus().deleteRange(range).run();
+        const input = document.getElementById('inquestra-csv-upload-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = '';
+          input.click();
+        }
       },
     },
+
+    // ── Protocols & SOPs ──
     {
       title: 'Protocol (Blank)',
       description: 'Insert an empty step-by-step protocol checklist',
-      icon: <ClipboardList className="w-4 h-4" />,
+      category: 'Protocols & SOPs',
+      keywords: ['protocol', 'sop', 'checklist', 'steps', 'procedure', 'blank', 'workflow', 'lab'],
+      icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
         editor
           .chain()
           .focus()
           .deleteRange(range)
           .insertContent({
             type: 'protocolBlock',
-            attrs: { title: 'New Protocol', version: 1, steps: [] },
+            attrs: { title: arg || 'New Protocol', version: 1, steps: [] },
           })
           .run();
       },
@@ -183,6 +299,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Protocol: PCR Amplification',
       description: 'Standard PCR thermocycling SOP (denaturation, annealing, extension)',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: pcr', 'pcr', 'thermocycling', 'amplification', 'polymerase', 'dna'],
       icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -210,6 +328,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Protocol: Western Blot',
       description: 'Standard SDS-PAGE, transfer, blocking, and antibody incubation SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: western blot', 'western blot', 'wb', 'sds-page', 'protein', 'antibody', 'blot'],
       icon: <ClipboardList className="w-4 h-4 text-violet-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -239,6 +359,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Protocol: Cell Passaging',
       description: 'Standard adherent mammalian cell culture trypsinization and splitting SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: cell passaging', 'cell passaging', 'cell culture', 'trypsin', 'passaging', 'split'],
       icon: <ClipboardList className="w-4 h-4 text-sky-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -267,6 +389,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Protocol: Flow Cytometry',
       description: 'Standard cell surface fluorophore staining & FACS acquisition SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: flow cytometry', 'flow cytometry', 'facs', 'staining', 'fluorophore', 'antibody'],
       icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -291,9 +415,68 @@ function buildSlashCommands(): SlashCommand[] {
           .run();
       },
     },
+
+    // ── Actions & Compliance ──
+    {
+      title: 'Timer',
+      description: 'Insert an interactive countdown incubation timer',
+      category: 'Actions & Compliance',
+      keywords: ['timer', 'countdown', 'incubation', 'stopwatch', 'minutes', 'alarm', 'wait', 'clock'],
+      icon: <Timer className="w-4 h-4 text-amber-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        const duration = parseTimerSeconds(arg);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'timerBlock',
+            attrs: { duration, label: arg ? `Timer (${arg})` : 'Incubation Timer' },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Export Trial',
+      description: 'Download trial as ZIP archive (Markdown + HTML + signatures)',
+      category: 'Actions & Compliance',
+      keywords: ['export', 'zip', 'download', 'archive', 'backup', 'markdown', 'pdf', 'package'],
+      icon: <Download className="w-4 h-4 text-sky-500" />,
+      command: (_params: { editor: Editor; range: Range }) => {
+        _params.editor.chain().focus().deleteRange(_params.range).run();
+        window.dispatchEvent(new CustomEvent('inquestra:trigger-export'));
+      },
+    },
+    {
+      title: 'Sign Trial (21 CFR § 11)',
+      description: 'Apply electronic signature — seals trial for regulatory compliance',
+      category: 'Actions & Compliance',
+      keywords: ['sign', 'signature', 'seal', 'attest', 'cfr', 'part11', 'witness', 'electronic', 'lock', 'approve'],
+      icon: <FileLock2 className="w-4 h-4 text-emerald-500" />,
+      command: (_params: { editor: Editor; range: Range }) => {
+        _params.editor.chain().focus().deleteRange(_params.range).run();
+        window.dispatchEvent(new CustomEvent('inquestra:trigger-seal'));
+      },
+    },
+    {
+      title: 'Audit Trail',
+      description: 'Open compliance & audit log panel (SHA-256 provenance)',
+      category: 'Actions & Compliance',
+      keywords: ['audit', 'history', 'provenance', 'revisions', 'integrity', 'checksum', 'sha256', 'compliance', 'log'],
+      icon: <ScrollText className="w-4 h-4 text-violet-500" />,
+      command: (_params: { editor: Editor; range: Range }) => {
+        _params.editor.chain().focus().deleteRange(_params.range).run();
+        useNotebookStore.getState().setRightDrawerMode('COMPLIANCE');
+      },
+    },
+
+    // ── Document Formatting ──
     {
       title: 'Table',
       description: 'Insert a structured data table',
+      category: 'Formatting',
+      keywords: ['table', 'grid', 'matrix', 'data', 'cells', 'rows', 'columns'],
       icon: <Table2 className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -307,6 +490,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Heading 1',
       description: 'Large section heading',
+      category: 'Formatting',
+      keywords: ['heading 1', 'h1', 'header 1', 'title', 'large'],
       icon: <Heading1 className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -320,6 +505,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Heading 2',
       description: 'Medium section heading',
+      category: 'Formatting',
+      keywords: ['heading 2', 'h2', 'header 2', 'section', 'medium'],
       icon: <Heading2 className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -333,6 +520,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Heading 3',
       description: 'Small subsection heading',
+      category: 'Formatting',
+      keywords: ['heading 3', 'h3', 'header 3', 'subsection', 'small'],
       icon: <Heading3 className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -346,6 +535,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Task Checklist',
       description: 'To-do checklist with interactive checkboxes',
+      category: 'Formatting',
+      keywords: ['task checklist', 'todo', 'tasks', 'checklist', 'checkbox', 'check'],
       icon: <ListTodo className="w-4 h-4 text-emerald-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -359,6 +550,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Bulleted List',
       description: 'Standard unordered bullet list',
+      category: 'Formatting',
+      keywords: ['bulleted list', 'ul', 'bullets', 'list', 'points'],
       icon: <List className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -372,6 +565,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Numbered List',
       description: 'Ordered sequential step list',
+      category: 'Formatting',
+      keywords: ['numbered list', 'ol', 'numbers', 'ordered', 'steps'],
       icon: <ListOrdered className="w-4 h-4" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -385,6 +580,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Callout Note',
       description: 'Highlighted observation or hypothesis blockquote',
+      category: 'Formatting',
+      keywords: ['callout note', 'quote', 'blockquote', 'callout', 'note', 'info', 'hypothesis', 'observation'],
       icon: <Quote className="w-4 h-4 text-primary" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -398,6 +595,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Code Block',
       description: 'Preformatted code or protocol script',
+      category: 'Formatting',
+      keywords: ['code block', 'code', 'snippet', 'pre', 'script', 'python', 'r'],
       icon: <CodeIcon className="w-4 h-4 text-indigo-400" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -411,6 +610,8 @@ function buildSlashCommands(): SlashCommand[] {
     {
       title: 'Divider Line',
       description: 'Horizontal section divider',
+      category: 'Formatting',
+      keywords: ['divider line', 'hr', 'divider', 'separator', 'rule', 'line'],
       icon: <MinusIcon className="w-4 h-4 opacity-70" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
@@ -418,22 +619,6 @@ function buildSlashCommands(): SlashCommand[] {
           .focus()
           .deleteRange(range)
           .setHorizontalRule()
-          .run();
-      },
-    },
-    {
-      title: 'Timer',
-      description: 'Insert an interactive countdown incubation timer',
-      icon: <Timer className="w-4 h-4 text-amber-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'timerBlock',
-            attrs: { duration: 300, label: 'Incubation Timer' },
-          })
           .run();
       },
     },
@@ -451,13 +636,27 @@ const SlashCommandExtension = Extension.create({
         editor: this.editor,
         char: '/',
         startOfLine: false,
-        allowSpaces: false,
+        allowSpaces: true,
 
         items: ({ query }: { query: string; editor: Editor }) => {
           const commands = buildSlashCommands();
           if (!query) return commands;
+          // Dismiss if query has too many words (user is typing prose, not a command)
+          const words = query.trim().split(/\s+/);
+          if (words.length > 6) return [];
+          const cmdToken = words[0]?.toLowerCase() || '';
           const q = query.toLowerCase();
-          return commands.filter((c) => c.title.toLowerCase().includes(q));
+          return commands.filter((c) => {
+            const titleMatches = c.title.toLowerCase().includes(q);
+            const descMatches = c.description.toLowerCase().includes(q);
+            const kwMatches = (c.keywords ?? []).some(
+              (kw) =>
+                kw.toLowerCase().includes(q) ||
+                (words.length > 1 && (kw.toLowerCase() === cmdToken || kw.toLowerCase().startsWith(cmdToken)))
+            );
+            const tokenMatches = words.length > 1 && c.title.toLowerCase().startsWith(cmdToken);
+            return titleMatches || descMatches || kwMatches || tokenMatches;
+          });
         },
 
         render: () => {
