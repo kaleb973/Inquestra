@@ -291,7 +291,7 @@ function StepTimer({
 
 // ─── NodeView component ────────────────────────────────────────────────────────
 
-function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
+function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }: NodeViewProps) {
   const attrs = node.attrs as ProtocolAttrs;
   const [showDeviation, setShowDeviation] = useState<string | null>(null);
   const [deviationDraft, setDeviationDraft] = useState('');
@@ -346,17 +346,40 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
 
   // ── Fork: copy steps, reset checks, bump version ──────────────────────────
 
-  const forkProtocol = () =>
+  const forkProtocol = () => {
+    const newVersion = (attrs.version || 1) + 1;
+    const freshSteps = attrs.steps.map((s) => ({
+      ...s,
+      id: typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+      checked: false,
+      checkedAt: null,
+      deviation: null,
+    }));
+
+    if (editor && typeof getPos === 'function') {
+      const pos = getPos();
+      if (typeof pos === 'number') {
+        const insertPos = pos + node.nodeSize;
+        editor
+          .chain()
+          .insertContentAt(insertPos, {
+            type: 'protocolBlock',
+            attrs: {
+              title: attrs.title,
+              version: newVersion,
+              steps: freshSteps,
+            },
+          })
+          .focus(insertPos)
+          .run();
+        return;
+      }
+    }
     update({
-      version: attrs.version + 1,
-      steps: attrs.steps.map((s) => ({
-        ...s,
-        id: crypto.randomUUID(),
-        checked: false,
-        checkedAt: null,
-        deviation: null,
-      })),
+      version: newVersion,
+      steps: freshSteps,
     });
+  };
 
   const completedCount = attrs.steps.filter((s) => s.checked).length;
   const totalCount = attrs.steps.length;
@@ -400,7 +423,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
             </button>
             <button
               onClick={forkProtocol}
-              title="Fork — new run with same steps"
+              title="Duplicate protocol for next run (Replicate)"
               className="text-muted-foreground hover:text-violet-500 p-1 rounded hover:bg-accent transition-colors"
             >
               <GitFork className="w-3.5 h-3.5" />

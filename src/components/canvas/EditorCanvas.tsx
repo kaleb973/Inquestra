@@ -126,351 +126,6 @@ function parseReagentAttrs(arg: string): { initialChemical: string; initialQuant
 
 function buildSlashCommands(): SlashCommand[] {
   return [
-    // ── Scientific Blocks ──
-    {
-      title: 'Molecule (SMILES)',
-      description: 'Draw 2D chemical structure',
-      category: 'Scientific',
-      keywords: ['molecule', 'smiles', 'chemical', 'structure', 'compound', 'chem', 'formula', 'draw', 'benzene', 'organic'],
-      icon: <FlaskConical className="w-4 h-4 text-indigo-400" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        const arg = parseCommandArg(editor, range);
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'moleculeBlock',
-            attrs: {
-              smiles: arg || 'c1ccccc1',
-              name: arg ? 'Custom Compound' : 'Benzene',
-            },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Math Equation',
-      description: 'Insert KaTeX formula',
-      category: 'Scientific',
-      keywords: ['math', 'equation', 'formula', 'latex', 'katex', 'sigma', 'calculus', 'integral', 'kinetics', 'nernst'],
-      icon: <span className="w-4 h-4 font-serif italic font-bold">∑</span>,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        const arg = parseCommandArg(editor, range);
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'mathBlock',
-            attrs: {
-              latex: arg || 'E = mc^2',
-            },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Sequence (DNA/RNA)',
-      description: 'Biological sequence alignment',
-      category: 'Scientific',
-      keywords: ['sequence', 'dna', 'rna', 'protein', 'nucleotide', 'genome', 'fasta', 'pcr', 'primer', 'atgc', 'alignment', 'bio'],
-      icon: <span className="w-4 h-4 font-mono font-bold text-purple-400">GC</span>,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        const arg = parseCommandArg(editor, range);
-        const cleanSeq = arg ? arg.replace(/[^a-zA-Z]/g, '').toUpperCase() : '';
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'sequenceBlock',
-            attrs: {
-              sequence: cleanSeq || 'ATGCGTACGTAGCTAGCTAGCTGATCG',
-              name: 'Sequence 1',
-            },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Reagent',
-      description: 'Log a chemical deduction from inventory',
-      category: 'Scientific',
-      keywords: ['reagent', 'chemical', 'inventory', 'deduct', 'stock', 'ethanol', 'buffer', 'solution', 'lims', 'consume'],
-      icon: <FlaskConical className="w-4 h-4 text-emerald-400" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        const arg = parseCommandArg(editor, range);
-        const attrs = parseReagentAttrs(arg);
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'reagentBlock',
-            attrs,
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Literature Citation',
-      description: 'Search & cite peer-reviewed papers from Europe PMC / PubMed',
-      category: 'Scientific',
-      keywords: ['citation', 'literature', 'pubmed', 'paper', 'reference', 'doi', 'journal', 'cite', 'bibliogr', 'ncbi', 'pmid'],
-      icon: <Quote className="w-4 h-4 text-emerald-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'citationBlock' }).run();
-      },
-    },
-    {
-      title: 'Equipment Link',
-      description: 'Link an instrument or sensor to this trial',
-      category: 'Scientific',
-      keywords: ['equipment', 'eq', 'instrument', 'device', 'hardware', 'link', 'sensor', 'potentiostat'],
-      icon: <span className="w-4 h-4 font-bold text-indigo-400">EQ</span>,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'equipmentBlock' }).run();
-      },
-    },
-    {
-      title: 'Reference Experiment',
-      description: 'Retrieve & embed parameters from another trial by name',
-      category: 'Scientific',
-      keywords: ['reference', 'trial', 'experiment', 'parameter', 'ref'],
-      icon: <Database className="w-4 h-4 text-indigo-400" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
-      },
-    },
-
-    // ── Data & DAQ ──
-    {
-      title: 'Chart',
-      description: 'Insert a live telemetry chart node',
-      category: 'Data & DAQ',
-      keywords: ['chart', 'graph', 'plot', 'telemetry', 'visualization', 'data', 'bar', 'line', 'daq'],
-      icon: <BarChart3 className="w-4 h-4 text-sky-400" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({ type: 'interactiveChart', attrs: { csvData: null } })
-          .run();
-      },
-    },
-    {
-      title: 'Lab Dataset (CSV)',
-      description: 'Import multi-column laboratory assay, plate reader, or telemetry data',
-      category: 'Data & DAQ',
-      keywords: ['lab dataset (csv)', 'csv', 'dataset', 'import', 'spreadsheet', 'data', 'upload', 'plate'],
-      icon: <FileSpreadsheet className="w-4 h-4 text-blue-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor.chain().focus().deleteRange(range).run();
-        const input = document.getElementById('inquestra-csv-upload-input') as HTMLInputElement | null;
-        if (input) {
-          input.value = '';
-          input.click();
-        }
-      },
-    },
-
-    // ── Protocols & SOPs ──
-    {
-      title: 'Protocol (Blank)',
-      description: 'Insert an empty step-by-step protocol checklist',
-      category: 'Protocols & SOPs',
-      keywords: ['protocol', 'sop', 'checklist', 'steps', 'procedure', 'blank', 'workflow', 'lab'],
-      icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        const arg = parseCommandArg(editor, range);
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'protocolBlock',
-            attrs: { title: arg || 'New Protocol', version: 1, steps: [] },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Protocol: PCR Amplification',
-      description: 'Standard PCR thermocycling SOP (denaturation, annealing, extension)',
-      category: 'Protocols & SOPs',
-      keywords: ['protocol: pcr', 'pcr', 'thermocycling', 'amplification', 'polymerase', 'dna'],
-      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'protocolBlock',
-            attrs: {
-              title: 'PCR Amplification Protocol',
-              version: 1,
-              steps: [
-                { id: 'pcr-1', text: 'Thaw 2X PCR Master Mix, forward/reverse primers, and template DNA on ice.', checked: false, checkedAt: null, deviation: null },
-                { id: 'pcr-2', text: 'Prepare reaction mix (Master Mix 12.5 µL, Fwd Primer 1.0 µL, Rev Primer 1.0 µL, Template 2.0 µL, Nuclease-free H2O to 25 µL).', checked: false, checkedAt: null, deviation: null },
-                { id: 'pcr-3', text: 'Gently vortex and spin down PCR tubes in microcentrifuge.', checked: false, checkedAt: null, deviation: null },
-                { id: 'pcr-4', text: 'Initial denaturation: 95°C for 3 minutes.', checked: false, checkedAt: null, deviation: null },
-                { id: 'pcr-5', text: 'Cycle 30x: 95°C for 30s (denature) → 58°C for 30s (anneal) → 72°C for 60s (extend).', checked: false, checkedAt: null, deviation: null },
-                { id: 'pcr-6', text: 'Final extension: 72°C for 5 minutes, then hold at 4°C.', checked: false, checkedAt: null, deviation: null },
-              ],
-            },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Protocol: Western Blot',
-      description: 'Standard SDS-PAGE, transfer, blocking, and antibody incubation SOP',
-      category: 'Protocols & SOPs',
-      keywords: ['protocol: western blot', 'western blot', 'wb', 'sds-page', 'protein', 'antibody', 'blot'],
-      icon: <ClipboardList className="w-4 h-4 text-violet-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'protocolBlock',
-            attrs: {
-              title: 'Western Blot Assay Protocol',
-              version: 1,
-              steps: [
-                { id: 'wb-1', text: 'Lyse cells in RIPA buffer with protease/phosphatase inhibitors; quantify protein (BCA assay).', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-2', text: 'Boil samples with 4X Laemmli sample buffer at 95°C for 5 minutes.', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-3', text: 'Load 20-30 µg protein per well into 4-20% SDS-PAGE gel; run at 120V for ~70 minutes.', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-4', text: 'Transfer to PVDF membrane at 100V for 60 minutes on ice (transfer buffer with 20% MeOH).', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-5', text: 'Block membrane in 5% non-fat dry milk in TBST for 1 hour at room temperature.', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-6', text: 'Incubate primary antibody (1:1000 in 5% BSA/TBST) overnight at 4°C with gentle rocking.', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-7', text: 'Wash 3x 10min with TBST; incubate HRP-conjugated secondary (1:5000) 1h at RT.', checked: false, checkedAt: null, deviation: null },
-                { id: 'wb-8', text: 'Wash 3x with TBST; apply ECL substrate and image chemiluminescence.', checked: false, checkedAt: null, deviation: null },
-              ],
-            },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Protocol: Cell Passaging',
-      description: 'Standard adherent mammalian cell culture trypsinization and splitting SOP',
-      category: 'Protocols & SOPs',
-      keywords: ['protocol: cell passaging', 'cell passaging', 'cell culture', 'trypsin', 'passaging', 'split'],
-      icon: <ClipboardList className="w-4 h-4 text-sky-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'protocolBlock',
-            attrs: {
-              title: 'Cell Culture Passaging Protocol',
-              version: 1,
-              steps: [
-                { id: 'cp-1', text: 'Examine cells under inverted microscope to verify 80-90% confluence and morphology.', checked: false, checkedAt: null, deviation: null },
-                { id: 'cp-2', text: 'Aspirate spent growth media from culture dish in laminar flow hood.', checked: false, checkedAt: null, deviation: null },
-                { id: 'cp-3', text: 'Gently wash cell monolayer with 5 mL sterile 1X DPBS (without Ca2+/Mg2+).', checked: false, checkedAt: null, deviation: null },
-                { id: 'cp-4', text: 'Add 2 mL 0.25% Trypsin-EDTA; incubate at 37°C for 3-5 minutes until cells detach.', checked: false, checkedAt: null, deviation: null },
-                { id: 'cp-5', text: 'Neutralize trypsin by adding 6 mL complete growth medium with 10% FBS.', checked: false, checkedAt: null, deviation: null },
-                { id: 'cp-6', text: 'Centrifuge cell suspension at 300 x g for 5 minutes; aspirate supernatant and resuspend pellet.', checked: false, checkedAt: null, deviation: null },
-                { id: 'cp-7', text: 'Count viable cells with trypan blue and hemocytometer; seed new flasks at 1:4 to 1:6 ratio.', checked: false, checkedAt: null, deviation: null },
-              ],
-            },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Protocol: Flow Cytometry',
-      description: 'Standard cell surface fluorophore staining & FACS acquisition SOP',
-      category: 'Protocols & SOPs',
-      keywords: ['protocol: flow cytometry', 'flow cytometry', 'facs', 'staining', 'fluorophore', 'antibody'],
-      icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'protocolBlock',
-            attrs: {
-              title: 'Flow Cytometry Surface Staining Protocol',
-              version: 1,
-              steps: [
-                { id: 'fc-1', text: 'Harvest 1x10^6 cells; wash once with 1 mL cold FACS buffer (PBS + 2% FBS + 1mM EDTA).', checked: false, checkedAt: null, deviation: null },
-                { id: 'fc-2', text: 'Block Fc receptors with anti-CD16/32 (1:100 in FACS buffer) on ice for 10 minutes.', checked: false, checkedAt: null, deviation: null },
-                { id: 'fc-3', text: 'Add fluorophore-conjugated primary antibodies at titration concentration; incubate 30 min in dark on ice.', checked: false, checkedAt: null, deviation: null },
-                { id: 'fc-4', text: 'Wash 2x with 1 mL cold FACS buffer (centrifuge 300 x g for 5 min at 4°C).', checked: false, checkedAt: null, deviation: null },
-                { id: 'fc-5', text: 'Resuspend pellet in 300 µL FACS buffer containing viability dye (e.g. 7-AAD / DAPI).', checked: false, checkedAt: null, deviation: null },
-                { id: 'fc-6', text: 'Filter through 40 µm cell strainer cap and acquire on flow cytometer.', checked: false, checkedAt: null, deviation: null },
-              ],
-            },
-          })
-          .run();
-      },
-    },
-
-    // ── Actions & Compliance ──
-    {
-      title: 'Timer',
-      description: 'Insert an interactive countdown incubation timer',
-      category: 'Actions & Compliance',
-      keywords: ['timer', 'countdown', 'incubation', 'stopwatch', 'minutes', 'alarm', 'wait', 'clock'],
-      icon: <Timer className="w-4 h-4 text-amber-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        const arg = parseCommandArg(editor, range);
-        const duration = parseTimerSeconds(arg);
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertContent({
-            type: 'timerBlock',
-            attrs: { duration, label: arg ? `Timer (${arg})` : 'Incubation Timer' },
-          })
-          .run();
-      },
-    },
-    {
-      title: 'Export Trial',
-      description: 'Download trial as ZIP archive (Markdown + HTML + signatures)',
-      category: 'Actions & Compliance',
-      keywords: ['export', 'zip', 'download', 'archive', 'backup', 'markdown', 'pdf', 'package'],
-      icon: <Download className="w-4 h-4 text-sky-500" />,
-      command: (_params: { editor: Editor; range: Range }) => {
-        _params.editor.chain().focus().deleteRange(_params.range).run();
-        window.dispatchEvent(new CustomEvent('inquestra:trigger-export'));
-      },
-    },
-    {
-      title: 'Sign Trial (21 CFR § 11)',
-      description: 'Apply electronic signature — seals trial for regulatory compliance',
-      category: 'Actions & Compliance',
-      keywords: ['sign', 'signature', 'seal', 'attest', 'cfr', 'part11', 'witness', 'electronic', 'lock', 'approve'],
-      icon: <FileLock2 className="w-4 h-4 text-emerald-500" />,
-      command: (_params: { editor: Editor; range: Range }) => {
-        _params.editor.chain().focus().deleteRange(_params.range).run();
-        window.dispatchEvent(new CustomEvent('inquestra:trigger-seal'));
-      },
-    },
-    {
-      title: 'Audit Trail',
-      description: 'Open compliance & audit log panel (SHA-256 provenance)',
-      category: 'Actions & Compliance',
-      keywords: ['audit', 'history', 'provenance', 'revisions', 'integrity', 'checksum', 'sha256', 'compliance', 'log'],
-      icon: <ScrollText className="w-4 h-4 text-violet-500" />,
-      command: (_params: { editor: Editor; range: Range }) => {
-        _params.editor.chain().focus().deleteRange(_params.range).run();
-        useNotebookStore.getState().setRightDrawerMode('COMPLIANCE');
-      },
-    },
-
     // ── Document Formatting ──
     {
       title: 'Table',
@@ -622,6 +277,351 @@ function buildSlashCommands(): SlashCommand[] {
           .run();
       },
     },
+
+    // ── Protocols & SOPs ──
+    {
+      title: 'Protocol (Blank)',
+      description: 'Insert an empty step-by-step protocol checklist',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol', 'sop', 'checklist', 'steps', 'procedure', 'blank', 'workflow', 'lab'],
+      icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: { title: arg || 'New Protocol', version: 1, steps: [] },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: PCR Amplification',
+      description: 'Standard PCR thermocycling SOP (denaturation, annealing, extension)',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: pcr', 'pcr', 'thermocycling', 'amplification', 'polymerase', 'dna'],
+      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'PCR Amplification Protocol',
+              version: 1,
+              steps: [
+                { id: 'pcr-1', text: 'Thaw 2X PCR Master Mix, forward/reverse primers, and template DNA on ice.', checked: false, checkedAt: null, deviation: null },
+                { id: 'pcr-2', text: 'Prepare reaction mix (Master Mix 12.5 µL, Fwd Primer 1.0 µL, Rev Primer 1.0 µL, Template 2.0 µL, Nuclease-free H2O to 25 µL).', checked: false, checkedAt: null, deviation: null },
+                { id: 'pcr-3', text: 'Gently vortex and spin down PCR tubes in microcentrifuge.', checked: false, checkedAt: null, deviation: null },
+                { id: 'pcr-4', text: 'Initial denaturation: 95°C for 3 minutes.', checked: false, checkedAt: null, deviation: null },
+                { id: 'pcr-5', text: 'Cycle 30x: 95°C for 30s (denature) → 58°C for 30s (anneal) → 72°C for 60s (extend).', checked: false, checkedAt: null, deviation: null },
+                { id: 'pcr-6', text: 'Final extension: 72°C for 5 minutes, then hold at 4°C.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: Western Blot',
+      description: 'Standard SDS-PAGE, transfer, blocking, and antibody incubation SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: western blot', 'western blot', 'wb', 'sds-page', 'protein', 'antibody', 'blot'],
+      icon: <ClipboardList className="w-4 h-4 text-violet-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Western Blot Assay Protocol',
+              version: 1,
+              steps: [
+                { id: 'wb-1', text: 'Lyse cells in RIPA buffer with protease/phosphatase inhibitors; quantify protein (BCA assay).', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-2', text: 'Boil samples with 4X Laemmli sample buffer at 95°C for 5 minutes.', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-3', text: 'Load 20-30 µg protein per well into 4-20% SDS-PAGE gel; run at 120V for ~70 minutes.', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-4', text: 'Transfer to PVDF membrane at 100V for 60 minutes on ice (transfer buffer with 20% MeOH).', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-5', text: 'Block membrane in 5% non-fat dry milk in TBST for 1 hour at room temperature.', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-6', text: 'Incubate primary antibody (1:1000 in 5% BSA/TBST) overnight at 4°C with gentle rocking.', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-7', text: 'Wash 3x 10min with TBST; incubate HRP-conjugated secondary (1:5000) 1h at RT.', checked: false, checkedAt: null, deviation: null },
+                { id: 'wb-8', text: 'Wash 3x with TBST; apply ECL substrate and image chemiluminescence.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: Cell Passaging',
+      description: 'Standard adherent mammalian cell culture trypsinization and splitting SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: cell passaging', 'cell passaging', 'cell culture', 'trypsin', 'passaging', 'split'],
+      icon: <ClipboardList className="w-4 h-4 text-sky-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Cell Culture Passaging Protocol',
+              version: 1,
+              steps: [
+                { id: 'cp-1', text: 'Examine cells under inverted microscope to verify 80-90% confluence and morphology.', checked: false, checkedAt: null, deviation: null },
+                { id: 'cp-2', text: 'Aspirate spent growth media from culture dish in laminar flow hood.', checked: false, checkedAt: null, deviation: null },
+                { id: 'cp-3', text: 'Gently wash cell monolayer with 5 mL sterile 1X DPBS (without Ca2+/Mg2+).', checked: false, checkedAt: null, deviation: null },
+                { id: 'cp-4', text: 'Add 2 mL 0.25% Trypsin-EDTA; incubate at 37°C for 3-5 minutes until cells detach.', checked: false, checkedAt: null, deviation: null },
+                { id: 'cp-5', text: 'Neutralize trypsin by adding 6 mL complete growth medium with 10% FBS.', checked: false, checkedAt: null, deviation: null },
+                { id: 'cp-6', text: 'Centrifuge cell suspension at 300 x g for 5 minutes; aspirate supernatant and resuspend pellet.', checked: false, checkedAt: null, deviation: null },
+                { id: 'cp-7', text: 'Count viable cells with trypan blue and hemocytometer; seed new flasks at 1:4 to 1:6 ratio.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: Flow Cytometry',
+      description: 'Standard cell surface fluorophore staining & FACS acquisition SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['protocol: flow cytometry', 'flow cytometry', 'facs', 'staining', 'fluorophore', 'antibody'],
+      icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Flow Cytometry Surface Staining Protocol',
+              version: 1,
+              steps: [
+                { id: 'fc-1', text: 'Harvest 1x10^6 cells; wash once with 1 mL cold FACS buffer (PBS + 2% FBS + 1mM EDTA).', checked: false, checkedAt: null, deviation: null },
+                { id: 'fc-2', text: 'Block Fc receptors with anti-CD16/32 (1:100 in FACS buffer) on ice for 10 minutes.', checked: false, checkedAt: null, deviation: null },
+                { id: 'fc-3', text: 'Add fluorophore-conjugated primary antibodies at titration concentration; incubate 30 min in dark on ice.', checked: false, checkedAt: null, deviation: null },
+                { id: 'fc-4', text: 'Wash 2x with 1 mL cold FACS buffer (centrifuge 300 x g for 5 min at 4°C).', checked: false, checkedAt: null, deviation: null },
+                { id: 'fc-5', text: 'Resuspend pellet in 300 µL FACS buffer containing viability dye (e.g. 7-AAD / DAPI).', checked: false, checkedAt: null, deviation: null },
+                { id: 'fc-6', text: 'Filter through 40 µm cell strainer cap and acquire on flow cytometer.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+
+    // ── Scientific Blocks ──
+    {
+      title: 'Molecule (SMILES)',
+      description: 'Draw 2D chemical structure',
+      category: 'Scientific',
+      keywords: ['molecule', 'smiles', 'chemical', 'structure', 'compound', 'chem', 'formula', 'draw', 'benzene', 'organic'],
+      icon: <FlaskConical className="w-4 h-4 text-indigo-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'moleculeBlock',
+            attrs: {
+              smiles: arg || 'c1ccccc1',
+              name: arg ? 'Custom Compound' : 'Benzene',
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Math Equation',
+      description: 'Insert KaTeX formula',
+      category: 'Scientific',
+      keywords: ['math', 'equation', 'formula', 'latex', 'katex', 'sigma', 'calculus', 'integral', 'kinetics', 'nernst'],
+      icon: <span className="w-4 h-4 font-serif italic font-bold">∑</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'mathBlock',
+            attrs: {
+              latex: arg || 'E = mc^2',
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Sequence (DNA/RNA)',
+      description: 'Biological sequence alignment',
+      category: 'Scientific',
+      keywords: ['sequence', 'dna', 'rna', 'protein', 'nucleotide', 'genome', 'fasta', 'pcr', 'primer', 'atgc', 'alignment', 'bio'],
+      icon: <span className="w-4 h-4 font-mono font-bold text-purple-400">GC</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        const cleanSeq = arg ? arg.replace(/[^a-zA-Z]/g, '').toUpperCase() : '';
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'sequenceBlock',
+            attrs: {
+              sequence: cleanSeq || 'ATGCGTACGTAGCTAGCTAGCTGATCG',
+              name: 'Sequence 1',
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Reagent',
+      description: 'Log a chemical deduction from inventory',
+      category: 'Scientific',
+      keywords: ['reagent', 'chemical', 'inventory', 'deduct', 'stock', 'ethanol', 'buffer', 'solution', 'lims', 'consume'],
+      icon: <FlaskConical className="w-4 h-4 text-emerald-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        const attrs = parseReagentAttrs(arg);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'reagentBlock',
+            attrs,
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Literature Citation',
+      description: 'Search & cite peer-reviewed papers from Europe PMC / PubMed',
+      category: 'Scientific',
+      keywords: ['citation', 'literature', 'pubmed', 'paper', 'reference', 'doi', 'journal', 'cite', 'bibliogr', 'ncbi', 'pmid'],
+      icon: <Quote className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'citationBlock' }).run();
+      },
+    },
+    {
+      title: 'Equipment Link',
+      description: 'Link an instrument or sensor to this trial',
+      category: 'Scientific',
+      keywords: ['equipment', 'eq', 'instrument', 'device', 'hardware', 'link', 'sensor', 'potentiostat'],
+      icon: <span className="w-4 h-4 font-bold text-indigo-400">EQ</span>,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'equipmentBlock' }).run();
+      },
+    },
+    {
+      title: 'Reference Experiment',
+      description: 'Retrieve & embed parameters from another trial by name',
+      category: 'Scientific',
+      keywords: ['reference', 'trial', 'experiment', 'parameter', 'ref'],
+      icon: <Database className="w-4 h-4 text-indigo-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
+      },
+    },
+
+    // ── Data & DAQ ──
+    {
+      title: 'Chart',
+      description: 'Insert a live telemetry chart node',
+      category: 'Data & DAQ',
+      keywords: ['chart', 'graph', 'plot', 'telemetry', 'visualization', 'data', 'bar', 'line', 'daq'],
+      icon: <BarChart3 className="w-4 h-4 text-sky-400" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({ type: 'interactiveChart', attrs: { csvData: null } })
+          .run();
+      },
+    },
+    {
+      title: 'Lab Dataset (CSV)',
+      description: 'Import multi-column laboratory assay, plate reader, or telemetry data',
+      category: 'Data & DAQ',
+      keywords: ['lab dataset (csv)', 'csv', 'dataset', 'import', 'spreadsheet', 'data', 'upload', 'plate'],
+      icon: <FileSpreadsheet className="w-4 h-4 text-blue-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor.chain().focus().deleteRange(range).run();
+        const input = document.getElementById('inquestra-csv-upload-input') as HTMLInputElement | null;
+        if (input) {
+          input.value = '';
+          input.click();
+        }
+      },
+    },
+
+    // ── Actions & Compliance ──
+    {
+      title: 'Timer',
+      description: 'Insert an interactive countdown incubation timer',
+      category: 'Actions & Compliance',
+      keywords: ['timer', 'countdown', 'incubation', 'stopwatch', 'minutes', 'alarm', 'wait', 'clock'],
+      icon: <Timer className="w-4 h-4 text-amber-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        const duration = parseTimerSeconds(arg);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'timerBlock',
+            attrs: { duration, label: arg ? `Timer (${arg})` : 'Incubation Timer' },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Export Trial',
+      description: 'Download trial as ZIP archive (Markdown + HTML + signatures)',
+      category: 'Actions & Compliance',
+      keywords: ['export', 'zip', 'download', 'archive', 'backup', 'markdown', 'pdf', 'package'],
+      icon: <Download className="w-4 h-4 text-sky-500" />,
+      command: (_params: { editor: Editor; range: Range }) => {
+        _params.editor.chain().focus().deleteRange(_params.range).run();
+        window.dispatchEvent(new CustomEvent('inquestra:trigger-export'));
+      },
+    },
+    {
+      title: 'Sign Trial (21 CFR § 11)',
+      description: 'Apply electronic signature — seals trial for regulatory compliance',
+      category: 'Actions & Compliance',
+      keywords: ['sign', 'signature', 'seal', 'attest', 'cfr', 'part11', 'witness', 'electronic', 'lock', 'approve'],
+      icon: <FileLock2 className="w-4 h-4 text-emerald-500" />,
+      command: (_params: { editor: Editor; range: Range }) => {
+        _params.editor.chain().focus().deleteRange(_params.range).run();
+        window.dispatchEvent(new CustomEvent('inquestra:trigger-seal'));
+      },
+    },
+    {
+      title: 'Audit Trail',
+      description: 'Open compliance & audit log panel (SHA-256 provenance)',
+      category: 'Actions & Compliance',
+      keywords: ['audit', 'history', 'provenance', 'revisions', 'integrity', 'checksum', 'sha256', 'compliance', 'log'],
+      icon: <ScrollText className="w-4 h-4 text-violet-500" />,
+      command: (_params: { editor: Editor; range: Range }) => {
+        _params.editor.chain().focus().deleteRange(_params.range).run();
+        useNotebookStore.getState().setRightDrawerMode('COMPLIANCE');
+      },
+    }
   ];
 }
 
@@ -902,13 +902,15 @@ export function EditorCanvas() {
         updateTitle(newTitle);
       }
 
-      // Mark locally as unsaved immediately
-      setSaveStatus('UNSAVED');
-
       // If trial is not synced yet (no cloudTrialId), store is updated in localStorage
       if (!currentCloudTrialId) {
+        setSaveStatus('SAVED');
+        setLastSavedAt(new Date().toISOString());
         return;
       }
+
+      // Mark locally as unsaved immediately for server sync
+      setSaveStatus('UNSAVED');
 
       // Record pending save targeted explicitly to this trialId
       const latestTrial = useNotebookStore.getState().activeTrial;
@@ -932,7 +934,7 @@ export function EditorCanvas() {
         }
       }, 2500);
     },
-    [updateContent, updateTitle, setSaveStatus, executeServerSave]
+    [updateContent, updateTitle, setSaveStatus, setLastSavedAt, executeServerSave]
   );
 
   // Flush pending save before switching trials or unmounting

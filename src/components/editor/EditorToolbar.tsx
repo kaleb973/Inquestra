@@ -89,7 +89,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   ];
 
   return (
-    <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border/80 px-2.5 py-1.5 flex items-center gap-1 flex-nowrap overflow-x-auto no-scrollbar text-foreground select-none">
+    <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border/80 px-2.5 py-1.5 flex items-center gap-1 flex-wrap text-foreground select-none">
       {/* ── Headings & Paragraph ── */}
       <div className="flex items-center gap-0.5 border-r border-border/60 pr-1.5 mr-1">
         <button

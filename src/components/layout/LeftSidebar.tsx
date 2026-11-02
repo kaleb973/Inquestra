@@ -283,6 +283,9 @@ export function LeftSidebar() {
   const cachedTrials = useNotebookStore((s) => s.cachedTrials);
   const setCachedProjects = useNotebookStore((s) => s.setCachedProjects);
   const setCachedTrials = useNotebookStore((s) => s.setCachedTrials);
+  const localTrials = useNotebookStore((s) => s.localTrials);
+  const addLocalTrial = useNotebookStore((s) => s.addLocalTrial);
+  const deleteLocalTrial = useNotebookStore((s) => s.deleteLocalTrial);
   const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
 
   // Instant restoration from in-memory cache — zero layout flash or skeleton wait
@@ -317,8 +320,15 @@ export function LeftSidebar() {
 
   const handleSelectTrial = useCallback((id: string) => {
     // If user is already on this exact trial, don't trigger a full network reload
-    const storeActiveId = useNotebookStore.getState().cloudTrialId;
-    if (storeActiveId === id && useNotebookStore.getState().activeTrial.id === id) {
+    if (useNotebookStore.getState().activeTrial.id === id) {
+      return;
+    }
+
+    // Instant switch for in-browser local trials (guest mode)
+    const localMatch = (useNotebookStore.getState().localTrials || []).find((t) => t.id === id);
+    if (localMatch) {
+      setActiveTrial(localMatch);
+      useNotebookStore.setState({ cloudTrialId: null });
       return;
     }
 
@@ -428,6 +438,21 @@ export function LeftSidebar() {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
   const handleNewTrial = (cat?: string) => {
+    if (!cloudProjectId) {
+      const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      const now = new Date().toISOString();
+      const localTrial: import('@/types/inquestra').TrialDocument = {
+        id: localId,
+        title: 'Untitled Run',
+        content: { type: 'doc', content: [] },
+        status: 'DRAFT',
+        metadata: cat ? [{ id: 'cat', key: 'category', value: cat }] : [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      addLocalTrial(localTrial);
+      return;
+    }
     startTransition(async () => {
       try {
         setIsLoadingTrial(true);
@@ -501,6 +526,15 @@ export function LeftSidebar() {
   };
 
   const handleRenameTrial = async (targetTrial: TrialSummaryItem, newTitle: string) => {
+    if (targetTrial.projectId === 'local' || !cloudProjectId) {
+      useNotebookStore.getState().updateTitle(newTitle);
+      useNotebookStore.setState((s) => ({
+        localTrials: s.localTrials.map((t) =>
+          t.id === targetTrial.id ? { ...t, title: newTitle, updatedAt: new Date().toISOString() } : t
+        ),
+      }));
+      return;
+    }
     try {
       await renameTrial(targetTrial.id, newTitle);
       setTrials((prev) =>
@@ -528,6 +562,10 @@ export function LeftSidebar() {
   };
 
   const handleDeleteTrial = async (targetTrial: TrialSummaryItem) => {
+    if (targetTrial.projectId === 'local' || !cloudProjectId) {
+      deleteLocalTrial(targetTrial.id);
+      return;
+    }
     try {
       await deleteTrial(targetTrial.id);
       setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
@@ -594,18 +632,21 @@ export function LeftSidebar() {
 
   // Real-time optimistic synchronization of the active trial's title, status, metadata
   const displayTrials = useMemo(() => {
-    if (trials.length === 0 && activeTrial) {
-      return [
-        {
-          id: activeTrial.id,
-          title: activeTrial.title || 'Local Run',
-          status: activeTrial.status || 'DRAFT',
-          metadata: activeTrial.metadata || [],
-          createdAt: activeTrial.createdAt,
-          updatedAt: activeTrial.updatedAt || activeTrial.createdAt,
+    const isGuest = !cloudProjectId && projects.length === 0;
+    if (isGuest) {
+      const list = localTrials && localTrials.length > 0 ? localTrials : (activeTrial ? [activeTrial] : []);
+      return list.map((t) => {
+        const isCurrentActive = t.id === activeTrial.id;
+        return {
+          id: t.id,
+          title: isCurrentActive ? (activeTrial.title || t.title) : t.title,
+          status: isCurrentActive ? (activeTrial.status || t.status) : t.status,
+          metadata: isCurrentActive ? (activeTrial.metadata || t.metadata) : t.metadata,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt || t.createdAt,
           projectId: 'local',
-        } as TrialSummaryItem,
-      ];
+        } as TrialSummaryItem;
+      });
     }
     return trials.map((t) => {
       if (t.id === activeTrial.id) {
@@ -618,7 +659,7 @@ export function LeftSidebar() {
       }
       return t;
     });
-  }, [trials, activeTrial.id, activeTrial.title, activeTrial.status, activeTrial.metadata, activeTrial.createdAt, activeTrial.updatedAt]);
+  }, [cloudProjectId, projects.length, localTrials, trials, activeTrial]);
 
   // Extract distinct category tags across all trials
   const availableCategories = useMemo(() => {

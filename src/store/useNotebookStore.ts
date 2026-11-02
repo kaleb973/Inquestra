@@ -152,6 +152,8 @@ interface NotebookState {
   isRightDrawerOpen: boolean;
   rightDrawerMode: RightDrawerMode;
   activeTrial: TrialDocument;
+  /** In-browser collection of local trials for guest mode (persisted in localStorage) */
+  localTrials: TrialDocument[];
   /** Supabase-side UUID for the synced trial (null = never synced) */
   cloudTrialId: string | null;
   /** Supabase-side UUID for the auto-provisioned project */
@@ -185,6 +187,8 @@ interface NotebookActions {
   setIsLoadingTrial: (loading: boolean) => void;
   setCachedProjects: (projects: ProjectWithLead[]) => void;
   setCachedTrials: (trials: TrialSummaryItem[]) => void;
+  addLocalTrial: (trial: TrialDocument) => void;
+  deleteLocalTrial: (id: string) => void;
   /**
    * Append one or many samples to the rolling buffer (cap: BUFFER_MAX).
    * Also recomputes telemetryStats in the same set() call.
@@ -210,6 +214,7 @@ export const useNotebookStore = create<NotebookStore>()(
       isRightDrawerOpen: false,
       rightDrawerMode: 'TELEMETRY' as RightDrawerMode,
       activeTrial: makeDefaultTrial(),
+      localTrials: [makeDefaultTrial()],
       cloudTrialId: null,
       cloudProjectId: null,
       saveStatus: 'SAVED' as SaveStatus,
@@ -264,25 +269,69 @@ export const useNotebookStore = create<NotebookStore>()(
           };
         }),
 
-      updateContent: (json) =>
+      addLocalTrial: (trial) =>
         set((state) => ({
-          activeTrial: {
-            ...state.activeTrial,
-            content: json,
-            updatedAt: new Date().toISOString(),
-          },
-          saveStatus: 'UNSAVED',
+          localTrials: [trial, ...state.localTrials.filter((t) => t.id !== trial.id)],
+          activeTrial: trial,
+          cloudTrialId: null,
+          saveStatus: 'SAVED',
+          lastSavedAt: new Date().toISOString(),
         })),
 
+      deleteLocalTrial: (id) =>
+        set((state) => {
+          const remaining = state.localTrials.filter((t) => t.id !== id);
+          const nextActive = remaining.length > 0 ? remaining[0] : makeDefaultTrial();
+          return {
+            localTrials: remaining.length > 0 ? remaining : [nextActive],
+            activeTrial: nextActive,
+            cloudTrialId: null,
+          };
+        }),
+
+      updateContent: (json) =>
+        set((state) => {
+          const now = new Date().toISOString();
+          const updatedActive = {
+            ...state.activeTrial,
+            content: json,
+            updatedAt: now,
+          };
+          const updatedLocal = state.localTrials.map((t) =>
+            t.id === updatedActive.id ? updatedActive : t
+          );
+          if (!updatedLocal.some((t) => t.id === updatedActive.id)) {
+            updatedLocal.push(updatedActive);
+          }
+          return {
+            activeTrial: updatedActive,
+            localTrials: updatedLocal,
+            saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
+            lastSavedAt: now,
+          };
+        }),
+
       updateTitle: (title) =>
-        set((state) => ({
-          activeTrial: {
+        set((state) => {
+          const now = new Date().toISOString();
+          const updatedActive = {
             ...state.activeTrial,
             title,
-            updatedAt: new Date().toISOString(),
-          },
-          saveStatus: 'UNSAVED',
-        })),
+            updatedAt: now,
+          };
+          const updatedLocal = state.localTrials.map((t) =>
+            t.id === updatedActive.id ? updatedActive : t
+          );
+          if (!updatedLocal.some((t) => t.id === updatedActive.id)) {
+            updatedLocal.push(updatedActive);
+          }
+          return {
+            activeTrial: updatedActive,
+            localTrials: updatedLocal,
+            saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
+            lastSavedAt: now,
+          };
+        }),
 
       setHardwareStatus: (status) =>
         set((state) => ({
@@ -318,6 +367,7 @@ export const useNotebookStore = create<NotebookStore>()(
       // Persist document + cloud IDs + lastSavedAt + project/trial caches for instant 0ms restoration
       partialize: (state) => ({
         activeTrial: state.activeTrial,
+        localTrials: state.localTrials,
         cloudTrialId: state.cloudTrialId,
         cloudProjectId: state.cloudProjectId,
         lastSavedAt: state.lastSavedAt,
