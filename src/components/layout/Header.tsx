@@ -106,11 +106,19 @@ export function Header() {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
+      // Clear local storage so no private experiments leak on shared lab computers
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('inquestra-notebook-v1');
+      }
       const supabase = createSupabaseBrowserClient();
       await supabase.auth.signOut();
-      window.location.href = '/app/login';
+      window.location.href = '/app';
     } catch {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('inquestra-notebook-v1');
+      }
       await signOut();
+      window.location.href = '/app';
     }
   };
 

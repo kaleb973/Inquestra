@@ -7,12 +7,11 @@ import { signUp } from '@/actions/authActions';
 import { Eye, EyeOff } from 'lucide-react';
 
 const LAB_TYPES = [
-  { value: '', label: '— Select lab type —' },
   { value: 'Academic Lab', label: 'Academic / University Lab' },
+  { value: 'Independent', label: 'Student / Independent Researcher' },
   { value: 'Biotech / Startup', label: 'Biotech / Startup' },
   { value: 'Hospital / Clinical', label: 'Hospital / Clinical Research' },
   { value: 'Government / Federal', label: 'Government / Federal Lab' },
-  { value: 'Independent', label: 'Independent Researcher' },
 ];
 
 export default function SignUpPage() {
@@ -50,9 +49,9 @@ export default function SignUpPage() {
         </Link>
 
         <div className="bg-card border border-border rounded-lg p-6 sm:p-8 shadow-sm">
-          <h1 className="text-foreground text-xl font-semibold mb-1">Create lab account</h1>
+          <h1 className="text-foreground text-xl font-semibold mb-1">Create your account</h1>
           <p className="text-muted-foreground text-xs mb-6">
-            Set up your research workspace on Inquestra.
+            Back up your experiments and sync notes across devices.
           </p>
 
           {success ? (
@@ -75,7 +74,7 @@ export default function SignUpPage() {
                   autoComplete="name"
                   disabled={isPending}
                   className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  placeholder="Dr. Jane Smith"
+                  placeholder="Jane Smith"
                 />
               </div>
 
@@ -87,12 +86,12 @@ export default function SignUpPage() {
                 <select
                   id="labType"
                   name="labType"
-                  required
+                  defaultValue="Academic Lab"
                   disabled={isPending}
                   className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {LAB_TYPES.map((t) => (
-                    <option key={t.value} value={t.value} disabled={t.value === ''}>
+                    <option key={t.value} value={t.value}>
                       {t.label}
                     </option>
                   ))}
@@ -102,7 +101,7 @@ export default function SignUpPage() {
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Institutional work email
+                  Email
                 </label>
                 <input
                   id="email"
@@ -112,7 +111,7 @@ export default function SignUpPage() {
                   autoComplete="email"
                   disabled={isPending}
                   className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  placeholder="researcher@university.edu"
+                  placeholder="you@email.com"
                 />
               </div>
 
@@ -179,7 +178,7 @@ export default function SignUpPage() {
                 disabled={isPending}
                 className="w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold py-2.5 rounded transition-colors"
               >
-                {isPending ? 'Creating account…' : 'Create Lab Account'}
+                {isPending ? 'Creating account…' : 'Create Account'}
               </button>
             </form>
           )}
