@@ -451,7 +451,30 @@ export function LeftSidebar() {
           cloudProjectId: newTrial.projectId,
         });
       } catch (err) {
-        console.error('Failed to create new trial:', err);
+        console.warn('Server trial creation skipped (Local Notebook mode):', err);
+        const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+        const now = new Date().toISOString();
+        const localTrial: import('@/types/inquestra').TrialDocument = {
+          id: localId,
+          title: 'Untitled Run',
+          content: { type: 'doc', content: [] },
+          status: 'DRAFT',
+          metadata: cat ? [{ id: 'cat', key: 'category', value: cat }] : [],
+          createdAt: now,
+          updatedAt: now,
+        };
+        const summary: TrialSummaryItem = {
+          id: localId,
+          title: 'Untitled Run',
+          status: 'DRAFT',
+          createdAt: now,
+          updatedAt: now,
+          projectId: 'local',
+          metadata: cat ? [{ id: 'cat', key: 'category', value: cat }] : [],
+        };
+        setTrials((prev) => [summary, ...prev]);
+        setActiveTrial(localTrial);
+        useNotebookStore.setState({ cloudTrialId: null });
       } finally {
         setIsLoadingTrial(false);
       }
@@ -571,6 +594,19 @@ export function LeftSidebar() {
 
   // Real-time optimistic synchronization of the active trial's title, status, metadata
   const displayTrials = useMemo(() => {
+    if (trials.length === 0 && activeTrial) {
+      return [
+        {
+          id: activeTrial.id,
+          title: activeTrial.title || 'Local Run',
+          status: activeTrial.status || 'DRAFT',
+          metadata: activeTrial.metadata || [],
+          createdAt: activeTrial.createdAt,
+          updatedAt: activeTrial.updatedAt || activeTrial.createdAt,
+          projectId: 'local',
+        } as TrialSummaryItem,
+      ];
+    }
     return trials.map((t) => {
       if (t.id === activeTrial.id) {
         return {
@@ -582,7 +618,7 @@ export function LeftSidebar() {
       }
       return t;
     });
-  }, [trials, activeTrial.id, activeTrial.title, activeTrial.status, activeTrial.metadata]);
+  }, [trials, activeTrial.id, activeTrial.title, activeTrial.status, activeTrial.metadata, activeTrial.createdAt, activeTrial.updatedAt]);
 
   // Extract distinct category tags across all trials
   const availableCategories = useMemo(() => {

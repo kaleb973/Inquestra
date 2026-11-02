@@ -153,7 +153,7 @@ function StepTimer({
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, isMuted]);
 
   if (!detectedSeconds && !showPicker) {
     return (

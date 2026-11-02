@@ -403,78 +403,98 @@ export function Header() {
           </span>
         )}
 
-        {/* Real-time Autosave status indicator */}
-        {(saveStatus === 'SAVING' || isPending) && (
+        {/* Real-time Autosave / Local status indicator */}
+        {!user && (
+          <span
+            className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono font-medium"
+            title="Private to this device. Everything is saved automatically in your browser's local storage."
+          >
+            <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 shrink-0" />
+            <span className="hidden sm:inline">Saved in browser</span>
+          </span>
+        )}
+        {user && (saveStatus === 'SAVING' || isPending) && (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
             <span className="hidden sm:inline">Saving…</span>
           </span>
         )}
-        {saveStatus === 'SAVED' && !syncError && isSynced && !isPending && (
+        {user && saveStatus === 'SAVED' && !syncError && isSynced && !isPending && (
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono" title="Continuous background autosave is active">
             <Cloud className="w-3.5 h-3.5 text-primary" />
             <span className="hidden sm:inline">Autosaved</span>
           </span>
         )}
-        {saveStatus === 'UNSAVED' && isSynced && !isPending && (
+        {user && saveStatus === 'UNSAVED' && isSynced && !isPending && (
           <span className="flex items-center gap-1.5 text-xs text-amber-500 font-mono" title="Unsaved changes pending autosave">
             <Circle className="w-2 h-2 fill-amber-500" />
             <span className="hidden sm:inline">Unsaved</span>
           </span>
         )}
-        {(saveStatus === 'ERROR' || syncError) && (
+        {user && (saveStatus === 'ERROR' || syncError) && (
           <span className="flex items-center gap-1.5 text-xs text-critical font-mono" title={saveError || syncError || 'Sync failed'}>
             <AlertCircle className="w-3.5 h-3.5 text-critical" />
             <span className="hidden sm:inline">Save Error</span>
           </span>
         )}
 
-        {/* Save Snapshot button (Ctrl+S) - Creates deliberate audit revision */}
-        <button
-          onClick={handleSaveSnapshot}
-          disabled={isPending || saveStatus === 'SAVING'}
-          title={isSynced ? 'Autosave is active. Click or press Ctrl+S to save a numbered revision checkpoint.' : 'Save trial to cloud database'}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors ${
-            snapshotSuccess
-              ? 'bg-phosphor/15 text-phosphor border-phosphor/40 font-semibold'
-              : isSynced
-              ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
-              : 'bg-muted/60 text-foreground border-border hover:bg-accent'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          {isPending || saveStatus === 'SAVING' ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : snapshotSuccess ? (
-            <Check className="w-3.5 h-3.5 text-phosphor" />
-          ) : isSynced ? (
-            <Bookmark className="w-3.5 h-3.5" />
-          ) : (
+        {/* Back up to Cloud (Guests) or Save Snapshot button (Logged in users) */}
+        {!user ? (
+          <Link
+            href="/app/signup?redirectTo=/app"
+            title="Create an account to back up notes and sync across devices"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors"
+          >
             <Cloud className="w-3.5 h-3.5" />
-          )}
-          <span>
-            {isPending || saveStatus === 'SAVING'
-              ? 'Saving…'
-              : snapshotSuccess
-              ? 'Saved!'
-              : isSynced
-              ? 'Snapshot'
-              : 'Save'}
-          </span>
-        </button>
+            <span>Back up to Cloud</span>
+          </Link>
+        ) : (
+          <button
+            onClick={handleSaveSnapshot}
+            disabled={isPending || saveStatus === 'SAVING'}
+            title={isSynced ? 'Autosave is active. Click or press Ctrl+S to save a numbered revision checkpoint.' : 'Save trial to cloud database'}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors ${
+              snapshotSuccess
+                ? 'bg-phosphor/15 text-phosphor border-phosphor/40 font-semibold'
+                : isSynced
+                ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
+                : 'bg-muted/60 text-foreground border-border hover:bg-accent'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isPending || saveStatus === 'SAVING' ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : snapshotSuccess ? (
+              <Check className="w-3.5 h-3.5 text-phosphor" />
+            ) : isSynced ? (
+              <Bookmark className="w-3.5 h-3.5" />
+            ) : (
+              <Cloud className="w-3.5 h-3.5" />
+            )}
+            <span>
+              {isPending || saveStatus === 'SAVING'
+                ? 'Saving…'
+                : snapshotSuccess
+                ? 'Saved!'
+                : isSynced
+                ? 'Snapshot'
+                : 'Save'}
+            </span>
+          </button>
+        )}
 
-        {/* Export button (desktop/tablet) */}
+        {/* Download / Export button */}
         <button
           onClick={handleExport}
           disabled={isExporting}
-          title="Export trial archive as ZIP (Markdown + JSON + CSV)"
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Download notes and protocol as ZIP (Markdown + JSON)"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isExporting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
             <Download className="w-3.5 h-3.5" />
           )}
-          <span className="hidden lg:inline">{isExporting ? 'Exporting…' : 'Export'}</span>
+          <span className="hidden sm:inline">{isExporting ? 'Downloading…' : 'Download'}</span>
         </button>
 
         {/* Print button (desktop) */}

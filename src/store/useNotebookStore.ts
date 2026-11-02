@@ -17,12 +17,112 @@ import type { ProjectWithLead } from '@/actions/projectActions';
 
 const BUFFER_MAX = 500;
 
+export const STARTER_PCR_CONTENT: Record<string, unknown> = {
+  type: 'doc',
+  content: [
+    {
+      type: 'heading',
+      attrs: { level: 1 },
+      content: [{ type: 'text', text: 'Standard PCR Amplification & Gel Electrophoresis' }],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'High-fidelity PCR amplification of a 1.2 kb target construct followed by analytical 1.0% agarose gel electrophoresis. Check off bench steps and trigger timers directly below.',
+        },
+      ],
+    },
+    {
+      type: 'protocolBlock',
+      attrs: {
+        title: 'PCR Thermal Cycling Procedure',
+        version: 1,
+        steps: [
+          {
+            id: 'pcr-step-1',
+            text: 'Initial Denaturation: Heat reaction mixture at 98°C for 30s',
+            checked: false,
+            checkedAt: null,
+            deviation: null,
+            timerDuration: 30,
+          },
+          {
+            id: 'pcr-step-2',
+            text: '30 Cycles: Denature at 98°C (10s), Anneal at 58°C (30s), Extend at 72°C (45s)',
+            checked: false,
+            checkedAt: null,
+            deviation: null,
+            timerDuration: 45,
+          },
+          {
+            id: 'pcr-step-3',
+            text: 'Final Extension: Incubate at 72°C for 2m to ensure full-length amplicons',
+            checked: false,
+            checkedAt: null,
+            deviation: null,
+            timerDuration: 120,
+          },
+          {
+            id: 'pcr-step-4',
+            text: 'Hold at 4°C and transfer to ice for gel loading',
+            checked: false,
+            checkedAt: null,
+            deviation: null,
+            timerDuration: null,
+          },
+        ],
+      },
+    },
+    {
+      type: 'heading',
+      attrs: { level: 2 },
+      content: [{ type: 'text', text: 'Agarose Gel Electrophoresis (1.0%)' }],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'Prepare 50 mL 1.0% agarose in 1X TAE buffer. Cast gel with 10-well comb. Mix 5 µL PCR product with 1 µL 6X Loading Dye and load alongside 1 kb Plus DNA Ladder. Run at 100V for 30 minutes.',
+        },
+      ],
+    },
+    {
+      type: 'timerBlock',
+      attrs: {
+        duration: 1800,
+        label: 'Gel Electrophoresis Run (100V, 30m)',
+      },
+    },
+    {
+      type: 'heading',
+      attrs: { level: 2 },
+      content: [{ type: 'text', text: 'Observations & Imaging Notes' }],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'Document band migration under blue light transilluminator. Confirm target band at 1.2 kb without non-specific primer-dimer artifacts.',
+        },
+      ],
+    },
+  ],
+};
+
 const makeDefaultTrial = (): TrialDocument => ({
   id: typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2),
-  title: 'Untitled Trial',
-  content: {},
-  status: 'DRAFT',
-  metadata: [],
+  title: 'Standard PCR Amplification & Gel Electrophoresis',
+  content: STARTER_PCR_CONTENT,
+  status: 'ACTIVE',
+  metadata: [
+    { id: 'meta-1', key: 'Organism', value: 'E. coli DH5α' },
+    { id: 'meta-2', key: 'Polymerase', value: 'Q5 High-Fidelity' },
+    { id: 'meta-3', key: 'Target Amplicon', value: '1.2 kb' },
+  ],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });

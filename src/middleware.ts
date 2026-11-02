@@ -145,10 +145,11 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Subpath routing (everything under /app is the workspace)
+  // /app operates in Local Notebook mode for unauthenticated researchers (ADR-0001).
+  // Only administrative and billing management routes require authentication.
   const isAppProtectedRoute =
     pathname.startsWith('/app/admin') ||
-    pathname.startsWith('/app/billing') ||
-    pathname === '/app'; // The workspace root is protected
+    pathname.startsWith('/app/billing');
 
   const isAppAuthRoute =
     pathname.startsWith('/app/login') || pathname.startsWith('/app/signup');
