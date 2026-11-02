@@ -236,7 +236,7 @@ function ProjectsTab({
                   {project.lead ? (
                     <span className="flex items-center gap-1 text-xs font-medium text-foreground">
                       <UserIcon className="w-3 h-3 text-violet-500" />
-                      {project.lead.email.split('@')[0]}
+                      {project.lead?.email?.split('@')?.[0] ?? 'Lead'}
                       <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ml-1 ${ROLE_COLORS[project.lead.role] ?? ROLE_COLORS['VIEWER']}`}>
                         {project.lead.role}
                       </span>
@@ -258,7 +258,7 @@ function ProjectsTab({
                           <option value="">— Remove lead —</option>
                           {orgUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.email.split('@')[0]} ({u.role})
+                              {u.email?.split('@')?.[0] ?? 'User'} ({u.role})
                             </option>
                           ))}
                         </select>
@@ -509,7 +509,7 @@ export function AdminTabs({
                         {p.lead && (
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                             <UserIcon className="w-2.5 h-2.5 shrink-0" />
-                            {p.lead.email.split('@')[0]}
+                            {p.lead?.email?.split('@')?.[0] ?? 'Lead'}
                           </span>
                         )}
                       </div>

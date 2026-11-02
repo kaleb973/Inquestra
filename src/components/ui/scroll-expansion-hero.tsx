@@ -72,13 +72,15 @@ const ScrollExpandMedia = ({
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      setTouchStartY(e.touches[0].clientY);
+      if (e.touches && e.touches[0]) {
+        setTouchStartY(e.touches[0].clientY);
+      }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!touchStartY) return;
 
-      const touchY = e.touches[0].clientY;
+      const touchY = e.touches?.[0]?.clientY ?? 0;
       const deltaY = touchStartY - touchY;
 
       if (mediaFullyExpanded && deltaY < -20 && window.scrollY <= 5) {
@@ -221,7 +223,7 @@ const ScrollExpandMedia = ({
                               "autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1"
                             : mediaSrc.replace("watch?v=", "embed/") +
                               "?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&playlist=" +
-                              mediaSrc.split("v=")[1]
+                              (mediaSrc.split("v=")[1] || "")
                         }
                         className="w-full h-full rounded-xl"
                         frameBorder="0"

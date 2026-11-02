@@ -288,7 +288,7 @@ export function LeftSidebar() {
   // Instant restoration from in-memory cache — zero layout flash or skeleton wait
   const [projects, setProjects] = useState<ProjectWithLead[]>(cachedProjects || []);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(
-    cloudProjectId || (cachedProjects && cachedProjects.length > 0 ? cachedProjects[0].id : null)
+    cloudProjectId || (cachedProjects && cachedProjects.length > 0 ? cachedProjects[0]?.id ?? null : null)
   );
   type StatusFilter = 'ALL' | 'ACTIVE' | 'DRAFT' | 'COMPLETED' | 'FAILED';
 
@@ -393,7 +393,7 @@ export function LeftSidebar() {
 
         // Auto-hydrate first trial ONLY if the store has no active trial yet
         const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
-        if (!currentCloudTrialId && trialList.length > 0 && !hasInitializedRef.current) {
+        if (!currentCloudTrialId && trialList.length > 0 && !hasInitializedRef.current && trialList[0]?.id) {
           hasInitializedRef.current = true;
           handleSelectTrialRef.current(trialList[0].id);
         }
@@ -510,7 +510,7 @@ export function LeftSidebar() {
       setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
       if (activeTrial.id === targetTrial.id) {
         const remaining = trials.filter((t) => t.id !== targetTrial.id);
-        if (remaining.length > 0) {
+        if (remaining.length > 0 && remaining[0]?.id) {
           handleSelectTrial(remaining[0].id);
         } else {
           handleNewTrial();
@@ -656,7 +656,7 @@ export function LeftSidebar() {
                   {activeProject?.lead && (
                     <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
                       {ROLE_LABEL[activeProject.lead.role]} ·{' '}
-                      {activeProject.lead.email.split('@')[0]}
+                      {activeProject.lead.email?.split('@')?.[0] ?? 'Lead'}
                     </span>
                   )}
                   {activeProject?.code && !activeProject.lead && (
@@ -759,7 +759,7 @@ export function LeftSidebar() {
                       {p.lead && (
                         <span className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
                           <UserIcon className="w-2.5 h-2.5 shrink-0" />
-                          {p.lead.email.split('@')[0]}
+                          {p.lead.email?.split('@')?.[0] ?? 'Lead'}
                         </span>
                       )}
                       <span className="text-[10px] text-muted-foreground shrink-0">

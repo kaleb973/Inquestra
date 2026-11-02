@@ -125,7 +125,7 @@ export function VersionHistory({ trialId, isSynced }: VersionHistoryProps) {
                       </span>
                       <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                         <UserIcon className="w-2.5 h-2.5 shrink-0" />
-                        {rev.savedBy.email.split('@')[0]}
+                        {rev.savedBy?.email?.split('@')?.[0] ?? 'Author'}
                       </span>
                     </div>
 

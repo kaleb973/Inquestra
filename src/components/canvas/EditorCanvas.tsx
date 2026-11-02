@@ -702,24 +702,24 @@ const SlashCommandExtension = Extension.create({
             },
 
             onUpdate: (props) => {
-              component.updateProps(props);
+              component?.updateProps(props);
               if (!props.clientRect) return;
-              popup[0]?.setProps({
+              popup?.[0]?.setProps({
                 getReferenceClientRect: props.clientRect as () => DOMRect,
               });
             },
 
             onKeyDown: (props) => {
               if (props.event.key === 'Escape') {
-                popup[0]?.hide();
+                popup?.[0]?.hide();
                 return true;
               }
-              return component.ref?.onKeyDown(props) ?? false;
+              return component?.ref?.onKeyDown(props) ?? false;
             },
 
             onExit: () => {
-              popup[0]?.destroy();
-              component.destroy();
+              popup?.[0]?.destroy();
+              component?.destroy();
             },
           };
         },

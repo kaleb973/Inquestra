@@ -250,10 +250,10 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
   // ─── Group Aggregation State (Mean ± SD per category) ────────────────────────
 
   const [aggCategoryKey, setAggCategoryKey] = useState<string>(
-    categoryColumns[0]?.key || (csvAttr?.headers[0] ?? '')
+    categoryColumns[0]?.key || (csvAttr?.headers?.[0] ?? '')
   );
   const [aggMetricKey, setAggMetricKey] = useState<string>(
-    numericColumns[0]?.key || (csvAttr?.numericKeys[0] ?? '')
+    numericColumns[0]?.key || (csvAttr?.numericKeys?.[0] ?? '')
   );
 
   useEffect(() => {
@@ -277,7 +277,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
     if (csvAttr?.timestampKeys && csvAttr.timestampKeys.length > 0) {
       return csvAttr.timestampKeys[0]!;
     }
-    const timeCandidate = csvAttr?.headers.find((h) =>
+    const timeCandidate = csvAttr?.headers?.find((h) =>
       /^(time|time_s|time_ms|timestamp|timestamp_ms|date|datetime)/i.test(h)
     );
     return timeCandidate || '__row_index__';
@@ -287,7 +287,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
     const measurementCandidate = csvAttr.numericKeys.find(
       (k) => !/^(time|timestamp|date|id)/i.test(k)
     );
-    return measurementCandidate ? [measurementCandidate] : [csvAttr.numericKeys[0]!];
+    return measurementCandidate ? [measurementCandidate] : (csvAttr.numericKeys[0] ? [csvAttr.numericKeys[0]] : []);
   });
 
   // Live polling (only active when NOT in CSV mode)
@@ -418,12 +418,12 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
           },
         });
         const defaultX =
-          parsed.timestampKeys[0] ||
-          parsed.headers.find((h) => /^(time|time_s|time_ms|timestamp|date)/i.test(h)) ||
+          parsed.timestampKeys?.[0] ||
+          parsed.headers?.find((h) => /^(time|time_s|time_ms|timestamp|date)/i.test(h)) ||
           '__row_index__';
         const defaultY =
-          parsed.numericKeys.find((k) => k !== defaultX && !/^(time|timestamp|date|id)/i.test(k)) ||
-          parsed.numericKeys[0];
+          parsed.numericKeys?.find((k) => k !== defaultX && !/^(time|timestamp|date|id)/i.test(k)) ||
+          parsed.numericKeys?.[0];
         setXAxisKey(defaultX);
         if (defaultY) {
           setSelectedYChannels([defaultY]);

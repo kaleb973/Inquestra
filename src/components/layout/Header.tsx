@@ -655,7 +655,7 @@ export function Header() {
                   {profile.role === 'PI' ? 'LAB PI' : profile.role}
                 </span>
                 <span className="text-muted-foreground">·</span>
-                <span className="truncate">{user.email?.split('@')[0]}</span>
+                <span className="truncate">{user.email?.split('@')?.[0] ?? 'Researcher'}</span>
               </Link>
             ) : profile === null ? (
               // Profile still loading — show skeleton to avoid role flash
@@ -674,7 +674,7 @@ export function Header() {
                   {profile.role}
                 </span>
                 <span className="text-muted-foreground">·</span>
-                <span className="truncate">{user.email?.split('@')[0]}</span>
+                <span className="truncate">{user.email?.split('@')?.[0] ?? 'Researcher'}</span>
               </Link>
             )}
 
