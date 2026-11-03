@@ -1290,10 +1290,10 @@ export function EditorCanvas() {
             </div>
           </div>
 
-          {/* Loading overlay when switching trials */}
+          {/* Loading overlay when switching trials — solid opaque to prevent text bleed */}
           {isLoadingTrial && (
-            <div className="absolute inset-0 bg-card/80 backdrop-blur-xs z-30 flex items-center justify-center rounded-2xl">
-              <div className="flex items-center gap-2.5 px-4 py-2.5 bg-background border border-border rounded-lg shadow-xl text-xs font-mono text-foreground">
+            <div className="absolute inset-0 bg-background z-30 flex flex-col items-center justify-center rounded-2xl gap-3 animate-in fade-in duration-100 min-h-[500px]">
+              <div className="flex items-center gap-2.5 px-4 py-2.5 bg-card border border-border rounded-lg shadow-xl text-xs font-mono text-foreground">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
                 <span>Loading experiment notebook…</span>
               </div>

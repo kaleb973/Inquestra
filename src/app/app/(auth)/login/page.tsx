@@ -117,6 +117,9 @@ export default function LoginPage() {
       }
 
       if (data.success) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('inquestra-notebook-v1');
+        }
         setStep('redirecting');
         window.location.href = '/app';
       }
@@ -174,6 +177,9 @@ export default function LoginPage() {
         return;
       }
 
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('inquestra-notebook-v1');
+      }
       setStep('redirecting');
       window.location.href = '/app';
     } catch (err: unknown) {
@@ -206,6 +212,9 @@ export default function LoginPage() {
           setOtp('');
           otpRef.current?.focus();
         } else if (result.success) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('inquestra-notebook-v1');
+          }
           setStep('redirecting');
           window.location.href = '/app';
         }

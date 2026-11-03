@@ -62,6 +62,7 @@ export function Header() {
   const cloudProjectId = useNotebookStore((s) => s.cloudProjectId);
   const setCloudIds = useNotebookStore((s) => s.setCloudIds);
   const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
+  const isLoadingTrial = useNotebookStore((s) => s.isLoadingTrial);
   const saveStatus = useNotebookStore((s) => s.saveStatus);
   const saveError = useNotebookStore((s) => s.saveError);
   const setSaveStatus = useNotebookStore((s) => s.setSaveStatus);
@@ -358,9 +359,13 @@ export function Header() {
 
       {/* Trial identity */}
       <div className="flex items-center min-w-0 max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md shrink">
-        <span className="text-foreground text-sm font-semibold tracking-tight truncate" title={title}>
-          {title}
-        </span>
+        {isLoadingTrial ? (
+          <div className="h-4 w-28 bg-muted-foreground/20 rounded animate-pulse" />
+        ) : (
+          <span className="text-foreground text-sm font-semibold tracking-tight truncate" title={title}>
+            {title}
+          </span>
+        )}
       </div>
 
       {/* Status badge — interactive dropdown when trial is not sealed */}

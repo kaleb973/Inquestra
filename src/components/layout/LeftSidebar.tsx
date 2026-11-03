@@ -303,7 +303,7 @@ export function LeftSidebar() {
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const isGuest = isAuthenticated === false || (!cloudProjectId && projects.length === 0);
+  const isGuest = isAuthenticated === false;
   const [trials, setTrials] = useState<TrialSummaryItem[]>(cachedTrials || []);
   const [previewTrial, setPreviewTrial] = useState<TrialSummaryItem | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -410,7 +410,14 @@ export function LeftSidebar() {
         return;
       }
 
-      // Authenticated: fetch cloud workspace bootstrap
+      // Authenticated: mask canvas immediately if holding an un-synced trial
+      const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
+      if (!currentCloudTrialId) {
+        setIsLoadingTrial(true);
+      }
+
+      // Fetch cloud workspace bootstrap
+      setIsLoadingTrials(true);
       const initialProjectId = activeProjectId || cloudProjectId;
       fetchWorkspaceBootstrap(initialProjectId)
         .then((res) => {
@@ -427,16 +434,18 @@ export function LeftSidebar() {
           setCachedTrials(trialList);
           setIsLoadingTrials(false);
 
-          // Auto-hydrate first trial ONLY if the store has no active trial yet
-          const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
-          if (!currentCloudTrialId && trialList.length > 0 && !hasInitializedRef.current && trialList[0]?.id) {
+          // Auto-hydrate first cloud trial
+          if (trialList.length > 0 && !hasInitializedRef.current && trialList[0]?.id) {
             hasInitializedRef.current = true;
             handleSelectTrialRef.current(trialList[0].id);
+          } else {
+            setIsLoadingTrial(false);
           }
         })
         .catch((err) => {
           console.error('Failed to bootstrap workspace:', err);
           setIsLoadingTrials(false);
+          setIsLoadingTrial(false);
         });
     });
 
