@@ -325,21 +325,25 @@ export function LeftSidebar() {
   const loadingTrialIdRef = useRef<string | null>(null);
 
   const handleSelectTrial = useCallback((id: string) => {
-    // If user is already on this exact trial, don't trigger a full reload
-    if (useNotebookStore.getState().activeTrial.id === id) {
-      return;
-    }
-
     // Guest / Local Notebook mode: instant switch with 0ms network latency
     if (isGuest) {
       selectLocalTrial(id);
+      setIsLoadingTrial(false);
       return;
     }
 
-    // Check if trial exists in localTrials as a fast local fallback
+    // Check if trial exists in localTrials as a fast local fallback (when not authenticated)
     const localMatch = (useNotebookStore.getState().localTrials || []).find((t) => t.id === id);
-    if (localMatch) {
+    if (localMatch && !isAuthenticated) {
       selectLocalTrial(id);
+      setIsLoadingTrial(false);
+      return;
+    }
+
+    // If user is already on this exact trial AND it has already been synced with cloud, don't trigger a full network reload
+    const storeState = useNotebookStore.getState();
+    if (storeState.activeTrial.id === id && storeState.cloudTrialId === id) {
+      setIsLoadingTrial(false);
       return;
     }
 
@@ -384,7 +388,7 @@ export function LeftSidebar() {
         }
       }
     });
-  }, [isGuest, selectLocalTrial, setActiveTrial, setCloudIds, setIsLoadingTrial]);
+  }, [isGuest, isAuthenticated, selectLocalTrial, setActiveTrial, setCloudIds, setIsLoadingTrial]);
 
   const handleSelectTrialRef = useRef(handleSelectTrial);
   useEffect(() => {
@@ -403,10 +407,11 @@ export function LeftSidebar() {
 
       if (!isAuthed) {
         // Enforce Local Notebook guest mode: purge stale cloud IDs from localStorage
-        useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null });
+        useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null, saveStatus: 'SAVED' });
         setProjects([]);
         setTrials([]);
         setIsLoadingTrials(false);
+        setIsLoadingTrial(false);
         return;
       }
 
@@ -434,10 +439,25 @@ export function LeftSidebar() {
           setCachedTrials(trialList);
           setIsLoadingTrials(false);
 
-          // Auto-hydrate first cloud trial
-          if (trialList.length > 0 && !hasInitializedRef.current && trialList[0]?.id) {
+          // Auto-hydrate active or first cloud trial
+          if (trialList.length > 0 && !hasInitializedRef.current) {
             hasInitializedRef.current = true;
-            handleSelectTrialRef.current(trialList[0].id);
+            const currentActiveId = useNotebookStore.getState().activeTrial?.id;
+            const currentCloudId = useNotebookStore.getState().cloudTrialId;
+
+            // Prioritize preserving current active trial if it exists in the cloud trial list
+            const targetTrialId =
+              (currentCloudId && trialList.some((t) => t.id === currentCloudId))
+                ? currentCloudId
+                : (currentActiveId && trialList.some((t) => t.id === currentActiveId))
+                  ? currentActiveId
+                  : trialList[0]?.id;
+
+            if (targetTrialId) {
+              handleSelectTrialRef.current(targetTrialId);
+            } else {
+              setIsLoadingTrial(false);
+            }
           } else {
             setIsLoadingTrial(false);
           }

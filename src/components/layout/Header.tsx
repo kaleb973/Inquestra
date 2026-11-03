@@ -418,13 +418,23 @@ export function Header() {
 
         {/* Real-time Autosave / Local status indicator */}
         {!user && (
-          <span
-            className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono font-medium"
-            title="Private to this device. Everything is saved automatically in your browser's local storage."
-          >
-            <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 shrink-0" />
-            <span className="hidden sm:inline">Saved in browser</span>
-          </span>
+          saveStatus === 'UNSAVED' ? (
+            <span
+              className="flex items-center gap-1.5 text-xs text-amber-500 font-mono"
+              title="Unsaved changes pending local save"
+            >
+              <Circle className="w-2 h-2 fill-amber-500 shrink-0" />
+              <span className="hidden sm:inline">Unsaved</span>
+            </span>
+          ) : (
+            <span
+              className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono font-medium"
+              title="Private to this device. Everything is saved automatically in your browser's local storage."
+            >
+              <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 shrink-0" />
+              <span className="hidden sm:inline">Saved in browser</span>
+            </span>
+          )
         )}
         {user && (saveStatus === 'SAVING' || isPending) && (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">

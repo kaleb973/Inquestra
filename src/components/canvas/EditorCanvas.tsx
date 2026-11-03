@@ -984,12 +984,22 @@ export function EditorCanvas() {
     immediatelyRender: false,
   });
 
+  // Track previous loading state so we know when a trial just finished loading from server or store
+  const wasLoadingRef = useRef(false);
+
   // Keep editor content in sync when switching trials or when initial load finishes
   useEffect(() => {
-    if (!editor || isLoadingTrial) return;
+    if (!editor) return;
+    if (isLoadingTrial) {
+      wasLoadingRef.current = true;
+      return;
+    }
 
-    // Check if this trial has not yet been loaded into this editor instance
-    if (loadedTrialIdRef.current !== activeTrialId) {
+    const justFinishedLoading = wasLoadingRef.current;
+    wasLoadingRef.current = false;
+
+    // Check if this trial has not yet been loaded into this editor instance OR if it just finished loading
+    if (loadedTrialIdRef.current !== activeTrialId || justFinishedLoading) {
       flushPendingSave();
       loadedTrialIdRef.current = activeTrialId;
 

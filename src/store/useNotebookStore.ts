@@ -397,7 +397,7 @@ export const useNotebookStore = create<NotebookStore>()(
             metadata: [...state.activeTrial.metadata, entry],
             updatedAt: new Date().toISOString(),
           },
-          saveStatus: 'UNSAVED',
+          saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
         })),
 
       removeMetadata: (id) =>
@@ -407,7 +407,7 @@ export const useNotebookStore = create<NotebookStore>()(
             metadata: state.activeTrial.metadata.filter((m) => m.id !== id),
             updatedAt: new Date().toISOString(),
           },
-          saveStatus: 'UNSAVED',
+          saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
         })),
 
       resetTelemetry: () =>
