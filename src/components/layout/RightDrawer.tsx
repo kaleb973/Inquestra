@@ -248,7 +248,7 @@ export function RightDrawer() {
                 <span className="text-[10px] text-muted-foreground font-mono">LIMS-lite</span>
               </div>
               <p className="text-[11px] text-muted-foreground mb-3">
-                Click any item or <span className="text-indigo-400 font-medium">Use in Note</span> to log chemical usage in your trial notebook.
+                Click any item or <span className="text-emerald-500 font-medium">Use in Note</span> to log chemical usage in your trial notebook.
               </p>
               <div className="relative">
                 <input
@@ -256,7 +256,7 @@ export function RightDrawer() {
                   placeholder="Search reagents, plasmids, lot #..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+                  className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors shadow-sm"
                 />
                 <div className="absolute left-3 top-2.5 text-muted-foreground">
                   <Box className="w-3.5 h-3.5" />
@@ -271,7 +271,7 @@ export function RightDrawer() {
                   <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Linked to This Trial</span>
                   <button
                     onClick={() => insertReagentIntoDoc({ name: '', unit: 'mL' })}
-                    className="text-[10px] text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
+                    className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium flex items-center gap-1 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" /> Log Reagent
                   </button>
@@ -286,7 +286,7 @@ export function RightDrawer() {
                       onClick={() => insertReagentIntoDoc({ name: '', unit: 'mL' })}
                       className="px-2.5 py-1 text-xs bg-muted hover:bg-accent border border-border rounded text-foreground transition-colors inline-flex items-center gap-1.5"
                     >
-                      <Plus className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Insert Reagent Log
+                      <Plus className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Insert Reagent Log
                     </button>
                   </div>
                 ) : (
@@ -295,7 +295,7 @@ export function RightDrawer() {
                       <div key={link.id} className="bg-card border border-border rounded-lg p-3 shadow-sm">
                         <div className="flex justify-between items-start mb-1">
                           <span className="text-xs font-semibold text-foreground">{link.inventoryItem.name}</span>
-                          <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
                             {link.quantityUsed} {link.unit} used
                           </span>
                         </div>
@@ -334,10 +334,10 @@ export function RightDrawer() {
                     {searchResults.map((item) => (
                       <div 
                         key={item.id} 
-                        className="bg-card border border-border hover:border-indigo-500/50 transition-colors rounded-lg p-3 group relative shadow-sm"
+                        className="bg-card border border-border hover:border-emerald-500/40 transition-colors rounded-lg p-3 group relative shadow-sm"
                       >
                         <div className="flex justify-between items-start gap-2 mb-1.5">
-                          <span className="text-xs font-semibold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                          <span className="text-xs font-semibold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">
                             {item.name}
                           </span>
                           <span className={`text-[10px] font-mono shrink-0 px-1.5 py-0.5 rounded border ${
@@ -355,7 +355,7 @@ export function RightDrawer() {
                           </span>
                           
                           {item.location && (
-                            <span className="text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                            <span className="text-muted-foreground flex items-center gap-1">
                               <MapPin className="w-2.5 h-2.5" />
                               {item.location.name}
                             </span>
@@ -378,7 +378,7 @@ export function RightDrawer() {
                           </span>
                           <button
                             onClick={() => insertReagentIntoDoc({ name: item.name, unit: item.unit })}
-                            className="px-2 py-1 text-[10px] font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white rounded border border-indigo-500/30 transition-all flex items-center gap-1 shadow-sm"
+                            className="px-2 py-1 text-[10px] font-medium bg-muted text-muted-foreground hover:bg-primary hover:text-white rounded border border-border transition-all flex items-center gap-1 shadow-sm"
                           >
                             <Plus className="w-3 h-3" /> Use in Note
                           </button>

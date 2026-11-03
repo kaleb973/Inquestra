@@ -135,7 +135,7 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
         <div className="p-3 bg-card border border-border rounded-xl shadow-md max-w-lg space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Database className="w-4 h-4 text-indigo-500" />
+              <Database className="w-4 h-4 text-foreground" />
               <span className="text-xs font-semibold text-foreground">
                 Retrieve Experiment Data by Name
               </span>
@@ -157,7 +157,7 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search experiments by name..."
-              className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60"
+              className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60"
               autoFocus
             />
           </div>
@@ -198,10 +198,10 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
           </div>
         </div>
       ) : (
-        <div className="relative group max-w-xl bg-card border border-border/80 rounded-xl p-3.5 shadow-sm hover:border-indigo-500/40 transition-all">
+        <div className="relative group max-w-xl bg-card border border-border/80 rounded-xl p-3.5 shadow-sm hover:border-border transition-all">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-2.5 min-w-0">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5">
+              <div className="p-1.5 rounded-lg bg-muted text-foreground shrink-0 mt-0.5">
                 <Database className="w-4 h-4" />
               </div>
               <div className="min-w-0 space-y-1">
@@ -250,7 +250,7 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
                   key={idx}
                   className="inline-flex items-center gap-1 text-[10px] bg-muted/60 border border-border/60 px-2 py-0.5 rounded-md font-mono text-muted-foreground"
                 >
-                  <Tag className="w-2.5 h-2.5 text-indigo-400" />
+                  <Tag className="w-2.5 h-2.5 text-muted-foreground" />
                   <span className="font-semibold text-foreground">{m.key}:</span>
                   <span>{m.value}</span>
                 </span>
@@ -262,7 +262,7 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
           <div className="mt-3 pt-2 flex items-center justify-end">
             <button
               onClick={handleJumpToTrial}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-foreground hover:text-foreground transition-colors"
             >
               <span>Inspect Source Notebook</span>
               <ExternalLink className="w-3 h-3" />

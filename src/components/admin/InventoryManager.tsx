@@ -53,7 +53,7 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
         <h2 className="text-lg font-semibold text-foreground">Reagents & Specimens</h2>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors shadow-sm font-medium"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-foreground text-background hover:bg-foreground/90 font-medium rounded transition-colors shadow-sm font-medium"
         >
           <Plus className="w-4 h-4" /> Add Item
         </button>
@@ -66,11 +66,11 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <label className="block text-xs font-medium text-muted-foreground mb-1">Name</label>
-              <input required name="name" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+              <input required name="name" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
-              <select required name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500">
+              <select required name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
                 <option value="REAGENT">Reagent</option>
                 <option value="CHEMICAL">Chemical</option>
                 <option value="BIOLOGICAL">Biological</option>
@@ -81,30 +81,30 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Lot Number</label>
-              <input name="lotNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+              <input name="lotNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Quantity</label>
-              <input required type="number" step="any" name="quantity" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+              <input required type="number" step="any" name="quantity" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Unit</label>
-              <input required name="unit" placeholder="mL, g..." className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+              <input required name="unit" placeholder="mL, g..." className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Low Stock Alert</label>
-              <input type="number" step="any" name="thresholdValue" defaultValue="0" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+              <input type="number" step="any" name="thresholdValue" defaultValue="0" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Expiry Date</label>
-              <input type="date" name="expirationDate" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+              <input type="date" name="expirationDate" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Location</label>
-              <select name="locationId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500">
+              <select name="locationId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
                 <option value="">Unassigned</option>
                 {locations.map((loc) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
@@ -114,7 +114,7 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
           </div>
 
           <div className="flex justify-end pt-2 border-t border-border mt-2">
-            <button disabled={isPending} type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
+            <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
               {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Item'}
             </button>
           </div>
@@ -156,7 +156,7 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
                     step="any"
                     defaultValue={item.quantity}
                     onBlur={(e) => { if (e.target.value !== String(item.quantity)) handleUpdate(item.id, e.target.value) }}
-                    className="w-16 bg-transparent border-b border-transparent hover:border-border focus:border-indigo-500 focus:outline-none text-foreground mr-1 px-1 py-0.5 rounded-none"
+                    className="w-16 bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none text-foreground mr-1 px-1 py-0.5 rounded-none"
                   />
                   <span className="text-muted-foreground text-xs">{item.unit}</span>
                 </td>
@@ -183,7 +183,7 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
                         type: 'inventory',
                       })}
                       title="Print QR label"
-                      className="text-muted-foreground hover:text-indigo-500 transition-colors p-1"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
                     >
                       <QrCode className="w-4 h-4" />
                     </button>

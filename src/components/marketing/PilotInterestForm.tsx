@@ -67,7 +67,7 @@ export function PilotInterestForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Alex Morgan"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
         <div>
@@ -80,7 +80,7 @@ export function PilotInterestForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="e.g. alex.morgan@institution.edu"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
       </div>
@@ -96,7 +96,7 @@ export function PilotInterestForm() {
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
             placeholder="e.g. Department of Biomedical Engineering"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
         <div>
@@ -108,7 +108,7 @@ export function PilotInterestForm() {
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="Principal Investigator, Postdoc, Lab Manager…"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
       </div>
@@ -123,7 +123,7 @@ export function PilotInterestForm() {
           onChange={(e) => setUseCase(e.target.value)}
           placeholder="e.g. Enzyme kinetic assays, molecular cloning SOPs, chemical reagent lot tracking, live sensor logging, or mechanical testing…"
           rows={3}
-          className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+          className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
         />
       </div>
 

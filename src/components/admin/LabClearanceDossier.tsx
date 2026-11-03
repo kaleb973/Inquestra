@@ -60,7 +60,7 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
     clearanceLevel: 4,
     title: 'Principal Investigator',
     subtitle: 'Lab Director & Legal Sign-off Authority',
-    colorClass: 'text-violet-600 dark:text-violet-400',
+    colorClass: 'text-foreground',
     borderClass: 'border-violet-300 dark:border-violet-500/40',
     bgClass: 'bg-violet-50 dark:bg-violet-950/20',
     badgeClass: 'bg-violet-100 dark:bg-violet-950/50 text-violet-800 dark:text-violet-300 border-violet-300 dark:border-violet-800',
@@ -88,10 +88,10 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
     clearanceLevel: 3,
     title: 'Lab Operations Manager',
     subtitle: 'Facility & Inventory Operations Lead',
-    colorClass: 'text-indigo-600 dark:text-indigo-400',
-    borderClass: 'border-indigo-300 dark:border-indigo-500/40',
+    colorClass: 'text-foreground',
+    borderClass: 'border-indigo-300 dark:border-border',
     bgClass: 'bg-indigo-50 dark:bg-indigo-950/20',
-    badgeClass: 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800',
+    badgeClass: 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-800 dark:text-muted-foreground border-indigo-300 dark:border-indigo-800',
     authorizedList: [
       'Manage LIMS inventory, stock replenishment, and lot numbers',
       'Define storage locations (freezers, racks, boxes, well-plates)',
@@ -298,7 +298,7 @@ export function LabClearanceDossier({
             </div>
             <div>
               <div className="text-[10px] uppercase font-mono text-muted-foreground">Assigned Squad</div>
-              <div className="text-sm font-semibold text-indigo-600 dark:text-indigo-300 mt-0.5">
+              <div className="text-sm font-semibold text-indigo-600 dark:text-muted-foreground mt-0.5">
                 {user.squadName || 'General Lab Pool (Unassigned)'}
               </div>
             </div>
@@ -313,7 +313,7 @@ export function LabClearanceDossier({
                   Role Kickoff Objectives ({completedCount}/{config.checklist.length})
                 </h3>
               </div>
-              <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+              <span className="text-xs font-mono font-bold text-foreground">
                 {progressPercent}% Complete
               </span>
             </div>
@@ -341,7 +341,7 @@ export function LabClearanceDossier({
                   >
                     <div className="mt-0.5 shrink-0">
                       {isChecked ? (
-                        <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        <CheckCircle2 className="w-4 h-4 text-foreground" />
                       ) : (
                         <Circle className="w-4 h-4 text-muted-foreground" />
                       )}
@@ -364,14 +364,14 @@ export function LabClearanceDossier({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Authorized */}
             <div className="p-4 rounded-xl bg-muted/20 border border-border">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-2.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-muted-foreground uppercase tracking-wider mb-2.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-foreground" />
                 Authorized Operations
               </div>
               <ul className="space-y-2 text-xs text-foreground">
                 {config.authorizedList.map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-indigo-600 dark:text-indigo-400 mt-0.5 font-bold">✓</span>
+                    <span className="text-foreground mt-0.5 font-bold">✓</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -397,9 +397,9 @@ export function LabClearanceDossier({
 
           {/* Regulatory Mandate (21 CFR Part 11) */}
           <div className="p-4 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/15 border border-indigo-200 dark:border-indigo-900/40 flex items-start gap-3">
-            <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+            <Info className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
             <div>
-              <div className="text-xs font-semibold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider">
+              <div className="text-xs font-semibold text-indigo-800 dark:text-muted-foreground uppercase tracking-wider">
                 FDA 21 CFR Part 11 & GLP Regulatory Mandate
               </div>
               <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
@@ -419,7 +419,7 @@ export function LabClearanceDossier({
               </div>
               <button
                 onClick={() => setShowEscalationModal(true)}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-sm"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-sm"
               >
                 <ArrowUpRight className="w-3.5 h-3.5" />
                 Request Higher Clearance
@@ -445,7 +445,7 @@ export function LabClearanceDossier({
             <div className="w-full max-w-md bg-card border border-border rounded-xl p-5 shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <div className="flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-indigo-500" />
+                  <ShieldAlert className="w-4 h-4 text-foreground" />
                   <h3 className="text-sm font-semibold text-foreground">Ask Higher-Up: Clearance Elevation</h3>
                 </div>
                 <button
@@ -458,7 +458,7 @@ export function LabClearanceDossier({
 
               {escalationSuccess ? (
                 <div className="p-6 text-center space-y-2">
-                  <CheckCircle2 className="w-8 h-8 text-indigo-500 mx-auto" />
+                  <CheckCircle2 className="w-8 h-8 text-foreground mx-auto" />
                   <div className="text-sm font-semibold text-foreground">Escalation Transmitted</div>
                   <p className="text-xs text-muted-foreground">
                     Your clearance request has been forwarded to the Principal Investigator&apos;s Authorizations Inbox.
@@ -479,7 +479,7 @@ export function LabClearanceDossier({
                     <select
                       value={requestedRole}
                       onChange={(e) => setRequestedRole(e.target.value as Role)}
-                      className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                      className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                     >
                       <option value="RESEARCHER">Level 2: Bench Biomedical Researcher</option>
                       <option value="ADMIN">Level 3: Lab Operations Manager</option>
@@ -496,7 +496,7 @@ export function LabClearanceDossier({
                       value={justification}
                       onChange={(e) => setJustification(e.target.value)}
                       placeholder="e.g. Completed BioSafety Level 2 clearance. Need to conduct microfluidic serial acquisitions and deduct reagents."
-                      className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                      className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
 
@@ -511,7 +511,7 @@ export function LabClearanceDossier({
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="px-4 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 disabled:opacity-50 shadow-sm"
+                      className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 disabled:opacity-50 shadow-sm"
                     >
                       {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                       Transmit to PI

@@ -77,8 +77,8 @@ interface AdminTabsProps {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  ADMIN: 'text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 border-indigo-500/30',
-  PI: 'text-violet-700 dark:text-violet-300 bg-violet-500/10 border-violet-500/30',
+  ADMIN: 'text-foreground bg-muted border-border',
+  PI: 'text-foreground bg-muted border-violet-500/30',
   RESEARCHER: 'text-sky-700 dark:text-sky-300 bg-sky-500/10 border-sky-500/30',
   VIEWER: 'text-muted-foreground bg-muted border-border',
 };
@@ -169,8 +169,8 @@ function ProjectsTab({
             >
               <div className="px-5 py-4 flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="mt-1 p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 shrink-0">
-                    <FolderOpen className="w-3.5 h-3.5 text-indigo-500" />
+                  <div className="mt-1 p-1.5 rounded-lg bg-muted border border-border/60 shrink-0">
+                    <FolderOpen className="w-3.5 h-3.5 text-foreground" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -235,7 +235,7 @@ function ProjectsTab({
                   <span className="text-xs text-muted-foreground">Project PI / Lead</span>
                   {project.lead ? (
                     <span className="flex items-center gap-1 text-xs font-medium text-foreground">
-                      <UserIcon className="w-3 h-3 text-violet-500" />
+                      <UserIcon className="w-3 h-3 text-muted-foreground" />
                       {project.lead?.email?.split('@')?.[0] ?? 'Lead'}
                       <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ml-1 ${ROLE_COLORS[project.lead.role] ?? ROLE_COLORS['VIEWER']}`}>
                         {project.lead.role}
@@ -253,7 +253,7 @@ function ProjectsTab({
                         <select
                           value={selectedLeadId}
                           onChange={(e) => setSelectedLeadId(e.target.value)}
-                          className="text-xs px-2 py-1 rounded border border-border bg-background text-foreground focus:outline-none focus:border-indigo-500/60"
+                          className="text-xs px-2 py-1 rounded border border-border bg-background text-foreground focus:outline-none focus:border-primary/60"
                         >
                           <option value="">— Remove lead —</option>
                           {orgUsers.map((u) => (
@@ -265,7 +265,7 @@ function ProjectsTab({
                         <button
                           onClick={() => handleLeadChange(project.id)}
                           disabled={isPending}
-                          className="text-[10px] px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50"
+                          className="text-[10px] px-2 py-1 rounded bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors disabled:opacity-50"
                         >
                           {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Save'}
                         </button>
@@ -282,7 +282,7 @@ function ProjectsTab({
                           setEditingLeadId(project.id);
                           setSelectedLeadId(project.lead?.id ?? '');
                         }}
-                        className="text-[10px] text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1"
+                        className="text-[10px] text-muted-foreground hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors flex items-center gap-1"
                       >
                         <Plus className="w-3 h-3" />
                         {project.lead ? 'Reassign' : 'Assign Lead'}
@@ -371,7 +371,7 @@ export function AdminTabs({
                 onClick={() => setActiveTab(t.id)}
                 className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px ${
                   activeTab === t.id
-                    ? 'border-indigo-500 text-foreground font-semibold'
+                    ? 'border-primary text-foreground font-semibold'
                     : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                 }`}
               >
@@ -434,7 +434,7 @@ export function AdminTabs({
                     stat.alert
                       ? 'border-amber-500/40 hover:border-amber-500/70'
                       : stat.onClick
-                      ? 'border-border hover:border-indigo-500/40 cursor-pointer'
+                      ? 'border-border hover:border-border cursor-pointer'
                       : 'border-border cursor-default'
                   }`}
                 >
@@ -459,7 +459,7 @@ export function AdminTabs({
                   <h2 className="text-sm font-semibold text-foreground">Team Members</h2>
                   <button
                     onClick={() => setActiveTab('teams')}
-                    className="text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
                   >
                     Manage →
                   </button>
@@ -496,7 +496,7 @@ export function AdminTabs({
                   <h2 className="text-sm font-semibold text-foreground">Projects</h2>
                   <button
                     onClick={() => setActiveTab('projects')}
-                    className="text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
                   >
                     Manage →
                   </button>
@@ -528,16 +528,16 @@ export function AdminTabs({
             {/* Quick links */}
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: 'Manage Inventory', desc: `${inventory.length} reagents tracked`, tab: 'inventory' as TabId, icon: <Box className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> },
-                { label: 'Equipment Calibration', desc: `${equipment.length} instruments registered`, tab: 'equipment' as TabId, icon: <Wrench className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> },
-                { label: 'Audit Logs', desc: `${auditLogs.length} recent events`, tab: 'audit' as TabId, icon: <ClipboardList className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> },
+                { label: 'Manage Inventory', desc: `${inventory.length} reagents tracked`, tab: 'inventory' as TabId, icon: <Box className="w-5 h-5 text-foreground" /> },
+                { label: 'Equipment Calibration', desc: `${equipment.length} instruments registered`, tab: 'equipment' as TabId, icon: <Wrench className="w-5 h-5 text-foreground" /> },
+                { label: 'Audit Logs', desc: `${auditLogs.length} recent events`, tab: 'audit' as TabId, icon: <ClipboardList className="w-5 h-5 text-foreground" /> },
               ].map((item) => (
                 <button
                   key={item.label}
                   onClick={() => setActiveTab(item.tab)}
-                  className="text-left bg-card border border-border hover:border-indigo-500/60 rounded-xl p-4 flex items-start gap-3 transition-colors group shadow-sm"
+                  className="text-left bg-card border border-border hover:border-border rounded-xl p-4 flex items-start gap-3 transition-colors group shadow-sm"
                 >
-                  <div className="mt-0.5 p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 group-hover:bg-indigo-500/20 transition-colors">
+                  <div className="mt-0.5 p-2 rounded-lg bg-muted border border-border/60 group-hover:bg-primary/90/20 transition-colors">
                     {item.icon}
                   </div>
                   <div>

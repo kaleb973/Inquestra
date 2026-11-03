@@ -50,7 +50,7 @@ function SequenceNode(props: any) {
     const c = char.toUpperCase();
     if (c === 'A') return 'text-red-600 dark:text-red-400 bg-red-500/10 rounded-sm px-0.5';
     if (c === 'T' || c === 'U') return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 rounded-sm px-0.5';
-    if (c === 'G') return 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 rounded-sm px-0.5';
+    if (c === 'G') return 'text-foreground bg-muted rounded-sm px-0.5';
     if (c === 'C') return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-sm px-0.5';
     return 'text-muted-foreground';
   };

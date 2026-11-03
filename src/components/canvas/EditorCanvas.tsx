@@ -252,7 +252,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Preformatted code or protocol script',
       category: 'Formatting',
       keywords: ['code block', 'code', 'snippet', 'pre', 'script', 'python', 'r'],
-      icon: <CodeIcon className="w-4 h-4 text-indigo-400" />,
+      icon: <CodeIcon className="w-4 h-4 text-sky-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
           .chain()
@@ -332,7 +332,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Standard SDS-PAGE, transfer, blocking, and antibody incubation SOP',
       category: 'Protocols & SOPs',
       keywords: ['protocol: western blot', 'western blot', 'wb', 'sds-page', 'protein', 'antibody', 'blot'],
-      icon: <ClipboardList className="w-4 h-4 text-violet-500" />,
+      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor
           .chain()
@@ -424,7 +424,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Draw 2D chemical structure',
       category: 'Scientific',
       keywords: ['molecule', 'smiles', 'chemical', 'structure', 'compound', 'chem', 'formula', 'draw', 'benzene', 'organic'],
-      icon: <FlaskConical className="w-4 h-4 text-indigo-400" />,
+      icon: <FlaskConical className="w-4 h-4 text-sky-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         const arg = parseCommandArg(editor, range);
         editor
@@ -467,7 +467,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Biological sequence alignment',
       category: 'Scientific',
       keywords: ['sequence', 'dna', 'rna', 'protein', 'nucleotide', 'genome', 'fasta', 'pcr', 'primer', 'atgc', 'alignment', 'bio'],
-      icon: <span className="w-4 h-4 font-mono font-bold text-purple-400">GC</span>,
+      icon: <span className="w-4 h-4 font-mono font-bold text-teal-500">GC</span>,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         const arg = parseCommandArg(editor, range);
         const cleanSeq = arg ? arg.replace(/[^a-zA-Z]/g, '').toUpperCase() : '';
@@ -520,7 +520,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Link an instrument or sensor to this trial',
       category: 'Scientific',
       keywords: ['equipment', 'eq', 'instrument', 'device', 'hardware', 'link', 'sensor', 'potentiostat'],
-      icon: <span className="w-4 h-4 font-bold text-indigo-400">EQ</span>,
+      icon: <span className="w-4 h-4 font-bold text-sky-500">EQ</span>,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'equipmentBlock' }).run();
       },
@@ -530,7 +530,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Retrieve & embed parameters from another trial by name',
       category: 'Scientific',
       keywords: ['reference', 'trial', 'experiment', 'parameter', 'ref'],
-      icon: <Database className="w-4 h-4 text-indigo-400" />,
+      icon: <Database className="w-4 h-4 text-sky-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
       },
@@ -616,7 +616,7 @@ function buildSlashCommands(): SlashCommand[] {
       description: 'Open compliance & audit log panel (SHA-256 provenance)',
       category: 'Actions & Compliance',
       keywords: ['audit', 'history', 'provenance', 'revisions', 'integrity', 'checksum', 'sha256', 'compliance', 'log'],
-      icon: <ScrollText className="w-4 h-4 text-violet-500" />,
+      icon: <ScrollText className="w-4 h-4 text-emerald-500" />,
       command: (_params: { editor: Editor; range: Range }) => {
         _params.editor.chain().focus().deleteRange(_params.range).run();
         useNotebookStore.getState().setRightDrawerMode('COMPLIANCE');
@@ -1237,7 +1237,7 @@ export function EditorCanvas() {
           }}
         >
           {/* Subtle notebook binder margin indicator on the left */}
-          <div className="absolute top-8 bottom-8 left-3 w-[2px] bg-gradient-to-b from-indigo-500/20 via-border/30 to-transparent rounded-full pointer-events-none" />
+          <div className="absolute top-8 bottom-8 left-3 w-[2px] bg-gradient-to-b from-border/80 via-border/40 to-transparent rounded-full pointer-events-none" />
 
           {/* Document header / Title */}
           <div className="pb-4 border-b border-border/60 mb-6 pl-2">

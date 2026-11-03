@@ -124,7 +124,7 @@ export function CanvasContextMenu({
           onClick={() => insertNode('moleculeBlock')}
           className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <FlaskConical className="w-3.5 h-3.5 text-indigo-400" />
+          <FlaskConical className="w-3.5 h-3.5 text-muted-foreground" />
           <span>Chemical Molecule (SMILES)</span>
         </button>
 

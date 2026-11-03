@@ -65,7 +65,7 @@ function MathNode(props: any) {
         {/* Top action bar */}
         <div className="bg-muted/60 px-4 py-1.5 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Sigma className="w-3.5 h-3.5 text-indigo-500" />
+            <Sigma className="w-3.5 h-3.5 text-foreground" />
             <span className="font-mono font-medium">KaTeX Equation</span>
           </div>
           <div className="flex items-center gap-1">
@@ -73,7 +73,7 @@ function MathNode(props: any) {
               type="button"
               onClick={handleCopyLatex}
               title="Copy LaTeX source"
-              className="p-1 rounded text-muted-foreground hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
+              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-primary/90/10 transition-colors"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
@@ -114,7 +114,7 @@ function MathNode(props: any) {
                   key={p.label}
                   type="button"
                   onClick={() => updateAttributes({ latex: p.latex, caption: p.caption })}
-                  className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/70 bg-background hover:bg-indigo-500/10 hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/70 bg-background hover:bg-primary/90/10 hover:border-border hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
                 >
                   {p.label}
                 </button>
@@ -122,7 +122,7 @@ function MathNode(props: any) {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-medium text-indigo-600 dark:text-indigo-400">
+              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
                 <Sigma className="w-3.5 h-3.5" /> KaTeX Equation
               </div>
               <button
@@ -138,7 +138,7 @@ function MathNode(props: any) {
               value={latex}
               onChange={(e) => updateAttributes({ latex: e.target.value })}
               placeholder={`Enter LaTeX e.g. \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}`}
-              className="bg-background border border-border rounded p-2 text-sm font-mono text-indigo-700 dark:text-indigo-300 focus:outline-none focus:border-indigo-500 w-full min-h-[60px]"
+              className="bg-background border border-border rounded p-2 text-sm font-mono text-foreground focus:outline-none focus:border-primary w-full min-h-[60px]"
             />
 
             <input
@@ -146,7 +146,7 @@ function MathNode(props: any) {
               value={node.attrs.caption}
               onChange={(e) => updateAttributes({ caption: e.target.value })}
               placeholder="Caption (optional)"
-              className="bg-background border border-border rounded p-1.5 text-xs text-foreground focus:outline-none focus:border-indigo-500 w-full"
+              className="bg-background border border-border rounded p-1.5 text-xs text-foreground focus:outline-none focus:border-primary w-full"
             />
           </div>
         )}

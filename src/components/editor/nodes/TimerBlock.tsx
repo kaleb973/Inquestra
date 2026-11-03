@@ -204,14 +204,14 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
           isDone
             ? 'bg-emerald-500/10 border-emerald-500/40'
             : isRunning
-            ? 'bg-card border-indigo-500/40 shadow-md ring-1 ring-indigo-500/20'
+            ? 'bg-card border-primary/40 shadow-md ring-1 ring-indigo-500/20'
             : 'bg-card border-border hover:border-border/80'
         }`}
       >
         {/* Header with Label and Delete */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
-            <Timer className={`w-4 h-4 ${isRunning ? 'text-indigo-500 animate-spin' : 'text-muted-foreground'}`} style={{ animationDuration: '3s' }} />
+            <Timer className={`w-4 h-4 ${isRunning ? 'text-foreground animate-spin' : 'text-muted-foreground'}`} style={{ animationDuration: '3s' }} />
             {editingLabel ? (
               <div className="flex items-center gap-1 flex-1">
                 <input
@@ -223,7 +223,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                     if (e.key === 'Escape') setEditingLabel(false);
                   }}
                   autoFocus
-                  className="bg-background border border-border rounded px-2 py-0.5 text-xs text-foreground focus:outline-none focus:border-indigo-500 w-full"
+                  className="bg-background border border-border rounded px-2 py-0.5 text-xs text-foreground focus:outline-none focus:border-primary w-full"
                 />
                 <button onClick={saveLabel} className="p-1 hover:text-foreground text-muted-foreground">
                   <Check className="w-3.5 h-3.5 text-emerald-500" />
@@ -265,11 +265,11 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                 onBlur={handleSaveTimeInput}
                 autoFocus
                 placeholder="e.g. 12:30 or 45s"
-                className="font-mono text-3xl font-bold tracking-tight text-foreground bg-background border-2 border-indigo-500 rounded-lg px-2 py-0.5 w-40 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                className="font-mono text-3xl font-bold tracking-tight text-foreground bg-background border-2 border-primary rounded-lg px-2 py-0.5 w-40 focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <button
                 onClick={handleSaveTimeInput}
-                className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-xs"
+                className="px-2.5 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-xs text-xs font-semibold transition-colors shadow-xs"
               >
                 Set
               </button>
@@ -341,7 +341,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
               className={`p-1.5 rounded-lg border transition-colors ${
                 isMuted
                   ? 'border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted'
-                  : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-500 hover:text-indigo-600 dark:text-indigo-400'
+                  : 'border-primary/30 bg-muted text-foreground hover:text-foreground'
               }`}
               title={isMuted ? 'Alarm audio muted (click to unmute)' : 'Alarm audio active (click to mute)'}
             >
@@ -391,7 +391,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                   }
                 }
               }}
-              className="text-[10px] font-mono px-2 py-0.5 rounded bg-background border border-border text-foreground placeholder:text-muted-foreground w-28 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+              className="text-[10px] font-mono px-2 py-0.5 rounded bg-background border border-border text-foreground placeholder:text-muted-foreground w-28 focus:outline-none focus:border-primary disabled:opacity-50"
             />
           </div>
         </div>

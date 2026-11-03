@@ -344,7 +344,7 @@ export function LiteratureLibrary({
 
           <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-1.5 shadow-xs">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <Quote className="w-3.5 h-3.5 text-indigo-500" />
+              <Quote className="w-3.5 h-3.5 text-foreground" />
               Trial Citations
             </div>
             <p className="text-2xl font-bold text-foreground tabular-nums">{totalCitedTrials}</p>

@@ -21,7 +21,7 @@ export default function ProtocolsLoading() {
           <div className="h-4 w-px bg-border/80" />
 
           <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-indigo-500" />
+            <ClipboardList className="w-4 h-4 text-foreground" />
             <h2 className="text-sm font-semibold text-foreground tracking-tight">
               Protocol &amp; SOP Library
             </h2>

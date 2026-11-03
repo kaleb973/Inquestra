@@ -80,7 +80,7 @@ function NewProtocolModal({
       <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-indigo-500" />
+            <ClipboardList className="w-4 h-4 text-foreground" />
             <h2 className="text-sm font-semibold text-foreground">New Protocol Template</h2>
           </div>
           <button
@@ -101,7 +101,7 @@ function NewProtocolModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Western Blot — Standard Protocol v1"
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
               autoFocus
             />
           </div>
@@ -116,7 +116,7 @@ function NewProtocolModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief scope of this SOP…"
               rows={2}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
             />
           </div>
 
@@ -269,7 +269,7 @@ export function ProtocolLibrary({
             <div className="h-4 w-px bg-border/80" />
 
             <div className="flex items-center gap-2">
-              <ClipboardList className="w-4 h-4 text-indigo-500" />
+              <ClipboardList className="w-4 h-4 text-foreground" />
               <h2 className="text-sm font-semibold text-foreground tracking-tight">
                 Protocol &amp; SOP Library
               </h2>
@@ -326,7 +326,7 @@ export function ProtocolLibrary({
             {!pickerMode && canManage && (
               <button
                 onClick={() => setShowNewModal(true)}
-                className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-indigo-500/50 transition-colors"
+                className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-border transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Create your first protocol
@@ -340,7 +340,7 @@ export function ProtocolLibrary({
                 key={protocol.id}
                 className={`group bg-card border rounded-xl p-4 transition-all ${
                   pickerMode
-                    ? 'border-border hover:border-indigo-500/50 cursor-pointer hover:shadow-md'
+                    ? 'border-border hover:border-border cursor-pointer hover:shadow-md'
                     : 'border-border hover:border-border/80'
                 }`}
                 onClick={pickerMode && onInsertProtocol ? () => onInsertProtocol(protocol) : undefined}

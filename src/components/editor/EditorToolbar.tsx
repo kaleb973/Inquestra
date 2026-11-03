@@ -490,7 +490,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           className="px-2 py-1 rounded text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center gap-1"
           title="Insert 2D Molecule"
         >
-          <FlaskConical className="w-3.5 h-3.5 text-indigo-400" />
+          <FlaskConical className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="text-[10px] hidden xl:inline">Molecule</span>
         </button>
         <button

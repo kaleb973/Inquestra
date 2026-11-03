@@ -54,8 +54,8 @@ interface TeamManagerProps {
 }
 
 const ROLE_BADGES: Record<Role, { label: string; badgeClass: string; level: number }> = {
-  PI: { label: 'Principal Investigator', badgeClass: 'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/30', level: 4 },
-  ADMIN: { label: 'Lab Operations Manager', badgeClass: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30', level: 3 },
+  PI: { label: 'Principal Investigator', badgeClass: 'bg-muted text-foreground border-violet-500/30', level: 4 },
+  ADMIN: { label: 'Lab Operations Manager', badgeClass: 'bg-muted text-foreground border-border', level: 3 },
   RESEARCHER: { label: 'Bench Researcher', badgeClass: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30', level: 2 },
   VIEWER: { label: 'Audit Observer', badgeClass: 'bg-muted text-muted-foreground border-border', level: 1 },
 };
@@ -222,7 +222,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
       )}
 
       {successMsg && (
-        <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-xs flex items-center justify-between">
+        <div className="p-3 rounded-lg bg-muted text-foreground border border-border/60 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
@@ -244,7 +244,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
             }`}
           >
-            <Users className="w-3.5 h-3.5 text-indigo-500" />
+            <Users className="w-3.5 h-3.5 text-foreground" />
             Research Squads ({teams.length})
           </button>
 
@@ -271,7 +271,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
             Authorizations Inbox
             {pendingCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-indigo-600 text-white font-bold animate-pulse">
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-primary text-white font-bold animate-pulse">
                 {pendingCount}
               </span>
             )}
@@ -281,7 +281,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
         {activeSubTab === 'squads' && (
           <button
             onClick={() => setShowCreateSquadModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors shadow-sm"
           >
             <Plus className="w-3.5 h-3.5" />
             Create Research Squad
@@ -296,7 +296,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             {teams.map((t) => (
               <div
                 key={t.id}
-                className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between hover:border-indigo-500/40 transition-colors shadow-sm"
+                className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between hover:border-border transition-colors shadow-sm"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
@@ -306,7 +306,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                         {t.description || 'No mission statement provided.'}
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 shrink-0">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-50 dark:bg-indigo-950/40 border border-emerald-500/30 dark:border-emerald-500/30 text-foreground shrink-0">
                       {t.members.length} {t.members.length === 1 ? 'Scientist' : 'Scientists'}
                     </span>
                   </div>
@@ -317,7 +317,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                       {t.members.map((m) => (
                         <div
                           key={m.id}
-                          className="w-7 h-7 rounded-full bg-indigo-600 border-2 border-card flex items-center justify-center text-[9px] font-mono font-bold text-white shadow"
+                          className="w-7 h-7 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[9px] font-mono font-bold text-white shadow"
                           title={`${m.email} (${m.role})`}
                         >
                           {m.email.substring(0, 2).toUpperCase()}
@@ -330,7 +330,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
                     <button
                       onClick={() => setEditingSquad(t)}
-                      className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+                      className="text-xs font-medium text-foreground hover:text-foreground transition-colors"
                     >
                       Manage Squad →
                     </button>
@@ -348,7 +348,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 </p>
                 <button
                   onClick={() => setShowCreateSquadModal(true)}
-                  className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-sm"
+                  className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Create First Squad
@@ -371,7 +371,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 placeholder="Search personnel by email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                className="w-full pl-8 pr-3 py-1.5 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
 
@@ -380,7 +380,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="px-2.5 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                className="px-2.5 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
               >
                 <option value="ALL">All Roles</option>
                 <option value="PI">Principal Investigator</option>
@@ -392,7 +392,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               {(currentUser?.role === 'PI' || currentUser?.role === 'ADMIN') && (
                 <button
                   onClick={() => setShowInviteModal(true)}
-                  className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-sm"
+                  className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors shadow-sm"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   Invite Researcher
@@ -421,7 +421,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                     <tr key={u.id} className="hover:bg-muted/40 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-neutral-800 border border-indigo-200 dark:border-neutral-700 flex items-center justify-center font-mono text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                          <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-neutral-800 border border-indigo-200 dark:border-neutral-700 flex items-center justify-center font-mono text-xs font-bold text-foreground">
                             {u.email.substring(0, 2).toUpperCase()}
                           </div>
                           <div>
@@ -443,7 +443,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                             value={u.role}
                             disabled={isPending || (!isPI && (u.role === 'PI'))}
                             onChange={(e) => handleRoleChange(u.id, e.target.value as Role)}
-                            className="text-[11px] bg-background border border-border rounded px-2 py-0.5 text-foreground focus:outline-none focus:border-indigo-500 disabled:opacity-50 shadow-sm"
+                            className="text-[11px] bg-background border border-border rounded px-2 py-0.5 text-foreground focus:outline-none focus:border-primary disabled:opacity-50 shadow-sm"
                             title={!isPI ? 'Only a PI can elevate or demote PI roles' : 'Change role'}
                           >
                             <option value="VIEWER">Viewer (Lvl 1)</option>
@@ -461,7 +461,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                           value={u.teamId || 'UNASSIGNED'}
                           disabled={isPending}
                           onChange={(e) => handleAssignUserSquad(u.id, e.target.value)}
-                          className="text-xs bg-background border border-border rounded px-2.5 py-1 text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                          className="text-xs bg-background border border-border rounded px-2.5 py-1 text-foreground focus:outline-none focus:border-primary shadow-sm"
                         >
                           <option value="UNASSIGNED">General Lab Pool (Unassigned)</option>
                           {teams.map((t) => (
@@ -551,7 +551,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                             isPendingReq
                               ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                               : req.status === 'APPROVED'
-                              ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+                              ? 'bg-indigo-50 dark:bg-indigo-950/50 text-foreground border-emerald-500/30 dark:border-emerald-500/30'
                               : 'bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-800'
                           }`}
                         >
@@ -563,7 +563,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                         </span>
 
                         {req.requestedRole && (
-                          <span className="text-xs text-indigo-600 dark:text-indigo-300 font-mono">
+                          <span className="text-xs text-indigo-600 dark:text-muted-foreground font-mono">
                             → Target: {req.requestedRole}
                           </span>
                         )}
@@ -598,7 +598,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                         <button
                           onClick={() => handleResolveAuth(req.requestId, 'APPROVED')}
                           disabled={isPending}
-                          className="px-3.5 py-1.5 rounded text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center gap-1.5 shadow-sm"
+                          className="px-3.5 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors flex items-center gap-1.5 shadow-sm"
                         >
                           <Check className="w-3.5 h-3.5" />
                           Approve
@@ -633,7 +633,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
           <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-indigo-500" />
+                <Users className="w-4 h-4 text-foreground" />
                 <h3 className="text-sm font-semibold text-foreground">Create Research Squad</h3>
               </div>
               <button
@@ -652,7 +652,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                   name="name"
                   required
                   placeholder="e.g. Electrophysiology Core"
-                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -662,7 +662,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                   name="description"
                   rows={3}
                   placeholder="e.g. High-throughput neural impedance sensing and microfluidic patch clamping."
-                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -677,7 +677,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 shadow-sm"
                 >
                   {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Create Squad
@@ -713,7 +713,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                   name="name"
                   defaultValue={editingSquad.name}
                   required
-                  className="w-full px-3 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -723,7 +723,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                   name="description"
                   rows={2}
                   defaultValue={editingSquad.description || ''}
-                  className="w-full px-3 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -756,7 +756,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                         <div
                           className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${
                             isMember
-                              ? 'bg-indigo-600 border-indigo-500 text-white'
+                              ? 'bg-primary border-primary text-white'
                               : 'border-border bg-background'
                           }`}
                         >
@@ -770,7 +770,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
                       <span className="text-[11px] font-mono text-muted-foreground">
                         {isMember ? (
-                          <span className="text-indigo-600 dark:text-indigo-400 font-bold">Assigned</span>
+                          <span className="text-foreground font-bold">Assigned</span>
                         ) : u.teamId ? (
                           'Other Squad'
                         ) : (
@@ -813,7 +813,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
           <div className="w-full max-w-md bg-card border border-border rounded-xl p-5 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-indigo-500" />
+                <ShieldAlert className="w-4 h-4 text-foreground" />
                 <h3 className="text-sm font-semibold text-foreground">Ask Higher-Up: Escalation</h3>
               </div>
               <button
@@ -854,7 +854,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <label className="block text-xs font-medium text-foreground mb-1">Request Type</label>
                 <select
                   name="requestType"
-                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                 >
                   <option value="ROLE_ELEVATION">Role Elevation</option>
                   <option value="OVERDRAFT_OVERRIDE">Reagent Overdraft Override</option>
@@ -867,7 +867,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <label className="block text-xs font-medium text-foreground mb-1">Target Role (If applicable)</label>
                 <select
                   name="requestedRole"
-                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                 >
                   <option value="RESEARCHER">Bench Researcher (Lvl 2)</option>
                   <option value="ADMIN">Lab Operations Manager (Lvl 3)</option>
@@ -882,7 +882,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                   required
                   rows={3}
                   placeholder="Explain why this authorization is necessary for research continuity..."
-                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                  className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -897,7 +897,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 shadow-sm"
                 >
                   {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Submit Escalation
@@ -964,7 +964,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div className="flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-indigo-500" />
+            <UserPlus className="w-4 h-4 text-foreground" />
             <h3 className="text-sm font-semibold text-foreground">Invite Lab Member</h3>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
@@ -985,7 +985,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as Role)}
-                className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
               >
                 <option value="RESEARCHER">Bench Researcher (Standard)</option>
                 <option value="VIEWER">Audit Observer (Read-only)</option>
@@ -999,7 +999,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               <select
                 value={expiry}
                 onChange={(e) => setExpiry(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-indigo-500 shadow-sm"
+                className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
               >
                 <option value={24}>24 Hours</option>
                 <option value={72}>72 Hours</option>
@@ -1018,7 +1018,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-4 py-1.5 rounded text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
                 {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Shield className="w-3.5 h-3.5" />}
                 Generate Secure Link
@@ -1039,7 +1039,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               />
               <button 
                 onClick={handleCopy}
-                className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold whitespace-nowrap transition-colors"
+                className="px-3 py-2 rounded bg-foreground text-background hover:bg-foreground/90 font-medium text-xs font-semibold whitespace-nowrap transition-colors"
               >
                 {copied ? 'Copied!' : 'Copy'}
               </button>

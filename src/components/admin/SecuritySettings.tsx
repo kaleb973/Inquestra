@@ -279,7 +279,7 @@ export function SecuritySettings() {
         {mfaState === 'inactive' && (
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-4 bg-muted/40 border border-border/60 rounded-xl">
-              <Smartphone className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
+              <Smartphone className="w-5 h-5 text-foreground shrink-0 mt-0.5" />
               <div className="text-xs text-muted-foreground leading-relaxed space-y-1">
                 <p className="text-foreground font-medium">Authenticator app required</p>
                 <p>
@@ -296,7 +296,7 @@ export function SecuritySettings() {
             )}
             <button
               onClick={handleStartEnroll}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors"
             >
               <Shield className="w-4 h-4" />
               Enable 2FA
@@ -378,7 +378,7 @@ export function SecuritySettings() {
                   </button>
                   <button
                     onClick={() => { setMfaState('verifying'); setOtpError(null); }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors"
                   >
                     Next — Enter Code →
                   </button>
@@ -412,7 +412,7 @@ export function SecuritySettings() {
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
                 placeholder="000000"
-                className="w-full max-w-[160px] px-3 py-2.5 rounded-lg bg-background border border-border text-xl font-mono text-center text-foreground tracking-[0.4em] focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+                className="w-full max-w-[160px] px-3 py-2.5 rounded-lg bg-background border border-border text-xl font-mono text-center text-foreground tracking-[0.4em] focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
               />
             </div>
 
@@ -433,7 +433,7 @@ export function SecuritySettings() {
               <button
                 onClick={handleVerify}
                 disabled={isPending || otp.length !== 6}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
               >
                 {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
                 {isPending ? 'Verifying…' : 'Activate 2FA'}
@@ -519,7 +519,7 @@ export function SecuritySettings() {
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-border bg-muted/40 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Fingerprint className="w-5 h-5 text-indigo-500 shrink-0" />
+            <Fingerprint className="w-5 h-5 text-foreground shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-foreground">Passkeys & Hardware Keys</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -550,7 +550,7 @@ export function SecuritySettings() {
             </div>
           ) : passkeys.length === 0 ? (
             <div className="flex items-start gap-3 p-4 bg-muted/40 border border-border/60 rounded-xl">
-              <KeyRound className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
+              <KeyRound className="w-5 h-5 text-foreground shrink-0 mt-0.5" />
               <div className="text-xs text-muted-foreground leading-relaxed">
                 <p className="text-foreground font-medium">No passkeys registered</p>
                 <p className="mt-1">
@@ -586,7 +586,7 @@ export function SecuritySettings() {
           <button
             onClick={handleRegisterPasskey}
             disabled={isPasskeysLoading || isRegisteringPasskey}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
           >
             {isRegisteringPasskey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
             {isRegisteringPasskey ? 'Registering…' : 'Register New Passkey'}

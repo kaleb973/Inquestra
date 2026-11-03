@@ -51,11 +51,11 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
         <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm flex gap-4 items-end">
           <div className="flex-1">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Location Name</label>
-            <input required name="name" placeholder="e.g. -80°C Freezer A" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500" />
+            <input required name="name" placeholder="e.g. -80°C Freezer A" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
           </div>
           <div className="w-48">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
-            <select name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500">
+            <select name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
               <option value="FREEZER">Freezer / Fridge</option>
               <option value="RACK">Rack / Shelf</option>
               <option value="BOX">Box / Plate</option>
@@ -63,14 +63,14 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
           </div>
           <div className="w-48">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Parent Location (Optional)</label>
-            <select name="parentId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-indigo-500">
+            <select name="parentId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
               <option value="">None (Top Level)</option>
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>{loc.name} ({loc.type})</option>
               ))}
             </select>
           </div>
-          <button disabled={isPending} type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
+          <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
           </button>
         </form>
@@ -118,7 +118,7 @@ function LocationNode({
     <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-3">
         <div className="flex items-center gap-2">
-          <Box className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <Box className="w-4 h-4 text-foreground" />
           <h3 className="text-sm font-semibold text-foreground">{location.name}</h3>
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-foreground font-mono">
             {location.type}
@@ -135,7 +135,7 @@ function LocationNode({
             })
           }
           title="Print Location QR label"
-          className="p-1 rounded text-muted-foreground hover:text-indigo-500 hover:bg-accent transition-colors"
+          className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         >
           <QrCode className="w-3.5 h-3.5" />
         </button>

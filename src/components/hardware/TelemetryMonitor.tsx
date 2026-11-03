@@ -45,7 +45,7 @@ function StatCard({ label, value, unit, Icon, accent }: StatCardProps) {
       <div className="flex items-baseline gap-1">
         <span
           className={`font-mono text-sm font-semibold tracking-tight ${
-            accent ? 'text-indigo-600 dark:text-indigo-400' : 'text-foreground'
+            accent ? 'text-sky-600 dark:text-sky-400' : 'text-foreground'
           }`}
         >
           {value}
@@ -122,7 +122,7 @@ export function TelemetryMonitor() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-indigo-500" />
+          <Activity className="w-4 h-4 text-sky-500 dark:text-sky-400" />
           <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Live DAQ Telemetry
           </span>
@@ -149,12 +149,12 @@ export function TelemetryMonitor() {
           <span>Signal Preview (Last 80 pts)</span>
           <span>{stats.current !== null ? `${fmtNum(stats.current)} ${buffer[buffer.length - 1]?.unit || ''}` : 'Idle'}</span>
         </div>
-        <div className="h-14 w-full bg-muted/20 border border-border/50 rounded-lg flex items-center justify-center overflow-hidden relative">
+        <div className="h-14 w-full bg-neutral-950 border border-neutral-800 rounded-lg flex items-center justify-center overflow-hidden relative shadow-[inset_0_1px_4px_rgba(0,0,0,0.6)]">
           {sparklinePoints ? (
             <svg className="w-full h-full p-1" viewBox="0 0 240 48" preserveAspectRatio="none">
               <polyline
                 fill="none"
-                stroke="#6366f1"
+                stroke="#10b981"
                 strokeWidth="1.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -202,9 +202,9 @@ export function TelemetryMonitor() {
 
         {hardwareStatus.isConnected && !hardwareStatus.isSimulated ? (
           <div className="space-y-2">
-            <div className="p-2.5 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30 text-xs font-mono flex items-center justify-between text-indigo-700 dark:text-indigo-300">
+            <div className="p-2.5 rounded-lg border border-emerald-500/30 dark:border-emerald-500/30 bg-muted/50 text-xs font-mono flex items-center justify-between text-foreground">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="font-semibold">{hardwareStatus.portName || 'Connected USB'}</span>
               </div>
               <span className="text-[11px]">{hardwareStatus.baudRate} baud</span>
@@ -225,7 +225,7 @@ export function TelemetryMonitor() {
                 value={selectedBaud}
                 onChange={(e) => setSelectedBaud(Number(e.target.value))}
                 disabled={hardwareStatus.isConnected}
-                className="flex-1 bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:border-indigo-500 disabled:opacity-40"
+                className="flex-1 bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary disabled:opacity-40"
               >
                 {BAUD_RATES.map((rate) => (
                   <option key={rate} value={rate}>
@@ -244,9 +244,9 @@ export function TelemetryMonitor() {
                 await connect(selectedBaud);
               }}
               disabled={hardwareStatus.isConnected}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition-colors disabled:opacity-40"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 border border-neutral-700/60 dark:border-neutral-300/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_4px_rgba(0,0,0,0.25)] transition-all active:scale-[0.99] disabled:opacity-40"
             >
-              <Plug className="w-3.5 h-3.5" />
+              <Plug className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-600" />
               Connect USB Device
             </button>
           </div>
@@ -259,8 +259,8 @@ export function TelemetryMonitor() {
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5" /> In-Browser Simulator
           </span>
-          <span className="text-[10px] text-indigo-500 font-mono flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> Offline DAQ
+          <span className="text-[10px] text-sky-500 dark:text-sky-400 font-mono flex items-center gap-1">
+            <Activity className="w-3 h-3" /> Virtual Generator
           </span>
         </div>
 
@@ -289,7 +289,7 @@ export function TelemetryMonitor() {
                 value={selectedSimMode}
                 onChange={(e) => setSelectedSimMode(e.target.value as SimMode)}
                 disabled={hardwareStatus.isConnected}
-                className="flex-1 bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:border-indigo-500 disabled:opacity-40"
+                className="flex-1 bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary disabled:opacity-40"
               >
                 <option value="ecg">Lead-II ECG (100 Hz, mV)</option>
                 <option value="thermistor">Bioreactor Temp (50 Hz, °C)</option>
@@ -300,7 +300,7 @@ export function TelemetryMonitor() {
               disabled={hardwareStatus.isConnected}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-accent border border-border text-foreground transition-colors disabled:opacity-40 shadow-xs"
             >
-              <Activity className="w-3.5 h-3.5 text-indigo-500" />
+              <Activity className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
               Start {selectedSimMode === 'ecg' ? 'ECG' : 'Temperature'} Stream
             </button>
           </div>

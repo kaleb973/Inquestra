@@ -39,7 +39,7 @@ export function SerialControlPanel() {
           value={selectedBaud}
           onChange={(e) => setSelectedBaud(Number(e.target.value))}
           disabled={isConnected}
-          className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {BAUD_RATES.map((rate) => (
             <option key={rate} value={rate}>
@@ -90,7 +90,7 @@ export function SerialControlPanel() {
         className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
           isConnected
             ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20'
-            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+            : 'bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 border border-neutral-700/60 dark:border-neutral-300/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] font-semibold'
         }`}
       >
         {isConnected ? (

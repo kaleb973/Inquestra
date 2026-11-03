@@ -598,7 +598,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                       setCurrentPage(1);
                     }}
                     placeholder="Search all sample fields, IDs, notes…"
-                    className="w-full bg-background border border-border rounded-md pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500 font-sans"
+                    className="w-full bg-background border border-border rounded-md pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary font-sans"
                   />
                   {searchTerm && (
                     <button
@@ -676,7 +676,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                         <span>Toggle Columns</span>
                         <button
                           onClick={() => setVisibleColumns(csvAttr.headers)}
-                          className="text-indigo-500 hover:underline"
+                          className="text-foreground hover:underline"
                         >
                           Show All
                         </button>
@@ -747,7 +747,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                             )}
                             <ArrowUpDown
                               className={`w-3 h-3 transition-opacity ${
-                                isSorted ? 'opacity-100 text-indigo-500' : 'opacity-25'
+                                isSorted ? 'opacity-100 text-foreground' : 'opacity-25'
                               }`}
                             />
                           </div>

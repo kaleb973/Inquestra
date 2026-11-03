@@ -29,14 +29,14 @@ export function LabSettings({ org }: { org: Organization }) {
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               {isStrict ? (
-                <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <ShieldCheck className="w-5 h-5 text-foreground" />
               ) : (
                 <ShieldAlert className="w-5 h-5 text-muted-foreground" />
               )}
               <h2 className="text-lg font-semibold text-foreground">Compliance & Governance Policy</h2>
               <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border font-semibold ${
                 isStrict 
-                  ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30' 
+                  ? 'bg-muted text-foreground border-border' 
                   : 'bg-muted text-muted-foreground border-border'
               }`}>
                 {isStrict ? 'Strict Mode (GLP / 21 CFR Part 11)' : 'Flexible Bench Mode'}
@@ -57,7 +57,7 @@ export function LabSettings({ org }: { org: Organization }) {
               disabled={isPending}
               aria-label="Toggle Strict Compliance Mode"
               className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
-                isStrict ? 'bg-indigo-600' : 'bg-muted-foreground/30'
+                isStrict ? 'bg-primary' : 'bg-muted-foreground/30'
               }`}
             >
               {isPending ? (
@@ -91,13 +91,13 @@ export function LabSettings({ org }: { org: Organization }) {
             <div className="grid grid-cols-1 md:grid-cols-3 bg-muted/40 font-semibold border-b border-border text-foreground">
               <div className="p-3">Function / Dimension</div>
               <div className="p-3 border-l border-border bg-muted/20">Flexible Mode (Off)</div>
-              <div className="p-3 border-l border-border bg-indigo-500/10 text-indigo-700 dark:text-indigo-200">Strict Compliance Mode (On)</div>
+              <div className="p-3 border-l border-border bg-muted text-indigo-700 dark:text-indigo-200">Strict Compliance Mode (On)</div>
             </div>
 
             {/* Row 1: Inventory Overdraft */}
             <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border/50 hover:bg-muted/20 transition-colors">
               <div className="p-3 flex items-start gap-2 font-medium text-foreground">
-                <Box className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <Box className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <div>
                   <div>Inventory Overdrafts</div>
                   <div className="text-[10px] text-muted-foreground font-normal">Deducting more quantity than is in stock</div>
@@ -109,8 +109,8 @@ export function LabSettings({ org }: { org: Organization }) {
                 </span>
                 Stock balance goes negative (e.g. <code className="font-mono text-[10px] text-amber-600 dark:text-amber-300">-3 mL</code>). Scientist is not blocked at the bench; lab manager is alerted.
               </div>
-              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
-                <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
+              <div className="p-3 border-l border-border/50 text-foreground bg-muted/50">
+                <span className="text-foreground font-medium flex items-center gap-1 mb-1">
                   <Lock className="w-3.5 h-3.5" /> Hard Block (Zero Overdraft)
                 </span>
                 Deduction is strictly rejected. Scientists cannot consume more physical material than what has been verified and logged into inventory.
@@ -120,7 +120,7 @@ export function LabSettings({ org }: { org: Organization }) {
             {/* Row 2: Uncataloged Materials */}
             <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border/50 hover:bg-muted/20 transition-colors">
               <div className="p-3 flex items-start gap-2 font-medium text-foreground">
-                <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <FileText className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <div>
                   <div>Uncataloged Reagents</div>
                   <div className="text-[10px] text-muted-foreground font-normal">Using a chemical not in database</div>
@@ -132,8 +132,8 @@ export function LabSettings({ org }: { org: Organization }) {
                 </span>
                 Item is automatically created on the fly with negative stock so experimental notes can be saved without delay.
               </div>
-              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
-                <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
+              <div className="p-3 border-l border-border/50 text-foreground bg-muted/50">
+                <span className="text-foreground font-medium flex items-center gap-1 mb-1">
                   <Lock className="w-3.5 h-3.5" /> Hard Block (Must be Registered)
                 </span>
                 Reagents must be pre-cataloged with lot numbers and physical storage locations before they can be used in any experiment.
@@ -143,7 +143,7 @@ export function LabSettings({ org }: { org: Organization }) {
             {/* Row 3: Instrument Calibration */}
             <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border/50 hover:bg-muted/20 transition-colors">
               <div className="p-3 flex items-start gap-2 font-medium text-foreground">
-                <Cpu className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <Cpu className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <div>
                   <div>Hardware & Sensor DAQ</div>
                   <div className="text-[10px] text-muted-foreground font-normal">Overdue or uncalibrated devices</div>
@@ -155,8 +155,8 @@ export function LabSettings({ org }: { org: Organization }) {
                 </span>
                 Telemetry streams are tagged with calibration warnings, but live DAQ ingestion continues unimpeded.
               </div>
-              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
-                <span className="text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1 mb-1">
+              <div className="p-3 border-l border-border/50 text-foreground bg-muted/50">
+                <span className="text-foreground font-medium flex items-center gap-1 mb-1">
                   <Lock className="w-3.5 h-3.5" /> DAQ Hardware Gate
                 </span>
                 Serial port data acquisition is locked if connected instrument is marked <span className="font-mono text-[9px] bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1 py-0.5 rounded border border-amber-500/30">NEEDS_CALIBRATION</span> or <span className="font-mono text-[9px] bg-red-500/10 text-red-700 dark:text-red-300 px-1 py-0.5 rounded border border-red-500/30">BROKEN</span>.
@@ -166,7 +166,7 @@ export function LabSettings({ org }: { org: Organization }) {
             {/* Row 4: Audit Trail */}
             <div className="grid grid-cols-1 md:grid-cols-3 hover:bg-muted/20 transition-colors">
               <div className="p-3 flex items-start gap-2 font-medium text-foreground">
-                <ShieldAlert className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <ShieldAlert className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <div>
                   <div>21 CFR Part 11 Audit Trail</div>
                   <div className="text-[10px] text-muted-foreground font-normal">Regulatory inspection readiness</div>
@@ -175,7 +175,7 @@ export function LabSettings({ org }: { org: Organization }) {
               <div className="p-3 border-l border-border/50 text-foreground">
                 Standard audit events recorded for user accountability.
               </div>
-              <div className="p-3 border-l border-border/50 text-foreground bg-indigo-500/5">
+              <div className="p-3 border-l border-border/50 text-foreground bg-muted/50">
                 Full regulatory audit trail with cryptographic trial sealing and strict discrepancy prevention.
               </div>
             </div>
@@ -195,7 +195,7 @@ export function LabSettings({ org }: { org: Organization }) {
             You are an early-stage research lab, university group, or discovery incubator where moving fast at the bench is prioritized and lab members frequently introduce novel chemicals before logging them in digital inventory.
           </div>
           <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/30 rounded-lg">
-            <span className="text-indigo-700 dark:text-indigo-300 font-medium block mb-1">Choose Strict Mode if:</span>
+            <span className="text-foreground font-medium block mb-1">Choose Strict Mode if:</span>
             You are operating in regulated biopharma, clinical trials, GMP/GLP manufacturing, or pre-clinical safety studies where FDA 21 CFR Part 11 requires immutable material verification and zero unverified chemical usage.
           </div>
         </div>

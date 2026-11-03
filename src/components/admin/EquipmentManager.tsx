@@ -113,7 +113,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                   ) : overdue ? (
                     <Calendar className="w-5 h-5 text-amber-500" />
                   ) : (
-                    <CheckCircle2 className="w-5 h-5 text-indigo-500" />
+                    <CheckCircle2 className="w-5 h-5 text-foreground" />
                   )}
                 </div>
               </div>

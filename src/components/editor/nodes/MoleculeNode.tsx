@@ -90,11 +90,11 @@ function MoleculeNode(props: any) {
         {/* Header */}
         <div className="bg-muted/60 px-4 py-2 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-2">
-            <FlaskConical className="w-4 h-4 text-indigo-500" />
+            <FlaskConical className="w-4 h-4 text-foreground" />
             {isEditing ? (
               <input
                 autoFocus
-                className="bg-background border border-border rounded px-2 py-0.5 text-sm text-foreground focus:outline-none focus:border-indigo-500 w-48 shadow-sm"
+                className="bg-background border border-border rounded px-2 py-0.5 text-sm text-foreground focus:outline-none focus:border-primary w-48 shadow-sm"
                 value={node.attrs.name}
                 onChange={(e) => updateAttributes({ name: e.target.value })}
                 onBlur={() => setIsEditing(false)}
@@ -102,7 +102,7 @@ function MoleculeNode(props: any) {
               />
             ) : (
               <h3
-                className="font-medium text-foreground text-sm cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                className="font-medium text-foreground text-sm cursor-pointer hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
                 onClick={() => setIsEditing(true)}
               >
                 {node.attrs.name}
@@ -130,7 +130,7 @@ function MoleculeNode(props: any) {
               key={p.label}
               type="button"
               onClick={() => updateAttributes({ smiles: p.smiles, name: p.name, mw: p.mw })}
-              className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/70 bg-background hover:bg-indigo-500/10 hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/70 bg-background hover:bg-primary/90/10 hover:border-border hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
             >
               {p.label}
             </button>
@@ -145,7 +145,7 @@ function MoleculeNode(props: any) {
               value={smiles}
               onChange={(e) => updateAttributes({ smiles: e.target.value })}
               placeholder="Enter SMILES..."
-              className="bg-background border border-border rounded p-2 text-xs font-mono text-foreground focus:outline-none focus:border-indigo-500 min-h-[80px]"
+              className="bg-background border border-border rounded p-2 text-xs font-mono text-foreground focus:outline-none focus:border-primary min-h-[80px]"
             />
             <div className="flex gap-2">
               <input
@@ -153,7 +153,7 @@ function MoleculeNode(props: any) {
                 value={node.attrs.mw}
                 onChange={(e) => updateAttributes({ mw: e.target.value })}
                 placeholder="MW (g/mol)"
-                className="bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:border-indigo-500 w-28"
+                className="bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary w-28"
               />
             </div>
             {error && <p className="text-xs text-red-500">{error}</p>}

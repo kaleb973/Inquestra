@@ -40,13 +40,13 @@ const SIG_META: Record<Sig['role'], { label: string; color: string; badge: strin
   },
   WITNESS: {
     label: 'Witnessed',
-    color: 'border-indigo-500/30 bg-indigo-500/5',
-    badge: 'text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 border-indigo-500/30',
+    color: 'border-border bg-muted/50',
+    badge: 'text-foreground bg-muted border-border',
   },
   PI_APPROVAL: {
     label: 'PI Approved',
     color: 'border-violet-500/30 bg-violet-500/5',
-    badge: 'text-violet-700 dark:text-violet-300 bg-violet-500/10 border-violet-500/30',
+    badge: 'text-foreground bg-muted border-violet-500/30',
   },
 };
 
@@ -114,7 +114,7 @@ export function SignaturePanel({
     <div className="border-t-2 border-border/60 mt-12 pt-8 pb-4 print:hidden">
       {/* Header */}
       <div className="flex items-center gap-2 mb-5">
-        <ShieldCheck className="w-4 h-4 text-indigo-500" />
+        <ShieldCheck className="w-4 h-4 text-foreground" />
         <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
           Electronic Signatures
         </h3>
@@ -196,14 +196,14 @@ export function SignaturePanel({
                   value={meaning || DEFAULT_MEANINGS[signingRole]}
                   onChange={(e) => setMeaning(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-xs text-foreground resize-none focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-xs text-foreground resize-none focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleSign(signingRole)}
                   disabled={isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-xs transition-colors disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PenLine className="w-3.5 h-3.5" />}
                   Confirm Signature
@@ -236,7 +236,7 @@ export function SignaturePanel({
               {canApprove && !alreadySigned('WITNESS') && (
                 <button
                   onClick={() => { setSigningRole('WITNESS'); setMeaning(''); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-500/40 text-indigo-700 dark:text-indigo-300 bg-indigo-500/5 hover:bg-indigo-500/15 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-foreground bg-muted/50 hover:bg-primary/90/15 transition-colors"
                 >
                   <PenLine className="w-3.5 h-3.5" />
                   Sign as Witness
@@ -247,7 +247,7 @@ export function SignaturePanel({
               {canApprove && !alreadySigned('PI_APPROVAL') && (
                 <button
                   onClick={() => { setSigningRole('PI_APPROVAL'); setMeaning(''); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/5 hover:bg-violet-500/15 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-violet-500/40 text-foreground bg-violet-500/5 hover:bg-violet-500/15 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   PI Approval

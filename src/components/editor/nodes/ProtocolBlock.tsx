@@ -159,7 +159,7 @@ function StepTimer({
     return (
       <button
         onClick={() => setShowPicker(true)}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-violet-500 hover:bg-accent transition-all shrink-0"
+        className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-muted-foreground hover:bg-accent transition-all shrink-0"
         title="Add countdown bench timer to this step"
       >
         <Timer className="w-3.5 h-3.5" />
@@ -208,7 +208,7 @@ function StepTimer({
         <div
           className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono border transition-colors ${
             isRunning
-              ? 'bg-violet-500/10 border-violet-500/40 text-violet-600 dark:text-violet-400 font-bold'
+              ? 'bg-muted border-violet-500/40 text-foreground font-bold'
               : 'bg-muted/70 border-border text-muted-foreground hover:border-violet-500/30'
           }`}
         >
@@ -397,7 +397,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/40">
           <div className="flex items-center gap-2 min-w-0">
-            <ClipboardList className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 shrink-0" />
+            <ClipboardList className="w-3.5 h-3.5 text-muted-foreground dark:text-violet-400 shrink-0" />
             <input
               value={attrs.title}
               onChange={(e) => update({ title: e.target.value })}
@@ -416,7 +416,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
               onClick={() => setIsMuted(!isMuted)}
               title={isMuted ? 'Step alarms muted (click to unmute)' : 'Step alarms audio enabled (click to mute)'}
               className={`p-1 rounded hover:bg-accent transition-colors ${
-                isMuted ? 'text-muted-foreground' : 'text-violet-500 dark:text-violet-400'
+                isMuted ? 'text-muted-foreground' : 'text-muted-foreground dark:text-violet-400'
               }`}
             >
               {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
@@ -424,7 +424,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
             <button
               onClick={forkProtocol}
               title="Duplicate protocol for next run (Replicate)"
-              className="text-muted-foreground hover:text-violet-500 p-1 rounded hover:bg-accent transition-colors"
+              className="text-muted-foreground hover:text-muted-foreground p-1 rounded hover:bg-accent transition-colors"
             >
               <GitFork className="w-3.5 h-3.5" />
             </button>
@@ -468,7 +468,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
                 <button
                   onClick={() => toggleStep(step.id)}
                   className={`mt-0.5 shrink-0 transition-colors ${
-                    step.checked ? 'text-violet-500 dark:text-violet-400' : 'text-muted-foreground hover:text-foreground'
+                    step.checked ? 'text-muted-foreground dark:text-violet-400' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {step.checked ? (
@@ -563,7 +563,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
         <div className="px-4 pb-3">
           <button
             onClick={addStep}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-violet-500 transition-colors font-mono"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-muted-foreground transition-colors font-mono"
           >
             <Plus className="w-3.5 h-3.5" />
             Add step

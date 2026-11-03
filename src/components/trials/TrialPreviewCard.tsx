@@ -99,7 +99,7 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-semibold uppercase tracking-wider text-[10px] text-muted-foreground flex items-center gap-1">
-                <Tag className="w-3 h-3 text-indigo-400" />
+                <Tag className="w-3 h-3 text-muted-foreground" />
                 Experiment Parameters
               </span>
               <span className="text-[10px] text-muted-foreground">
@@ -130,7 +130,7 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
           {/* Lineage & Provenance Indicators */}
           <div className="grid grid-cols-3 gap-2">
             <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/40 border border-border/40 text-center">
-              <Layers className="w-3.5 h-3.5 text-indigo-400 mb-1" />
+              <Layers className="w-3.5 h-3.5 text-muted-foreground mb-1" />
               <span className="text-xs font-bold text-foreground">{revisionsCount}</span>
               <span className="text-[10px] text-muted-foreground">Revisions</span>
             </div>

@@ -162,7 +162,7 @@ function NewProjectModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
-            <FolderOpen className="w-4 h-4 text-indigo-500" />
+            <FolderOpen className="w-4 h-4 text-foreground" />
             <h2 className="text-sm font-semibold text-foreground">New Research Project</h2>
           </div>
           <button
@@ -184,7 +184,7 @@ function NewProjectModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Cardiac Biomarker Study"
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
               autoFocus
             />
           </div>
@@ -199,7 +199,7 @@ function NewProjectModal({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="e.g. PRJ-CARD-02"
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground font-mono focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground font-mono focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
             />
           </div>
 
@@ -213,7 +213,7 @@ function NewProjectModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief research scope or objectives…"
               rows={2}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
             />
           </div>
 
@@ -225,7 +225,7 @@ function NewProjectModal({
             <select
               value={leadId}
               onChange={(e) => setLeadId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
             >
               <option value="">— No lead assigned yet —</option>
               {members.map((m) => (
@@ -1071,7 +1071,7 @@ export function LeftSidebar() {
                     className="flex items-center gap-2 flex-1 min-w-0 text-left"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-3 h-3 text-indigo-400 animate-spin shrink-0" />
+                      <Loader2 className="w-3 h-3 text-primary animate-spin shrink-0" />
                     ) : (
                       <span
                         title={STATUS_CONFIG[t.status as TrialStatus]?.tooltip || `Status: ${t.status}`}
@@ -1187,7 +1187,7 @@ export function LeftSidebar() {
             title="Open Live DAQ Telemetry Drawer"
           >
             <div className="flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5 text-indigo-500" />
+              <Activity className="w-3.5 h-3.5 text-foreground" />
               <span className="font-medium text-xs">DAQ Telemetry</span>
             </div>
             <div className="flex items-center gap-1.5">

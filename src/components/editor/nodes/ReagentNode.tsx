@@ -185,7 +185,7 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
                 <button
                   onClick={handleDeduct}
                   disabled={feedback.type === 'loading'}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 text-sm shadow-sm"
+                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-xs px-4 py-2 rounded-lg transition-colors disabled:opacity-50 text-sm shadow-sm"
                 >
                   {feedback.type === 'loading' ? (
                     'Logging…'
@@ -210,10 +210,10 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
                 {feedback.alert ? (
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                 ) : (
-                  <CheckCircle2 className="w-4 h-4 text-indigo-500" />
+                  <CheckCircle2 className="w-4 h-4 text-foreground" />
                 )}
                 <span className="text-sm font-medium text-muted-foreground">
-                  Used <span className="text-foreground font-semibold">{quantity} {unit}</span> of <span className="text-indigo-600 dark:text-indigo-300 font-semibold">{feedback.chemical}</span>
+                  Used <span className="text-foreground font-semibold">{quantity} {unit}</span> of <span className="text-indigo-600 dark:text-muted-foreground font-semibold">{feedback.chemical}</span>
                 </span>
               </div>
               <div className="h-4 w-px bg-border mx-1" />

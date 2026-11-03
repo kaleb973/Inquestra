@@ -139,7 +139,7 @@ export function VersionHistory({ trialId, isSynced }: VersionHistoryProps) {
                     <button
                       onClick={() => handleRestore(rev)}
                       disabled={isPending && restoringId === rev.id}
-                      className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/15 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50 shrink-0"
+                      className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-border text-foreground bg-muted/50 hover:bg-primary/90/15 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50 shrink-0"
                       title="Restore this version as a new draft"
                     >
                       {restoringId === rev.id ? (

@@ -674,15 +674,15 @@ export function Header() {
             {profile && (profile.role === 'ADMIN' || profile.role === 'PI') ? (
               <Link
                 href="/app/admin"
-                className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[240px] truncate hover:bg-accent hover:border-indigo-500/60 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 text-xs text-foreground font-mono bg-muted border border-border px-2.5 py-1 rounded max-w-[240px] truncate hover:bg-accent hover:border-border/80 transition-colors shadow-sm"
                 title="Lab Operations & Settings"
               >
-                <Shield className="w-3 h-3 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <Shield className="w-3 h-3 text-sky-600 dark:text-sky-400 shrink-0" />
                 <span
                   className={`font-semibold text-[10px] uppercase ${
                     profile.role === 'PI'
-                      ? 'text-violet-700 dark:text-violet-300'
-                      : 'text-indigo-700 dark:text-indigo-300'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-sky-600 dark:text-sky-400'
                   }`}
                 >
                   {profile.role === 'PI' ? 'LAB PI' : profile.role}

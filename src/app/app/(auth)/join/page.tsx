@@ -25,13 +25,13 @@ const ROLE_META: Record<Role, { label: string; level: string; color: string; dut
   PI: {
     label: 'Principal Investigator',
     level: 'Level 4 — Lab Director',
-    color: 'text-violet-700 dark:text-violet-300 bg-violet-500/10 border-violet-500/30',
+    color: 'text-foreground bg-muted border-violet-500/30',
     duties: 'Full lab governance, trial sealing, team management, and regulatory oversight.',
   },
   ADMIN: {
     label: 'Lab Administrator',
     level: 'Level 3 — Lab Manager',
-    color: 'text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 border-indigo-500/30',
+    color: 'text-foreground bg-muted border-border',
     duties: 'Inventory management, equipment calibration, squad assignments, and compliance monitoring.',
   },
   RESEARCHER: {
@@ -156,7 +156,7 @@ function JoinPageContent() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
         <div className="max-w-md w-full bg-card border border-border rounded-2xl p-8 space-y-6 shadow-xl">
           <div className="text-center space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400">
+            <div className="w-10 h-10 rounded-xl bg-muted border border-border/60 flex items-center justify-center mx-auto text-muted-foreground">
               <KeyRound className="w-5 h-5" />
             </div>
             <h1 className="text-lg font-semibold text-foreground">Join Your Lab</h1>
