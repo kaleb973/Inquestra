@@ -24,6 +24,7 @@ import {
   PanelLeftClose,
   Activity,
 } from 'lucide-react';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import {
   fetchWorkspaceBootstrap,
@@ -286,6 +287,9 @@ export function LeftSidebar() {
   const localTrials = useNotebookStore((s) => s.localTrials);
   const addLocalTrial = useNotebookStore((s) => s.addLocalTrial);
   const deleteLocalTrial = useNotebookStore((s) => s.deleteLocalTrial);
+  const selectLocalTrial = useNotebookStore((s) => s.selectLocalTrial);
+  const updateLocalTrialStatus = useNotebookStore((s) => s.updateLocalTrialStatus);
+  const updateLocalTrialMetadata = useNotebookStore((s) => s.updateLocalTrialMetadata);
   const hardwareStatus = useNotebookStore((s) => s.hardwareStatus);
 
   // Instant restoration from in-memory cache — zero layout flash or skeleton wait
@@ -298,6 +302,8 @@ export function LeftSidebar() {
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const isGuest = isAuthenticated === false || (!cloudProjectId && projects.length === 0);
   const [trials, setTrials] = useState<TrialSummaryItem[]>(cachedTrials || []);
   const [previewTrial, setPreviewTrial] = useState<TrialSummaryItem | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -319,16 +325,21 @@ export function LeftSidebar() {
   const loadingTrialIdRef = useRef<string | null>(null);
 
   const handleSelectTrial = useCallback((id: string) => {
-    // If user is already on this exact trial, don't trigger a full network reload
+    // If user is already on this exact trial, don't trigger a full reload
     if (useNotebookStore.getState().activeTrial.id === id) {
       return;
     }
 
-    // Instant switch for in-browser local trials (guest mode)
+    // Guest / Local Notebook mode: instant switch with 0ms network latency
+    if (isGuest) {
+      selectLocalTrial(id);
+      return;
+    }
+
+    // Check if trial exists in localTrials as a fast local fallback
     const localMatch = (useNotebookStore.getState().localTrials || []).find((t) => t.id === id);
     if (localMatch) {
-      setActiveTrial(localMatch);
-      useNotebookStore.setState({ cloudTrialId: null });
+      selectLocalTrial(id);
       return;
     }
 
@@ -342,7 +353,6 @@ export function LeftSidebar() {
     startTransition(async () => {
       try {
         const fullTrial = await getTrial(id);
-        // Ignore stale responses if the user clicked another trial in the meantime
         if (requestSeqRef.current !== currentSeq) return;
 
         if (fullTrial) {
@@ -374,47 +384,78 @@ export function LeftSidebar() {
         }
       }
     });
-  }, [setActiveTrial, setCloudIds, setIsLoadingTrial]);
+  }, [isGuest, selectLocalTrial, setActiveTrial, setCloudIds, setIsLoadingTrial]);
 
   const handleSelectTrialRef = useRef(handleSelectTrial);
   useEffect(() => {
     handleSelectTrialRef.current = handleSelectTrial;
   }, [handleSelectTrial]);
 
-  // Consolidated single-roundtrip workspace bootstrap on mount
+  // Consolidated workspace bootstrap on mount with Supabase auth awareness
   useEffect(() => {
     let isCancelled = false;
-    const initialProjectId = activeProjectId || cloudProjectId;
+    const supabase = createSupabaseBrowserClient();
 
-    fetchWorkspaceBootstrap(initialProjectId)
-      .then((res) => {
-        if (isCancelled) return;
-        setProjects(res.projects);
-        setCachedProjects(res.projects);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (isCancelled) return;
+      const isAuthed = !!user;
+      setIsAuthenticated(isAuthed);
 
-        if (res.activeProjectId) {
-          setActiveProjectId(res.activeProjectId);
-        }
-
-        const trialList = res.trials as unknown as TrialSummaryItem[];
-        setTrials(trialList);
-        setCachedTrials(trialList);
+      if (!isAuthed) {
+        // Enforce Local Notebook guest mode: purge stale cloud IDs from localStorage
+        useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null });
+        setProjects([]);
+        setTrials([]);
         setIsLoadingTrials(false);
+        return;
+      }
 
-        // Auto-hydrate first trial ONLY if the store has no active trial yet
-        const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
-        if (!currentCloudTrialId && trialList.length > 0 && !hasInitializedRef.current && trialList[0]?.id) {
-          hasInitializedRef.current = true;
-          handleSelectTrialRef.current(trialList[0].id);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to bootstrap workspace:', err);
-        setIsLoadingTrials(false);
-      });
+      // Authenticated: fetch cloud workspace bootstrap
+      const initialProjectId = activeProjectId || cloudProjectId;
+      fetchWorkspaceBootstrap(initialProjectId)
+        .then((res) => {
+          if (isCancelled) return;
+          setProjects(res.projects);
+          setCachedProjects(res.projects);
+
+          if (res.activeProjectId) {
+            setActiveProjectId(res.activeProjectId);
+          }
+
+          const trialList = res.trials as unknown as TrialSummaryItem[];
+          setTrials(trialList);
+          setCachedTrials(trialList);
+          setIsLoadingTrials(false);
+
+          // Auto-hydrate first trial ONLY if the store has no active trial yet
+          const currentCloudTrialId = useNotebookStore.getState().cloudTrialId;
+          if (!currentCloudTrialId && trialList.length > 0 && !hasInitializedRef.current && trialList[0]?.id) {
+            hasInitializedRef.current = true;
+            handleSelectTrialRef.current(trialList[0].id);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to bootstrap workspace:', err);
+          setIsLoadingTrials(false);
+        });
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isCancelled) return;
+      const isAuthed = !!session?.user;
+      setIsAuthenticated(isAuthed);
+      if (!isAuthed) {
+        useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null });
+        setProjects([]);
+        setTrials([]);
+      }
+    });
 
     return () => {
       isCancelled = true;
+      subscription.unsubscribe();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -438,7 +479,7 @@ export function LeftSidebar() {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
   const handleNewTrial = (cat?: string) => {
-    if (!cloudProjectId) {
+    if (isGuest) {
       const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
       const now = new Date().toISOString();
       const localTrial: import('@/types/inquestra').TrialDocument = {
@@ -476,7 +517,7 @@ export function LeftSidebar() {
           cloudProjectId: newTrial.projectId,
         });
       } catch (err) {
-        console.warn('Server trial creation skipped (Local Notebook mode):', err);
+        console.warn('Server trial creation skipped (fallback to local):', err);
         const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
         const now = new Date().toISOString();
         const localTrial: import('@/types/inquestra').TrialDocument = {
@@ -488,18 +529,7 @@ export function LeftSidebar() {
           createdAt: now,
           updatedAt: now,
         };
-        const summary: TrialSummaryItem = {
-          id: localId,
-          title: 'Untitled Run',
-          status: 'DRAFT',
-          createdAt: now,
-          updatedAt: now,
-          projectId: 'local',
-          metadata: cat ? [{ id: 'cat', key: 'category', value: cat }] : [],
-        };
-        setTrials((prev) => [summary, ...prev]);
-        setActiveTrial(localTrial);
-        useNotebookStore.setState({ cloudTrialId: null });
+        addLocalTrial(localTrial);
       } finally {
         setIsLoadingTrial(false);
       }
@@ -526,7 +556,7 @@ export function LeftSidebar() {
   };
 
   const handleRenameTrial = async (targetTrial: TrialSummaryItem, newTitle: string) => {
-    if (targetTrial.projectId === 'local' || !cloudProjectId) {
+    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
       useNotebookStore.getState().updateTitle(newTitle);
       useNotebookStore.setState((s) => ({
         localTrials: s.localTrials.map((t) =>
@@ -562,7 +592,7 @@ export function LeftSidebar() {
   };
 
   const handleDeleteTrial = async (targetTrial: TrialSummaryItem) => {
-    if (targetTrial.projectId === 'local' || !cloudProjectId) {
+    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
       deleteLocalTrial(targetTrial.id);
       return;
     }
@@ -583,6 +613,15 @@ export function LeftSidebar() {
   };
 
   const handleSetCategory = async (targetTrial: TrialSummaryItem, category: string) => {
+    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+      const currentMeta = targetTrial.metadata || [];
+      const filteredMeta = currentMeta.filter(
+        (m) => !['category', 'type'].includes(m.key.toLowerCase())
+      );
+      const newMeta = category ? [...filteredMeta, { id: 'cat', key: 'category', value: category }] : filteredMeta;
+      updateLocalTrialMetadata(targetTrial.id, newMeta);
+      return;
+    }
     try {
       await setTrialCategory(targetTrial.id, category);
       setTrials((prev) =>
@@ -615,6 +654,10 @@ export function LeftSidebar() {
   };
 
   const handleChangeStatus = async (targetTrial: TrialSummaryItem, newStatus: TrialStatus) => {
+    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+      updateLocalTrialStatus(targetTrial.id, newStatus);
+      return;
+    }
     try {
       await updateTrialStatus(targetTrial.id, newStatus);
       setTrials((prev) =>
@@ -632,7 +675,6 @@ export function LeftSidebar() {
 
   // Real-time optimistic synchronization of the active trial's title, status, metadata
   const displayTrials = useMemo(() => {
-    const isGuest = !cloudProjectId && projects.length === 0;
     if (isGuest) {
       const list = localTrials && localTrials.length > 0 ? localTrials : (activeTrial ? [activeTrial] : []);
       return list.map((t) => {
@@ -659,7 +701,7 @@ export function LeftSidebar() {
       }
       return t;
     });
-  }, [cloudProjectId, projects.length, localTrials, trials, activeTrial]);
+  }, [isGuest, localTrials, trials, activeTrial]);
 
   // Extract distinct category tags across all trials
   const availableCategories = useMemo(() => {
@@ -717,53 +759,73 @@ export function LeftSidebar() {
         {/* ── Project Switcher ──────────────────────────────────────────── */}
         <div className="px-3 py-3 border-b border-border/60 bg-muted/20">
           <div className="flex items-center gap-1">
-            {/* Switcher button */}
-            <button
-              onClick={() => setProjectMenuOpen((v) => !v)}
-              className="flex-1 flex items-center justify-between px-2 py-1.5 rounded hover:bg-accent transition-all duration-200 group min-w-0"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="bg-muted p-1 rounded shrink-0">
-                  <FlaskConical className="w-3.5 h-3.5 text-foreground shrink-0" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-sm text-foreground font-medium truncate tracking-tight block">
-                    {activeProject?.name ?? 'All Projects'}
-                  </span>
-                  {activeProject?.lead && (
+            {isGuest ? (
+              <div className="flex-1 flex items-center px-2 py-1.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="bg-muted p-1 rounded shrink-0">
+                    <FlaskConical className="w-3.5 h-3.5 text-foreground shrink-0" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-sm text-foreground font-medium truncate tracking-tight block">
+                      Local Notebook
+                    </span>
                     <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
-                      {ROLE_LABEL[activeProject.lead.role]} ·{' '}
-                      {activeProject.lead.email?.split('@')?.[0] ?? 'Lead'}
+                      Stored in this browser
                     </span>
-                  )}
-                  {activeProject?.code && !activeProject.lead && (
-                    <span className="text-[10px] text-muted-foreground font-mono truncate block leading-none mt-0.5">
-                      {activeProject.code}
-                    </span>
-                  )}
-                  {!activeProject && (
-                    <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
-                      Workspace Overview
-                    </span>
-                  )}
+                  </div>
                 </div>
               </div>
-              <ChevronDown
-                className={`w-3 h-3 text-muted-foreground shrink-0 transition-transform duration-200 ${projectMenuOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
+            ) : (
+              <>
+                {/* Switcher button */}
+                <button
+                  onClick={() => setProjectMenuOpen((v) => !v)}
+                  className="flex-1 flex items-center justify-between px-2 py-1.5 rounded hover:bg-accent transition-all duration-200 group min-w-0"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="bg-muted p-1 rounded shrink-0">
+                      <FlaskConical className="w-3.5 h-3.5 text-foreground shrink-0" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-sm text-foreground font-medium truncate tracking-tight block">
+                        {activeProject?.name ?? 'All Projects'}
+                      </span>
+                      {activeProject?.lead && (
+                        <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
+                          {ROLE_LABEL[activeProject.lead.role]} ·{' '}
+                          {activeProject.lead.email?.split('@')?.[0] ?? 'Lead'}
+                        </span>
+                      )}
+                      {activeProject?.code && !activeProject.lead && (
+                        <span className="text-[10px] text-muted-foreground font-mono truncate block leading-none mt-0.5">
+                          {activeProject.code}
+                        </span>
+                      )}
+                      {!activeProject && (
+                        <span className="text-[10px] text-muted-foreground truncate block leading-none mt-0.5">
+                          Workspace Overview
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-3 h-3 text-muted-foreground shrink-0 transition-transform duration-200 ${projectMenuOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
 
-            {/* New Project button */}
-            <button
-              onClick={() => {
-                setProjectMenuOpen(false);
-                setShowNewProjectModal(true);
-              }}
-              className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
-              title="New project"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
+                {/* New Project button */}
+                <button
+                  onClick={() => {
+                    setProjectMenuOpen(false);
+                    setShowNewProjectModal(true);
+                  }}
+                  className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
+                  title="New project"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
 
             {/* Collapse sidebar button */}
             <button

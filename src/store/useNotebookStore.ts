@@ -12,6 +12,7 @@ import type {
   TelemetryStats,
   SaveStatus,
   TrialSummaryItem,
+  TrialStatus,
 } from '@/types/inquestra';
 import type { ProjectWithLead } from '@/actions/projectActions';
 
@@ -180,6 +181,9 @@ interface NotebookActions {
   setRightDrawerOpen: (open: boolean) => void;
   setRightDrawerMode: (mode: RightDrawerMode) => void;
   setActiveTrial: (trial: TrialDocument) => void;
+  selectLocalTrial: (id: string) => void;
+  updateLocalTrialStatus: (id: string, status: TrialStatus) => void;
+  updateLocalTrialMetadata: (id: string, metadata: MetadataEntry[]) => void;
   setCloudIds: (ids: { cloudTrialId: string; cloudProjectId: string }) => void;
   setSaveStatus: (status: SaveStatus) => void;
   setLastSavedAt: (time: string | null) => void;
@@ -235,13 +239,61 @@ export const useNotebookStore = create<NotebookStore>()(
       setCachedProjects: (projects) => set({ cachedProjects: projects }),
       setCachedTrials: (trials) => set({ cachedTrials: trials }),
       setActiveTrial: (trial) =>
-        set({
+        set((state) => ({
           activeTrial: trial,
-          cloudTrialId: trial.id,
+          cloudTrialId: state.cloudProjectId ? trial.id : null,
           saveStatus: 'SAVED',
           saveError: null,
           isLoadingTrial: false,
           lastSavedAt: trial.updatedAt || new Date().toISOString(),
+        })),
+
+      selectLocalTrial: (id) =>
+        set((state) => {
+          const found = state.localTrials.find((t) => t.id === id);
+          if (!found) return state;
+          return {
+            activeTrial: found,
+            cloudTrialId: null,
+            saveStatus: 'SAVED',
+            saveError: null,
+            isLoadingTrial: false,
+            lastSavedAt: found.updatedAt || new Date().toISOString(),
+          };
+        }),
+
+      updateLocalTrialStatus: (id, status) =>
+        set((state) => {
+          const now = new Date().toISOString();
+          const updated = state.localTrials.map((t) =>
+            t.id === id ? { ...t, status, updatedAt: now } : t
+          );
+          const updatedActive =
+            state.activeTrial.id === id
+              ? { ...state.activeTrial, status, updatedAt: now }
+              : state.activeTrial;
+          return {
+            localTrials: updated,
+            activeTrial: updatedActive,
+            saveStatus: 'SAVED',
+          };
+        }),
+
+      updateLocalTrialMetadata: (id, metadata) =>
+        set((state) => {
+          const now = new Date().toISOString();
+          const updated = state.localTrials.map((t) =>
+            t.id === id ? { ...t, metadata, updatedAt: now } : t
+          );
+          const updatedActive =
+            state.activeTrial.id === id
+              ? { ...state.activeTrial, metadata, updatedAt: now }
+              : state.activeTrial;
+          return {
+            localTrials: updated,
+            activeTrial: updatedActive,
+            saveStatus: 'SAVED',
+          };
         }),
 
       setCloudIds: ({ cloudTrialId, cloudProjectId }) =>
@@ -365,17 +417,22 @@ export const useNotebookStore = create<NotebookStore>()(
       name: 'inquestra-notebook-v1',
       storage: createJSONStorage(() => localStorage),
       // Persist document + cloud IDs + lastSavedAt + project/trial caches for instant 0ms restoration
-      partialize: (state) => ({
-        activeTrial: state.activeTrial,
-        localTrials: state.localTrials,
-        cloudTrialId: state.cloudTrialId,
-        cloudProjectId: state.cloudProjectId,
-        lastSavedAt: state.lastSavedAt,
-        cachedProjects: state.cachedProjects,
-        cachedTrials: state.cachedTrials,
-        isLeftSidebarOpen: state.isLeftSidebarOpen,
-        isRightDrawerOpen: state.isRightDrawerOpen,
-      }),
+      partialize: (state) => {
+        const localTrials = state.localTrials.some((t) => t.id === state.activeTrial.id)
+          ? state.localTrials
+          : [state.activeTrial, ...state.localTrials];
+        return {
+          activeTrial: state.activeTrial,
+          localTrials,
+          cloudTrialId: state.cloudProjectId ? state.cloudTrialId : null,
+          cloudProjectId: state.cloudProjectId,
+          lastSavedAt: state.lastSavedAt,
+          cachedProjects: state.cachedProjects,
+          cachedTrials: state.cachedTrials,
+          isLeftSidebarOpen: state.isLeftSidebarOpen,
+          isRightDrawerOpen: state.isRightDrawerOpen,
+        };
+      },
     }
   )
 );
