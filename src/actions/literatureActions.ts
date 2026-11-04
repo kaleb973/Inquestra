@@ -1,7 +1,7 @@
 'use server';
 // src/actions/literatureActions.ts
 // Scientific Literature & Citations Server Actions
-// Integrates with Europe PMC REST API (44M+ biomedical articles) and manages
+// Integrates with Europe PMC REST API (44M+ scientific & life science articles) and manages
 // lab-wide references and experiment-linked citations with 21 CFR Part 11 audit trails.
 
 import { z } from 'zod';
@@ -70,8 +70,8 @@ function invalidateTrialPapersCache(trialId?: string) {
 }
 
 /**
- * Search external biomedical literature using Europe PMC REST API.
- * Free, public, zero-auth endpoint with 44M+ life science & BME records.
+ * Search external scientific literature using Europe PMC REST API.
+ * Free, public, zero-auth endpoint with 44M+ life science, chemistry & engineering records.
  */
 export async function searchExternalLiterature(
   query: string,
@@ -120,7 +120,7 @@ export async function searchExternalLiterature(
       const res = await fetch(endpoint, {
         headers: {
           Accept: 'application/json',
-          'User-Agent': 'Inquestra-BME-Platform/1.0 (https://inquestra.app)',
+          'User-Agent': 'Inquestra-Research-Platform/1.0 (https://inquestra.app)',
         },
         next: { revalidate: 3600 },
         signal: AbortSignal.timeout(9000),

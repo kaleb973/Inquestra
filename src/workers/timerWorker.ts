@@ -1,7 +1,7 @@
 // src/workers/timerWorker.ts
 // Phase 4 — Web Worker protocol timer.
 // Runs in an isolated thread so browser tab throttling (1/min background limit)
-// cannot drift biomedical incubation countdowns.
+// cannot drift laboratory incubation countdowns or protocol timers.
 
 interface TimerMessage {
   command: 'START' | 'PAUSE' | 'RESET';

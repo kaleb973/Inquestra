@@ -1,6 +1,6 @@
 'use client';
 // src/components/admin/LabClearanceDossier.tsx
-// Extraordinary role-tailored onboarding & clearance dossier for Biomedical Engineering labs.
+// Role-tailored onboarding & clearance dossier for scientific research laboratories.
 // Displays regulatory mandates (21 CFR Part 11), granular authority bounds, interactive mission checklist,
 // and direct "Ask Higher-Up" escalation requests.
 
@@ -114,7 +114,7 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
   },
   RESEARCHER: {
     clearanceLevel: 2,
-    title: 'Bench Biomedical Researcher',
+    title: 'Bench Research Scientist',
     subtitle: 'Experimental Protocol Execution & DAQ Lead',
     colorClass: 'text-sky-600 dark:text-sky-400',
     borderClass: 'border-sky-300 dark:border-sky-500/40',
@@ -264,7 +264,7 @@ export function LabClearanceDossier({
                   CLEARANCE LEVEL {config.clearanceLevel}
                 </span>
                 <span className="text-xs text-muted-foreground font-mono">
-                  CLASSIFIED BME LAB DOSSIER
+                  LABORATORY CLEARANCE DOSSIER
                 </span>
               </div>
               <h2 className="text-lg font-bold text-foreground tracking-tight mt-0.5">
@@ -430,7 +430,7 @@ export function LabClearanceDossier({
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-border bg-muted/30 flex justify-between items-center text-xs text-muted-foreground">
-          <span>Inquestra Biomedical Engineering Governance</span>
+          <span>Inquestra Scientific Research Governance</span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded text-xs font-medium bg-muted hover:bg-accent text-foreground border border-border transition-colors shadow-sm"
@@ -481,7 +481,7 @@ export function LabClearanceDossier({
                       onChange={(e) => setRequestedRole(e.target.value as Role)}
                       className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                     >
-                      <option value="RESEARCHER">Level 2: Bench Biomedical Researcher</option>
+                      <option value="RESEARCHER">Level 2: Bench Research Scientist</option>
                       <option value="ADMIN">Level 3: Lab Operations Manager</option>
                       <option value="PI">Level 4: Principal Investigator (PI Approval Required)</option>
                     </select>

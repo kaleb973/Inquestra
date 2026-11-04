@@ -46,14 +46,14 @@ const MODALITIES: Record<SignalModality, ModalityConfig> = {
   },
   loadcell: {
     id: 'loadcell',
-    label: 'Tensile Biomechanics',
+    label: 'Materials Tensile Testing',
     channelName: 'Ch 01: Full-Bridge Strain Gauge (N)',
     unit: 'N',
     nominalBaud: 230400,
     sampleRate: '250 Hz',
-    description: 'Hydrogel ligament scaffold tensile deformation assay. Uniaxial load cell instrumentation.',
+    description: 'Polymer matrix stress-strain deformation assay. Uniaxial load cell instrumentation.',
     reagentLot: 'PBS Hydration Buffer Lot #PB-4402',
-    protocolTitle: 'Polymeric Ligament Ultimate Tensile Strength',
+    protocolTitle: 'Polymer Sample Ultimate Tensile Strength',
     stimulusLabel: 'Apply 40 N Tensile Step',
   },
 };
@@ -307,7 +307,7 @@ export function InteractiveBenchConsole() {
             {/* Protocol Meta Header */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
-                Protocol #TR-2026-BME
+                Protocol #TR-2026-SCI
               </span>
               <button
                 type="button"

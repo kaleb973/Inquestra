@@ -1,5 +1,5 @@
 // src/lib/resilience.ts
-// Enterprise Resilience Primitives for Inquestra BME Platform.
+// Enterprise Resilience Primitives for Inquestra Platform.
 // Implements Timeouts (via AbortSignal), Retries with Exponential Backoff and Full Jitter,
 // and transient error classifiers to protect outbound RPC, MCP, LIMS, and external webhooks.
 

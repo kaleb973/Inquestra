@@ -215,7 +215,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </button>
       </div>
 
-      {/* ── Subscript & Superscript (Crucial for BME / Chemistry) ── */}
+      {/* ── Subscript & Superscript (Crucial for Chemistry & Formulas) ── */}
       <div className="flex items-center gap-0.5 border-r border-border/60 pr-1.5 mr-1">
         <button
           type="button"

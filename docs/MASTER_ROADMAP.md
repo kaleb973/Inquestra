@@ -22,7 +22,7 @@
 To avoid the `application/pdf` MIME error when switching to Claude Sonnet, simply open a **new chat session** and paste the exact prompt below:
 
 ```text
-I am building Inquestra (inquestra.org), an enterprise-grade Data Acquisition (DAQ) and Electronic Research Notebook (ERN) for Biomedical Engineering.
+I am building Inquestra (inquestra.org), an enterprise-grade Data Acquisition (DAQ) and Electronic Research Notebook (ERN) for Life Sciences, Chemistry, Biotech, and Engineering.
 
 The complete architectural specifications have been written to the repository docs:
 - Phase 1: docs/PHASE_1_PRD.md
@@ -33,7 +33,7 @@ The complete architectural specifications have been written to the repository do
 Please read `docs/PHASE_1_PRD.md` and begin executing Phase 1:
 1. Scaffold the Next.js 15 App Router project with TypeScript strict mode and Tailwind CSS.
 2. Install the required dependencies (@tiptap/react, @tiptap/starter-kit, zustand, recharts, lucide-react).
-3. Build the 3-column BME workspace layout.
+3. Build the 3-column scientific research workspace layout.
 4. Implement the `useWebSerial` hook and offline synthetic telemetry simulator.
 5. Create the TipTap canvas with the inline `InteractiveChartNode` NodeView.
 ```

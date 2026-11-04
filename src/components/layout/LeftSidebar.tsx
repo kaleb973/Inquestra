@@ -956,7 +956,7 @@ export function LeftSidebar() {
               <button
                 onClick={() => setShowInfoPopover((v) => !v)}
                 className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
-                title="Why 'Trials'? Click for details on Inquestra's BME DAQ + ELN architecture."
+                title="Why 'Trials'? Click for details on Inquestra's research notebook architecture."
               >
                 <Info className="w-3 h-3" />
               </button>
@@ -991,7 +991,7 @@ export function LeftSidebar() {
                 </button>
               </div>
               <p className="leading-relaxed">
-                In Biomedical Engineering (BME) and DAQ, a <strong>trial</strong> is an individual data collection cycle or telemetry run.
+                In experimental research and laboratory data acquisition, a <strong>trial</strong> is an individual data collection cycle, protocol execution, or telemetry run.
               </p>
               <p className="leading-relaxed">
                 In Inquestra, every entry is also a full <strong>Electronic Research Notebook (ERN)</strong> document that tracks rich hypotheses, protocol executions (SOPs), LIMS reagent deductions, telemetry graphs, and 21 CFR Part 11 seals.

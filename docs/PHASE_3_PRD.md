@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary & Objectives
 
-Biomedical trials produce massive data payloads (multi-gigabyte sensor streams, ECGs, spectrophotometer outputs). Passing these files through Next.js serverless functions exhausts memory and triggers function timeouts.
+Scientific experimental trials produce massive data payloads (multi-gigabyte sensor streams, spectrophotometer outputs, chromatography runs). Passing these files through Next.js serverless functions exhausts memory and triggers function timeouts.
 
 Phase 3 resolves the throughput bottleneck by implementing:
 1. **Direct-to-Cloud Storage (Cloudflare R2):** Bypasses Vercel servers completely with zero egress costs.
@@ -28,7 +28,7 @@ Phase 3 resolves the throughput bottleneck by implementing:
 | **Object Storage** | Cloudflare R2 (`@aws-sdk/client-s3`) | S3-compatible, high-throughput storage with **$0 egress fees**. |
 | **CSV Parser** | PapaParse (`papaparse`) | High-speed, streaming client-side CSV parsing. |
 | **Rich Text Nodes** | TipTap React NodeViews | Mounting dynamic React components inside ProseMirror blocks. |
-| **Data Visualization** | Recharts | Interactive, zoomable line and area plots for biomedical telemetry. |
+| **Data Visualization** | Recharts | Interactive, zoomable line and area plots for experimental telemetry. |
 | **Upload Pipeline** | Presigned S3 URLs | Direct browser-to-bucket multi-part streaming. |
 
 ---

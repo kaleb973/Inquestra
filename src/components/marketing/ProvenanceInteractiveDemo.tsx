@@ -96,13 +96,13 @@ export function ProvenanceInteractiveDemo() {
           {/* Trial State */}
           <div className="p-4 rounded-lg border border-border bg-card space-y-3">
             <div className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold border-b border-border pb-2 flex justify-between items-center">
-              <span>Trial Payload #TR-8841-BME</span>
+              <span>Trial Payload #TR-8841-SCI</span>
               <span className="text-[10px] text-muted-foreground font-normal">IndexedDB / Cloud</span>
             </div>
 
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Recorded Peak Biopotential:</span>
+                <span className="text-muted-foreground">Recorded Peak Signal Output:</span>
                 <span
                   className={cn(
                     'px-2 py-0.5 rounded font-bold transition-colors',

@@ -578,7 +578,7 @@ export function LiteraturePanel() {
               </div>
             ) : (
               <div className="py-6 text-center text-xs text-muted-foreground">
-                Type a biomedical keyword, author name, or DOI above to search.
+                Type a keyword, molecule name, author, or DOI above to search.
               </div>
             )}
           </div>

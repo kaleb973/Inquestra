@@ -5,7 +5,7 @@ import { LiteratureLibrary, type SavedPaperItem } from '@/components/literature/
 
 export const metadata = {
   title: 'Literature & Citations | Inquestra',
-  description: 'Biomedical literature discovery, peer-reviewed citations, and open-access research library.',
+  description: 'Scientific literature discovery, peer-reviewed citations, and open-access research library.',
 };
 
 export default async function LiteraturePage() {

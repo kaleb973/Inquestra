@@ -366,7 +366,7 @@ export function LiteratureLibrary({
               Active Tags
             </div>
             <p className="text-2xl font-bold text-foreground tabular-nums">{allTags.length}</p>
-            <span className="text-[10px] text-muted-foreground">biomedical categories</span>
+            <span className="text-[10px] text-muted-foreground">research disciplines</span>
           </div>
         </div>
 
@@ -474,7 +474,7 @@ export function LiteratureLibrary({
             <h3 className="text-sm font-semibold text-foreground">No research papers found</h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
               {papers.length === 0
-                ? 'Your lab library is empty. Search Europe PMC to discover and curate biomedical papers for your experimental protocols.'
+                ? 'Your lab library is empty. Search Europe PMC and PubMed to discover and curate scientific papers for your experimental protocols.'
                 : 'No papers matched the current search and tag filters.'}
             </p>
             <button

@@ -95,7 +95,7 @@ export function PilotInterestForm() {
             required
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
-            placeholder="e.g. Department of Biomedical Engineering"
+            placeholder="e.g. Molecular Biology Core, Dept. of Chemistry, or Bioengineering Lab"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>

@@ -44,3 +44,4 @@ Inquestra follows the visual grammar of precision laboratory instrumentation (Be
 
 - "Sandbox" was previously used to describe the unauthenticated mode — resolved: replaced with **Local Notebook** to use plain, natural laboratory terminology instead of developer jargon.
 - AI purple / violet gradients — resolved: replaced with bench instrumentation console styling, P31 phosphor green, and clinical emerald.
+- **Biomedical Engineering (BME) Bias**: Inquestra was previously described with a heavy bias toward Biomedical Engineering (BME). Resolved: Inquestra is a universal scientific research platform spanning **Life Sciences, Chemistry, Biotech, Materials Science, and Engineering**. UI labels, documentation, starter content, and telemetry modalities must maintain balanced multi-disciplinary terminology.

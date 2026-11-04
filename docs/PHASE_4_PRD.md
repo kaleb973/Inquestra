@@ -61,7 +61,7 @@ export function generateTrialChecksum(payload: CanonicalTrialPayload): string {
 - If current stock drops below `thresholdValue`, an alert flag is set for procurement.
 
 ### 2.3 Feature 3: Web Worker Timer Grid (`src/workers/timerWorker.ts`)
-Browsers throttle `setTimeout` down to 1 execution per minute in inactive background tabs. To maintain strict biomedical incubation protocols, timers run in an isolated Web Worker:
+Browsers throttle `setTimeout` down to 1 execution per minute in inactive background tabs. To maintain strict laboratory incubation protocols and reaction step timers, timers run in an isolated Web Worker:
 
 ```typescript
 // src/workers/timerWorker.ts

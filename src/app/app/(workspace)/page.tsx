@@ -1,6 +1,6 @@
 'use client';
 // src/app/page.tsx
-// 3-column enterprise BME workspace shell.
+// 3-column enterprise scientific workspace shell.
 // All children are client components; this page is also client-only (DAQ, editor).
 
 import { Header } from '@/components/layout/Header';

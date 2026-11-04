@@ -22,8 +22,8 @@ export default function ArchitecturePage() {
             Engineered for high-frequency telemetry &amp; immutable storage.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            How Inquestra delivers smooth 60fps real-time biopotential waveform rendering, zero UI frame drops,
-            offline bench resilience, and tamper-evident cloud synchronization across modern biomedical laboratories.
+            How Inquestra delivers smooth 60fps real-time sensor telemetry waveform rendering, zero UI frame drops,
+            offline bench resilience, and tamper-evident cloud synchronization across modern scientific laboratories and research facilities.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <Link
@@ -110,10 +110,10 @@ export default function ArchitecturePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
-                Why off-main-thread Web Workers are essential for BME DAQ.
+                Why off-main-thread Web Workers are essential for bench DAQ.
               </h2>
               <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-                Biomedical signal acquisition requires uninterrupted streaming. At 1 kHz with multiple differential channels,
+                Continuous laboratory signal acquisition requires uninterrupted streaming. At 1 kHz with multiple differential channels,
                 a browser processing serial data on the JavaScript main thread will inevitably stutter whenever the user types
                 in their protocol notes or scrolls a complex document.
               </p>

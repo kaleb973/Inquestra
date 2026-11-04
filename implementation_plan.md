@@ -29,7 +29,7 @@ Implement a robust multi-trial save/load system using PostgreSQL, build data exp
 - Add actions for switching active trials, fetching trials from the server, and syncing the active trial's TipTap JSON up to PostgreSQL automatically via debounced calls.
 
 #### [MODIFY] `src/components/layout/LeftSidebar.tsx`
-- Replace the static "BME Lab" and dummy trial with a live list fetched from `useNotebookStore`.
+- Replace the static placeholder lab and dummy trial with a live list fetched from `useNotebookStore`.
 - Add a "New Trial" button that hits `createTrial()` and immediately opens it in the canvas.
 
 #### [MODIFY] `src/components/canvas/EditorCanvas.tsx`

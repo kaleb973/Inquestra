@@ -389,8 +389,8 @@ export function ScientificWorkspacePreview() {
             <div className="space-y-3">
               <div className="p-4 rounded-xl border border-border bg-card space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                  <span className="text-primary font-semibold">Nature Biomedical Engineering (2024)</span>
-                  <span>PMID: 38412901 · DOI: 10.1038/s41551-024-01182-1</span>
+                  <span className="text-primary font-semibold">Nature Biotechnology (2024)</span>
+                  <span>PMID: 38412901 · DOI: 10.1038/s41587-024-01182-1</span>
                 </div>
                 <h4 className="text-sm font-semibold text-foreground">
                   Electromechanical synchronization of engineered human cardiac tissue on nanofibrous scaffolds
@@ -400,7 +400,7 @@ export function ScientificWorkspacePreview() {
                 </p>
                 <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] font-mono">
                   <span className="text-phosphor">Cited in Section 3.1: Protocol Electrophysiological Rationale</span>
-                  <span className="text-muted-foreground">Direct Markdown Citation: [@NBE2024]</span>
+                  <span className="text-muted-foreground">Direct Markdown Citation: [@NBT2024]</span>
                 </div>
               </div>
 

@@ -21,9 +21,9 @@ const SNIPPETS: Record<CodeTab, CodeSnippet> = {
     title: 'ESP32-S3 Firmware (C++)',
     badge: 'Hardware DAQ',
     language: 'cpp',
-    description: 'High-speed differential biopotential sampling with FreeRTOS ring-buffer queue and USB-CDC telemetry stream.',
+    description: 'High-speed analog transducer sampling with FreeRTOS ring-buffer queue and USB-CDC telemetry stream.',
     code: `// Inquestra DAQ Firmware for ESP32-S3 (Arduino Core / ESP-IDF)
-// Continuous 1,000 Hz biopotential sampling with hardware timer
+// Continuous 1,000 Hz instrument telemetry sampling with hardware timer
 
 #include <Arduino.h>
 
@@ -63,9 +63,9 @@ void loop() {
     title: 'Arduino Uno / Mega (C++)',
     badge: 'Standard Microcontroller',
     language: 'cpp',
-    description: 'Standard 115,200 baud streaming for Arduino boards. Directly compatible with AD8232 ECG and MyoWare EMG sensors.',
+    description: 'Standard 115,200 baud streaming for Arduino boards. Compatible with laboratory strain gauges, photodiode detectors, and analytical probes.',
     code: `// Inquestra Basic DAQ for Arduino Uno / Nano / Mega
-// Compatible with AD8232 ECG, MyoWare EMG, and HX711 Load Cells
+// Compatible with load cells, optical detectors, and analog front-ends
 
 const int SENSOR_CH0 = A0;
 const int SENSOR_CH1 = A1;
@@ -142,7 +142,7 @@ import pandas as pd
 import numpy as np
 
 # Load sealed trial manifest and telemetry stream
-with open("trial_TR-2026-BME_manifest.json", "r") as f:
+with open("trial_TR-2026-SCI_manifest.json", "r") as f:
     manifest = json.load(f)
 
 # Verify SHA-256 data integrity before running statistical model

@@ -14,7 +14,7 @@
 The primary goal of Phase 1 is to establish the foundational, local-first reactive canvas for **Inquestra** and validate real-time hardware telemetry ingestion without the overhead of cloud databases or authentication. 
 
 ### Core Deliverables
-1. **Responsive 3-Column Enterprise BME Workspace:** Professional dark-mode UI (Left Navigation/Hardware Control, Center TipTap v3 Canvas, Right Telemetry & Metadata Drawer).
+1. **Responsive 3-Column Enterprise Workspace:** Professional dark-mode UI (Left Navigation/Hardware Control, Center TipTap v3 Canvas, Right Telemetry & Metadata Drawer).
 2. **TipTap v3 Block-Based Editor:** Clean WYSIWYG note-taking canvas supporting markdown shortcuts, slash commands, and custom React NodeViews.
 3. **Web Serial DAQ Integration (`navigator.serial`):** Direct-to-browser USB/Bluetooth microcontroller (ESP32/Arduino) connection loop reading high-speed telemetry (115200 baud) via `TextDecoderStream`.
 4. **Zustand High-Frequency State Store:** Granular, transient state manager buffering incoming sensor readings without triggering full-canvas re-renders.
@@ -28,7 +28,7 @@ The primary goal of Phase 1 is to establish the foundational, local-first reacti
 | Layer | Technology | Justification |
 | :--- | :--- | :--- |
 | **Framework** | Next.js 15+ (App Router) | High-performance React 19 architecture, colocation of client and future server code. |
-| **Language** | TypeScript (Strict Mode) | Strict typing across hardware packets, preventing runtime crashes in medical/BME data. |
+| **Language** | TypeScript (Strict Mode) | Strict typing across hardware packets, preventing runtime crashes in high-frequency research data. |
 | **Styling** | Tailwind CSS + Lucide Icons | Clean, high-density enterprise laboratory aesthetic; dark mode standard. |
 | **State Management** | Zustand (`useNotebookStore`) | Decoupled atomic subscriptions preventing TipTap re-render lag during high-frequency streaming. |
 | **Editor Canvas** | TipTap v3 (`@tiptap/react`, `@tiptap/pm`) | Headless ProseMirror-powered block editor supporting custom React NodeViews. |

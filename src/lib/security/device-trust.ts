@@ -22,7 +22,7 @@ async function getHmacKey(): Promise<CryptoKey> {
     process.env.DEVICE_TRUST_SECRET ||
     process.env.NEXTAUTH_SECRET ||
     process.env.SUPABASE_JWT_SECRET ||
-    'inquestra-bme-device-trust-secret-key-min-32-bytes!';
+    'inquestra-device-trust-secret-key-min-32-bytes!';
 
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);

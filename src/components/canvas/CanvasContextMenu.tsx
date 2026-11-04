@@ -1,7 +1,7 @@
 'use client';
 // src/components/canvas/CanvasContextMenu.tsx
 // Specialized right-click context menu for the Editor Canvas.
-// Allows researchers to quickly insert BME blocks, charts, reagents, and save snapshots.
+// Allows researchers to quickly insert protocol blocks, charts, reagents, and save snapshots.
 
 import { useEffect, useRef } from 'react';
 import type { Editor } from '@tiptap/core';

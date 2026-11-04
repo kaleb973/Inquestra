@@ -1,6 +1,6 @@
 // src/components/editor/extensions/BlockGuardExtension.ts
 // TipTap extension providing safe block boundary deletion and accidental backspace protection.
-// Guards complex BME blocks (Interactive Telemetry Charts, Protocols, Reagent Deductions, Molecules,
+// Guards complex interactive blocks (Interactive Telemetry Charts, Protocols, Reagent Deductions, Molecules,
 // Equations, Sequences, and Data Tables) against accidental single-keystroke vaporization while taking notes.
 
 import { Extension } from '@tiptap/core';

@@ -24,6 +24,7 @@ Configuration and guidelines for agents working in this project.
 3. **TypeScript Strictly Enforced:** Do not use `any` types. All hardware payloads, API responses, and database schemas must be strongly typed.
 4. **Artifact Generation First:** Before executing massive refactors or writing complex integrations (like serial port reading or WebSockets), you must output an implementation plan artifact for review.
 5. **Strict API & Zero-Hallucination Enforced (Always On):** Never guess or invent function signatures, framework methods, library APIs, or import paths. Verify every method call, type, and import against installed package versions or source files before writing code.
+6. **Domain Neutrality (No BME Bias):** Inquestra is an Electronic Lab Notebook & research platform spanning **Life Sciences, Chemistry, Biotech, Materials Science, and Engineering**. Never introduce or assume a narrow bias toward Biomedical Engineering (BME), physiological monitoring, or medical devices when designing features, writing copy, generating templates, naming demo payloads, or documenting architecture. Keep terminology, examples, and telemetry modalities balanced across wet lab chemistry, molecular biology, materials testing, and physical instrumentation.
 
 ## Code Style
 - Write highly modular, DRY code.

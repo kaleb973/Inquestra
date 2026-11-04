@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Hardware DAQ & Telemetry Ingestion — Inquestra',
   description:
-    'Direct browser Web Serial telemetry ingestion for ESP32, Arduino, Teensy, and biomedical sensors. Zero driver installation, 1 kHz sampling, and sub-millisecond latency.',
+    'Direct browser Web Serial telemetry ingestion for ESP32, Arduino, Teensy, laboratory instruments, and analytical sensors. Zero driver installation, 1 kHz sampling, and sub-millisecond latency.',
 };
 
 export default function HardwarePage() {
@@ -113,7 +113,7 @@ export default function HardwarePage() {
               Eliminating the fragile workstation bridge.
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">
-              Traditional biomedical DAQ setups rely on ad-hoc Python listeners, proprietary National Instruments runtime
+              Traditional laboratory DAQ setups rely on ad-hoc Python listeners, proprietary National Instruments runtime
               drivers, or custom C++ daemons writing loose CSV files to workstation desktops. Inquestra replaces this entire
               fragile chain with browser-native Web Serial communication.
             </p>
@@ -214,12 +214,12 @@ export default function HardwarePage() {
         </div>
       </section>
 
-      {/* Supported Biomedical Sensors */}
+      {/* Supported Laboratory Transducers & Analytical Sensors */}
       <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
             <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
-              Pre-calibrated for physiological transducers.
+              Pre-calibrated for laboratory transducers &amp; instruments.
             </h2>
           </div>
 
