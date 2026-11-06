@@ -388,23 +388,29 @@ export function Header() {
         ) : (
           <select
             value={status}
-            disabled={!cloudTrialId || isPending}
+            disabled={isPending}
             onChange={(e) => {
               const newStatus = e.target.value as TrialStatus;
-              if (!cloudTrialId) return;
+              const targetId = cloudTrialId || activeTrialId;
               startTransition(async () => {
                 try {
-                  await updateTrialStatus(cloudTrialId, newStatus);
-                  // Optimistically update local store
-                  useNotebookStore.setState((s) => ({
-                    activeTrial: { ...s.activeTrial, status: newStatus },
-                  }));
+                  if (cloudTrialId) {
+                    await updateTrialStatus(cloudTrialId, newStatus);
+                  }
+                  useNotebookStore.getState().updateTrialStatusEverywhere(targetId, newStatus);
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(
+                      new CustomEvent('inquestra:trial-status-updated', {
+                        detail: { trialId: targetId, status: newStatus },
+                      })
+                    );
+                  }
                 } catch (err) {
                   alert(err instanceof Error ? err.message : 'Status update failed');
                 }
               });
             }}
-            title={cloudTrialId ? 'Change trial lifecycle status' : 'Save trial to cloud to change status'}
+            title="Change trial lifecycle status"
             aria-label="Change trial lifecycle status"
             className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border cursor-pointer appearance-none bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-ring transition-colors disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
           >

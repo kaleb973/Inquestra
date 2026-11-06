@@ -183,6 +183,7 @@ interface NotebookActions {
   setActiveTrial: (trial: TrialDocument) => void;
   selectLocalTrial: (id: string) => void;
   updateLocalTrialStatus: (id: string, status: TrialStatus) => void;
+  updateTrialStatusEverywhere: (id: string, status: TrialStatus) => void;
   updateLocalTrialMetadata: (id: string, metadata: MetadataEntry[]) => void;
   setCloudIds: (ids: { cloudTrialId: string; cloudProjectId: string }) => void;
   setSaveStatus: (status: SaveStatus) => void;
@@ -272,10 +273,34 @@ export const useNotebookStore = create<NotebookStore>()(
             state.activeTrial.id === id
               ? { ...state.activeTrial, status, updatedAt: now }
               : state.activeTrial;
+          const updatedCached = state.cachedTrials.map((t) =>
+            t.id === id ? { ...t, status, updatedAt: now } : t
+          );
           return {
             localTrials: updated,
             activeTrial: updatedActive,
+            cachedTrials: updatedCached,
             saveStatus: 'SAVED',
+          };
+        }),
+
+      updateTrialStatusEverywhere: (id, status) =>
+        set((state) => {
+          const now = new Date().toISOString();
+          const updatedActive =
+            state.activeTrial.id === id
+              ? { ...state.activeTrial, status, updatedAt: now }
+              : state.activeTrial;
+          const updatedLocal = state.localTrials.map((t) =>
+            t.id === id ? { ...t, status, updatedAt: now } : t
+          );
+          const updatedCached = state.cachedTrials.map((t) =>
+            t.id === id ? { ...t, status, updatedAt: now } : t
+          );
+          return {
+            activeTrial: updatedActive,
+            localTrials: updatedLocal,
+            cachedTrials: updatedCached,
           };
         }),
 
@@ -377,9 +402,13 @@ export const useNotebookStore = create<NotebookStore>()(
           if (!updatedLocal.some((t) => t.id === updatedActive.id)) {
             updatedLocal.push(updatedActive);
           }
+          const updatedCached = state.cachedTrials.map((t) =>
+            t.id === updatedActive.id ? { ...t, title, updatedAt: now } : t
+          );
           return {
             activeTrial: updatedActive,
             localTrials: updatedLocal,
+            cachedTrials: updatedCached,
             saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
             lastSavedAt: now,
           };

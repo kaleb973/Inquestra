@@ -325,6 +325,23 @@ export function LeftSidebar() {
   const loadingTrialIdRef = useRef<string | null>(null);
 
   const handleSelectTrial = useCallback((id: string) => {
+    // Before switching away, ensure the outgoing active trial's latest title/status in store is mirrored to trials
+    const currentActive = useNotebookStore.getState().activeTrial;
+    if (currentActive && currentActive.id) {
+      setTrials((prev) =>
+        prev.map((t) =>
+          t.id === currentActive.id
+            ? {
+                ...t,
+                status: currentActive.status || t.status,
+                title: currentActive.title || t.title,
+                metadata: currentActive.metadata || t.metadata,
+              }
+            : t
+        )
+      );
+    }
+
     // Guest / Local Notebook mode: instant switch with 0ms network latency
     if (isGuest) {
       selectLocalTrial(id);
@@ -360,18 +377,33 @@ export function LeftSidebar() {
         if (requestSeqRef.current !== currentSeq) return;
 
         if (fullTrial) {
+          const loadedStatus = fullTrial.status as import('@/types/inquestra').TrialStatus;
+          const loadedMetadata = (fullTrial.metadata ?? []) as import('@/types/inquestra').MetadataEntry[];
           setActiveTrial({
             id: fullTrial.id,
             title: fullTrial.title,
             content: (fullTrial.content ?? { type: 'doc', content: [] }) as Record<string, unknown>,
-            status: fullTrial.status as import('@/types/inquestra').TrialStatus,
-            metadata: (fullTrial.metadata ?? []) as import('@/types/inquestra').MetadataEntry[],
+            status: loadedStatus,
+            metadata: loadedMetadata,
             createdAt: fullTrial.createdAt instanceof Date ? fullTrial.createdAt.toISOString() : String(fullTrial.createdAt),
             updatedAt: fullTrial.updatedAt instanceof Date ? fullTrial.updatedAt.toISOString() : String(fullTrial.updatedAt),
             checksum: fullTrial.checksum ?? null,
             sealedAt: fullTrial.sealedAt instanceof Date ? fullTrial.sealedAt.toISOString() : (fullTrial.sealedAt ?? null),
             sealedBy: fullTrial.sealedBy ?? null,
           });
+
+          setTrials((prev) =>
+            prev.map((t) =>
+              t.id === fullTrial.id
+                ? {
+                    ...t,
+                    status: loadedStatus || t.status,
+                    title: fullTrial.title || t.title,
+                    metadata: loadedMetadata || t.metadata,
+                  }
+                : t
+            )
+          );
 
           setCloudIds({
             cloudTrialId: fullTrial.id,
@@ -489,6 +521,19 @@ export function LeftSidebar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Synchronize trial status changes across components (Header, Context Menu, Canvas)
+  useEffect(() => {
+    const handleStatusUpdate = (e: Event) => {
+      const detail = (e as CustomEvent<{ trialId: string; status: TrialStatus }>).detail;
+      if (!detail?.trialId) return;
+      setTrials((prev) =>
+        prev.map((t) => (t.id === detail.trialId ? { ...t, status: detail.status } : t))
+      );
+    };
+    window.addEventListener('inquestra:trial-status-updated', handleStatusUpdate);
+    return () => window.removeEventListener('inquestra:trial-status-updated', handleStatusUpdate);
+  }, []);
+
   // Handler for manual project switcher
   const handleSelectProject = useCallback(async (newProjectId: string) => {
     setActiveProjectId(newProjectId);
@@ -508,6 +553,22 @@ export function LeftSidebar() {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
   const handleNewTrial = (cat?: string) => {
+    // Before creating new trial, preserve outgoing active trial's latest title/status
+    const currentActive = useNotebookStore.getState().activeTrial;
+    if (currentActive && currentActive.id) {
+      setTrials((prev) =>
+        prev.map((t) =>
+          t.id === currentActive.id
+            ? {
+                ...t,
+                status: currentActive.status || t.status,
+                title: currentActive.title || t.title,
+                metadata: currentActive.metadata || t.metadata,
+              }
+            : t
+        )
+      );
+    }
     if (isGuest) {
       const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
       const now = new Date().toISOString();
@@ -684,18 +745,31 @@ export function LeftSidebar() {
 
   const handleChangeStatus = async (targetTrial: TrialSummaryItem, newStatus: TrialStatus) => {
     if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
-      updateLocalTrialStatus(targetTrial.id, newStatus);
+      useNotebookStore.getState().updateTrialStatusEverywhere(targetTrial.id, newStatus);
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, status: newStatus } : t))
+      );
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('inquestra:trial-status-updated', {
+            detail: { trialId: targetTrial.id, status: newStatus },
+          })
+        );
+      }
       return;
     }
     try {
       await updateTrialStatus(targetTrial.id, newStatus);
+      useNotebookStore.getState().updateTrialStatusEverywhere(targetTrial.id, newStatus);
       setTrials((prev) =>
         prev.map((t) => (t.id === targetTrial.id ? { ...t, status: newStatus } : t))
       );
-      if (activeTrial.id === targetTrial.id) {
-        useNotebookStore.setState((s) => ({
-          activeTrial: { ...s.activeTrial, status: newStatus },
-        }));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('inquestra:trial-status-updated', {
+            detail: { trialId: targetTrial.id, status: newStatus },
+          })
+        );
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update status');
