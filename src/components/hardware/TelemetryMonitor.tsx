@@ -22,6 +22,7 @@ import { useWebSerial } from '@/hooks/useWebSerial';
 import { useTelemetrySim, SimMode } from '@/hooks/useTelemetrySim';
 import { formatSafeCsvCell } from '@/lib/csvParser';
 import { checkLabCompliance } from '@/actions/adminActions';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 const BAUD_RATES = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600] as const;
 
@@ -241,6 +242,10 @@ export function TelemetryMonitor() {
                   alert(res.reason);
                   return;
                 }
+                trackAnalyticsEvent('daq_stream_started', {
+                  portType: 'serial',
+                  baudRate: selectedBaud,
+                });
                 await connect(selectedBaud);
               }}
               disabled={hardwareStatus.isConnected}
@@ -296,7 +301,13 @@ export function TelemetryMonitor() {
               </select>
             </div>
             <button
-              onClick={() => startSimulation(selectedSimMode)}
+              onClick={() => {
+                trackAnalyticsEvent('daq_stream_started', {
+                  portType: 'mock',
+                  mode: selectedSimMode,
+                });
+                startSimulation(selectedSimMode);
+              }}
               disabled={hardwareStatus.isConnected}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-accent border border-border text-foreground transition-colors disabled:opacity-40 shadow-xs"
             >

@@ -9,6 +9,11 @@ import { Prisma, Role } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { generateTrialHash } from '@/lib/provenance';
+import {
+  flushPostHogLogs,
+  logTrialSealed,
+  logTrialStatusChanged,
+} from '@/lib/posthog-logs';
 import type { ProjectWithLead } from '@/actions/projectActions';
 
 // ─── Validation schemas ────────────────────────────────────────────────────────
@@ -634,6 +639,9 @@ export async function sealTrial(trialId: string) {
     }
   });
 
+  logTrialSealed();
+  await flushPostHogLogs();
+
   revalidatePath('/app');
   return updated;
 }
@@ -683,6 +691,9 @@ export async function updateTrialStatus(
       },
     },
   });
+
+  logTrialStatusChanged(validStatus);
+  await flushPostHogLogs();
 
   revalidatePath('/app');
   return updated;

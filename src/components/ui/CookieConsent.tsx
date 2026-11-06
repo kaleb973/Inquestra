@@ -68,6 +68,9 @@ export function CookieConsent() {
           updatedAt: new Date().toISOString(),
         })
       );
+      window.dispatchEvent(
+        new CustomEvent('inquestra:cookie-consent-updated', { detail: prefs })
+      );
     } catch {
       // Ignore localStorage write error
     }

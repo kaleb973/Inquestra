@@ -5,6 +5,7 @@ import './globals.css';
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from '@/components/theme-provider';
 import { CookieConsent } from '@/components/ui/CookieConsent';
+import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
 
 const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -86,6 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           {children}
           <CookieConsent />
+          <AnalyticsProvider />
         </ThemeProvider>
       </body>
     </html>

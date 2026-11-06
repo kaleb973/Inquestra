@@ -33,6 +33,8 @@ import { signOut } from '@/actions/authActions';
 import { sealTrial, updateTrialStatus, fetchTrialSignatures } from '@/actions/trialActions';
 import { checkLabCompliance, getCurrentUserProfile } from '@/actions/adminActions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
+import posthog from 'posthog-js';
 import type { TrialStatus, MetadataEntry } from '@/types/inquestra';
 import type { User } from '@supabase/supabase-js';
 import type { Role } from '@prisma/client';
@@ -106,6 +108,12 @@ export function Header() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.reset();
+    }
     try {
       // Clear local storage so no private experiments leak on shared lab computers
       if (typeof window !== 'undefined') {
@@ -240,6 +248,7 @@ export function Header() {
   }, [toggleLeftSidebar, toggleRightDrawer]);
 
   const handleExport = async () => {
+    trackAnalyticsEvent('export_triggered', { format: 'zip', trialTitle: title });
     setIsExporting(true);
     try {
       // Request HTML from EditorCanvas via custom event
@@ -320,6 +329,7 @@ export function Header() {
         }
 
         await sealTrial(targetId);
+        trackAnalyticsEvent('trial_sealed', { trialId: targetId });
         setShowSealModal(false);
         // Force reload to grab latest DB state
         window.location.reload(); 
@@ -398,6 +408,10 @@ export function Header() {
                     await updateTrialStatus(cloudTrialId, newStatus);
                   }
                   useNotebookStore.getState().updateTrialStatusEverywhere(targetId, newStatus);
+                  trackAnalyticsEvent('trial_status_changed', {
+                    trialId: targetId,
+                    status: newStatus,
+                  });
                   if (typeof window !== 'undefined') {
                     window.dispatchEvent(
                       new CustomEvent('inquestra:trial-status-updated', {
@@ -480,6 +494,11 @@ export function Header() {
         {!user ? (
           <Link
             href="/app/signup?redirectTo=/app"
+            onClick={() =>
+              trackAnalyticsEvent('cloud_backup_intent', {
+                triggerSource: 'header_backup_button',
+              })
+            }
             title="Create an account to back up notes and sync across devices"
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors"
           >
@@ -540,7 +559,10 @@ export function Header() {
         {/* Print button (desktop) */}
         <button
           type="button"
-          onClick={() => window.print()}
+          onClick={() => {
+            trackAnalyticsEvent('export_triggered', { format: 'pdf', trialTitle: title });
+            window.print();
+          }}
           title="Print trial to PDF (Ctrl+P)"
           aria-label="Print trial to PDF"
           className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -759,6 +781,11 @@ export function Header() {
         ) : (
           <Link
             href="/app/login"
+            onClick={() =>
+              trackAnalyticsEvent('sign_in_intent', {
+                triggerSource: 'header_signin_button',
+              })
+            }
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors"
           >
             <LogIn className="w-3.5 h-3.5" />

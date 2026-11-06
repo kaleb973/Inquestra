@@ -43,3 +43,6 @@ scripts/
 .github/agents/
 .github/hooks/
 .github/skills/
+
+# PostHog Wizard Cache
+.posthog-wizard-cache/

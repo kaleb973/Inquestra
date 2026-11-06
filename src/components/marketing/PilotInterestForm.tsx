@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -36,6 +37,7 @@ export function PilotInterestForm() {
       }
 
       setState('success');
+      trackAnalyticsEvent('pilot_interest_submitted', { role, institution });
     } catch (err) {
       setState('error');
       setErrorMsg(err instanceof Error ? err.message : 'Submission failed. Please try again.');

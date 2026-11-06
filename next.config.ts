@@ -1,6 +1,18 @@
 import type { NextConfig } from 'next';
 
 const isDev = process.env.NODE_ENV === 'development';
+const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+const posthogCspSources = posthogHost
+  ? (() => {
+      const url = new URL(posthogHost);
+      const baseDomain = url.hostname.split('.').slice(-2).join('.');
+
+      return {
+        apiHost: url.origin,
+        scriptHost: `${url.protocol}//*.${baseDomain}`,
+      };
+    })()
+  : null;
 
 const securityHeaders = [
   {
@@ -32,12 +44,15 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com" +
+        (posthogCspSources ? ` ${posthogCspSources.scriptHost}` : ''),
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' blob: data: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.cloudflarestorage.com" +
+        (posthogCspSources ? ` ${posthogCspSources.apiHost}` : '') +
         (isDev ? ' ws://localhost:* http://localhost:*' : ''),
+      `worker-src 'self'${posthogCspSources ? ' blob:' : ''}`,
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",

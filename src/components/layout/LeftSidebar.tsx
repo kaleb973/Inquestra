@@ -43,6 +43,7 @@ import type { ProjectWithLead } from '@/actions/projectActions';
 import type { Role } from '@prisma/client';
 import { TrialPreviewCard } from '@/components/trials/TrialPreviewCard';
 import { TrialContextMenu } from '@/components/trials/TrialContextMenu';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 interface StatusConfig {
   dotClass: string;
@@ -553,6 +554,10 @@ export function LeftSidebar() {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
   const handleNewTrial = (cat?: string) => {
+    trackAnalyticsEvent('trial_created', {
+      category: cat || 'General',
+      isAnonymous: isGuest,
+    });
     // Before creating new trial, preserve outgoing active trial's latest title/status
     const currentActive = useNotebookStore.getState().activeTrial;
     if (currentActive && currentActive.id) {

@@ -31,6 +31,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -180,10 +181,22 @@ function StepTimer({
   const toggleRun = () => {
     if (isDone) {
       setIsDone(false);
-      setRemaining(detectedSeconds ?? 60);
+      const dur = detectedSeconds ?? 60;
+      setRemaining(dur);
       setIsRunning(true);
+      trackAnalyticsEvent('timer_started', {
+        stepId: step.id,
+        durationSeconds: dur,
+      });
     } else {
-      setIsRunning(!isRunning);
+      const willRun = !isRunning;
+      setIsRunning(willRun);
+      if (willRun) {
+        trackAnalyticsEvent('timer_started', {
+          stepId: step.id,
+          durationSeconds: remaining,
+        });
+      }
     }
   };
 
@@ -321,7 +334,14 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
       steps: attrs.steps.map((s) => (s.id === id ? { ...s, timerDuration } : s)),
     });
 
-  const toggleStep = (id: string) =>
+  const toggleStep = (id: string) => {
+    const target = attrs.steps.find((s) => s.id === id);
+    if (target && !target.checked) {
+      trackAnalyticsEvent('protocol_step_completed', {
+        stepId: id,
+        protocolTitle: attrs.title,
+      });
+    }
     update({
       steps: attrs.steps.map((s) =>
         s.id === id
@@ -334,6 +354,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
           : s
       ),
     });
+  };
 
   const saveDeviation = (id: string) => {
     update({

@@ -20,11 +20,11 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const CSP_HEADER = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' blob: data: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.cloudflarestorage.com" +
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.cloudflarestorage.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.posthog.com https://us.i.posthog.com https://eu.i.posthog.com" +
     (isDev ? ' ws://localhost:* http://localhost:*' : ''),
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
   "object-src 'none'",

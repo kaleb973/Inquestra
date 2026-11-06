@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
 import { Timer, Play, Pause, RotateCcw, Bell, X, Check, Volume2, VolumeX, Edit2 } from 'lucide-react';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 export const TimerExtension = Node.create({
   name: 'timerBlock',
@@ -163,8 +164,19 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
       setIsDone(false);
       setRemaining(duration);
       setIsRunning(true);
+      trackAnalyticsEvent('timer_started', {
+        label,
+        durationSeconds: duration,
+      });
     } else {
-      setIsRunning(!isRunning);
+      const willRun = !isRunning;
+      setIsRunning(willRun);
+      if (willRun) {
+        trackAnalyticsEvent('timer_started', {
+          label,
+          durationSeconds: remaining,
+        });
+      }
     }
   };
 
