@@ -55,5 +55,18 @@ This document captures upcoming feature pillars and strategic initiatives for In
     ```
 
 ---
-*Created: September 19, 2026 | Last Updated: October 1, 2026*
+
+## 6. Stripe & SaaS Billing Architecture (Phase 4 Milestone)
+- **Status**: Deferred / Staged for execution when institutional monetization begins.
+- **Specification Reference**: Full blueprint, security guardrails, and activation checklist documented in [`docs/PHASE_4_PRD.md`](docs/PHASE_4_PRD.md#31-stripe-launch--security-architecture-blueprint-activate-when-billing-starts).
+- **Key Implementation Highlights**:
+  - **Prisma Schema Updates**: Add `stripeCustomerId`, `stripeSubscriptionId`, `stripePriceId`, `subscriptionTier` (`FREE`, `PRO`, `ENTERPRISE`), and `subscriptionStatus` to `Organization`.
+  - **Endpoints**:
+    - `POST /api/stripe/checkout`: Initiates checkout with idempotency keys (`checkout_org_${orgId}_tier_${tier}`).
+    - `POST /api/stripe/portal`: Self-service seat management, invoicing, and cancellation.
+    - `POST /api/stripe/webhook`: Cryptographically verified (`req.text()` + `stripe.webhooks.constructEvent`) to handle `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`.
+  - **Security & Anti-Abuse**: Server-only secret key isolation, Stripe Radar SCA/3DS enabled, and hard software usage caps on metered R2 storage before billing sync.
+
+---
+*Created: September 19, 2026 | Last Updated: November 5, 2026*
 

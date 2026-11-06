@@ -306,7 +306,7 @@ export function LiteratureLibrary({
                 <h1 className="text-base font-semibold text-foreground tracking-tight">
                   Literature &amp; Citations
                 </h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-mono font-medium">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-xs bg-primary/10 text-primary font-mono font-medium border border-primary/20">
                   {orgName}
                 </span>
               </div>
@@ -441,7 +441,7 @@ export function LiteratureLibrary({
               <button
                 type="button"
                 onClick={() => setSelectedTag('ALL')}
-                className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
+                className={`text-[10px] px-2 py-0.5 rounded-xs border transition-colors ${
                   selectedTag === 'ALL'
                     ? 'bg-primary text-primary-foreground border-primary font-medium'
                     : 'bg-muted/60 text-muted-foreground border-border hover:text-foreground'
@@ -454,7 +454,7 @@ export function LiteratureLibrary({
                   key={tag}
                   type="button"
                   onClick={() => setSelectedTag(tag === selectedTag ? 'ALL' : tag)}
-                  className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
+                  className={`text-[10px] px-2 py-0.5 rounded-xs border transition-colors ${
                     selectedTag === tag
                       ? 'bg-primary text-primary-foreground border-primary font-medium'
                       : 'bg-muted/60 text-muted-foreground border-border hover:text-foreground'
@@ -601,7 +601,7 @@ export function LiteratureLibrary({
                     {paper.tags.map((t) => (
                       <span
                         key={t}
-                        className="inline-flex items-center gap-1 text-[10px] bg-muted px-2 py-0.5 rounded-full border border-border text-foreground group"
+                        className="inline-flex items-center gap-1 text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded-xs border border-border text-foreground group"
                       >
                         #{t}
                         <button

@@ -54,31 +54,31 @@ interface StatusConfig {
 const STATUS_CONFIG: Record<TrialStatus, StatusConfig> = {
   DRAFT: {
     dotClass: 'bg-muted-foreground/60',
-    badgeClass: 'bg-muted text-muted-foreground',
+    badgeClass: 'bg-muted text-muted-foreground border-border',
     label: 'Draft',
     tooltip: 'Lifecycle: Draft (Protocol setup / in planning)',
   },
   ACTIVE: {
-    dotClass: 'bg-sky-500 ring-2 ring-sky-500/20 shadow-[0_0_6px_rgba(14,165,233,0.4)]',
-    badgeClass: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30',
+    dotClass: 'bg-primary ring-2 ring-primary/20 shadow-[0_0_6px_rgba(56,189,248,0.4)]',
+    badgeClass: 'bg-primary/10 text-primary border border-primary/30',
     label: 'Active',
     tooltip: 'Lifecycle: Active (Live telemetry acquisition / execution in progress)',
   },
   IN_REVIEW: {
-    dotClass: 'bg-amber-500 ring-2 ring-amber-500/20 shadow-[0_0_6px_rgba(245,158,11,0.4)]',
-    badgeClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+    dotClass: 'bg-caution ring-2 ring-caution/20 shadow-[0_0_6px_rgba(245,158,11,0.4)]',
+    badgeClass: 'bg-caution/10 text-caution border border-caution/30',
     label: 'In Review',
     tooltip: 'Lifecycle: In Review (Pending peer or QA verification)',
   },
   COMPLETED: {
-    dotClass: 'bg-emerald-500 ring-2 ring-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.4)]',
-    badgeClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
+    dotClass: 'bg-phosphor ring-2 ring-phosphor/20 shadow-[0_0_6px_rgba(34,197,94,0.4)]',
+    badgeClass: 'bg-phosphor/10 text-phosphor border border-phosphor/30',
     label: 'Completed',
     tooltip: 'Lifecycle: Completed (Acquisition finished & cryptographically sealed)',
   },
   FAILED: {
-    dotClass: 'bg-red-500 ring-2 ring-red-500/20 shadow-[0_0_6px_rgba(239,68,68,0.4)]',
-    badgeClass: 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30',
+    dotClass: 'bg-critical ring-2 ring-critical/20 shadow-[0_0_6px_rgba(239,68,68,0.4)]',
+    badgeClass: 'bg-critical/10 text-critical border border-critical/30',
     label: 'Failed',
     tooltip: 'Lifecycle: Failed (Sensor anomaly or protocol deviation)',
   },
@@ -778,10 +778,10 @@ export function LeftSidebar() {
   return (
     <>
       <aside
-        className={`bg-background/80 backdrop-blur-md border-r border-border/80 flex flex-col shrink-0 overflow-hidden shadow-2xl transition-all duration-300 ease-in-out ${
+        className={`bg-background/95 backdrop-blur-md border-r border-border/80 flex flex-col shrink-0 overflow-hidden shadow-2xl transition-all duration-300 ease-in-out fixed inset-y-14 left-0 z-40 lg:static lg:inset-auto lg:h-auto ${
           isLeftSidebarOpen
-            ? 'w-[260px]'
-            : 'w-0 border-r-0 opacity-0 pointer-events-none'
+            ? 'w-[280px] sm:w-[260px] translate-x-0 opacity-100'
+            : 'w-0 border-r-0 opacity-0 pointer-events-none -translate-x-full lg:translate-x-0'
         }`}
       >
 
@@ -950,22 +950,27 @@ export function LeftSidebar() {
               <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground truncate">
                 Experiments &amp; Trials
               </span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono shrink-0">
-                {filteredTrials.length}
+              <span className="text-[10px] text-muted-foreground font-mono shrink-0 tabular-nums">
+                ({filteredTrials.length})
               </span>
               <button
+                type="button"
                 onClick={() => setShowInfoPopover((v) => !v)}
-                className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 title="Why 'Trials'? Click for details on Inquestra's research notebook architecture."
+                aria-label="About trials and notebook architecture"
+                aria-expanded={showInfoPopover}
               >
                 <Info className="w-3 h-3" />
               </button>
             </div>
             <button
+              type="button"
               onClick={() => handleNewTrial()}
               disabled={isPending}
-              className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1 rounded disabled:opacity-50 shrink-0"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1.5 rounded disabled:opacity-50 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               title="New experiment"
+              aria-label="New experiment"
             >
               {isPending && !loadingTrialId ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -984,8 +989,10 @@ export function LeftSidebar() {
                   What is an Experiment / Trial?
                 </span>
                 <button
+                  type="button"
                   onClick={() => setShowInfoPopover(false)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground rounded p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Close information popup"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -1005,33 +1012,37 @@ export function LeftSidebar() {
             <input
               type="text"
               placeholder="Search experiments, tags..."
+              aria-label="Search experiments and tags"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-background/60 border border-border/80 rounded-md pl-7 pr-6 py-1 text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-colors"
+              className="w-full bg-background/60 border border-border/80 rounded-md pl-7 pr-6 py-1 text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary focus-visible:ring-2 focus-visible:ring-ring focus:bg-background transition-colors"
             />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-1.5 top-1.5 text-muted-foreground hover:text-foreground p-0.5"
+                className="absolute right-1.5 top-1.5 text-muted-foreground hover:text-foreground p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Clear search input"
               >
                 <X className="w-3 h-3" />
               </button>
             )}
           </div>
 
-          {/* Categorization: Status Filter Pills */}
-          <div className="flex items-center gap-1 mb-2 overflow-x-auto pb-1 scrollbar-none text-[10px]">
+          {/* Categorization: Status Filter Segmented Control */}
+          <div className="grid grid-cols-4 p-0.5 mb-2.5 bg-muted/50 border border-border/60 rounded-md text-[10px] font-mono">
             {(['ALL', 'ACTIVE', 'DRAFT', 'COMPLETED'] as const).map((st) => (
               <button
                 key={st}
+                type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-2 py-0.5 rounded-full border transition-colors shrink-0 font-medium ${
+                className={`py-1 text-center transition-all rounded-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   statusFilter === st
-                    ? 'bg-foreground text-background border-foreground font-semibold shadow-xs'
-                    : 'bg-muted/40 text-muted-foreground border-border/60 hover:bg-accent hover:text-foreground'
+                    ? 'bg-background text-foreground font-semibold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
                 }`}
               >
-                {st === 'ALL' ? 'All' : st === 'ACTIVE' ? 'Active' : st === 'DRAFT' ? 'Draft' : 'Completed'}
+                {st === 'ALL' ? 'All' : st === 'ACTIVE' ? 'Active' : st === 'DRAFT' ? 'Draft' : 'Done'}
               </button>
             ))}
           </div>

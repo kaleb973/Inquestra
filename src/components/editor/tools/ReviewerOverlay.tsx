@@ -20,9 +20,11 @@ export function ReviewerOverlay() {
   if (!isOpen) {
     return (
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-80 mr-4 z-40 bg-purple-950/80 border border-purple-900 text-purple-400 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-purple-900 transition-colors shadow-lg shadow-purple-900/20 backdrop-blur"
+        className="fixed bottom-4 right-80 mr-4 z-40 bg-card border border-border text-foreground px-3 py-1.5 rounded-md text-xs font-mono font-medium hover:bg-accent transition-colors shadow-md backdrop-blur inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
+        <ShieldAlert className="w-3.5 h-3.5 text-primary" />
         Strict Review Mode
       </button>
     );

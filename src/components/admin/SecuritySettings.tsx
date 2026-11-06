@@ -257,11 +257,13 @@ export function SecuritySettings() {
         {mfaState === 'loading' ? (
           <Loader2 className="w-4 h-4 animate-spin text-muted-foreground shrink-0" />
         ) : mfaState === 'active' ? (
-          <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 uppercase tracking-wider shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase text-phosphor font-semibold tracking-wider shrink-0">
+            <span className="w-1.5 h-1.5 rounded-xs bg-phosphor" />
             Active
           </span>
         ) : (
-          <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full border bg-muted text-muted-foreground border-border uppercase tracking-wider shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase text-muted-foreground font-semibold tracking-wider shrink-0">
+            <span className="w-1.5 h-1.5 rounded-xs bg-muted-foreground/40" />
             Not Enabled
           </span>
         )}
@@ -530,7 +532,8 @@ export function SecuritySettings() {
           {isPasskeysLoading ? (
             <Loader2 className="w-4 h-4 animate-spin text-muted-foreground shrink-0" />
           ) : (
-            <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full border bg-muted text-muted-foreground border-border uppercase tracking-wider shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase text-muted-foreground font-semibold tracking-wider shrink-0">
+              <span className="w-1.5 h-1.5 rounded-xs bg-primary" />
               {passkeys.length} Registered
             </span>
           )}

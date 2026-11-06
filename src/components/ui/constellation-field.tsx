@@ -208,44 +208,6 @@ const CONSTELLATION_FIELD_SOURCE = String.raw`<!DOCTYPE html>
 
             </div>
         </div>
-
-        <!-- Logos Section -->
-        <div class="w-full mt-28 md:mt-32 max-w-6xl mx-auto flex flex-col items-center fade-in-up" style="opacity: 0; transform: translateY(24px); transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.6s;">
-            <p class="text-xs font-normal text-[#5C668A] mb-12 tracking-widest uppercase">Powering data-driven enterprises</p>
-
-            <div class="flex flex-wrap justify-center items-center gap-10 md:gap-16">
-
-                <div class="flex items-center gap-2 text-xl font-thin text-[#9AA3BC] hover:text-[#7FC4FF] hover:shadow-[0_0_12px_rgba(127,196,255,0.2)] transition-all cursor-default">
-                    <iconify-icon icon="solar:box-linear" stroke-width="1.5"></iconify-icon>
-                    Quantus
-                </div>
-
-                <div class="flex items-center gap-2 text-lg font-thin text-[#9AA3BC] hover:text-[#7FC4FF] hover:shadow-[0_0_12px_rgba(127,196,255,0.2)] transition-all cursor-default">
-                    <iconify-icon icon="solar:globus-linear" class="text-xl" stroke-width="1.5"></iconify-icon>
-                    NexusData
-                </div>
-
-                <div class="flex items-center gap-2 text-xl font-thin text-[#9AA3BC] hover:text-[#7FC4FF] hover:shadow-[0_0_12px_rgba(127,196,255,0.2)] transition-all cursor-default">
-                    OmniStream
-                </div>
-
-                <div class="flex items-center gap-2 text-lg font-thin text-[#9AA3BC] hover:text-[#7FC4FF] hover:shadow-[0_0_12px_rgba(127,196,255,0.2)] transition-all cursor-default">
-                    <iconify-icon icon="solar:routing-2-linear" class="text-xl" stroke-width="1.5"></iconify-icon>
-                    Veridian
-                </div>
-
-                <div class="flex items-center gap-2 text-lg font-thin text-[#9AA3BC] hover:text-[#7FC4FF] hover:shadow-[0_0_12px_rgba(127,196,255,0.2)] transition-all cursor-default">
-                    <iconify-icon icon="solar:letter-linear" class="text-xl" stroke-width="1.5"></iconify-icon>
-                    ApexMetrics
-                </div>
-
-                <div class="hidden lg:flex items-center gap-2 text-xl font-thin text-[#9AA3BC] hover:text-[#7FC4FF] hover:shadow-[0_0_12px_rgba(127,196,255,0.2)] transition-all cursor-default">
-                    Zenith
-                </div>
-
-            </div>
-        </div>
-
     </main>
 
     <script>
@@ -357,13 +319,16 @@ const CONSTELLATION_FIELD_SOURCE = String.raw`<!DOCTYPE html>
             });
 
             ctx.globalAlpha = 1;
-            requestAnimationFrame(animateCanvas);
+            animId = requestAnimationFrame(animateCanvas);
         }
         
+        let animId = null;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!prefersReducedMotion) {
-            animateCanvas();
+            animId = requestAnimationFrame(animateCanvas);
         }
+        window.addEventListener('pagehide', () => { if (animId) cancelAnimationFrame(animId); });
+        window.addEventListener('unload', () => { if (animId) cancelAnimationFrame(animId); });
 
         // --- Intersection Observer for structural fade-ins ---
         document.addEventListener('DOMContentLoaded', () => {

@@ -211,7 +211,7 @@ function TrialReferenceNode({ node, updateAttributes }: NodeViewProps) {
                   </span>
                   {trialStatus && (
                     <span
-                      className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full uppercase ${
+                      className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded-xs uppercase ${
                         STATUS_PILL[trialStatus]?.bg ?? 'bg-muted'
                       }`}
                     >

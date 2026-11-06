@@ -198,10 +198,11 @@ function StepTimer({
       {isDone ? (
         <button
           onClick={onComplete}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 animate-pulse hover:bg-emerald-500/30 transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 min-h-[26px] rounded-xs text-[10px] font-bold bg-phosphor/20 text-phosphor border border-phosphor/40 animate-pulse hover:bg-phosphor/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Timer finished! Click to complete step with timestamp"
+          aria-label="Timer finished! Click to complete step with timestamp"
         >
-          <Bell className="w-3 h-3 animate-bounce" />
+          <Bell className="w-3 h-3 animate-pulse motion-reduce:animate-none" />
           <span>Done! (Check off)</span>
         </button>
       ) : (

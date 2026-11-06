@@ -48,7 +48,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
         </button>
       </div>
 
-      {error && <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
+      {error && <div className="p-3 bg-critical/10 border border-critical/30 text-critical text-sm rounded">{error}</div>}
 
       {showAdd && (
         <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
@@ -85,15 +85,32 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
           const overdue = isOverdue(new Date(item.lastCalibrated), item.calibrationFreq);
           return (
             <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex flex-col relative overflow-hidden shadow-sm">
-              <div className={`absolute top-0 left-0 w-1 h-full ${item.status === 'BROKEN' ? 'bg-red-500' : overdue ? 'bg-amber-500' : 'bg-indigo-500'}`} />
-              
-              <div className="flex justify-between items-start mb-4 pl-2">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="font-semibold text-foreground">{item.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{item.name}</h3>
+                    {item.status === 'BROKEN' ? (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase text-critical font-semibold tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-xs bg-critical" />
+                        Broken
+                      </span>
+                    ) : overdue ? (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase text-caution font-semibold tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-xs bg-caution" />
+                        Calib Overdue
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase text-phosphor font-semibold tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-xs bg-phosphor" />
+                        Operational
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
                     onClick={() =>
                       setSelectedLabel({
                         id: item.id,
@@ -104,21 +121,22 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                       })
                     }
                     title="Print Equipment QR label"
-                    className="p-1 rounded text-muted-foreground hover:text-purple-500 hover:bg-accent transition-colors"
+                    aria-label="Print Equipment QR label"
+                    className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <QrCode className="w-3.5 h-3.5" />
                   </button>
                   {item.status === 'BROKEN' ? (
-                    <AlertCircle className="w-5 h-5 text-red-500" />
+                    <AlertCircle className="w-5 h-5 text-critical" />
                   ) : overdue ? (
-                    <Calendar className="w-5 h-5 text-amber-500" />
+                    <Calendar className="w-5 h-5 text-caution" />
                   ) : (
-                    <CheckCircle2 className="w-5 h-5 text-foreground" />
+                    <CheckCircle2 className="w-5 h-5 text-phosphor" />
                   )}
                 </div>
               </div>
 
-              <div className="space-y-1 mb-6 pl-2">
+              <div className="space-y-1 mb-6">
                 <div className="text-xs text-muted-foreground flex justify-between">
                   <span>Last Calibrated:</span>
                   <span className="text-foreground font-medium">{new Date(item.lastCalibrated).toLocaleDateString()}</span>
@@ -129,21 +147,23 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                 </div>
               </div>
 
-              <div className="mt-auto pl-2 flex gap-2">
+              <div className="mt-auto flex gap-2">
                 <button
+                  type="button"
                   onClick={() => handleUpdateStatus(item.id, 'OPERATIONAL', true)}
                   disabled={isPending || (item.status === 'OPERATIONAL' && !overdue)}
-                  className="flex-1 px-2 py-1.5 bg-muted hover:bg-accent text-foreground text-xs font-medium rounded transition-colors border border-border disabled:opacity-50"
+                  className="flex-1 px-2 py-1.5 bg-muted hover:bg-accent text-foreground text-xs font-medium rounded transition-colors border border-border disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Log Calibration
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleUpdateStatus(item.id, item.status === 'BROKEN' ? 'OPERATIONAL' : 'BROKEN')}
                   disabled={isPending}
-                  className={`px-3 py-1.5 text-xs font-medium rounded transition-colors border ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     item.status === 'BROKEN' 
                       ? 'border-border bg-muted hover:bg-accent text-foreground' 
-                      : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20'
+                      : 'border-critical/30 bg-critical/10 text-critical hover:bg-critical/20'
                   }`}
                 >
                   {item.status === 'BROKEN' ? 'Fix' : 'Mark Broken'}

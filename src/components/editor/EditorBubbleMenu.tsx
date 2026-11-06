@@ -26,112 +26,128 @@ export function EditorBubbleMenu({ editor }: EditorBubbleMenuProps) {
     <BubbleMenu
       editor={editor}
       tippyOptions={{ duration: 100, placement: 'top', animation: false }}
-      className="bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl shadow-black/40 px-1.5 py-1 flex items-center gap-0.5 z-40 text-foreground"
+      className="bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl shadow-black/40 p-1 flex items-center gap-1 z-40 text-foreground"
     >
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle bold"
+        aria-pressed={editor.isActive('bold')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('bold')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Bold"
       >
-        <Bold className="w-3.5 h-3.5" />
+        <Bold className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle italic"
+        aria-pressed={editor.isActive('italic')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('italic')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Italic"
       >
-        <Italic className="w-3.5 h-3.5" />
+        <Italic className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle underline"
+        aria-pressed={editor.isActive('underline')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('underline')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Underline"
       >
-        <UnderlineIcon className="w-3.5 h-3.5" />
+        <UnderlineIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle strikethrough"
+        aria-pressed={editor.isActive('strike')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('strike')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Strikethrough"
       >
-        <Strikethrough className="w-3.5 h-3.5" />
+        <Strikethrough className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleCode().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle inline code"
+        aria-pressed={editor.isActive('code')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('code')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Inline Code"
       >
-        <Code className="w-3.5 h-3.5" />
+        <Code className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHighlight().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle highlight"
+        aria-pressed={editor.isActive('highlight')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('highlight')
-            ? 'bg-amber-500/20 text-amber-500 font-semibold'
+            ? 'bg-caution/20 text-caution font-semibold'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Highlight"
       >
-        <Highlighter className="w-3.5 h-3.5" />
+        <Highlighter className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
-      <div className="h-3 w-px bg-border/60 mx-0.5" />
+      <div className="h-4 w-px bg-border/80 mx-0.5" />
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleSubscript().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle subscript"
+        aria-pressed={editor.isActive('subscript')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('subscript')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Subscript (H₂O)"
       >
-        <SubscriptIcon className="w-3.5 h-3.5" />
+        <SubscriptIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleSuperscript().run()}
-        className={`p-1 rounded text-xs transition-colors ${
+        aria-label="Toggle superscript"
+        aria-pressed={editor.isActive('superscript')}
+        className={`min-w-[32px] min-h-[32px] sm:min-w-[28px] sm:min-h-[28px] p-1.5 rounded text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           editor.isActive('superscript')
             ? 'bg-primary/20 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         title="Superscript (Ca²⁺)"
       >
-        <SuperscriptIcon className="w-3.5 h-3.5" />
+        <SuperscriptIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
       </button>
     </BubbleMenu>
   );

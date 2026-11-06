@@ -271,7 +271,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
             Authorizations Inbox
             {pendingCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-primary text-white font-bold animate-pulse">
+              <span className="px-1.5 py-0.2 rounded-xs text-[10px] font-mono bg-primary text-primary-foreground font-bold">
                 {pendingCount}
               </span>
             )}

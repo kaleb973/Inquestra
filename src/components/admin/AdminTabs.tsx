@@ -378,7 +378,7 @@ export function AdminTabs({
                 {t.icon}
                 {t.label}
                 {t.id === 'inventory' && inventoryAlerts > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                  <span className="ml-1 px-1.5 py-0.2 text-[10px] font-mono font-medium rounded-xs bg-caution/15 text-caution border border-caution/30">
                     {inventoryAlerts}
                   </span>
                 )}

@@ -409,7 +409,7 @@ export function TrialContextMenu({
                     type="button"
                     onClick={() => handleExecuteCategory(cat)}
                     disabled={isSubmitting}
-                    className="px-2 py-0.5 rounded-full text-[11px] font-mono border border-border bg-muted/60 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors"
+                    className="px-2 py-0.5 rounded text-[11px] font-mono border border-border bg-muted/60 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors"
                   >
                     {cat}
                   </button>

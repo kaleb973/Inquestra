@@ -312,7 +312,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
             >
               {isDone ? (
                 <>
-                  <Bell className="w-3.5 h-3.5 animate-bounce" />
+                  <Bell className="w-3.5 h-3.5 animate-pulse motion-reduce:animate-none" />
                   <span>Restart</span>
                 </>
               ) : isRunning ? (

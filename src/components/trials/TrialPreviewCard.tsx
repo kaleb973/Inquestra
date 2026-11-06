@@ -71,9 +71,9 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
           <div className="space-y-1.5 pr-4 min-w-0">
             <div className="flex items-center gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wider uppercase border ${statusInfo.bg} ${statusInfo.text}`}
+                className={`inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold tracking-wider uppercase ${statusInfo.text}`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />
+                <span className={`w-1.5 h-1.5 rounded-xs ${statusInfo.dot}`} />
                 {trial.status}
               </span>
               <span className="text-[11px] text-muted-foreground font-mono flex items-center gap-1">

@@ -178,10 +178,10 @@ export function RightDrawer() {
 
   return (
     <aside
-      className={`bg-background/80 backdrop-blur-md border-l border-border flex flex-col shrink-0 overflow-hidden z-10 transition-all duration-300 ease-in-out ${
+      className={`bg-background/95 backdrop-blur-md border-l border-border flex flex-col shrink-0 overflow-hidden transition-all duration-300 ease-in-out fixed inset-y-14 right-0 z-40 max-w-[90vw] lg:max-w-none lg:static lg:inset-auto lg:h-auto lg:z-10 ${
         isRightDrawerOpen
-          ? 'w-[360px]'
-          : 'w-0 border-l-0 opacity-0 pointer-events-none'
+          ? 'w-[360px] translate-x-0 opacity-100 shadow-2xl lg:shadow-none'
+          : 'w-0 border-l-0 opacity-0 pointer-events-none translate-x-full lg:translate-x-0'
       }`}
     >
       {/* Drawer Mode Tabs */}

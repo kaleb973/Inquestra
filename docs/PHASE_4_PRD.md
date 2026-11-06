@@ -120,6 +120,80 @@ self.onmessage = (e: MessageEvent<TimerMessage>) => {
 +---------------------------------------------------------------------------------+
 ```
 
+### 3.1 Stripe Launch & Security Architecture Blueprint (Activate When Billing Starts)
+
+> [!NOTE]
+> Billing is currently deferred. This section acts as the strict implementation blueprint for when Stripe is configured and live subscriptions are enabled.
+
+#### A. Database Schema Migration (Prisma)
+Add subscription metadata to `Organization` in `prisma/schema.prisma`:
+```prisma
+enum SubscriptionTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  INACTIVE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+// In model Organization:
+// stripeCustomerId          String?              @unique
+// stripeSubscriptionId      String?              @unique
+// stripePriceId             String?
+// stripeCurrentPeriodEnd    DateTime?
+// subscriptionTier          SubscriptionTier     @default(FREE)
+// subscriptionStatus        SubscriptionStatus   @default(INACTIVE)
+```
+
+#### B. API Endpoints Specification
+1. **Checkout Session Initiator (`app/api/stripe/checkout/route.ts`)**:
+   - Accepts requested tier (`PRO` monthly or annual).
+   - Generates or reuses `stripeCustomerId` for the logged-in `organizationId`.
+   - Attaches `client_reference_id = organization.id` and metadata `{ organizationId, userId }`.
+   - Employs an **Idempotency Key** (`checkout_org_${orgId}_tier_${tier}`) to prevent duplicate session charges if double-clicked.
+2. **Self-Service Customer Portal (`app/api/stripe/portal/route.ts`)**:
+   - Generates a Stripe Customer Portal session redirecting to `https://billing.stripe.com/p/session/...`.
+   - Allows PIs and Lab Admins to upgrade/downgrade seats, view invoices, download tax receipts, and cancel subscriptions without contacting support.
+3. **Secure Webhook Handler (`app/api/stripe/webhook/route.ts`)**:
+   - **Crucial Security Requirement**: The webhook handler MUST read the raw body buffer via `await req.text()` before any JSON parsing.
+   - Verifies the cryptographic HMAC-SHA256 signature using `stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET)`.
+   - Listens for and handles:
+     - `checkout.session.completed`: Upgrades `Organization.subscriptionTier` to `PRO` and records `stripeCustomerId`.
+     - `customer.subscription.updated`: Syncs plan changes, renewal dates, and status changes (`ACTIVE`, `PAST_DUE`).
+     - `customer.subscription.deleted`: Gracefully reverts `Organization` to `FREE` tier without deleting historical trial data.
+     - `invoice.payment_failed`: Flags the organization with `PAST_DUE` and sends an automated dunning notification via Resend.
+
+#### C. Financial & Anti-Abuse Guardrails
+- **Card Testing & Velocity Defense**: Enable Stripe Radar with 3D Secure (SCA) enabled for all European and US cardholders.
+- **Strict Key Isolation**: Keep `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` strictly on the server side (`src/lib/stripe.ts` using `import "server-only"`). Never prefix them with `NEXT_PUBLIC_`.
+- **Metered Usage Cap**: If telemetry bandwidth or Cloudflare R2 gigabytes are metered beyond 100GB, enforce hard software caps in `src/lib/storage.ts` before reporting usage meters to Stripe to prevent user bill shock or unconstrained upload loops.
+
+#### D. Step-by-Step Onboarding Checklist (When Starting Stripe)
+1. Register Stripe account & verify corporate identity.
+2. Create Product in Stripe Dashboard: `Inquestra Pro` with two Price objects (Monthly `$15/mo`, Annual `$144/yr`).
+3. Set up the Customer Portal in Stripe Settings (Settings > Billing > Customer Portal).
+4. Run Stripe CLI locally for webhook forward testing:
+   ```bash
+   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   ```
+5. Add keys to `.env.local`:
+   ```bash
+   STRIPE_SECRET_KEY=sk_test_...
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   STRIPE_PRO_MONTHLY_PRICE_ID=price_...
+   STRIPE_PRO_ANNUAL_PRICE_ID=price_...
+   ```
+6. Run Prisma migration: `npx prisma migrate dev --name add_stripe_billing_fields`.
+7. Test end-to-end checkout with Stripe test cards (`4242 4242...`) before activating live keys.
+
 ---
 
 ## 4. Implementation Checklist

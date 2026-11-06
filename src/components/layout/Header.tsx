@@ -332,6 +332,14 @@ export function Header() {
 
   return (
     <header className="h-14 border-b border-border bg-background/90 backdrop-blur-md flex items-center px-4 sm:px-5 gap-3 sm:gap-4 shrink-0 z-50 sticky top-0 shadow-sm font-sans">
+      {/* Accessible Skip Link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-1.5 focus:bg-primary focus:text-primary-foreground focus:rounded focus:shadow-lg focus:text-xs focus:font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        Skip to content
+      </a>
+
       {/* Left Sidebar Toggle Button */}
       <button
         type="button"
@@ -397,7 +405,8 @@ export function Header() {
               });
             }}
             title={cloudTrialId ? 'Change trial lifecycle status' : 'Save trial to cloud to change status'}
-            className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border cursor-pointer appearance-none bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
+            aria-label="Change trial lifecycle status"
+            className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded border cursor-pointer appearance-none bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50 focus-visible:ring-2 focus-visible:ring-ring transition-colors disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
           >
             <option value="DRAFT">DRAFT</option>
             <option value="ACTIVE">ACTIVE</option>
@@ -507,10 +516,12 @@ export function Header() {
 
         {/* Download / Export button */}
         <button
+          type="button"
           onClick={handleExport}
           disabled={isExporting}
           title="Download notes and protocol as ZIP (Markdown + JSON)"
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Export trial as ZIP"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {isExporting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -522,9 +533,11 @@ export function Header() {
 
         {/* Print button (desktop) */}
         <button
+          type="button"
           onClick={() => window.print()}
           title="Print trial to PDF (Ctrl+P)"
-          className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors"
+          aria-label="Print trial to PDF"
+          className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Printer className="w-3.5 h-3.5" />
           <span>Print</span>
@@ -548,8 +561,9 @@ export function Header() {
             type="button"
             onClick={() => setShowMoreMenu((prev) => !prev)}
             title="More actions and regulatory tools"
+            aria-label="More actions and regulatory tools"
             aria-expanded={showMoreMenu}
-            className={`p-1.5 rounded-lg border transition-colors ${
+            className={`p-1.5 rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               showMoreMenu
                 ? 'bg-accent text-foreground border-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted border-transparent hover:border-border'
@@ -722,10 +736,12 @@ export function Header() {
             )}
 
             <button
+              type="button"
               onClick={handleSignOut}
               disabled={isSigningOut}
               title="Sign out"
-              className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-muted border border-transparent hover:border-border rounded transition-colors disabled:opacity-50"
+              aria-label="Sign out"
+              className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-muted border border-transparent hover:border-border rounded transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {isSigningOut ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />

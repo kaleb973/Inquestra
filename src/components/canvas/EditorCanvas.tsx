@@ -1188,9 +1188,12 @@ export function EditorCanvas() {
     : '';
 
   return (
-    <div
-      className={`flex-1 bg-slate-100 dark:bg-background overflow-y-auto relative transition-colors cursor-default ${
-        isDragOver ? 'bg-blue-950/20' : ''
+    <main
+      id="main-content"
+      role="main"
+      tabIndex={-1}
+      className={`flex-1 bg-muted/30 dark:bg-background overflow-y-auto relative transition-colors cursor-default outline-none ${
+        isDragOver ? 'bg-primary/10' : ''
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -1220,8 +1223,8 @@ export function EditorCanvas() {
       {/* Drag-over overlay */}
       {isDragOver && (
         <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center gap-3 bg-muted/95 border-2 border-dashed border-blue-500 rounded-xl px-12 py-8 shadow-2xl">
-            <Upload className="w-8 h-8 text-blue-500 animate-bounce" />
+          <div className="flex flex-col items-center gap-3 bg-muted/95 border-2 border-dashed border-primary rounded-xl px-12 py-8 shadow-2xl">
+            <Upload className="w-8 h-8 text-primary animate-pulse motion-reduce:animate-none" />
             <p className="text-foreground text-sm font-semibold">Drop CSV to import laboratory dataset & telemetry</p>
             <p className="text-muted-foreground text-xs font-mono">Auto-detects sample IDs, categories, conditions & measurements</p>
           </div>
@@ -1355,7 +1358,7 @@ export function EditorCanvas() {
           onTriggerSave={flushPendingSave}
         />
       )}
-    </div>
+    </main>
   );
 }
 

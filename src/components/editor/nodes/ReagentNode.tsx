@@ -221,7 +221,8 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
                 {feedback.remaining.toFixed(2)} {feedback.unit} remaining
               </span>
               {feedback.alert && (
-                <span className="ml-auto text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium tracking-wide uppercase">
+                <span className="ml-auto inline-flex items-center gap-1.5 text-[10px] text-caution font-mono font-semibold uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-xs bg-caution" />
                   Low Stock
                 </span>
               )}
