@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { label: 'Features', href: '/#features', icon: Database },
+  { label: 'Compare ELNs', href: '/compare', icon: Database },
+  { label: 'About', href: '/about', icon: Database },
   { label: 'Provenance', href: '/provenance', icon: ShieldCheck },
   { label: 'Hardware DAQ', href: '/hardware', icon: Cpu },
-  { label: 'Architecture', href: '/architecture', icon: Database },
   { label: 'Live Demo', href: '/demo', icon: PlayCircle },
   { label: 'Contact', href: '/contact', icon: Mail },
 ];

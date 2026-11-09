@@ -16,7 +16,7 @@ export default function ProvenancePage() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-muted text-muted-foreground text-xs font-mono uppercase tracking-wider mb-6">
             <ShieldCheck className="w-3.5 h-3.5 text-phosphor" />
-            <span>Platform / Regulatory Compliance &amp; Integrity</span>
+            <span>Platform / Regulatory Compliance &amp; Integrity · Last updated November 2026</span>
           </div>
           <h1 className="font-display text-4xl sm:text-6xl font-normal tracking-tight text-foreground mb-6 leading-[1.15]">
             Zero silent mutations. Immutable research integrity.

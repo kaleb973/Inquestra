@@ -40,6 +40,59 @@ export default function MarketingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* ── FAQPage JSON-LD for AEO / AI Answer Engines ───────────────────────────── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'What is Inquestra?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Inquestra is a free, browser-based Electronic Lab Notebook (ELN) for life sciences, chemistry, biotech, materials science, and engineering research. It unifies scientific protocols, chemical inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature citations, 21 CFR Part 11 compliant audit trails, and optional hardware data acquisition in one workspace.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is Inquestra free for academic labs and students?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. Inquestra is completely free for individual researchers, students, postdocs, and academic labs. There is no subscription fee, no credit card required, and no per-user licensing cost. The full notebook, chemical inventory LIMS, molecular structure tools, and literature citation manager are free for everyone. Optional institutional features such as self-hosted PostgreSQL and SSO are available for university IT departments.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Does Inquestra support molecular biology research?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. Inquestra is purpose-built for molecular biology, life sciences, chemistry, biotech, materials science, and engineering — not just hardware labs. It supports PCR protocols, gel electrophoresis documentation, primer and reagent inventory, plasmid and molecule structure visualization using JSME and RDKit, and integration with PubMed and Europe PMC for literature citations.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How does Inquestra compare to Benchling, LabArchives, and SciNote?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Inquestra is the only platform in this category that is completely free and covers life sciences, chemistry, biotech, materials science, and engineering in one unified notebook. Benchling is free for academics but focused on molecular biology and genetics (CRISPR, plasmids). LabArchives charges per user and is institution-license-focused. SciNote has a free tier but limits storage and team features. Inquestra uniquely adds hardware DAQ integration, 21 CFR Part 11 provenance, and chemical inventory LIMS at no cost.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is Inquestra easy to learn for students and new researchers?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. Inquestra is designed with a zero-learning-curve goal for students and new researchers. The notebook editor uses familiar document conventions, the slash command menu provides instant access to all block types, and no IT setup or software installation is required — just open the browser and start a protocol. Most researchers are productive within minutes of first use.',
+                },
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* ── 1. Hero Section ────────────────────────────────────────────────────────── */}
       <section className="relative pt-32 pb-20 lg:pt-38 lg:pb-28 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -50,6 +103,16 @@ export default function MarketingPage() {
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
             Protocol execution, chemical inventory, molecular structures, literature citations, and
             bench DAQ — in one reproducible, audit-ready research environment.
+          </p>
+
+          {/* ── AEO Definition Block — crawlable, visually subtle ─────────────────── */}
+          <p className="sr-only">
+            Inquestra is a free electronic lab notebook (ELN) for life sciences, chemistry, biotech,
+            materials science, and engineering research. It unifies scientific protocols, chemical
+            inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature
+            citations, 21 CFR Part 11 audit trails, and optional hardware data acquisition in one
+            browser-based workspace — free for academic labs, students, and researchers with no credit
+            card or IT setup required.
           </p>
 
           {/* Primary Action Buttons */}
@@ -405,6 +468,123 @@ export default function MarketingPage() {
               Explore Full Hardware DAQ Specifications
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ── 6b. Free for Academic Research ──────────────────────────────────────────── */}
+      <section className="py-24 border-b border-border" id="academic">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-4">
+              Free for every researcher. No exceptions.
+            </h2>
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Inquestra is free for individual researchers, students, postdoctoral fellows, academic
+              labs, and university research groups — permanently, with no subscription, no credit
+              card, and no per-user licensing fee.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-start mb-20">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">What is included for free</h3>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Full scientific protocol notebook with rich text, tables, equations, molecular structures, and timers</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Chemical and biological inventory LIMS — unlimited reagents, standards, and samples</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Molecular structure drawing and visualization (JSME, RDKit-compatible)</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>PubMed and Europe PMC literature citation manager</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>21 CFR Part 11 compliant audit trails and cryptographic provenance</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Hardware DAQ integration for Arduino, ESP32, and USB instruments</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>PDF and CSV export — no data lock-in</span></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Built for academic environments</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Inquestra is designed for the realities of academic research: rotating undergraduate
+                and graduate students who need to get productive immediately, postdoctoral researchers
+                managing multiple concurrent experiments, and professors who need reproducible,
+                audit-ready documentation for grant reporting and publication.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                No IT department required. No software installation. Open a browser, create a trial,
+                and start documenting — your protocol history, inventory, and observations are saved
+                automatically and downloadable at any time.
+              </p>
+            </div>
+          </div>
+
+          {/* ── ELN Comparison Table ─────────────────────────────────────────────────── */}
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-6 text-center">
+              Inquestra vs Benchling vs LabArchives vs SciNote
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 text-foreground font-semibold">Feature</th>
+                    <th className="text-left py-3 px-4 text-emerald-500 font-semibold">Inquestra</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground font-semibold">Benchling</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground font-semibold">LabArchives</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground font-semibold">SciNote</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Price for academics</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Free, always</td>
+                    <td className="py-3 px-4 text-muted-foreground">Free academic tier (limited)</td>
+                    <td className="py-3 px-4 text-muted-foreground">Institution license required</td>
+                    <td className="py-3 px-4 text-muted-foreground">Free tier (storage limits)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Scientific disciplines</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Life sciences, chemistry, biotech, materials, engineering</td>
+                    <td className="py-3 px-4 text-muted-foreground">Molecular biology, genetics, biotech</td>
+                    <td className="py-3 px-4 text-muted-foreground">General science (all disciplines)</td>
+                    <td className="py-3 px-4 text-muted-foreground">Life sciences, medical research</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Learning curve for students</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Minimal — productive in minutes</td>
+                    <td className="py-3 px-4 text-muted-foreground">Moderate — specialized UI</td>
+                    <td className="py-3 px-4 text-muted-foreground">Low — simple document-based</td>
+                    <td className="py-3 px-4 text-muted-foreground">Low to moderate</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Hardware DAQ integration</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — Arduino, ESP32, USB instruments</td>
+                    <td className="py-3 px-4 text-muted-foreground">No</td>
+                    <td className="py-3 px-4 text-muted-foreground">No</td>
+                    <td className="py-3 px-4 text-muted-foreground">No</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Chemical inventory LIMS</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — built-in, free</td>
+                    <td className="py-3 px-4 text-muted-foreground">Yes (Benchling Registry)</td>
+                    <td className="py-3 px-4 text-muted-foreground">Limited</td>
+                    <td className="py-3 px-4 text-muted-foreground">Yes (inventory module)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">21 CFR Part 11 / audit trail</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — cryptographic provenance</td>
+                    <td className="py-3 px-4 text-muted-foreground">Enterprise tier only</td>
+                    <td className="py-3 px-4 text-muted-foreground">Yes</td>
+                    <td className="py-3 px-4 text-muted-foreground">Yes</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Setup required</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">None — browser only</td>
+                    <td className="py-3 px-4 text-muted-foreground">Account + onboarding</td>
+                    <td className="py-3 px-4 text-muted-foreground">Institution account</td>
+                    <td className="py-3 px-4 text-muted-foreground">Account required</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

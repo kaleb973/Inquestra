@@ -16,7 +16,7 @@ export default function HardwarePage() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-muted text-muted-foreground text-xs font-mono uppercase tracking-wider mb-6">
             <Cpu className="w-3.5 h-3.5 text-phosphor" />
-            <span>Platform / Hardware Instrumentation</span>
+            <span>Platform / Hardware Instrumentation · Last updated November 2026</span>
           </div>
           <h1 className="font-display text-4xl sm:text-6xl font-normal tracking-tight text-foreground mb-6 leading-[1.15]">
             Direct silicon-to-browser telemetry. Zero drivers required.

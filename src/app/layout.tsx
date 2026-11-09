@@ -30,26 +30,26 @@ const serifDisplay = DM_Serif_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Inquestra — Research-Grade DAQ & Electronic Lab Notebook',
+    default: 'Inquestra — Free Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
     template: '%s — Inquestra',
   },
   description:
-    'Stream ESP32 and Arduino telemetry directly into cryptographically sealed lab protocols. The research environment where hardware and notebook are one continuous system.',
+    'Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, and engineering research. Unified scientific protocols, chemical inventory LIMS, molecular structures, literature citations, and optional hardware DAQ — with zero learning curve for students and academic labs.',
   metadataBase: new URL('https://inquestra.org'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://inquestra.org',
     siteName: 'Inquestra',
-    title: 'Inquestra — Research-Grade DAQ & Electronic Lab Notebook',
+    title: 'Inquestra — Free Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
     description:
-      'Stream ESP32 and Arduino telemetry directly into cryptographically sealed lab protocols. The research environment where hardware and notebook are one continuous system.',
+      'Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, and engineering research. Unified scientific protocols, chemical inventory LIMS, molecular structures, literature citations, and optional hardware DAQ — with zero learning curve for students and academic labs.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Inquestra — Research-Grade DAQ & Electronic Lab Notebook',
+    title: 'Inquestra — Free Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
     description:
-      'Stream ESP32 and Arduino telemetry directly into cryptographically sealed lab protocols.',
+      'Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, and engineering research. Protocols, LIMS, molecular structures, literature citations, and optional hardware DAQ — free for academic labs.',
   },
   icons: {
     icon: [
@@ -93,4 +93,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-
