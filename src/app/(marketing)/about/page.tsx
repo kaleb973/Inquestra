@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'About Inquestra — Free ELN Built by Researchers, for Researchers',
+  title: 'About Inquestra — Free ELN Built for Researchers',
   description:
-    'Inquestra is a free electronic lab notebook (ELN) for life sciences, chemistry, biotech, materials science, and engineering — built by researchers who experienced the fragmented, expensive state of scientific documentation tools firsthand.',
+    'About Inquestra: a free electronic lab notebook (ELN) for life sciences, chemistry, and engineering, built by researchers for reproducible lab documentation.',
 };
 
 export default function AboutPage() {

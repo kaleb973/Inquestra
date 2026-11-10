@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Hardware DAQ & Telemetry Ingestion — Inquestra',
   description:
-    'Direct browser Web Serial telemetry ingestion for ESP32, Arduino, Teensy, laboratory instruments, and analytical sensors. Zero driver installation, 1 kHz sampling, and sub-millisecond latency.',
+    'Browser Web Serial telemetry ingestion for ESP32, Arduino, and lab sensors. Zero driver installation, 1 kHz sampling, and sub-millisecond latency.',
 };
 
 export default function HardwarePage() {

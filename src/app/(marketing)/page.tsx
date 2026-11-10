@@ -12,9 +12,9 @@ import { ProvenanceInteractiveDemo } from '@/components/marketing/ProvenanceInte
 import { PilotInterestForm } from '@/components/marketing/PilotInterestForm';
 
 export const metadata: Metadata = {
-  title: 'Inquestra — Modern Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
+  title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
   description:
-    'The complete Electronic Research Notebook (ERN) for scientific discovery. Unify protocols, chemical inventory LIMS, molecular structures, literature citations, 21 CFR Part 11 provenance, and bench DAQ in one reproducible workspace.',
+    'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
 };
 
 export default function MarketingPage() {

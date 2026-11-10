@@ -30,26 +30,26 @@ const serifDisplay = DM_Serif_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Inquestra — Free Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
+    default: 'Inquestra — Free Electronic Lab Notebook (ELN)',
     template: '%s — Inquestra',
   },
   description:
-    'Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, and engineering research. Unified scientific protocols, chemical inventory LIMS, molecular structures, literature citations, and optional hardware DAQ — with zero learning curve for students and academic labs.',
+    'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
   metadataBase: new URL('https://inquestra.org'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://inquestra.org',
     siteName: 'Inquestra',
-    title: 'Inquestra — Free Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
+    title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
     description:
-      'Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, and engineering research. Unified scientific protocols, chemical inventory LIMS, molecular structures, literature citations, and optional hardware DAQ — with zero learning curve for students and academic labs.',
+    'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Inquestra — Free Electronic Lab Notebook for Life Sciences, Chemistry & Engineering',
+    title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
     description:
-      'Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, and engineering research. Protocols, LIMS, molecular structures, literature citations, and optional hardware DAQ — free for academic labs.',
+      'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
   },
   icons: {
     icon: [

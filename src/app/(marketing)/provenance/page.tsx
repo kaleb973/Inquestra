@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Cryptographic Provenance & 21 CFR Part 11 Compliance — Inquestra',
   description:
-    'Immutable data provenance, deterministic SHA-256 trial hashing, RFC 3161 timestamps, and FDA 21 CFR Part 11 compliance for Life Sciences, Chemistry, Biotech, and Engineering.',
+    'Immutable data provenance, SHA-256 trial hashing, RFC 3161 timestamps, and 21 CFR Part 11 compliance for life sciences, chemistry, and engineering.',
 };
 
 export default function ProvenancePage() {

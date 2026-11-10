@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Inquestra vs Benchling vs LabArchives vs SciNote — Free ELN Comparison for Academic Labs',
+  title: 'Inquestra vs Benchling vs LabArchives — ELN Comparison',
   description:
-    'Detailed comparison of Inquestra, Benchling, LabArchives, and SciNote for academic researchers. Pricing, supported disciplines, learning curve, hardware DAQ, and audit trail features compared side by side. Inquestra is free for all researchers — no subscription required.',
+    'Compare Inquestra, Benchling, LabArchives, and SciNote. Pricing, supported disciplines, learning curve, and DAQ compared side by side for academic labs.',
 };
 
 export default function ComparePage() {
