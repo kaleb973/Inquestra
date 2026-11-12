@@ -24,10 +24,12 @@ export function MarketingFooter() {
               Free electronic lab notebook (ELN) for life sciences, chemistry, biotech, materials science, and engineering.
               Protocols, chemical inventory LIMS, molecular structures, literature citations, hardware DAQ, and 21 CFR Part 11 provenance — free for every researcher.
             </p>
-            <div className="flex gap-3 text-xs">
+            <div className="flex flex-wrap gap-3 text-xs">
               <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
               <span>·</span>
               <Link href="/compare" className="hover:text-foreground transition-colors">Compare ELNs</Link>
+              <span>·</span>
+              <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
               <span>·</span>
               <a href="https://github.com/kaleb973/Inquestra" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">GitHub</a>
             </div>

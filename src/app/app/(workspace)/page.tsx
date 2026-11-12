@@ -3,7 +3,8 @@
 // 3-column enterprise scientific workspace shell.
 // All children are client components; this page is also client-only (DAQ, editor).
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { LeftSidebar } from '@/components/layout/LeftSidebar';
 import { RightDrawer } from '@/components/layout/RightDrawer';
@@ -15,6 +16,19 @@ export default function WorkspacePage() {
   const isRightDrawerOpen = useNotebookStore((s) => s.isRightDrawerOpen);
   const setLeftSidebarOpen = useNotebookStore((s) => s.setLeftSidebarOpen);
   const setRightDrawerOpen = useNotebookStore((s) => s.setRightDrawerOpen);
+  const hasHydrated = useNotebookStore((s) => s._hasHydrated);
+  const activeTrialId = useNotebookStore((s) => s.activeTrial.id);
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for client mount + Zustand persist hydration to prevent SSR mismatch and preserve guest drafts
+  useEffect(() => {
+    setMounted(true);
+    if (!useNotebookStore.getState()._hasHydrated) {
+      Promise.resolve(useNotebookStore.persist?.rehydrate()).finally(() => {
+        useNotebookStore.getState().setHasHydrated(true);
+      });
+    }
+  }, []);
 
   // Auto-collapse on small/tablet viewports on initial load
   useEffect(() => {
@@ -23,6 +37,17 @@ export default function WorkspacePage() {
       setRightDrawerOpen(false);
     }
   }, [setLeftSidebarOpen, setRightDrawerOpen]);
+
+  if (!mounted || !hasHydrated) {
+    return (
+      <div className="h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2.5 px-4 py-2.5 bg-card border border-border rounded-lg shadow-sm text-xs font-mono text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+          <span>Initializing Inquestra workspace…</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden relative">
@@ -44,8 +69,8 @@ export default function WorkspacePage() {
           />
         )}
 
-        {/* Center: TipTap WYSIWYG canvas (flex-1) */}
-        <EditorCanvas />
+        {/* Center: TipTap WYSIWYG canvas (keyed by activeTrialId for clean trial transitions) */}
+        <EditorCanvas key={activeTrialId} />
 
         {/* Backdrop scrim for mobile/tablet right telemetry drawer */}
         {isRightDrawerOpen && (

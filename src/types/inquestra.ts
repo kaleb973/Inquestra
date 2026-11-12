@@ -47,6 +47,7 @@ export interface TrialSummaryItem {
   updatedAt: string | Date;
   createdAt?: string | Date;
   projectId?: string;
+  checksum?: string | null;
   metadata?: MetadataEntry[];
   _count?: {
     revisions: number;

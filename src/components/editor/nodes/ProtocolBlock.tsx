@@ -222,8 +222,8 @@ function StepTimer({
         <div
           className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono border transition-colors ${
             isRunning
-              ? 'bg-muted border-violet-500/40 text-foreground font-bold'
-              : 'bg-muted/70 border-border text-muted-foreground hover:border-violet-500/30'
+              ? 'bg-muted border-emerald-500/40 text-foreground font-bold'
+              : 'bg-muted/70 border-border text-muted-foreground hover:border-emerald-500/30'
           }`}
         >
           <Timer className={`w-3 h-3 ${isRunning ? 'animate-spin' : ''}`} style={{ animationDuration: '3s' }} />
@@ -287,7 +287,7 @@ function StepTimer({
                   }
                   if (e.key === 'Escape') setShowPicker(false);
                 }}
-                className="w-24 px-1.5 py-0.5 rounded bg-background border border-border text-[10px] text-foreground focus:outline-none focus:border-violet-500 font-mono"
+                className="w-24 px-1.5 py-0.5 rounded bg-background border border-border text-[10px] text-foreground focus:outline-none focus:border-emerald-500 font-mono"
               />
             </div>
             <button
@@ -406,6 +406,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
   const completedCount = attrs.steps.filter((s) => s.checked).length;
   const totalCount = attrs.steps.length;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const nextVersion = (attrs.version || 1) + 1;
 
   return (
     <NodeViewWrapper className="my-4">
@@ -419,7 +420,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/40">
           <div className="flex items-center gap-2 min-w-0">
-            <ClipboardList className="w-3.5 h-3.5 text-muted-foreground dark:text-violet-400 shrink-0" />
+            <ClipboardList className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <input
               value={attrs.title}
               onChange={(e) => update({ title: e.target.value })}
@@ -430,29 +431,36 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
               v{attrs.version}
             </span>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <span className="text-[10px] text-muted-foreground font-mono mr-1">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[10px] text-muted-foreground font-mono mr-0.5">
               {completedCount}/{totalCount}
             </span>
             <button
+              type="button"
               onClick={() => setIsMuted(!isMuted)}
               title={isMuted ? 'Step alarms muted (click to unmute)' : 'Step alarms audio enabled (click to mute)'}
+              aria-label={isMuted ? 'Unmute step alarms' : 'Mute step alarms'}
               className={`p-1 rounded hover:bg-accent transition-colors ${
-                isMuted ? 'text-muted-foreground' : 'text-muted-foreground dark:text-violet-400'
+                isMuted ? 'text-muted-foreground' : 'text-emerald-600 dark:text-emerald-400'
               }`}
             >
               {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
             </button>
             <button
+              type="button"
               onClick={forkProtocol}
-              title="Duplicate protocol for next run (Replicate)"
-              className="text-muted-foreground hover:text-muted-foreground p-1 rounded hover:bg-accent transition-colors"
+              title={`Replicate Protocol (v${nextVersion}) — Inserts a fresh, unchecked copy below with all steps preserved for your next run.`}
+              aria-label={`Replicate protocol as version ${nextVersion}`}
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-border/70 bg-background/70 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-colors"
             >
-              <GitFork className="w-3.5 h-3.5" />
+              <GitFork className="w-3 h-3 text-emerald-500" />
+              <span className="hidden sm:inline">Replicate v{nextVersion}</span>
             </button>
             <button
+              type="button"
               onClick={deleteNode}
               title="Remove protocol block"
+              aria-label="Remove protocol block"
               className="text-muted-foreground hover:text-red-500 p-1 rounded hover:bg-accent transition-colors"
             >
               <X className="w-3.5 h-3.5" />
@@ -464,7 +472,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
         {totalCount > 0 && (
           <div className="h-0.5 bg-muted">
             <div
-              className="h-full bg-violet-600 transition-all duration-300"
+              className="h-full bg-emerald-500 transition-all duration-300"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -490,7 +498,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
                 <button
                   onClick={() => toggleStep(step.id)}
                   className={`mt-0.5 shrink-0 transition-colors ${
-                    step.checked ? 'text-muted-foreground dark:text-violet-400' : 'text-muted-foreground hover:text-foreground'
+                    step.checked ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {step.checked ? (

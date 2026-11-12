@@ -11,6 +11,7 @@ import {
   CloudOff,
   Loader2,
   Download,
+  Upload,
   Printer,
   LogIn,
   LogOut,
@@ -24,6 +25,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal';
+import { ImportTrialModal } from '@/components/trials/ImportTrialModal';
 import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { syncTrialToCloud } from '@/actions/syncActions';
@@ -89,6 +91,7 @@ export function Header() {
   const [isExporting, setIsExporting] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSealModal, setShowSealModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [snapshotSuccess, setSnapshotSuccess] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
@@ -213,11 +216,14 @@ export function Header() {
   useEffect(() => {
     const handleExportEvent = () => { handleExport(); };
     const handleSealEvent = () => { handleOpenSealModal(); };
+    const handleImportEvent = () => { setShowImportModal(true); };
     window.addEventListener('inquestra:trigger-export', handleExportEvent);
     window.addEventListener('inquestra:trigger-seal', handleSealEvent);
+    window.addEventListener('inquestra:trigger-import', handleImportEvent);
     return () => {
       window.removeEventListener('inquestra:trigger-export', handleExportEvent);
       window.removeEventListener('inquestra:trigger-seal', handleSealEvent);
+      window.removeEventListener('inquestra:trigger-import', handleImportEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -445,48 +451,61 @@ export function Header() {
           </span>
         )}
 
-        {/* Real-time Autosave / Local status indicator */}
-        {!user && (
+        {/* Single Authoritative Save Status Indicator */}
+        {!user ? (
           saveStatus === 'UNSAVED' ? (
             <span
               className="flex items-center gap-1.5 text-xs text-amber-500 font-mono"
-              title="Unsaved changes pending local save"
+              title="Saving changes to browser storage…"
             >
               <Circle className="w-2 h-2 fill-amber-500 shrink-0" />
-              <span className="hidden sm:inline">Unsaved</span>
+              <span className="hidden sm:inline">Saving locally…</span>
             </span>
           ) : (
             <span
               className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono font-medium"
-              title="Private to this device. Everything is saved automatically in your browser's local storage."
+              title="Private to this device. All changes are auto-saved locally in browser storage."
             >
-              <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 shrink-0" />
-              <span className="hidden sm:inline">Saved in browser</span>
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Saved locally</span>
             </span>
           )
-        )}
-        {user && (saveStatus === 'SAVING' || isPending) && (
+        ) : (saveStatus === 'SAVING' || isPending) ? (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
             <span className="hidden sm:inline">Saving…</span>
           </span>
-        )}
-        {user && saveStatus === 'SAVED' && !syncError && isSynced && !isPending && (
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono" title="Continuous background autosave is active">
-            <Cloud className="w-3.5 h-3.5 text-primary" />
-            <span className="hidden sm:inline">Autosaved</span>
+        ) : (saveStatus === 'ERROR' || syncError) ? (
+          <span
+            className="flex items-center gap-1.5 text-xs text-critical font-mono"
+            title={saveError || syncError || 'Sync failed'}
+          >
+            <AlertCircle className="w-3.5 h-3.5 text-critical shrink-0" />
+            <span className="hidden sm:inline">Save failed</span>
           </span>
-        )}
-        {user && saveStatus === 'UNSAVED' && isSynced && !isPending && (
-          <span className="flex items-center gap-1.5 text-xs text-amber-500 font-mono" title="Unsaved changes pending autosave">
-            <Circle className="w-2 h-2 fill-amber-500" />
+        ) : !isSynced ? (
+          <span
+            className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono"
+            title="Saved locally — click Save to back up to cloud"
+          >
+            <Circle className="w-2 h-2 fill-muted-foreground/70 shrink-0" />
+            <span className="hidden sm:inline">Local draft</span>
+          </span>
+        ) : saveStatus === 'UNSAVED' ? (
+          <span
+            className="flex items-center gap-1.5 text-xs text-amber-500 font-mono"
+            title="Pending background autosave"
+          >
+            <Circle className="w-2 h-2 fill-amber-500 shrink-0" />
             <span className="hidden sm:inline">Unsaved</span>
           </span>
-        )}
-        {user && (saveStatus === 'ERROR' || syncError) && (
-          <span className="flex items-center gap-1.5 text-xs text-critical font-mono" title={saveError || syncError || 'Sync failed'}>
-            <AlertCircle className="w-3.5 h-3.5 text-critical" />
-            <span className="hidden sm:inline">Save Error</span>
+        ) : (
+          <span
+            className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono"
+            title="All changes synced to cloud"
+          >
+            <Check className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">Saved</span>
           </span>
         )}
 
@@ -538,6 +557,18 @@ export function Header() {
             </span>
           </button>
         )}
+
+        {/* Import button */}
+        <button
+          type="button"
+          onClick={() => setShowImportModal(true)}
+          title="Import trial from trial.json or .zip archive"
+          aria-label="Import trial from archive"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="hidden sm:inline">Import</span>
+        </button>
 
         {/* Download / Export button */}
         <button
@@ -602,6 +633,22 @@ export function Header() {
 
           {showMoreMenu && (
             <div className="absolute right-0 mt-2 w-72 rounded-lg border border-border bg-popover text-popover-foreground shadow-xl p-1.5 z-50 text-xs animate-in fade-in-50 zoom-in-95 duration-100">
+              {/* Import in dropdown */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMoreMenu(false);
+                  setShowImportModal(true);
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors"
+              >
+                <Upload className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div>
+                  <div className="font-medium text-foreground">Import Trial Archive</div>
+                  <div className="text-[10px] text-muted-foreground">Restore from trial.json or .zip bundle</div>
+                </div>
+              </button>
+
               {/* Export in dropdown */}
               <button
                 type="button"
@@ -800,6 +847,12 @@ export function Header() {
         isSealing={isSealing}
         onClose={() => setShowSealModal(false)}
         onConfirm={handleExecuteSeal}
+      />
+
+      <ImportTrialModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        isGuest={!user}
       />
     </header>
   );

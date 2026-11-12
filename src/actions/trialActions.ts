@@ -546,7 +546,17 @@ export async function getTrial(id: string) {
   });
 }
 
-export async function createNewTrial(projectId?: string | null, category?: string | null) {
+export interface NewTrialTemplateInput {
+  title?: string;
+  content?: Record<string, unknown>;
+  metadata?: { key: string; value: string }[];
+}
+
+export async function createNewTrial(
+  projectId?: string | null,
+  category?: string | null,
+  template?: NewTrialTemplateInput | null
+) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
@@ -571,17 +581,39 @@ export async function createNewTrial(projectId?: string | null, category?: strin
   }
 
   const initialMetadata: { key: string; value: string }[] = [];
-  if (category && category.trim()) {
+  const seenKeys = new Set<string>();
+
+  if (template?.metadata && template.metadata.length > 0) {
+    for (const entry of template.metadata) {
+      const cleanKey = DOMPurify.sanitize(entry.key.trim()).slice(0, 100);
+      if (!cleanKey || seenKeys.has(cleanKey.toLowerCase())) continue;
+      seenKeys.add(cleanKey.toLowerCase());
+      initialMetadata.push({
+        key: cleanKey,
+        value: DOMPurify.sanitize(entry.value.trim()).slice(0, 500),
+      });
+    }
+  }
+
+  if (category && category.trim() && !seenKeys.has('category')) {
     initialMetadata.push({
       key: 'category',
-      value: category.trim(),
+      value: DOMPurify.sanitize(category.trim()).slice(0, 500),
     });
   }
 
+  const cleanTitle = template?.title?.trim()
+    ? DOMPurify.sanitize(template.title.trim()).slice(0, 255) || 'Untitled Experiment'
+    : 'Untitled Experiment';
+
+  const initialContent = template?.content
+    ? (JSON.parse(JSON.stringify(template.content)) as Prisma.InputJsonValue)
+    : ({ type: 'doc', content: [] } as Prisma.InputJsonValue);
+
   const trial = await prisma.trial.create({
     data: {
-      title: 'Untitled Experiment',
-      content: { type: 'doc', content: [] },
+      title: cleanTitle,
+      content: initialContent,
       projectId: targetProjectId,
       userId: dbUser.id,
       ...(initialMetadata.length > 0

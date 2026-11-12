@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 const NAV_ITEMS = [
   { label: 'Features', href: '/#features', icon: Database },
   { label: 'Compare ELNs', href: '/compare', icon: Database },
+  { label: 'FAQ', href: '/faq', icon: Database },
   { label: 'About', href: '/about', icon: Database },
   { label: 'Provenance', href: '/provenance', icon: ShieldCheck },
   { label: 'Hardware DAQ', href: '/hardware', icon: Cpu },
@@ -32,7 +33,7 @@ export function MarketingNav() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-medium">
+          <div className="hidden md:flex items-center gap-4 lg:gap-5 xl:gap-6 text-xs font-medium">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -40,7 +41,7 @@ export function MarketingNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'transition-colors py-1 relative',
+                    'transition-colors py-1 relative whitespace-nowrap',
                     isActive
                       ? 'text-foreground font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary'
                       : 'text-muted-foreground hover:text-foreground'

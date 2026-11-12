@@ -128,21 +128,6 @@ function buildSlashCommands(): SlashCommand[] {
   return [
     // ── Document Formatting ──
     {
-      title: 'Table',
-      description: 'Insert a structured data table',
-      category: 'Formatting',
-      keywords: ['table', 'grid', 'matrix', 'data', 'cells', 'rows', 'columns'],
-      icon: <Table2 className="w-4 h-4" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-          .run();
-      },
-    },
-    {
       title: 'Heading 1',
       description: 'Large section heading',
       category: 'Formatting',
@@ -188,21 +173,6 @@ function buildSlashCommands(): SlashCommand[] {
       },
     },
     {
-      title: 'Task Checklist',
-      description: 'To-do checklist with interactive checkboxes',
-      category: 'Formatting',
-      keywords: ['task checklist', 'todo', 'tasks', 'checklist', 'checkbox', 'check'],
-      icon: <ListTodo className="w-4 h-4 text-emerald-500" />,
-      command: ({ editor, range }: { editor: Editor; range: Range }) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .toggleTaskList()
-          .run();
-      },
-    },
-    {
       title: 'Bulleted List',
       description: 'Standard unordered bullet list',
       category: 'Formatting',
@@ -229,6 +199,36 @@ function buildSlashCommands(): SlashCommand[] {
           .focus()
           .deleteRange(range)
           .toggleOrderedList()
+          .run();
+      },
+    },
+    {
+      title: 'Task Checklist',
+      description: 'To-do checklist with interactive checkboxes',
+      category: 'Formatting',
+      keywords: ['task checklist', 'todo', 'tasks', 'checklist', 'checkbox', 'check'],
+      icon: <ListTodo className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleTaskList()
+          .run();
+      },
+    },
+    {
+      title: 'Table',
+      description: 'Insert a structured data table',
+      category: 'Formatting',
+      keywords: ['table', 'grid', 'matrix', 'data', 'cells', 'rows', 'columns'],
+      icon: <Table2 className="w-4 h-4" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
           .run();
       },
     },
@@ -417,6 +417,122 @@ function buildSlashCommands(): SlashCommand[] {
           .run();
       },
     },
+    {
+      title: 'Protocol: Bradford Assay',
+      description: 'Bradford protein quantification SOP with BSA standard curve and 595 nm read',
+      category: 'Protocols & SOPs',
+      keywords: ['bradford assay', 'bradford', 'protein assay', 'bsa', 'standard curve', 'spectrophotometry', '595', 'protocol'],
+      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Bradford Protein Assay SOP',
+              version: 1,
+              steps: [
+                { id: 'ba-1', text: 'Equilibrate Coomassie Brilliant Blue G-250 Bradford reagent to room temperature and invert gently to mix.', checked: false, checkedAt: null, deviation: null },
+                { id: 'ba-2', text: 'Prepare BSA serial standard curve in matching lysis buffer (0, 125, 250, 500, 750, 1000, 1500, 2000 µg/mL).', checked: false, checkedAt: null, deviation: null },
+                { id: 'ba-3', text: 'Pipette 5 µL of each BSA standard and unknown sample in triplicate into a clear 96-well microplate.', checked: false, checkedAt: null, deviation: null },
+                { id: 'ba-4', text: 'Add 250 µL Bradford reagent to each well and mix on a plate shaker for 30 seconds without introducing bubbles.', checked: false, checkedAt: null, deviation: null, timerDuration: 30 },
+                { id: 'ba-5', text: 'Incubate at room temperature for 10 minutes before absorbance readout.', checked: false, checkedAt: null, deviation: null, timerDuration: 600 },
+                { id: 'ba-6', text: 'Measure absorbance at 595 nm on spectrophotometer; plot linear regression (R² ≥ 0.99) and compute sample concentrations.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: Buffer Prep',
+      description: 'Analytical buffer formulation, pH calibration, volume bring-up, and sterilization SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['buffer prep', 'buffer', 'ph', 'titration', 'autoclave', 'sterilize', 'molarity', 'preparation', 'protocol'],
+      icon: <ClipboardList className="w-4 h-4 text-sky-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Analytical Buffer Preparation SOP',
+              version: 1,
+              steps: [
+                { id: 'bp-1', text: 'Verify molarity calculations and weigh dry solutes on analytical balance; record exact mass and lot numbers.', checked: false, checkedAt: null, deviation: null },
+                { id: 'bp-2', text: 'Dissolve solutes in ~80% of final target volume of Type I ultrapure water using a magnetic stir bar.', checked: false, checkedAt: null, deviation: null },
+                { id: 'bp-3', text: 'Perform two-point calibration on pH meter (pH 4.00 / 7.00 / 10.00) and record ambient buffer temperature.', checked: false, checkedAt: null, deviation: null },
+                { id: 'bp-4', text: 'Adjust pH dropwise with standardized HCl or NaOH to target ±0.02 pH units while stirring continuously.', checked: false, checkedAt: null, deviation: null },
+                { id: 'bp-5', text: 'Transfer quantitatively to a volumetric flask or graduated cylinder and bring to final volume with ultrapure water.', checked: false, checkedAt: null, deviation: null },
+                { id: 'bp-6', text: 'Filter-sterilize through 0.22 µm PES membrane or autoclave per stability requirements; label with concentration, pH, date, and operator.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: Miniprep',
+      description: 'Alkaline lysis plasmid DNA miniprep isolation and silica column purification SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['miniprep', 'plasmid', 'alkaline lysis', 'dna isolation', 'p1', 'p2', 'n3', 'spin column', 'protocol'],
+      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Plasmid Miniprep Isolation SOP (Alkaline Lysis)',
+              version: 1,
+              steps: [
+                { id: 'mp-1', text: 'Harvest 1.5–5 mL overnight bacterial culture by centrifugation at 6,800 x g for 3 minutes; aspirate supernatant completely.', checked: false, checkedAt: null, deviation: null, timerDuration: 180 },
+                { id: 'mp-2', text: 'Resuspend cell pellet thoroughly in 250 µL chilled Buffer P1 (with RNase A) until no cell clumps remain.', checked: false, checkedAt: null, deviation: null },
+                { id: 'mp-3', text: 'Add 250 µL lysis Buffer P2 and mix by inverting 4–6 times until solution turns clear and viscous (do not vortex; ≤5 min).', checked: false, checkedAt: null, deviation: null },
+                { id: 'mp-4', text: 'Neutralize with 350 µL Buffer N3, invert 4–6 times immediately until fluffy white precipitate forms, then centrifuge 10 min at 17,900 x g.', checked: false, checkedAt: null, deviation: null, timerDuration: 600 },
+                { id: 'mp-5', text: 'Apply cleared supernatant to silica spin column, centrifuge 60 seconds, discard flow-through, and wash with 750 µL Buffer PE (with ethanol).', checked: false, checkedAt: null, deviation: null, timerDuration: 60 },
+                { id: 'mp-6', text: 'Perform dry spin at 17,900 x g for 1 minute to remove residual ethanol, then elute plasmid DNA in 50 µL nuclease-free water or Buffer EB.', checked: false, checkedAt: null, deviation: null, timerDuration: 60 },
+              ],
+            },
+          })
+          .run();
+      },
+    },
+    {
+      title: 'Protocol: Transformation',
+      description: 'Chemically competent bacterial heat-shock transformation and SOC recovery SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['transformation', 'heat-shock', 'heat shock', 'competent', 'bacteria', 'e. coli', 'soc', 'antibiotic', 'protocol'],
+      icon: <ClipboardList className="w-4 h-4 text-amber-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Bacterial Heat-Shock Transformation SOP',
+              version: 1,
+              steps: [
+                { id: 'tr-1', text: 'Thaw 50 µL aliquot of chemically competent cells slowly on ice for 10 minutes; pre-warm antibiotic selection plates to 37°C.', checked: false, checkedAt: null, deviation: null, timerDuration: 600 },
+                { id: 'tr-2', text: 'Add 1–5 µL plasmid DNA (10 pg–100 ng) gently to competent cells, flick tube 4–5 times to mix, and incubate on ice for 30 minutes.', checked: false, checkedAt: null, deviation: null, timerDuration: 1800 },
+                { id: 'tr-3', text: 'Heat-shock cells in a 42°C water bath for exactly 45 seconds without shaking.', checked: false, checkedAt: null, deviation: null, timerDuration: 45 },
+                { id: 'tr-4', text: 'Immediately return tubes to ice for 2 minutes.', checked: false, checkedAt: null, deviation: null, timerDuration: 120 },
+                { id: 'tr-5', text: 'Add 950 µL room-temperature SOC outgrowth medium and shake at 37°C, 250 rpm for 60 minutes recovery.', checked: false, checkedAt: null, deviation: null, timerDuration: 3600 },
+                { id: 'tr-6', text: 'Spread 50–100 µL onto pre-warmed selective agar plates and incubate inverted at 37°C for 14–16 hours.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
 
     // ── Scientific Blocks ──
     {
@@ -533,6 +649,69 @@ function buildSlashCommands(): SlashCommand[] {
       icon: <Database className="w-4 h-4 text-sky-500" />,
       command: ({ editor, range }: { editor: Editor; range: Range }) => {
         editor.chain().focus().deleteRange(range).insertContent({ type: 'trialReferenceBlock' }).run();
+      },
+    },
+
+    // ── Chemistry ──
+    {
+      title: 'IUPAC → SMILES',
+      description: 'Look up a compound name or IUPAC ID via PubChem to generate SMILES, MW & InChIKey',
+      category: 'Chemistry',
+      keywords: ['iupac', 'smiles', 'pubchem', 'lookup', 'compound', 'inchi', 'inchikey', 'formula', 'chemistry'],
+      icon: <FlaskConical className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        const arg = parseCommandArg(editor, range);
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'moleculeBlock',
+            attrs: {
+              smiles: '',
+              name: arg || '',
+              mw: '',
+              formula: '',
+              iupacName: '',
+              inchiKey: '',
+              lookupMode: true,
+            },
+          })
+          .run();
+      },
+    },
+
+    // ── Molecular Biology ──
+    {
+      title: 'Primer Design',
+      description: 'Insert Forward & Reverse primer blocks with live GC%, Wallace & salt-adjusted Tm',
+      category: 'Molecular Biology',
+      keywords: ['primer', 'primer design', 'tm', 'melting temperature', 'pcr', 'forward', 'reverse', 'oligo', 'gc'],
+      icon: <Dna className="w-4 h-4 text-emerald-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent([
+            {
+              type: 'sequenceBlock',
+              attrs: {
+                name: "Forward Primer (5'→3')",
+                type: 'DNA',
+                sequence: 'ATGCGTACGTTAGCTAAGTC',
+              },
+            },
+            {
+              type: 'sequenceBlock',
+              attrs: {
+                name: "Reverse Primer (5'→3')",
+                type: 'DNA',
+                sequence: 'GACTTAGCTAACGTACGCAT',
+              },
+            },
+          ])
+          .run();
       },
     },
 
@@ -801,6 +980,7 @@ export function EditorCanvas() {
   const saveError = useNotebookStore((s) => s.saveError);
   const lastSavedAt = useNotebookStore((s) => s.lastSavedAt);
   const isLoadingTrial = useNotebookStore((s) => s.isLoadingTrial);
+  const authStatus = useNotebookStore((s) => s.authStatus);
   const setSaveStatus = useNotebookStore((s) => s.setSaveStatus);
   const setSaveError = useNotebookStore((s) => s.setSaveError);
   const setLastSavedAt = useNotebookStore((s) => s.setLastSavedAt);
@@ -840,9 +1020,9 @@ export function EditorCanvas() {
       content: Record<string, unknown>;
       metadata: { key: string; value: string }[];
     }) => {
-      // If trial is sealed, don't attempt to save
+      // Only skip save if THIS exact trial is cryptographically sealed
       const currentTrial = useNotebookStore.getState().activeTrial;
-      if (currentTrial.checksum) return;
+      if (currentTrial.id === payload.trialId && currentTrial.checksum) return;
 
       const contentString = JSON.stringify(payload.content);
       // Dirty check: skip network and DB transaction if identical to last saved state
@@ -1267,25 +1447,7 @@ export function EditorCanvas() {
             />
             <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-2 font-mono">
               <div className="flex items-center gap-2" suppressHydrationWarning>
-                {saveStatus === 'SAVING' && (
-                  <span className="text-primary flex items-center gap-1.5 font-medium animate-pulse">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Saving…
-                  </span>
-                )}
-                {saveStatus === 'SAVED' && (
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <Check className="w-3 h-3 text-emerald-500" />
-                    {formattedTime ? `Saved · ${formattedTime}` : 'All changes saved'}
-                  </span>
-                )}
-                {saveStatus === 'UNSAVED' && (
-                  <span className="text-amber-500/90 flex items-center gap-1.5">
-                    <Circle className="w-2 h-2 fill-amber-500" />
-                    Unsaved changes
-                  </span>
-                )}
-                {saveStatus === 'ERROR' && (
+                {saveStatus === 'ERROR' ? (
                   <button
                     type="button"
                     onClick={() => triggerDebouncedSave()}
@@ -1293,8 +1455,17 @@ export function EditorCanvas() {
                     title={saveError || 'Autosave failed. Click to retry.'}
                   >
                     <AlertCircle className="w-3 h-3" />
-                    Save error — click to retry
+                    Save failed — click to retry
                   </button>
+                ) : (
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-500" />
+                    {formattedTime
+                      ? `${cloudTrialId ? 'Cloud trial' : 'Local notebook'} · Updated ${formattedTime}`
+                      : cloudTrialId
+                        ? 'Cloud trial'
+                        : 'Local notebook'}
+                  </span>
                 )}
               </div>
               <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground">
@@ -1303,12 +1474,16 @@ export function EditorCanvas() {
             </div>
           </div>
 
-          {/* Loading overlay when switching trials — solid opaque to prevent text bleed */}
-          {isLoadingTrial && (
+          {/* Loading overlay while resolving auth or switching trials — solid opaque to prevent text bleed */}
+          {(authStatus === 'UNKNOWN' || isLoadingTrial) && (
             <div className="absolute inset-0 bg-background z-30 flex flex-col items-center justify-center rounded-2xl gap-3 animate-in fade-in duration-100 min-h-[500px]">
               <div className="flex items-center gap-2.5 px-4 py-2.5 bg-card border border-border rounded-lg shadow-xl text-xs font-mono text-foreground">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                <span>Loading experiment notebook…</span>
+                <span>
+                  {authStatus === 'UNKNOWN'
+                    ? 'Verifying workspace session…'
+                    : 'Loading experiment notebook…'}
+                </span>
               </div>
             </div>
           )}

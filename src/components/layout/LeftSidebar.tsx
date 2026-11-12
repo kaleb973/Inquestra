@@ -4,10 +4,14 @@
 
 import { useEffect, useState, useTransition, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import TemplateGalleryModal from '@/components/trials/TemplateGalleryModal';
+import { ImportTrialModal } from '@/components/trials/ImportTrialModal';
+import type { ExperimentTemplate } from '@/lib/templates';
 import {
   FlaskConical,
   ChevronDown,
   Plus,
+  Upload,
   HardDrive,
   BookOpen,
   Settings2,
@@ -281,6 +285,7 @@ export function LeftSidebar() {
   const setActiveTrial = useNotebookStore((s) => s.setActiveTrial);
   const setCloudIds = useNotebookStore((s) => s.setCloudIds);
   const setIsLoadingTrial = useNotebookStore((s) => s.setIsLoadingTrial);
+  const setAuthStatus = useNotebookStore((s) => s.setAuthStatus);
   const cachedProjects = useNotebookStore((s) => s.cachedProjects);
   const cachedTrials = useNotebookStore((s) => s.cachedTrials);
   const setCachedProjects = useNotebookStore((s) => s.setCachedProjects);
@@ -302,6 +307,8 @@ export function LeftSidebar() {
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const isGuest = isAuthenticated === false;
@@ -431,14 +438,25 @@ export function LeftSidebar() {
   // Consolidated workspace bootstrap on mount with Supabase auth awareness
   useEffect(() => {
     let isCancelled = false;
+    setAuthStatus('UNKNOWN');
     const supabase = createSupabaseBrowserClient();
+
+    // Defensive safety timeout so the loading spinner can never stay stuck indefinitely
+    const safetyTimer = setTimeout(() => {
+      if (!isCancelled) {
+        setIsLoadingTrials(false);
+        setIsLoadingTrial(false);
+      }
+    }, 5000);
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (isCancelled) return;
       const isAuthed = !!user;
       setIsAuthenticated(isAuthed);
+      setAuthStatus(isAuthed ? 'AUTHENTICATED' : 'GUEST');
 
       if (!isAuthed) {
+        clearTimeout(safetyTimer);
         // Enforce Local Notebook guest mode: purge stale cloud IDs from localStorage
         useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null, saveStatus: 'SAVED' });
         setProjects([]);
@@ -460,6 +478,7 @@ export function LeftSidebar() {
       fetchWorkspaceBootstrap(initialProjectId)
         .then((res) => {
           if (isCancelled) return;
+          clearTimeout(safetyTimer);
           setProjects(res.projects);
           setCachedProjects(res.projects);
 
@@ -497,9 +516,18 @@ export function LeftSidebar() {
         })
         .catch((err) => {
           console.error('Failed to bootstrap workspace:', err);
+          clearTimeout(safetyTimer);
           setIsLoadingTrials(false);
           setIsLoadingTrial(false);
         });
+    }).catch((err) => {
+      console.error('Auth resolution error:', err);
+      if (isCancelled) return;
+      clearTimeout(safetyTimer);
+      setIsAuthenticated(false);
+      setAuthStatus('GUEST');
+      setIsLoadingTrials(false);
+      setIsLoadingTrial(false);
     });
 
     const {
@@ -508,15 +536,20 @@ export function LeftSidebar() {
       if (isCancelled) return;
       const isAuthed = !!session?.user;
       setIsAuthenticated(isAuthed);
+      setAuthStatus(isAuthed ? 'AUTHENTICATED' : 'GUEST');
       if (!isAuthed) {
-        useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null });
+        useNotebookStore.setState({ cloudProjectId: null, cloudTrialId: null, saveStatus: 'SAVED' });
         setProjects([]);
         setTrials([]);
+        setIsLoadingTrials(false);
+        setIsLoadingTrial(false);
       }
     });
 
     return () => {
       isCancelled = true;
+      clearTimeout(safetyTimer);
+      loadingTrialIdRef.current = null;
       subscription.unsubscribe();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -553,9 +586,15 @@ export function LeftSidebar() {
 
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
 
-  const handleNewTrial = (cat?: string) => {
+  const handleNewTrial = (cat?: string, template?: ExperimentTemplate) => {
+    const resolvedCategory =
+      cat ||
+      template?.metadata.find((m) => m.key === 'category')?.value ||
+      (template?.category && template.category !== 'General' ? template.category : undefined);
+
     trackAnalyticsEvent('trial_created', {
-      category: cat || 'General',
+      category: resolvedCategory || 'General',
+      templateId: template?.id || 'blank',
       isAnonymous: isGuest,
     });
     // Before creating new trial, preserve outgoing active trial's latest title/status
@@ -574,25 +613,51 @@ export function LeftSidebar() {
         )
       );
     }
-    if (isGuest) {
+
+    const buildLocalTemplateTrial = () => {
       const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
       const now = new Date().toISOString();
+      const baseMeta = (template?.metadata ?? []).map((entry, idx) => ({
+        id: `${localId}-meta-${idx}`,
+        key: entry.key,
+        value: entry.value,
+      }));
+      if (resolvedCategory && !baseMeta.some((m) => m.key === 'category')) {
+        baseMeta.unshift({ id: `${localId}-cat`, key: 'category', value: resolvedCategory });
+      }
       const localTrial: import('@/types/inquestra').TrialDocument = {
         id: localId,
-        title: 'Untitled Run',
-        content: { type: 'doc', content: [] },
+        title: template?.defaultTitle || 'Untitled Run',
+        content: template?.content
+          ? (JSON.parse(JSON.stringify(template.content)) as Record<string, unknown>)
+          : { type: 'doc', content: [] },
         status: 'DRAFT',
-        metadata: cat ? [{ id: 'cat', key: 'category', value: cat }] : [],
+        metadata: baseMeta,
         createdAt: now,
         updatedAt: now,
       };
-      addLocalTrial(localTrial);
+      return localTrial;
+    };
+
+    if (isGuest) {
+      addLocalTrial(buildLocalTemplateTrial());
+      setShowTemplateGallery(false);
       return;
     }
     startTransition(async () => {
       try {
         setIsLoadingTrial(true);
-        const newTrial = await createNewTrial(activeProjectId, cat);
+        const newTrial = await createNewTrial(
+          activeProjectId,
+          resolvedCategory ?? null,
+          template
+            ? {
+                title: template.defaultTitle,
+                content: template.content,
+                metadata: template.metadata,
+              }
+            : null
+        );
         const summary = newTrial as unknown as TrialSummaryItem;
         setTrials((prev) => [summary, ...prev]);
         setActiveTrial({
@@ -613,20 +678,10 @@ export function LeftSidebar() {
         });
       } catch (err) {
         console.warn('Server trial creation skipped (fallback to local):', err);
-        const localId = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-        const now = new Date().toISOString();
-        const localTrial: import('@/types/inquestra').TrialDocument = {
-          id: localId,
-          title: 'Untitled Run',
-          content: { type: 'doc', content: [] },
-          status: 'DRAFT',
-          metadata: cat ? [{ id: 'cat', key: 'category', value: cat }] : [],
-          createdAt: now,
-          updatedAt: now,
-        };
-        addLocalTrial(localTrial);
+        addLocalTrial(buildLocalTemplateTrial());
       } finally {
         setIsLoadingTrial(false);
+        setShowTemplateGallery(false);
       }
     });
   };
@@ -652,12 +707,16 @@ export function LeftSidebar() {
 
   const handleRenameTrial = async (targetTrial: TrialSummaryItem, newTitle: string) => {
     if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
-      useNotebookStore.getState().updateTitle(newTitle);
-      useNotebookStore.setState((s) => ({
-        localTrials: s.localTrials.map((t) =>
-          t.id === targetTrial.id ? { ...t, title: newTitle, updatedAt: new Date().toISOString() } : t
-        ),
-      }));
+      const now = new Date().toISOString();
+      if (targetTrial.id === activeTrial.id) {
+        useNotebookStore.getState().updateTitle(newTitle);
+      } else {
+        useNotebookStore.setState((s) => ({
+          localTrials: s.localTrials.map((t) =>
+            t.id === targetTrial.id ? { ...t, title: newTitle, updatedAt: now } : t
+          ),
+        }));
+      }
       return;
     }
     try {
@@ -674,6 +733,27 @@ export function LeftSidebar() {
   };
 
   const handleDuplicateTrial = async (targetTrial: TrialSummaryItem) => {
+    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+      const source =
+        localTrials.find((t) => t.id === targetTrial.id) ??
+        (activeTrial.id === targetTrial.id ? activeTrial : null);
+      const now = new Date().toISOString();
+      const localId =
+        typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      const cloned: import('@/types/inquestra').TrialDocument = {
+        id: localId,
+        title: `${targetTrial.title} (Copy)`,
+        content: source?.content
+          ? (JSON.parse(JSON.stringify(source.content)) as Record<string, unknown>)
+          : { type: 'doc', content: [] },
+        status: 'DRAFT',
+        metadata: (source?.metadata ?? targetTrial.metadata ?? []).map((m) => ({ ...m })),
+        createdAt: now,
+        updatedAt: now,
+      };
+      addLocalTrial(cloned);
+      return;
+    }
     try {
       const res = await duplicateTrial(targetTrial.id);
       if (res.success && res.trial) {
@@ -783,6 +863,10 @@ export function LeftSidebar() {
 
   // Real-time optimistic synchronization of the active trial's title, status, metadata
   const displayTrials = useMemo(() => {
+    // Prevent flashing stale/guest trial lists before Supabase auth resolves
+    if (isAuthenticated === null) {
+      return [];
+    }
     if (isGuest) {
       const list = localTrials && localTrials.length > 0 ? localTrials : (activeTrial ? [activeTrial] : []);
       return list.map((t) => {
@@ -809,7 +893,7 @@ export function LeftSidebar() {
       }
       return t;
     });
-  }, [isGuest, localTrials, trials, activeTrial]);
+  }, [isAuthenticated, isGuest, localTrials, trials, activeTrial]);
 
   // Extract distinct category tags across all trials
   const availableCategories = useMemo(() => {
@@ -1043,20 +1127,32 @@ export function LeftSidebar() {
                 <Info className="w-3 h-3" />
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => handleNewTrial()}
-              disabled={isPending}
-              className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1.5 rounded disabled:opacity-50 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              title="New experiment"
-              aria-label="New experiment"
-            >
-              {isPending && !loadingTrialId ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Plus className="w-3.5 h-3.5" />
-              )}
-            </button>
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                disabled={isPending}
+                className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1.5 rounded disabled:opacity-50 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                title="Import trial from trial.json or .zip archive"
+                aria-label="Import trial archive"
+              >
+                <Upload className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTemplateGallery(true)}
+                disabled={isPending}
+                className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 p-1.5 rounded disabled:opacity-50 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                title="New experiment from template"
+                aria-label="New experiment"
+              >
+                {isPending && !loadingTrialId ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Plus className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Architecture Explainer Popover */}
@@ -1147,8 +1243,8 @@ export function LeftSidebar() {
 
           {/* Actual trial list */}
           <div className="space-y-1 flex-1 overflow-y-auto">
-            {/* Skeleton loaders only on initial empty load */}
-            {isLoadingTrials && trials.length === 0 &&
+            {/* Skeleton loaders while auth resolves or on initial empty load */}
+            {(isAuthenticated === null || isLoadingTrials) && displayTrials.length === 0 &&
               [...Array(4)].map((_, i) => (
                 <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded">
                   <div className="w-1.5 h-1.5 rounded-full bg-muted animate-pulse shrink-0" />
@@ -1236,7 +1332,7 @@ export function LeftSidebar() {
             })}
 
             {/* Filtered Empty State */}
-            {!isLoadingTrials && filteredTrials.length === 0 && trials.length > 0 && (
+            {isAuthenticated !== null && !isLoadingTrials && filteredTrials.length === 0 && displayTrials.length > 0 && (
               <div className="px-2 py-4 text-center">
                 <p className="text-xs text-muted-foreground mb-2">No experiments match filter.</p>
                 <button
@@ -1253,7 +1349,7 @@ export function LeftSidebar() {
             )}
 
             {/* Truly Empty State */}
-            {!isLoadingTrials && trials.length === 0 && (
+            {isAuthenticated !== null && !isLoadingTrials && displayTrials.length === 0 && (
               <p className="px-2 py-3 text-xs text-muted-foreground">
                 No experiments yet. Hit + to start.
               </p>
@@ -1329,6 +1425,21 @@ export function LeftSidebar() {
           onCreated={handleProjectCreated}
         />
       )}
+
+      {/* Experiment Template Gallery Modal */}
+      <TemplateGalleryModal
+        open={showTemplateGallery}
+        isCreating={isPending}
+        onClose={() => setShowTemplateGallery(false)}
+        onSelectTemplate={(template) => handleNewTrial(undefined, template)}
+      />
+
+      {/* Trial Re-Import Modal */}
+      <ImportTrialModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        isGuest={isGuest}
+      />
 
       {/* Cassini-Style Headless Trial Preview */}
       {previewTrial && (

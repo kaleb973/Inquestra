@@ -145,7 +145,7 @@ export function TrialContextMenu({
 
   if (!isOpen) return null;
 
-  const isSealed = trial.status === 'COMPLETED' || !!(trial as any).checksum;
+  const isSealed = trial.status === 'COMPLETED' || !!trial.checksum;
 
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(trial.id);
@@ -285,10 +285,15 @@ export function TrialContextMenu({
                 }
               }}
               disabled={isSubmitting}
-              className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+              className="w-full flex items-start gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
             >
-              <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>Duplicate as Draft</span>
+              <Copy className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+              <div>
+                <div>Duplicate as Draft</div>
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  Branch an editable copy with steps &amp; metadata
+                </div>
+              </div>
             </button>
           </div>
 

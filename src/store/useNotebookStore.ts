@@ -147,6 +147,16 @@ const DEFAULT_STATS: TelemetryStats = {
 // ─── State shape ───────────────────────────────────────────────────────────────
 
 export type RightDrawerMode = 'TELEMETRY' | 'INVENTORY' | 'LITERATURE' | 'COMPLIANCE' | 'HISTORY';
+export type AuthResolutionStatus = 'UNKNOWN' | 'GUEST' | 'AUTHENTICATED';
+
+const initialStarterTrial = makeDefaultTrial();
+
+function upsertTrialInList(list: TrialDocument[], updated: TrialDocument): TrialDocument[] {
+  const exists = list.some((t) => t.id === updated.id);
+  return exists
+    ? list.map((t) => (t.id === updated.id ? updated : t))
+    : [updated, ...list];
+}
 
 interface NotebookState {
   isLeftSidebarOpen: boolean;
@@ -164,6 +174,10 @@ interface NotebookState {
   lastSavedAt: string | null;
   saveError: string | null;
   isLoadingTrial: boolean;
+  /** Transient flag set true once Zustand persist finishes client hydration */
+  _hasHydrated: boolean;
+  /** Transient auth session state so workspace masks guest drafts during auth checks */
+  authStatus: AuthResolutionStatus;
   /** In-memory / persisted project and trial caches for instant zero-lag navigation */
   cachedProjects: ProjectWithLead[];
   cachedTrials: TrialSummaryItem[];
@@ -190,6 +204,8 @@ interface NotebookActions {
   setLastSavedAt: (time: string | null) => void;
   setSaveError: (error: string | null) => void;
   setIsLoadingTrial: (loading: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
+  setAuthStatus: (status: AuthResolutionStatus) => void;
   setCachedProjects: (projects: ProjectWithLead[]) => void;
   setCachedTrials: (trials: TrialSummaryItem[]) => void;
   addLocalTrial: (trial: TrialDocument) => void;
@@ -218,14 +234,16 @@ export const useNotebookStore = create<NotebookStore>()(
       isLeftSidebarOpen: true,
       isRightDrawerOpen: false,
       rightDrawerMode: 'TELEMETRY' as RightDrawerMode,
-      activeTrial: makeDefaultTrial(),
-      localTrials: [makeDefaultTrial()],
+      activeTrial: initialStarterTrial,
+      localTrials: [initialStarterTrial],
       cloudTrialId: null,
       cloudProjectId: null,
       saveStatus: 'SAVED' as SaveStatus,
       lastSavedAt: null,
       saveError: null,
       isLoadingTrial: false,
+      _hasHydrated: false,
+      authStatus: 'UNKNOWN' as AuthResolutionStatus,
       cachedProjects: [],
       cachedTrials: [],
       telemetryBuffer: [],
@@ -328,6 +346,8 @@ export const useNotebookStore = create<NotebookStore>()(
       setLastSavedAt: (time) => set({ lastSavedAt: time }),
       setSaveError: (error) => set({ saveError: error }),
       setIsLoadingTrial: (loading) => set({ isLoadingTrial: loading }),
+      setHasHydrated: (hydrated) => set({ _hasHydrated: hydrated }),
+      setAuthStatus: (status) => set({ authStatus: status }),
 
       appendTelemetry: (point) =>
         set((state) => {
@@ -348,10 +368,12 @@ export const useNotebookStore = create<NotebookStore>()(
 
       addLocalTrial: (trial) =>
         set((state) => ({
-          localTrials: [trial, ...state.localTrials.filter((t) => t.id !== trial.id)],
+          localTrials: upsertTrialInList(state.localTrials, trial),
           activeTrial: trial,
           cloudTrialId: null,
           saveStatus: 'SAVED',
+          saveError: null,
+          isLoadingTrial: false,
           lastSavedAt: new Date().toISOString(),
         })),
 
@@ -369,20 +391,14 @@ export const useNotebookStore = create<NotebookStore>()(
       updateContent: (json) =>
         set((state) => {
           const now = new Date().toISOString();
-          const updatedActive = {
+          const updatedActive: TrialDocument = {
             ...state.activeTrial,
             content: json,
             updatedAt: now,
           };
-          const updatedLocal = state.localTrials.map((t) =>
-            t.id === updatedActive.id ? updatedActive : t
-          );
-          if (!updatedLocal.some((t) => t.id === updatedActive.id)) {
-            updatedLocal.push(updatedActive);
-          }
           return {
             activeTrial: updatedActive,
-            localTrials: updatedLocal,
+            localTrials: upsertTrialInList(state.localTrials, updatedActive),
             saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
             lastSavedAt: now,
           };
@@ -391,23 +407,17 @@ export const useNotebookStore = create<NotebookStore>()(
       updateTitle: (title) =>
         set((state) => {
           const now = new Date().toISOString();
-          const updatedActive = {
+          const updatedActive: TrialDocument = {
             ...state.activeTrial,
             title,
             updatedAt: now,
           };
-          const updatedLocal = state.localTrials.map((t) =>
-            t.id === updatedActive.id ? updatedActive : t
-          );
-          if (!updatedLocal.some((t) => t.id === updatedActive.id)) {
-            updatedLocal.push(updatedActive);
-          }
           const updatedCached = state.cachedTrials.map((t) =>
             t.id === updatedActive.id ? { ...t, title, updatedAt: now } : t
           );
           return {
             activeTrial: updatedActive,
-            localTrials: updatedLocal,
+            localTrials: upsertTrialInList(state.localTrials, updatedActive),
             cachedTrials: updatedCached,
             saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
             lastSavedAt: now,
@@ -420,24 +430,34 @@ export const useNotebookStore = create<NotebookStore>()(
         })),
 
       addMetadata: (entry) =>
-        set((state) => ({
-          activeTrial: {
+        set((state) => {
+          const now = new Date().toISOString();
+          const updatedActive: TrialDocument = {
             ...state.activeTrial,
             metadata: [...state.activeTrial.metadata, entry],
-            updatedAt: new Date().toISOString(),
-          },
-          saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
-        })),
+            updatedAt: now,
+          };
+          return {
+            activeTrial: updatedActive,
+            localTrials: upsertTrialInList(state.localTrials, updatedActive),
+            saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
+          };
+        }),
 
       removeMetadata: (id) =>
-        set((state) => ({
-          activeTrial: {
+        set((state) => {
+          const now = new Date().toISOString();
+          const updatedActive: TrialDocument = {
             ...state.activeTrial,
             metadata: state.activeTrial.metadata.filter((m) => m.id !== id),
-            updatedAt: new Date().toISOString(),
-          },
-          saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
-        })),
+            updatedAt: now,
+          };
+          return {
+            activeTrial: updatedActive,
+            localTrials: upsertTrialInList(state.localTrials, updatedActive),
+            saveStatus: state.cloudTrialId ? 'UNSAVED' : 'SAVED',
+          };
+        }),
 
       resetTelemetry: () =>
         set({ telemetryBuffer: [], telemetryStats: DEFAULT_STATS }),
@@ -445,11 +465,12 @@ export const useNotebookStore = create<NotebookStore>()(
     {
       name: 'inquestra-notebook-v1',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       // Persist document + cloud IDs + lastSavedAt + project/trial caches for instant 0ms restoration
       partialize: (state) => {
-        const localTrials = state.localTrials.some((t) => t.id === state.activeTrial.id)
-          ? state.localTrials
-          : [state.activeTrial, ...state.localTrials];
+        const localTrials = upsertTrialInList(state.localTrials, state.activeTrial);
         return {
           activeTrial: state.activeTrial,
           localTrials,
