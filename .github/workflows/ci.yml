@@ -90,9 +90,20 @@ jobs:
         # Skip db push — no real DB in CI. Generate client types only.
         run: npx prisma generate
 
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
       - name: Build Next.js application
-        # Override the package.json build script to skip db push in CI
-        run: npx next build
+        # Override the package.json build script to skip db push in CI.
+        # Retry once if a transient external network error (like Google Fonts) occurs.
+        run: npx next build || (echo "Retrying build due to transient external network failure (e.g. Google Fonts)..." && sleep 3 && npx next build)
         env:
           # Skip DB migrations in CI — Prisma generate is sufficient for type safety
           SKIP_DB_PUSH: true
