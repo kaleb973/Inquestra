@@ -3,7 +3,8 @@
 // Two-step verification modal for 21 CFR Part 11 cryptographic experiment sealing.
 // Prevents accidental single-click sealing and ensures deliberate regulatory sign-off.
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Shield, AlertTriangle, X, Loader2, Lock } from 'lucide-react';
 
 interface SealConfirmationModalProps {
@@ -22,22 +23,27 @@ export function SealConfirmationModal({
   onConfirm,
 }: SealConfirmationModalProps) {
   const [confirmText, setConfirmText] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Reset input when modal closes
   if (!isOpen && confirmText !== '') {
     setConfirmText('');
   }
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const isConfirmed = confirmText.trim() === 'SEAL';
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-150"
       onClick={(e) => e.target === e.currentTarget && !isSealing && onClose()}
     >
-      <div className="relative w-full max-w-md bg-card border border-destructive/40 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-md my-auto bg-card border border-destructive/40 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 shrink-0">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-destructive/10">
           <div className="flex items-center gap-2.5 text-destructive font-semibold text-sm">
@@ -128,6 +134,7 @@ export function SealConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

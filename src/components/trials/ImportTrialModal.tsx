@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Upload,
   FileCheck2,
@@ -32,6 +33,7 @@ interface ImportTrialModalProps {
 }
 
 export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrialModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,6 +55,10 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
   const setSaveStatus = useNotebookStore((s) => s.setSaveStatus);
   const setCachedTrials = useNotebookStore((s) => s.setCachedTrials);
   const cachedTrials = useNotebookStore((s) => s.cachedTrials);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (cachedProjects.length > 0 && !selectedProjectId) {
@@ -193,11 +199,11 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
     });
   };
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="import-trial-title"
@@ -207,9 +213,9 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
         }
       }}
     >
-      <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-border bg-background shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-2xl max-h-[90vh] my-auto flex flex-col rounded-xl border border-border bg-background shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 shrink-0">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card/60 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <Upload className="w-4 h-4" />
@@ -449,7 +455,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-card/60">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-card/60 shrink-0">
           <button
             type="button"
             onClick={onClose}
@@ -478,6 +484,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

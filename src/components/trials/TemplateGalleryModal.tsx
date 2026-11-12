@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowRight,
   Dna,
@@ -81,11 +82,17 @@ export default function TemplateGalleryModal({
     return EXPERIMENT_TEMPLATES.filter((t) => t.category === selectedCategory);
   }, [selectedCategory]);
 
-  if (!open) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!open || !mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="template-gallery-title"
@@ -95,7 +102,7 @@ export default function TemplateGalleryModal({
         }
       }}
     >
-      <div className="w-full max-w-4xl max-h-[88vh] flex flex-col rounded-xl border border-border bg-background shadow-2xl overflow-hidden">
+      <div className="w-full max-w-4xl max-h-[88vh] my-auto flex flex-col rounded-xl border border-border bg-background shadow-2xl overflow-hidden shrink-0">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-border bg-card/50">
           <div>
@@ -206,6 +213,7 @@ export default function TemplateGalleryModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
