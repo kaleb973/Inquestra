@@ -293,13 +293,44 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
   // Live polling (only active when NOT in CSV mode)
   useEffect(() => {
     if (isCsvMode || paused) return;
+
+    let lastLen = -1;
+    let lastTime = -1;
+
     const poll = () => {
-      const buffer = useNotebookStore.getState().telemetryBuffer;
+      // Don't poll or re-render if the tab is hidden in background
+      if (typeof document !== 'undefined' && document.hidden) return;
+
+      const state = useNotebookStore.getState();
+      const buffer = state.telemetryBuffer;
+
+      const len = buffer.length;
+      const latestTs = len > 0 ? buffer[len - 1].timestamp : 0;
+
+      // Skip re-render if buffer has not changed (prevents 10 FPS idle loop)
+      if (len === lastLen && latestTs === lastTime) {
+        return;
+      }
+
+      lastLen = len;
+      lastTime = latestTs;
       setDisplayData(toChartPoints(buffer.slice(-CHART_WINDOW)));
     };
+
     poll();
-    const id = setInterval(poll, POLL_INTERVAL_MS);
-    return () => clearInterval(id);
+
+    const handleVisibility = () => {
+      if (!document.hidden) poll();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // 250ms polling interval balances smooth DAQ updates with near-zero idle CPU usage
+    const id = setInterval(poll, 250);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [isCsvMode, paused]);
 
   const handlePauseToggle = useCallback(() => {
