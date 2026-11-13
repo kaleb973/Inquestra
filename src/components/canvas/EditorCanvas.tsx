@@ -1537,8 +1537,13 @@ export function EditorCanvas() {
               onRequestSeal={async () => {
                 if (cloudTrialId) {
                   try {
-                    await sealTrial(cloudTrialId);
-                    alert('Trial successfully sealed.');
+                    const res = await sealTrial(cloudTrialId);
+                    if (res.success) {
+                      alert('Trial successfully sealed.');
+                      window.location.reload();
+                    } else {
+                      alert(res.error || 'Seal failed');
+                    }
                   } catch (err) {
                     alert(err instanceof Error ? err.message : 'Seal failed');
                   }

@@ -631,51 +631,95 @@ export async function createNewTrial(
   return trial;
 }
 
-export async function sealTrial(trialId: string) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+export interface SealTrialResult {
+  success: boolean;
+  checksum?: string;
+  sealedAt?: string;
+  alreadySealed?: boolean;
+  error?: string;
+}
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
+export async function sealTrial(trialId: string): Promise<SealTrialResult> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return { success: false, error: 'Unauthorized: active session required.' };
+    }
 
-  const trial = await prisma.trial.findFirst({
-    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
-    include: { metadata: true }
-  });
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) {
+      return { success: false, error: 'User profile not found in database.' };
+    }
 
-  if (!trial) throw new Error('Trial not found');
-  if (trial.checksum) throw new Error('Trial is already sealed');
+    const trial = await prisma.trial.findFirst({
+      where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+      include: { metadata: true }
+    });
 
-  const timestamp = new Date().toISOString();
-  const checksum = generateTrialHash(trial.content, trial.metadata, timestamp);
+    if (!trial) {
+      return { success: false, error: 'Trial not found or access denied.' };
+    }
 
-  const updated = await prisma.trial.update({
-    where: { id: trialId },
-    data: {
-      status: 'COMPLETED',
+    // Idempotent: If already sealed, return stored checksum without throwing
+    if (trial.checksum) {
+      return {
+        success: true,
+        checksum: trial.checksum,
+        sealedAt: trial.sealedAt?.toISOString() || new Date().toISOString(),
+        alreadySealed: true,
+      };
+    }
+
+    const timestamp = new Date().toISOString();
+    const checksum = generateTrialHash(trial.content, trial.metadata, timestamp);
+
+    await prisma.trial.update({
+      where: { id: trialId },
+      data: {
+        status: 'COMPLETED',
+        checksum,
+        sealedAt: new Date(timestamp),
+        sealedBy: dbUser.id
+      }
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+        action: 'TRIAL_SEALED',
+        entityType: 'Trial',
+        entityId: trialId,
+        details: { message: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}` }
+      }
+    });
+
+    try {
+      logTrialSealed();
+      await flushPostHogLogs();
+    } catch (logErr) {
+      console.warn('[Telemetry] Non-fatal log failure during seal:', logErr);
+    }
+
+    try {
+      revalidatePath('/app');
+    } catch (revErr) {
+      console.warn('[Cache] Non-fatal revalidatePath failure during seal:', revErr);
+    }
+
+    return {
+      success: true,
       checksum,
-      sealedAt: new Date(timestamp),
-      sealedBy: dbUser.id
-    }
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      userId: dbUser.id,
-      organizationId: dbUser.organizationId,
-      action: 'TRIAL_SEALED',
-      entityType: 'Trial',
-      entityId: trialId,
-      details: { message: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}` }
-    }
-  });
-
-  logTrialSealed();
-  await flushPostHogLogs();
-
-  revalidatePath('/app');
-  return updated;
+      sealedAt: timestamp,
+    };
+  } catch (err: unknown) {
+    console.error('sealTrial fatal error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Cryptographic sealing failed.',
+    };
+  }
 }
 
 /**
@@ -687,48 +731,73 @@ export async function updateTrialStatus(
   trialId: string,
   newStatus: 'DRAFT' | 'ACTIVE' | 'IN_REVIEW' | 'COMPLETED' | 'FAILED'
 ) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return { success: false, error: 'Unauthorized: active session required.' };
+    }
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) {
+      return { success: false, error: 'User profile not found.' };
+    }
 
-  const trial = await prisma.trial.findFirst({
-    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
-  });
-  if (!trial) throw new Error('Trial not found');
-  if (trial.checksum) throw new Error('Cannot change status of a sealed trial.');
+    const trial = await prisma.trial.findFirst({
+      where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+    });
+    if (!trial) {
+      return { success: false, error: 'Trial not found or access denied.' };
+    }
+    if (trial.checksum) {
+      return { success: false, error: 'Cannot change status of a sealed trial.' };
+    }
 
-  const validStatus = z
-    .enum(['DRAFT', 'ACTIVE', 'IN_REVIEW', 'COMPLETED', 'FAILED'])
-    .parse(newStatus);
+    const validStatus = z
+      .enum(['DRAFT', 'ACTIVE', 'IN_REVIEW', 'COMPLETED', 'FAILED'])
+      .parse(newStatus);
 
-  const updated = await prisma.trial.update({
-    where: { id: trialId },
-    data: { status: validStatus },
-  });
+    const updated = await prisma.trial.update({
+      where: { id: trialId },
+      data: { status: validStatus },
+    });
 
-  await prisma.auditLog.create({
-    data: {
-      userId: dbUser.id,
-      organizationId: dbUser.organizationId,
-      action: 'TRIAL_STATUS_CHANGED',
-      entityType: 'Trial',
-      entityId: trialId,
-      details: {
-        message: `Status changed from "${trial.status}" to "${validStatus}" on trial "${trial.title}".`,
-        previousStatus: trial.status,
-        newStatus: validStatus,
+    await prisma.auditLog.create({
+      data: {
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+        action: 'TRIAL_STATUS_CHANGED',
+        entityType: 'Trial',
+        entityId: trialId,
+        details: {
+          message: `Status changed from "${trial.status}" to "${validStatus}" on trial "${trial.title}".`,
+          previousStatus: trial.status,
+          newStatus: validStatus,
+        },
       },
-    },
-  });
+    });
 
-  logTrialStatusChanged(validStatus);
-  await flushPostHogLogs();
+    try {
+      logTrialStatusChanged(validStatus);
+      await flushPostHogLogs();
+    } catch (logErr) {
+      console.warn('[Telemetry] Non-fatal status log error:', logErr);
+    }
 
-  revalidatePath('/app');
-  return updated;
+    try {
+      revalidatePath('/app');
+    } catch (revErr) {
+      console.warn('[Cache] Non-fatal revalidatePath error:', revErr);
+    }
+
+    return { success: true, updated };
+  } catch (err: unknown) {
+    console.error('updateTrialStatus error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Failed to update trial status',
+    };
+  }
 }
 
 /**

@@ -408,9 +408,13 @@ export function RightDrawer() {
               onRequestSeal={async () => {
                 if (cloudTrialId) {
                   try {
-                    await sealTrial(cloudTrialId);
-                    // Reload to reflect sealed state
-                    window.location.reload();
+                    const res = await sealTrial(cloudTrialId);
+                    if (res.success) {
+                      // Reload to reflect sealed state
+                      window.location.reload();
+                    } else {
+                      alert(res.error || 'Seal failed');
+                    }
                   } catch (err) {
                     alert(err instanceof Error ? err.message : 'Seal failed');
                   }

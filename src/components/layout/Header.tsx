@@ -324,27 +324,52 @@ export function Header() {
         let targetId = cloudTrialId || activeTrialId;
         const currentTrial = useNotebookStore.getState().activeTrial;
         
-        // Ensure trial exists in DB by syncing first
-        const syncResult = await syncTrialToCloud({
-          title,
-          content: JSON.parse(JSON.stringify(currentTrial.content || {})),
-          status,
-          metadata: metadata.map(({ key, value }) => ({ key, value })),
-          cloudTrialId: targetId ?? undefined,
-          cloudProjectId: cloudProjectId ?? undefined,
-        });
+        // If not already sealed, sync to cloud first
+        if (!currentTrial.checksum) {
+          const syncResult = await syncTrialToCloud({
+            title,
+            content: JSON.parse(JSON.stringify(currentTrial.content || {})),
+            status,
+            metadata: metadata.map(({ key, value }) => ({ key, value })),
+            cloudTrialId: targetId ?? undefined,
+            cloudProjectId: cloudProjectId ?? undefined,
+          });
 
-        if (syncResult.success && syncResult.cloudTrialId) {
-          targetId = syncResult.cloudTrialId;
-          setCloudIds({
-            cloudTrialId: syncResult.cloudTrialId,
-            cloudProjectId: syncResult.cloudProjectId ?? '',
+          if (!syncResult.success && !syncResult.error?.includes('sealed')) {
+            alert(syncResult.error || 'Failed to sync trial before sealing.');
+            setIsSealing(false);
+            return;
+          }
+
+          if (syncResult.success && syncResult.cloudTrialId) {
+            targetId = syncResult.cloudTrialId;
+            setCloudIds({
+              cloudTrialId: syncResult.cloudTrialId,
+              cloudProjectId: syncResult.cloudProjectId ?? '',
+            });
+          }
+        }
+
+        const sealRes = await sealTrial(targetId);
+        if (!sealRes.success) {
+          alert(sealRes.error || 'Failed to seal trial');
+          setIsSealing(false);
+          return;
+        }
+
+        if (sealRes.checksum) {
+          const store = useNotebookStore.getState();
+          store.setActiveTrial({
+            ...store.activeTrial,
+            checksum: sealRes.checksum,
+            status: 'COMPLETED',
+            sealedAt: sealRes.sealedAt || new Date().toISOString(),
           });
         }
 
-        await sealTrial(targetId);
         trackAnalyticsEvent('trial_sealed', { trialId: targetId });
         setShowSealModal(false);
+        setIsSealing(false);
         // Force reload to grab latest DB state
         window.location.reload(); 
       } catch (err: unknown) {
@@ -419,7 +444,11 @@ export function Header() {
               startTransition(async () => {
                 try {
                   if (cloudTrialId) {
-                    await updateTrialStatus(cloudTrialId, newStatus);
+                    const res = await updateTrialStatus(cloudTrialId, newStatus);
+                    if (!res.success) {
+                      alert(res.error || 'Failed to update status');
+                      return;
+                    }
                   }
                   useNotebookStore.getState().updateTrialStatusEverywhere(targetId, newStatus);
                   trackAnalyticsEvent('trial_status_changed', {

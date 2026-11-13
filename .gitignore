@@ -43,6 +43,7 @@ scripts/
 .github/agents/
 .github/hooks/
 .github/skills/
+skills-lock.json
 
 # PostHog Wizard Cache
 .posthog-wizard-cache/

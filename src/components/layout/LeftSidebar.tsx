@@ -844,7 +844,11 @@ export function LeftSidebar() {
       return;
     }
     try {
-      await updateTrialStatus(targetTrial.id, newStatus);
+      const res = await updateTrialStatus(targetTrial.id, newStatus);
+      if (!res.success) {
+        alert(res.error || 'Failed to update status');
+        return;
+      }
       useNotebookStore.getState().updateTrialStatusEverywhere(targetTrial.id, newStatus);
       setTrials((prev) =>
         prev.map((t) => (t.id === targetTrial.id ? { ...t, status: newStatus } : t))

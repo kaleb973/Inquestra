@@ -1,5 +1,4 @@
-import 'server-only';
-
+// Server-side PostHog telemetry and OpenTelemetry logging provider
 import { SeverityNumber } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
@@ -17,43 +16,55 @@ let posthogLoggerProvider: LoggerProvider | undefined;
 
 if (missingVariable) {
   if (process.env.NODE_ENV === 'development') {
-    throw new Error(
-      `${missingVariable} variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once ${missingVariable} is configured`,
+    console.warn(
+      `[PostHog] ${missingVariable} variable required by PostHog is missing or un-configured.`
     );
   }
 } else if (projectToken && host) {
-  posthogLoggerProvider = new LoggerProvider({
-    resource: resourceFromAttributes({ 'service.name': 'inquestra' }),
-    processors: [
-      new BatchLogRecordProcessor({
-        exporter: new OTLPLogExporter({
-          url: new URL('i/v1/logs', `${host}/`).toString(),
-          headers: {
-            Authorization: `Bearer ${projectToken}`,
-            'Content-Type': 'application/json',
-          },
+  try {
+    posthogLoggerProvider = new LoggerProvider({
+      resource: resourceFromAttributes({ 'service.name': 'inquestra' }),
+      processors: [
+        new BatchLogRecordProcessor({
+          exporter: new OTLPLogExporter({
+            url: new URL('i/v1/logs', `${host}/`).toString(),
+            headers: {
+              Authorization: `Bearer ${projectToken}`,
+              'Content-Type': 'application/json',
+            },
+          }),
         }),
-      }),
-    ],
-  });
+      ],
+    });
+  } catch (err) {
+    console.warn('[PostHog] Failed to initialize LoggerProvider:', err);
+  }
 }
 
 const posthogLogger = posthogLoggerProvider?.getLogger('inquestra.posthog-exporter');
 
 export function logTrialSealed(): void {
-  posthogLogger?.emit({
-    body: 'Trial sealed successfully',
-    severityNumber: SeverityNumber.INFO,
-    attributes: { operation: 'trial_sealed' },
-  });
+  try {
+    posthogLogger?.emit({
+      body: 'Trial sealed successfully',
+      severityNumber: SeverityNumber.INFO,
+      attributes: { operation: 'trial_sealed' },
+    });
+  } catch (err) {
+    console.warn('[PostHog] logTrialSealed error (non-fatal):', err);
+  }
 }
 
 export function logTrialStatusChanged(status: string): void {
-  posthogLogger?.emit({
-    body: 'Trial status changed successfully',
-    severityNumber: SeverityNumber.INFO,
-    attributes: { operation: 'trial_status_changed', status },
-  });
+  try {
+    posthogLogger?.emit({
+      body: 'Trial status changed successfully',
+      severityNumber: SeverityNumber.INFO,
+      attributes: { operation: 'trial_status_changed', status },
+    });
+  } catch (err) {
+    console.warn('[PostHog] logTrialStatusChanged error (non-fatal):', err);
+  }
 }
 
 export async function flushPostHogLogs(): Promise<void> {
