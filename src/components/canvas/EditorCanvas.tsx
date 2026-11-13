@@ -50,9 +50,11 @@ import {
   ScrollText,
   Sigma,
   Dna,
+  RotateCw,
 } from 'lucide-react';
 
 import { useNotebookStore } from '@/store/useNotebookStore';
+import { isDeploymentSkewError, notifyDeploymentSkew } from '@/lib/deploymentSkew';
 import { InteractiveChartExtension } from '@/components/editor/nodes/InteractiveChartNode';
 import { ReagentExtension } from '@/components/editor/nodes/ReagentNode';
 import { ProtocolExtension } from '@/components/editor/nodes/ProtocolBlock';
@@ -1056,12 +1058,24 @@ export function EditorCanvas() {
           setLastSavedAt(result.savedAt || new Date().toISOString());
           setSaveError(null);
         } else {
-          setSaveStatus('ERROR');
-          setSaveError(result.error || 'Autosave failed');
+          if (isDeploymentSkewError(result.error)) {
+            notifyDeploymentSkew('EditorCanvas.executeServerSave.result');
+            setSaveStatus('ERROR');
+            setSaveError('NEW_VERSION_DEPLOYED');
+          } else {
+            setSaveStatus('ERROR');
+            setSaveError(result.error || 'Autosave failed');
+          }
         }
       } catch (err) {
-        setSaveStatus('ERROR');
-        setSaveError(err instanceof Error ? err.message : 'Network error');
+        if (isDeploymentSkewError(err)) {
+          notifyDeploymentSkew('EditorCanvas.executeServerSave.catch');
+          setSaveStatus('ERROR');
+          setSaveError('NEW_VERSION_DEPLOYED');
+        } else {
+          setSaveStatus('ERROR');
+          setSaveError(err instanceof Error ? err.message : 'Network error');
+        }
       }
     },
     [setSaveStatus, setLastSavedAt, setSaveError]
@@ -1448,15 +1462,27 @@ export function EditorCanvas() {
             <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-2 font-mono">
               <div className="flex items-center gap-2" suppressHydrationWarning>
                 {saveStatus === 'ERROR' ? (
-                  <button
-                    type="button"
-                    onClick={() => triggerDebouncedSave()}
-                    className="text-red-500 hover:text-red-400 flex items-center gap-1.5 font-medium transition-colors cursor-pointer"
-                    title={saveError || 'Autosave failed. Click to retry.'}
-                  >
-                    <AlertCircle className="w-3 h-3" />
-                    Save failed — click to retry
-                  </button>
+                  isDeploymentSkewError(saveError) ? (
+                    <button
+                      type="button"
+                      onClick={() => window.location.reload()}
+                      className="text-amber-500 hover:text-amber-400 flex items-center gap-1.5 font-medium transition-colors cursor-pointer"
+                      title="A new version of Inquestra was deployed to the server. Your draft is preserved locally in browser storage — click to reload."
+                    >
+                      <RotateCw className="w-3 h-3" />
+                      Update deployed · Click to reload
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => triggerDebouncedSave()}
+                      className="text-red-500 hover:text-red-400 flex items-center gap-1.5 font-medium transition-colors cursor-pointer"
+                      title={saveError || 'Autosave failed. Click to retry.'}
+                    >
+                      <AlertCircle className="w-3 h-3" />
+                      Save failed — click to retry
+                    </button>
+                  )
                 ) : (
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Check className="w-3 h-3 text-emerald-500" />

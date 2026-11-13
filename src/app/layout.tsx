@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from '@/components/theme-provider';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
+import { DeploymentSkewWatcher } from '@/components/providers/DeploymentSkewWatcher';
 
 const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -88,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <CookieConsent />
           <AnalyticsProvider />
+          <DeploymentSkewWatcher />
         </ThemeProvider>
       </body>
     </html>

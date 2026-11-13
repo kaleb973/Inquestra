@@ -23,7 +23,9 @@ import {
   PanelLeft,
   PanelRight,
   MoreVertical,
+  RotateCw,
 } from 'lucide-react';
+import { isDeploymentSkewError, notifyDeploymentSkew } from '@/lib/deploymentSkew';
 import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal';
 import { ImportTrialModal } from '@/components/trials/ImportTrialModal';
 import { Logo } from '@/components/ui/Logo';
@@ -186,8 +188,14 @@ export function Header() {
 
       if (!result.success || result.error) {
         const err = result.error ?? 'Snapshot save failed.';
-        setSyncError(err);
-        setSaveError(err);
+        if (isDeploymentSkewError(err)) {
+          notifyDeploymentSkew('Header.handleSaveSnapshot');
+          setSyncError('NEW_VERSION_DEPLOYED');
+          setSaveError('NEW_VERSION_DEPLOYED');
+        } else {
+          setSyncError(err);
+          setSaveError(err);
+        }
         setSaveStatus('ERROR');
       } else if (result.cloudTrialId && result.cloudProjectId) {
         setCloudIds({
@@ -476,13 +484,24 @@ export function Header() {
             <span className="hidden sm:inline">Saving…</span>
           </span>
         ) : (saveStatus === 'ERROR' || syncError) ? (
-          <span
-            className="flex items-center gap-1.5 text-xs text-critical font-mono"
-            title={saveError || syncError || 'Sync failed'}
-          >
-            <AlertCircle className="w-3.5 h-3.5 text-critical shrink-0" />
-            <span className="hidden sm:inline">Save failed</span>
-          </span>
+          isDeploymentSkewError(saveError || syncError) ? (
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 font-mono cursor-pointer transition-colors"
+              title="A new version of Inquestra was deployed to the server. Your draft is preserved locally — click to reload."
+            >
+              <RotateCw className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Update deployed (Reload)</span>
+            </button>
+          ) : (
+            <span
+              className="flex items-center gap-1.5 text-xs text-critical font-mono"
+              title={saveError || syncError || 'Sync failed'}
+            >
+              <AlertCircle className="w-3.5 h-3.5 text-critical shrink-0" />
+              <span className="hidden sm:inline">Save failed</span>
+            </span>
+          )
         ) : !isSynced ? (
           <span
             className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono"
