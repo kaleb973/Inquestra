@@ -12,9 +12,9 @@ import { ProvenanceInteractiveDemo } from '@/components/marketing/ProvenanceInte
 import { PilotInterestForm } from '@/components/marketing/PilotInterestForm';
 
 export const metadata: Metadata = {
-  title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
+  title: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
   description:
-    'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
+    'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Air-gapped data ownership.',
 };
 
 export default function MarketingPage() {
@@ -30,7 +30,7 @@ export default function MarketingPage() {
       priceCurrency: 'USD',
     },
     description:
-      'Enterprise-grade Electronic Research Notebook and Laboratory Intelligence Platform for Life Sciences, Chemistry, Biotech, Materials, and Engineering. Integrates protocol execution, chemical inventory LIMS, molecular structures, literature citations, 21 CFR Part 11 provenance, and bench DAQ.',
+      'Local-first Electronic Research Notebook for Life Sciences, Chemistry, Biotech, Materials, and Engineering. Unifies protocol execution, chemical inventory LIMS, molecular structures, literature citations, 21 CFR Part 11 technical controls, and bench instrumentation DAQ.',
   };
 
   return (
@@ -53,7 +53,7 @@ export default function MarketingPage() {
                 name: 'What is Inquestra?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Inquestra is a free, browser-based Electronic Lab Notebook (ELN) for life sciences, chemistry, biotech, materials science, and engineering research. It unifies scientific protocols, chemical inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature citations, 21 CFR Part 11 compliant audit trails, and optional hardware data acquisition in one workspace.',
+                  text: 'Inquestra is a free, local-first Electronic Lab Notebook (ELN) for life sciences, chemistry, biotech, materials science, and engineering research. It unifies scientific protocols, chemical inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature citations, 21 CFR Part 11 technical controls (cryptographic audit trails), and bench hardware data acquisition in one workspace.',
                 },
               },
               {
@@ -61,7 +61,7 @@ export default function MarketingPage() {
                 name: 'Is Inquestra free for academic labs and students?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. Inquestra is completely free for individual researchers, students, postdocs, and academic labs. There is no subscription fee, no credit card required, and no per-user licensing cost. The full notebook, chemical inventory LIMS, molecular structure tools, and literature citation manager are free for everyone. Optional institutional features such as self-hosted PostgreSQL and SSO are available for university IT departments.',
+                  text: 'Yes. Inquestra is completely free for individual researchers, students, postdocs, and academic labs. There is no subscription fee, no credit card required, and no per-user licensing cost. The full notebook, chemical inventory LIMS, molecular structure tools, and literature citation manager run locally on your device with complete data ownership.',
                 },
               },
               {
@@ -69,7 +69,7 @@ export default function MarketingPage() {
                 name: 'Does Inquestra support molecular biology research?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. Inquestra is purpose-built for molecular biology, life sciences, chemistry, biotech, materials science, and engineering — not just hardware labs. It supports PCR protocols, gel electrophoresis documentation, primer and reagent inventory, plasmid and molecule structure visualization using JSME and RDKit, and integration with PubMed and Europe PMC for literature citations.',
+                  text: 'Yes. Inquestra supports molecular biology, life sciences, chemistry, biotech, materials science, and engineering. It supports PCR protocols, gel electrophoresis documentation, primer and reagent inventory, plasmid and molecule structure visualization using JSME and RDKit, and integration with PubMed and Europe PMC for literature citations.',
                 },
               },
               {
@@ -77,7 +77,7 @@ export default function MarketingPage() {
                 name: 'How does Inquestra compare to Benchling, LabArchives, and SciNote?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Inquestra is the only platform in this category that is completely free and covers life sciences, chemistry, biotech, materials science, and engineering in one unified notebook. Benchling is free for academics but focused on molecular biology and genetics (CRISPR, plasmids). LabArchives charges per user and is institution-license-focused. SciNote has a free tier but limits storage and team features. Inquestra uniquely adds hardware DAQ integration, 21 CFR Part 11 provenance, and chemical inventory LIMS at no cost.',
+                  text: 'Unlike cloud-only platforms that store your research on remote servers, Inquestra is local-first: your unpublished data remains stored securely in your browser (IndexedDB) with zero cloud vendor lock-in and instant one-click exports. Additionally, Inquestra uniquely bridges molecular biology, synthetic chemistry, and physical bench DAQ (W3C Web Serial) at zero cost.',
                 },
               },
               {
@@ -85,7 +85,7 @@ export default function MarketingPage() {
                 name: 'Is Inquestra easy to learn for students and new researchers?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. Inquestra is designed with a zero-learning-curve goal for students and new researchers. The notebook editor uses familiar document conventions, the slash command menu provides instant access to all block types, and no IT setup or software installation is required — just open the browser and start a protocol. Most researchers are productive within minutes of first use.',
+                  text: 'Yes. Inquestra is designed for fast bench onboarding. The notebook editor uses familiar document conventions with slash commands, runs in standard modern web browsers without installing drivers, and includes one-click export protection for shared lab computers.',
                 },
               },
             ],
@@ -97,22 +97,20 @@ export default function MarketingPage() {
       <section className="relative pt-32 pb-20 lg:pt-38 lg:pb-28 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-foreground mb-6 leading-[1.12] text-balance">
-            One unified notebook for your protocols, molecules, inventory, and data.
+            The local-first notebook for your protocols, chemistry, and bench data.
           </h1>
 
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
-            Protocol execution, chemical inventory, molecular structures, literature citations, and
-            bench DAQ — in one reproducible, audit-ready research environment.
+            Air-gapped data sovereignty with native Web Serial instrumentation, molecular structures, chemical inventory, and cryptographic audit trails.
           </p>
 
           {/* ── AEO Definition Block — crawlable, visually subtle ─────────────────── */}
           <p className="sr-only">
-            Inquestra is a free electronic lab notebook (ELN) for life sciences, chemistry, biotech,
+            Inquestra is a local-first electronic lab notebook (ELN) for life sciences, chemistry, biotech,
             materials science, and engineering research. It unifies scientific protocols, chemical
             inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature
-            citations, 21 CFR Part 11 audit trails, and optional hardware data acquisition in one
-            browser-based workspace — free for academic labs, students, and researchers with no credit
-            card or IT setup required.
+            citations, 21 CFR Part 11 technical controls, and bench hardware data acquisition in one
+            browser-based workspace. Free and open for academic researchers with full data ownership.
           </p>
 
           {/* Primary Action Buttons */}
@@ -193,10 +191,10 @@ export default function MarketingPage() {
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">Audit Trails &amp; Version History</p>
+                <p className="text-sm font-medium text-foreground">Audit Trails &amp; Cryptographic Provenance</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   Time-stamped versioning captures procedure edits, reagent calibrations, and author attestation.
-                  Standards: 21 CFR § 11 · RFC 3161
+                  Technical Controls: 21 CFR § 11 · RFC 3161
                 </p>
               </div>
               <div>
@@ -250,8 +248,8 @@ export default function MarketingPage() {
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">Biotech &amp; Biopharma R&amp;D</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Batch records, SOP checklists, real-time deviation logging, 21 CFR Part 11 audit trails with dual-signature sign-offs.
-                    <span className="block mt-1 font-mono">SOP management · Deviation logs · 21 CFR § 11</span>
+                    Batch records, SOP checklists, real-time deviation logging, cryptographic audit trails with dual-signature sign-offs (Part 11 technical controls).
+                    <span className="block mt-1 font-mono">SOP management · Deviation logs · 21 CFR § 11 Controls</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
@@ -286,11 +284,11 @@ export default function MarketingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-16">
             <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Eliminate the five-app shuffle in your lab.
+              A unified workbench for protocols, chemistry, and bench data.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Most research groups waste hours stitching together office document software, unsearchable paper binders,
-              scattered inventory sheets, and separate reference managers. Here is the difference Inquestra makes.
+              Multi-disciplinary research suffers when laboratory protocols, chemical inventory, and bench telemetry
+              live in disconnected silos. Here is how Inquestra establishes a cohesive, local-first workflow.
             </p>
           </div>
 
@@ -344,7 +342,7 @@ export default function MarketingPage() {
                   The Inquestra Integrated Standard
                 </span>
                 <span className="text-[10px] font-mono text-phosphor bg-phosphor/10 border border-phosphor/30 px-2 py-0.5 rounded font-semibold">
-                  Unified Research OS
+                  Local-First Lab Workspace
                 </span>
               </div>
               <div className="space-y-3.5 text-xs text-muted-foreground leading-relaxed">
@@ -374,7 +372,7 @@ export default function MarketingPage() {
                     Tamper-Evident Record of Execution
                   </span>
                   Completed trials seal protocol text, reagent lots, and raw telemetry into an immutable,
-                  21 CFR Part 11 compliant audit log with non-repudiation.
+                  tamper-evident audit log with cryptographic non-repudiation (21 CFR Part 11 technical controls).
                 </div>
               </div>
             </div>
@@ -387,11 +385,11 @@ export default function MarketingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-14">
             <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Regulatory compliance &amp; verifiable integrity.
+              Data integrity &amp; cryptographic provenance.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Scientific trust is earned through verification. Inquestra seals completed trials so protocol procedures,
-              chemical lots, and telemetry samples maintain an unalterable chain of custody.
+              Scientific trust is earned through mathematical verification. Inquestra cryptographically seals completed trials so protocol steps,
+              reagent lot deductions, and sensor telemetry maintain an unbroken, tamper-evident record.
             </p>
           </div>
 
@@ -404,7 +402,7 @@ export default function MarketingPage() {
                 <Lock className="w-3.5 h-3.5" />
                 21 CFR § 11.10(b)
               </p>
-              <p className="text-sm font-medium text-foreground mb-1">Audit Trails</p>
+              <p className="text-sm font-medium text-foreground mb-1">Audit Trail Controls</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Computer-generated, time-stamped records independently log the date, time, and operator of all
                 trial additions, calibrations, and seals. Modifications preserve complete differential histories.
@@ -415,7 +413,7 @@ export default function MarketingPage() {
                 <Database className="w-3.5 h-3.5" />
                 21 CFR § 11.50
               </p>
-              <p className="text-sm font-medium text-foreground mb-1">Electronic Signatures</p>
+              <p className="text-sm font-medium text-foreground mb-1">Electronic Signature Controls</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Manifests display the printed name of the signer, date/time stamp, and the explicit meaning of the
                 signature (Author Execution, Technical Review, or Principal Investigator Sign-Off).
@@ -424,12 +422,12 @@ export default function MarketingPage() {
             <div className="flex-1 min-w-56 pl-8">
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Activity className="w-3.5 h-3.5" />
-                FAIR Data Principles
+                Air-Gapped Data Sovereignty
               </p>
-              <p className="text-sm font-medium text-foreground mb-1">Local-First &amp; Offline</p>
+              <p className="text-sm font-medium text-foreground mb-1">Local-First (FAIR Principles)</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Full offline continuity inside Faraday cages and basement labs via browser IndexedDB.
-                Export to open formats (CSV, EDF, JSON with cryptographic manifest) with zero platform lock-in.
+                Unpublished IP and experimental notes remain stored locally in your browser (IndexedDB). Zero unvetted cloud
+                exposure. Export everything to open JSON, CSV, or PDF archives at any moment with zero vendor lock-in.
               </p>
             </div>
           </div>
@@ -495,9 +493,9 @@ export default function MarketingPage() {
                 <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Chemical and biological inventory LIMS — unlimited reagents, standards, and samples</span></li>
                 <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Molecular structure drawing and visualization (JSME, RDKit-compatible)</span></li>
                 <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>PubMed and Europe PMC literature citation manager</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>21 CFR Part 11 compliant audit trails and cryptographic provenance</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Cryptographic audit trails and 21 CFR Part 11 technical controls</span></li>
                 <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Hardware DAQ integration for Arduino, ESP32, and USB instruments</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>PDF and CSV export — no data lock-in</span></li>
+                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Open JSON, CSV, and PDF export — zero vendor lock-in</span></li>
               </ul>
             </div>
             <div>
@@ -509,9 +507,9 @@ export default function MarketingPage() {
                 audit-ready documentation for grant reporting and publication.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                No IT department required. No software installation. Open a browser, create a trial,
-                and start documenting — your protocol history, inventory, and observations are saved
-                automatically and downloadable at any time.
+                Zero installation or IT infrastructure. Runs directly in standard modern web browsers via
+                Web Serial, WebAssembly, and IndexedDB. On shared or communal lab bench computers, instant one-click
+                JSON and CSV exports protect your experimental trials from local browser cache resets.
               </p>
             </div>
           </div>
@@ -539,6 +537,13 @@ export default function MarketingPage() {
                     <td className="py-3 px-4 text-muted-foreground">Free academic tier (limited)</td>
                     <td className="py-3 px-4 text-muted-foreground">Institution license required</td>
                     <td className="py-3 px-4 text-muted-foreground">Free tier (storage limits)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 text-foreground font-medium">Data storage &amp; sovereignty</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Local-first (Air-gapped in browser, zero cloud lock-in)</td>
+                    <td className="py-3 px-4 text-muted-foreground">Proprietary cloud (US/EU hosted)</td>
+                    <td className="py-3 px-4 text-muted-foreground">Proprietary cloud</td>
+                    <td className="py-3 px-4 text-muted-foreground">Proprietary cloud or self-hosted</td>
                   </tr>
                   <tr>
                     <td className="py-3 px-4 text-foreground font-medium">Scientific disciplines</td>
@@ -569,8 +574,8 @@ export default function MarketingPage() {
                     <td className="py-3 px-4 text-muted-foreground">Yes (inventory module)</td>
                   </tr>
                   <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">21 CFR Part 11 / audit trail</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — cryptographic provenance</td>
+                    <td className="py-3 px-4 text-foreground font-medium">Audit trails &amp; provenance</td>
+                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — SHA-256 technical controls</td>
                     <td className="py-3 px-4 text-muted-foreground">Enterprise tier only</td>
                     <td className="py-3 px-4 text-muted-foreground">Yes</td>
                     <td className="py-3 px-4 text-muted-foreground">Yes</td>

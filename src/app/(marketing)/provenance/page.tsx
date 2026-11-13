@@ -3,9 +3,9 @@ import { ArrowRight, ShieldCheck, Lock, FileCheck, Key, CheckCircle, AlertCircle
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cryptographic Provenance & 21 CFR Part 11 Compliance — Inquestra',
+  title: 'Cryptographic Provenance & 21 CFR Part 11 Technical Controls — Inquestra',
   description:
-    'Immutable data provenance, SHA-256 trial hashing, RFC 3161 timestamps, and 21 CFR Part 11 compliance for life sciences, chemistry, and engineering.',
+    'Immutable data provenance, SHA-256 trial hashing, RFC 3161 timestamps, and 21 CFR Part 11 technical controls for life sciences, chemistry, and engineering.',
 };
 
 export default function ProvenancePage() {
@@ -16,7 +16,7 @@ export default function ProvenancePage() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-muted text-muted-foreground text-xs font-mono uppercase tracking-wider mb-6">
             <ShieldCheck className="w-3.5 h-3.5 text-phosphor" />
-            <span>Platform / Regulatory Compliance &amp; Integrity · Last updated November 2026</span>
+            <span>Platform / Data Integrity &amp; Provenance · Last updated November 2026</span>
           </div>
           <h1 className="font-display text-4xl sm:text-6xl font-normal tracking-tight text-foreground mb-6 leading-[1.15]">
             Zero silent mutations. Immutable research integrity.
@@ -24,7 +24,7 @@ export default function ProvenancePage() {
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
             Scientific irreproducibility thrives in the gap between physical sensor capture and report publication.
             Inquestra cryptographically binds hardware telemetry, notebook protocol logs, and reagent deductions into
-            a deterministic SHA-256 digest adhering strictly to FDA 21 CFR Part 11.
+            a deterministic SHA-256 digest providing the core technical controls required for FDA 21 CFR Part 11 readiness.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <Link
@@ -171,10 +171,10 @@ export default function ProvenancePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
             <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
-              FDA 21 CFR Part 11 Alignment Matrix.
+              FDA 21 CFR Part 11 Technical Controls Alignment.
             </h2>
             <p className="text-sm text-muted-foreground mt-2">
-              Designed specifically for Good Laboratory Practice (GLP) and Good Manufacturing Practice (GMP) biotechnology compliance.
+              FDA 21 CFR Part 11 requires both software technical controls and organizational standard operating procedures (SOPs). Inquestra provides the automated cryptographic controls required for technical compliance.
             </p>
           </div>
 
@@ -185,7 +185,7 @@ export default function ProvenancePage() {
                   <th className="py-3.5 px-4 font-semibold">CFR § Clause</th>
                   <th className="py-3.5 px-4 font-semibold">Regulatory Requirement</th>
                   <th className="py-3.5 px-4 font-semibold">Inquestra Architectural Implementation</th>
-                  <th className="py-3.5 px-4 font-semibold">Validation Status</th>
+                  <th className="py-3.5 px-4 font-semibold">Technical Control Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border font-sans text-muted-foreground">
@@ -193,31 +193,31 @@ export default function ProvenancePage() {
                   <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.10 (a)</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Validation of Closed Systems</td>
                   <td className="py-3.5 px-4">Deterministic state machine validation, automated end-to-end integration test suites</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">VALIDATED</td>
+                  <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.10 (e)</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Time-Stamped Audit Trails</td>
                   <td className="py-3.5 px-4">Computer-generated, append-only PostgreSQL audit ledger logging actor, timestamp, action &amp; hash</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">VALIDATED</td>
+                  <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.50</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Signature Manifestations</td>
                   <td className="py-3.5 px-4">Contains printed name, UTC timestamp, and explicit signing reason (Author, Reviewer, Principal Investigator)</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">VALIDATED</td>
+                  <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.70</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Signature Linking</td>
                   <td className="py-3.5 px-4">Cryptographic signature is inextricably hashed into the trial record block; cannot be excised or transferred</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">VALIDATED</td>
+                  <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
                   <td className="py-3.5 px-4 font-mono text-foreground font-medium">NIH FAIR</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Data Stewardship Standards</td>
                   <td className="py-3.5 px-4">Standardized JSON-LD metadata schemas for Findability, Accessibility, Interoperability, and Reusability</td>
-                  <td className="py-3.5 px-4 font-mono text-phosphor">COMPLIANT</td>
+                  <td className="py-3.5 px-4 font-mono text-phosphor">COMPLIANT (FAIR SCHEMA)</td>
                 </tr>
               </tbody>
             </table>

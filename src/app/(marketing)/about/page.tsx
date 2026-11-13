@@ -108,7 +108,7 @@ export default function AboutPage() {
             </li>
             <li className="flex gap-3">
               <span className="text-emerald-500 font-bold mt-0.5 shrink-0">→</span>
-              <span>Generate 21 CFR Part 11 compliant audit trails for regulatory documentation and grant reporting</span>
+              <span>Generate cryptographic audit trails and verifiable exports adhering to 21 CFR Part 11 technical controls</span>
             </li>
           </ul>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-6">
@@ -157,6 +157,43 @@ export default function AboutPage() {
                 domain-specific tools like Benchling leave gaps in the workflow.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Founder & Engineering Leadership ─────────────────────────────── */}
+      <section className="py-16 border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight mb-6">
+            Founder &amp; Engineering Leadership
+          </h2>
+          <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Kaleb</h3>
+                <p className="text-xs font-mono text-muted-foreground">Founder &amp; Lead Builder · Inquestra</p>
+              </div>
+              <a
+                href="https://github.com/kaleb973"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+              >
+                github.com/kaleb973
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Inquestra was created by Kaleb out of first-hand frustration running bench sensor experiments and lab trials:
+              commercial Electronic Lab Notebooks are either gated behind enterprise procurement walls costing tens of thousands
+              of dollars, locked into proprietary cloud silos, or completely disconnected from physical bench instrumentation and hardware.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Instead of accepting that student researchers, iGEM teams, and independent labs have to stitch together Google Docs,
+              loose CSV files, and unverified scripts, Inquestra was engineered from the ground up on modern browser standards
+              (W3C Web Serial, WebAssembly RDKit, and local IndexedDB cryptographic storage). It provides an open, local-first
+              workspace where researchers retain 100% ownership over their data and bench protocols.
+            </p>
           </div>
         </div>
       </section>
