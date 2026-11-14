@@ -1,14 +1,14 @@
 # Contributing to Inquestra
 
-Thank you for your interest in contributing to Inquestra! We are building an open, browser-based Electronic Lab Notebook (ELN) and research workspace spanning Life Sciences, Chemistry, Biotech, Materials Science, and Engineering.
+Thank you for your interest in contributing to Inquestra! Inquestra is an open, browser-based Electronic Lab Notebook (ELN) and research workspace spanning Life Sciences, Chemistry, Biotech, Materials Science, and Engineering.
 
-This guide outlines our development process, code standards, and how to get your contributions reviewed and merged.
+This guide outlines the project's development process, code standards, and how to get contributions reviewed and merged.
 
 ---
 
 ## Code of Conduct
 
-All contributors and maintainers are expected to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please report unacceptable behavior through our official channels.
+All contributors and maintainers are expected to abide by the [Code of Conduct](CODE_OF_CONDUCT.md). Please report unacceptable behavior through official contact channels.
 
 ---
 
@@ -68,7 +68,7 @@ All contributors and maintainers are expected to abide by our [Code of Conduct](
 To maintain scientific integrity and software reliability, all contributions must respect these core principles:
 
 ### 1. TypeScript Strictness (Zero `any`)
-We run TypeScript in strict mode. All function signatures, API payloads, state stores, and hardware telemetry packets must be strongly typed. Verify your code with:
+Inquestra enforces TypeScript in strict mode. All function signatures, API payloads, state stores, and hardware telemetry packets must be strongly typed. Verify your code with:
 ```bash
 npm run type-check
 ```
@@ -93,7 +93,7 @@ Never commit real API credentials, service role tokens, or private keys. All sen
    - Performance: `perf/short-description`
 
 2. **Commit Conventions:**
-   We follow [Conventional Commits](https://www.conventionalcommits.org/):
+   The project follows [Conventional Commits](https://www.conventionalcommits.org/):
    - `feat: add IUPAC name autocomplete to molecule node`
    - `fix: prevent duplicate timestamp in Web Serial packet buffer`
    - `docs: update self-hosting deployment guide`
@@ -112,5 +112,5 @@ Never commit real API credentials, service role tokens, or private keys. All sen
 
 ## Questions & Community
 
-- Have questions or want to discuss a feature before building it? Open an issue using the [Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml) template or reach out via our [Contact Form](https://inquestra.org/contact).
-- Found a security vulnerability? Please review [SECURITY.md](SECURITY.md) for our responsible disclosure process.
+- Have questions or want to discuss a feature before building it? Open an issue using the [Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml) template or reach out via the [Contact Form](https://inquestra.org/contact).
+- Found a security vulnerability? Please review [SECURITY.md](SECURITY.md) for the responsible disclosure process.

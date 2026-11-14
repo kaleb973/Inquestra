@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        We love community feedback! Please explain the problem you are trying to solve and how this feature would help laboratory researchers.
+        Community feedback is welcome! Please explain the problem you are trying to solve and how this feature would help laboratory researchers.
   - type: textarea
     id: problem
     attributes:

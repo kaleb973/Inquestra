@@ -196,7 +196,7 @@ export default function ArchitecturePage() {
             Test the telemetry pipeline yourself.
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">
-            Launch our simulated test bench or open the research workspace to connect your microcontroller.
+            Launch the simulated test bench or open the research workspace to connect a microcontroller.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

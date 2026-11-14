@@ -1,6 +1,6 @@
 # Security Policy
 
-At Inquestra, we take the security, integrity, and privacy of scientific research data seriously. We welcome contributions and reports from security researchers to help keep our platform and users safe.
+Inquestra takes the security, integrity, and privacy of scientific research data seriously. Responsible reports and disclosures from security researchers help maintain platform safety for all users.
 
 ---
 
@@ -22,7 +22,7 @@ Only the latest release on the `main` branch is actively supported with security
 To report a vulnerability responsibly:
 
 1. **Secure Web Disclosure (Primary):**  
-   Submit disclosures directly through our secure contact channel at:  
+   Submit disclosures directly through the secure contact channel at:  
    **[https://inquestra.org/contact](https://inquestra.org/contact)**  
    or via email to **`support@inquestra.org`** with the subject line `[SECURITY DISCLOSURE]`.
 
@@ -30,7 +30,7 @@ To report a vulnerability responsibly:
    If you have a GitHub account and the repository has Private Vulnerability Reporting enabled, you may navigate to the repository's **Security** tab and click **"Report a vulnerability"** to open a confidential advisory.
 
 ### What to Include in Your Report
-To help us triage and resolve the issue quickly, please provide:
+To help triage and resolve the issue quickly, please provide:
 - A clear description of the vulnerability and its potential impact.
 - Step-by-step reproduction instructions or a minimal Proof of Concept (PoC).
 - Any relevant request/response traces, code snippets, or browser console outputs.
@@ -40,9 +40,9 @@ To help us triage and resolve the issue quickly, please provide:
 
 ## Response Timeline & Coordinated Disclosure
 
-- **Acknowledgment:** We aim to acknowledge receipt of security reports within **48 hours**.
-- **Assessment & Status Updates:** We will provide an assessment of validity and severity within **5 business days**.
-- **Fix & Public Advisory:** Once a patch is developed and verified, we will coordinate public disclosure alongside a credited security notice.
+- **Acknowledgment:** Security disclosures are acknowledged within **48 hours**.
+- **Assessment & Status Updates:** An assessment of validity and severity is provided within **5 business days**.
+- **Fix & Public Advisory:** Once a patch is developed and verified, coordinated public disclosure is issued alongside a credited security notice.
 
 ---
 

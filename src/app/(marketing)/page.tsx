@@ -602,14 +602,14 @@ export default function MarketingPage() {
               Partner with Inquestra on your bench.
             </h2>
             <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              We are onboarding scientific research groups and biotech teams for our pilot program.
-              Work directly with our engineering team to import your existing protocols, calibrate custom instrument profiles,
+              Inquestra is onboarding academic research groups and biotech teams for the pilot program.
+              Work directly with the lead developer to import existing protocols, calibrate custom instrument profiles,
               and configure team workspace permissions.
             </p>
             {/* Pilot value — plain list, no cards */}
             <ul className="mt-8 text-sm text-muted-foreground space-y-2 text-left max-w-md mx-auto">
               <li>— Individual researchers retain full free access to the core notebook, LIMS, and local DAQ tools.</li>
-              <li>— Collaborate directly with the engineers building Inquestra to tailor custom protocol blocks and data export schemas.</li>
+              <li>— Collaborate directly with the creator of Inquestra to tailor custom protocol blocks and data export schemas.</li>
               <li>— Assistance setting up self-hosted institutional PostgreSQL instances, team SSO, and importing existing lab SOPs.</li>
             </ul>
           </div>
@@ -621,7 +621,7 @@ export default function MarketingPage() {
                 Request Pilot Lab Access &amp; Lab Onboarding
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Tell us about your research focus, lab setup, and protocol needs. Inquiries are reviewed within 48 hours.
+                Share research focus, lab setup, and protocol needs. Inquiries are reviewed within 48 hours.
               </p>
             </div>
             <PilotInterestForm />

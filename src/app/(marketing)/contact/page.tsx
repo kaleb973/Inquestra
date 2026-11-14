@@ -28,7 +28,7 @@ export default function ContactPage() {
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
             Have inquiries regarding telemetry hardware integrations, lab clearance onboarding,
-            or regulatory compliance audits? Our engineering team assists researchers directly.
+            or regulatory compliance controls? Direct technical assistance is available for bench researchers.
           </p>
         </div>
 

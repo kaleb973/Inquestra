@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
           <p style="font-size:15px;margin-bottom:16px">Dear ${sanitized.name},</p>
 
           <p style="font-size:14px;color:#27272a;margin-bottom:16px">
-            Thank you for requesting access to the Inquestra Pilot Lab program for <strong>${sanitized.institution}</strong>. We have received your lab specifications and onboarding request.
+            Thank you for requesting access to the Inquestra Pilot Lab program for <strong>${sanitized.institution}</strong>. Your lab specifications and onboarding request have been received.
           </p>
 
           <div style="background-color:#f4f4f5;border-radius:6px;padding:16px;margin-bottom:20px;font-size:13px">
@@ -143,15 +143,15 @@ export async function POST(req: NextRequest) {
 
           <p style="font-size:14px;color:#27272a;margin-bottom:16px">
             <strong>What happens next?</strong><br/>
-            Our team is reviewing your research focus and protocol requirements. We will follow up within 48 hours with access instructions and to help configure your workspace.
+            Your research focus and protocol requirements are under review. A follow-up with access instructions and workspace configuration guidance will be sent within 48 hours.
           </p>
 
           <p style="font-size:14px;color:#27272a;margin-bottom:24px">
-            If you have questions or specific protocol notes to share in advance, you can reply directly to this email or reach us at <a href="mailto:support@inquestra.org" style="color:#2563eb">support@inquestra.org</a>.
+            If you have questions or specific protocol notes to share in advance, you can reply directly to this email or contact <a href="mailto:support@inquestra.org" style="color:#2563eb">support@inquestra.org</a>.
           </p>
 
           <div style="border-top:1px solid #e4e4e7;padding-top:16px;font-size:12px;color:#71717a">
-            <p style="margin:0"><strong>Inquestra Engineering Team</strong></p>
+            <p style="margin:0"><strong>Inquestra Onboarding</strong></p>
             <p style="margin:2px 0 0"><a href="https://inquestra.org" style="color:#71717a;text-decoration:none">inquestra.org</a> &bull; <a href="mailto:support@inquestra.org" style="color:#71717a;text-decoration:none">support@inquestra.org</a></p>
           </div>
         </div>

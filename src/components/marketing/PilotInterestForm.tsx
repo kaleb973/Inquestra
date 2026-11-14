@@ -50,7 +50,7 @@ export function PilotInterestForm() {
         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         <h3 className="text-lg font-semibold text-foreground">You&apos;re on the list.</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Our engineering team will review your bench requirements and follow up within 48 hours with access instructions. No sales pressure &mdash; strictly technical lab onboarding.
+          Bench requirements are reviewed within 48 hours followed by access instructions. No sales pressure &mdash; strictly technical lab onboarding.
         </p>
       </div>
     );
@@ -154,7 +154,7 @@ export function PilotInterestForm() {
       </button>
 
       <p className="text-[11px] text-muted-foreground text-center">
-        Free pilot. No credit card. We respond within 48 hours.
+        Free pilot. No credit card. 48-hour response window.
       </p>
     </form>
   );

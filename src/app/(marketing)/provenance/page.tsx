@@ -266,7 +266,7 @@ export default function ProvenancePage() {
             Protect your lab&apos;s data provenance.
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">
-            Explore the technical pipeline behind our high-speed acquisition and tamper-evident storage architecture.
+            Explore the technical pipeline behind Inquestra's high-speed acquisition and tamper-evident storage architecture.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

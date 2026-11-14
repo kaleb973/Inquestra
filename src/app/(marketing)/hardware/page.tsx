@@ -286,7 +286,7 @@ export default function HardwarePage() {
             Ready to interface your bench hardware?
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">
-            Test our telemetry ingestion pipeline right now using our in-browser simulator, or launch the workspace to stream real hardware.
+            Test the telemetry ingestion pipeline right now using the in-browser simulator, or launch the workspace to stream live hardware.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
