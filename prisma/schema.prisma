@@ -1,0 +1,413 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ======================= ENUMS =======================
+
+enum Role {
+  ADMIN
+  PI
+  RESEARCHER
+  VIEWER
+}
+
+enum TrialStatus {
+  DRAFT
+  ACTIVE
+  IN_REVIEW
+  COMPLETED
+  FAILED
+}
+
+enum SignatureRole {
+  AUTHOR
+  WITNESS
+  PI_APPROVAL
+}
+
+enum InventoryType {
+  CHEMICAL
+  BIOLOGICAL
+  REAGENT
+  PLASMID
+  CELL_LINE
+  CONSUMABLE
+}
+
+// ======================= CORE / ORG =======================
+
+model Organization {
+  id               String            @id @default(uuid())
+  name             String
+  domain           String?           @unique
+  strictMode       Boolean           @default(false)
+  
+  users            User[]
+  teams            Team[]
+  projects         Project[]
+  inventory        InventoryItem[]
+  storageLocations StorageLocation[]
+  equipment        Equipment[]
+  auditLogs        AuditLog[]
+  protocols        ProtocolTemplate[]
+  papers           ResearchPaper[]
+
+  createdAt        DateTime          @default(now())
+}
+
+model Team {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  members        User[]
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+model User {
+  id             String       @id @default(uuid())
+  authId         String       @unique
+  email          String       @unique
+  passwordHash   String?
+  role           Role         @default(RESEARCHER)
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  teamId         String?
+  team           Team?        @relation(fields: [teamId], references: [id])
+  
+  trials         Trial[]      @relation("TrialAuthor")
+  sealedTrials   Trial[]      @relation("TrialSealer")
+  auditLogs      AuditLog[]
+  signatures     Signature[]
+  ledProjects    Project[]    @relation("ProjectLead")
+  revisions      TrialRevision[] @relation("RevisionAuthor")
+  addedPapers    ResearchPaper[]
+
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([teamId])
+}
+
+model Project {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  code           String?      // e.g. "PRJ-NEURO-01" — grant/protocol identifier
+  status         String       @default("ACTIVE") // ACTIVE | ARCHIVED | COMPLETED
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  // Designated Project PI / Lead Scientist
+  leadId         String?
+  lead           User?        @relation("ProjectLead", fields: [leadId], references: [id])
+
+  trials         Trial[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+
+  @@index([organizationId])
+  @@index([leadId])
+}
+
+// ======================= EXPERIMENTS / ELN =======================
+
+model ProtocolTemplate {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  content        Json         // TipTap Template
+  version        Int          @default(1)
+  isPublished    Boolean      @default(false)
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  trials         Trial[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+model Trial {
+  id             String            @id @default(uuid())
+  title          String
+  content        Json              // TipTap ProseMirror JSON tree
+  status         TrialStatus       @default(DRAFT)
+  
+  projectId      String
+  project        Project           @relation(fields: [projectId], references: [id])
+  
+  userId         String
+  author         User              @relation("TrialAuthor", fields: [userId], references: [id])
+  
+  protocolId     String?
+  protocol       ProtocolTemplate? @relation(fields: [protocolId], references: [id])
+
+  metadata       MetadataEntry[]
+  telemetry      TelemetryStream[]
+  revisions      TrialRevision[]
+  
+  // Relational Linking
+  inventoryUsed  TrialInventory[]
+  equipmentUsed  TrialEquipment[]
+  papers         TrialPaper[]
+  
+  // Compliance
+  checksum       String?           @unique
+  sealedAt       DateTime?
+  sealedBy       String?
+  sealer         User?             @relation("TrialSealer", fields: [sealedBy], references: [id])
+  signatures     Signature[]
+
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([userId])
+  @@index([protocolId])
+  @@index([sealedBy])
+}
+
+// Snapshot of trial content at a point in time — append-only version history
+model TrialRevision {
+  id        String   @id @default(uuid())
+  trialId   String
+  trial     Trial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  title     String
+  content   Json
+  savedById String
+  savedBy   User     @relation("RevisionAuthor", fields: [savedById], references: [id])
+  note      String?  // optional commit-style message
+  savedAt   DateTime @default(now())
+
+  @@index([trialId])
+  @@index([savedAt])
+  @@index([savedById])
+}
+
+model MetadataEntry {
+  id      String @id @default(uuid())
+  key     String
+  value   String
+  trialId String
+  trial   Trial  @relation(fields: [trialId], references: [id], onDelete: Cascade)
+
+  @@index([trialId])
+}
+
+model TelemetryStream {
+  id         String   @id @default(uuid())
+  sensorType String   
+  fileUrl    String   // Pointer to R2/S3
+  rowCount   Int
+  
+  trialId    String
+  trial      Trial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  
+  recordedAt DateTime @default(now())
+
+  @@index([trialId])
+}
+
+// ======================= INVENTORY / LIMS =======================
+
+model StorageLocation {
+  id             String       @id @default(uuid())
+  name           String       // e.g. "Freezer A", "Box 2"
+  type           String       // e.g. "FREEZER", "RACK", "BOX", "WELL_PLATE"
+  barcode        String?      @unique
+  
+  parentId       String?
+  parent         StorageLocation?  @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children       StorageLocation[] @relation("LocationHierarchy")
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  items          InventoryItem[]
+
+  @@index([organizationId])
+  @@index([parentId])
+}
+
+model InventoryItem {
+  id             String       @id @default(uuid())
+  name           String
+  type           InventoryType
+  lotNumber      String?
+  barcode        String?      @unique
+  
+  quantity       Float
+  unit           String
+  thresholdValue Float        @default(0)
+  expirationDate DateTime?
+  
+  locationId     String?
+  location       StorageLocation? @relation(fields: [locationId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  trials         TrialInventory[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([locationId])
+  @@index([type])
+}
+
+model Equipment {
+  id              String       @id @default(uuid())
+  name            String
+  serialNumber    String?
+  barcode         String?      @unique
+  
+  lastCalibrated  DateTime
+  calibrationFreq Int          // in days
+  status          String       // "OPERATIONAL", "MAINTENANCE"
+  
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  
+  trials          TrialEquipment[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+// Join Tables for Traceability
+model TrialInventory {
+  id              String        @id @default(uuid())
+  trialId         String
+  trial           Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+  
+  quantityUsed    Float
+  unit            String
+  
+  @@unique([trialId, inventoryItemId])
+  @@index([inventoryItemId])
+}
+
+model TrialEquipment {
+  id              String        @id @default(uuid())
+  trialId         String
+  trial           Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  equipmentId     String
+  equipment       Equipment     @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  
+  @@unique([trialId, equipmentId])
+  @@index([equipmentId])
+}
+
+// ======================= COMPLIANCE (21 CFR Part 11) =======================
+
+model Signature {
+  id           String        @id @default(uuid())
+  trialId      String
+  trial        Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  
+  role         SignatureRole
+  meaning      String        // e.g. "I authored this experiment", "I reviewed this experiment"
+  signedAt     DateTime      @default(now())
+  
+  @@index([trialId])
+  @@index([userId])
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  action         String       // e.g. 'TRIAL_SEALED', 'INVENTORY_DEDUCTED', 'SIGNATURE_ADDED'
+  entityType     String       // e.g. 'Trial', 'InventoryItem'
+  entityId       String
+  details        Json
+  
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  ipAddress      String?
+  
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([entityType, entityId])
+}
+
+// ======================= LITERATURE & CITATIONS =======================
+
+model ResearchPaper {
+  id             String          @id @default(uuid())
+  title          String
+  authors        String          // e.g. "Langer R; Folkman J; Vacanti JP"
+  journal        String?
+  pubYear        Int?
+  doi            String?         @unique
+  pmid           String?
+  pmcid          String?
+  abstract       String?
+  url            String?         // Europe PMC or publisher URL
+  pdfUrl         String?         // Direct Open-Access PDF link if available
+  citationCount  Int             @default(0)
+  isOpenAccess   Boolean         @default(false)
+  tags           String[]        // e.g. ["Biosensor", "Optogenetics"]
+
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  trials         TrialPaper[]
+  
+  createdById    String?
+  createdBy      User?           @relation(fields: [createdById], references: [id])
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([organizationId])
+  @@index([doi])
+  @@index([pmid])
+}
+
+model TrialPaper {
+  id            String        @id @default(uuid())
+  trialId       String
+  trial         Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  paperId       String
+  paper         ResearchPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  notes         String?       // In-trial annotation (e.g. "Primary reference for protocol pH buffer")
+  citationIndex Int?          // [1], [2], etc.
+  addedAt       DateTime      @default(now())
+
+  @@unique([trialId, paperId])
+  @@index([trialId])
+  @@index([paperId])
+}
