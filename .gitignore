@@ -32,17 +32,24 @@ __pycache__/
 *.pyc
 *.exe
 
-# Local Leads & Outreach
+# Local Leads, Scraping & Outreach
 bme_pilot_leads.csv
+reddit_monitor.py
 reddit_digest_*.txt
 scripts/
+Inquestra_Value_Proposition_and_Market_Strategy.pdf
+implementation_plan.md
 
-# Local Agent Skills & Tooling
+# Local Agent Skills, Prompts & AI Tooling
 .agents/
 .codex/
+.claude/
+claude-skills/
 .github/agents/
 .github/hooks/
 .github/skills/
+AGENTS.md
+CONTEXT.md
 skills-lock.json
 
 # PostHog Wizard Cache
