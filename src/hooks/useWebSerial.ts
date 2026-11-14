@@ -52,6 +52,11 @@ export function useWebSerial() {
     async (baudRate = 115200) => {
       if (typeof navigator === 'undefined' || !('serial' in navigator)) {
         console.warn('[Inquestra] Web Serial API is not available in this browser.');
+        if (typeof window !== 'undefined') {
+          alert(
+            'Web Serial requires a Chromium-based browser (Chrome, Edge, Brave, or Opera). Please open Inquestra in a Chromium browser for direct USB DAQ, or use the virtual telemetry simulator.'
+          );
+        }
         return;
       }
       if (activeRef.current) return;
