@@ -3,6 +3,7 @@
 [![Website](https://img.shields.io/badge/workspace-inquestra.org-10b981?style=flat-square)](https://inquestra.org)
 [![Last Commit](https://img.shields.io/github/last-commit/kaleb973/Inquestra?style=flat-square&color=0ea5e9)](https://github.com/kaleb973/Inquestra/commits/main)
 [![GitHub Stars](https://img.shields.io/github/stars/kaleb973/Inquestra?style=flat-square&color=10b981)](https://github.com/kaleb973/Inquestra/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?style=flat-square)](https://www.typescriptlang.org/)
 
@@ -77,6 +78,17 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to browse the documentation pages or [http://localhost:3000/app](http://localhost:3000/app) to use the local-first ELN immediately (PostgreSQL / Supabase credentials in `.env.local` are only required when enabling cloud trial persistence).
+
+---
+
+## Community & Governance
+
+- [Contributing Guide](CONTRIBUTING.md) — Local development setup, code standards, and PR process.
+- [System Architecture](docs/ARCHITECTURE.md) — Overview of TipTap canvas, Web Serial DAQ, and persistence layers.
+- [Feature Roadmap](ROADMAP.md) — Active milestones and upcoming platform initiatives.
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Contributor Covenant v2.1.
+- [Security Policy](SECURITY.md) — Coordinated vulnerability disclosure guidelines.
+- [License](LICENSE) — MIT License.
 
 ---
 

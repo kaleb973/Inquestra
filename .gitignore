@@ -40,6 +40,13 @@ scripts/
 Inquestra_Value_Proposition_and_Market_Strategy.pdf
 implementation_plan.md
 
+# Internal PRDs, Strategy Notes & Local Scratchpads
+docs/PHASE_*.md
+docs/MASTER_ROADMAP.md
+docs/supabase_email_template.html
+docs/adr/
+.licenses/
+
 # Local Agent Skills, Prompts & AI Tooling
 .agents/
 .codex/

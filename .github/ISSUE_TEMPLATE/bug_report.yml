@@ -1,0 +1,62 @@
+name: Bug Report
+description: File a bug report to help us improve Inquestra
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please search existing issues before creating a new one.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+      placeholder: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the issue.
+      placeholder: |
+        1. Go to '/app'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: A clear description of what you expected to occur.
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Deployment / Operating Mode
+      description: Where did you observe this bug?
+      options:
+        - "Local-First Guest Mode (inquestra.org/app - browser storage)"
+        - "Cloud Workspace (Authenticated with Supabase/Postgres)"
+        - "Local Self-Hosted Instance (npm run dev / Docker)"
+        - "Hardware Web Serial DAQ (Direct microcontroller connection)"
+    validations:
+      required: true
+  - type: input
+    id: browser-os
+    attributes:
+      label: Browser & OS
+      description: e.g. Chrome 130 on macOS / Edge 128 on Windows 11
+      placeholder: e.g., Chrome 130, Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Screenshots or Error Logs
+      description: Drag and drop screenshots or paste browser console outputs here.
