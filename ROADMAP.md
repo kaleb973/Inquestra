@@ -35,12 +35,12 @@ This document captures upcoming feature pillars and strategic initiatives for In
 
 ---
 
-## 4. First-User Community Pilot (r/labrats Outreach)
-- **Concept**: Transition from zero users to 5 active academic/biotech pilot labs.
+## 4. Academic Core Lab & iGEM Pilot Program
+- **Concept**: Direct onboarding for academic research teams, university core facilities, and student wet-labs.
 - **Key Capabilities**:
-  - End-to-end verified deployment on Railway with sample demo lab workspace.
-  - Value wedge: *"The only free, local-first ELN that includes specimen & freezer inventory."*
-  - Authentic founder outreach campaign on `r/labrats` and academic lab networks following the non-promotional discovery playbook.
+  - Pre-calibrated starter templates for molecular biology (PCR, cloning), chemistry, and biomechanics.
+  - Direct collaboration on custom protocol blocks, hardware sensor calibration profiles, and open export schemas.
+  - Deployment assistance for self-hosted institutional PostgreSQL instances and team workspace configurations.
 
 ---
 
