@@ -3,7 +3,7 @@
 // Comprehensive DAQ telemetry control hub: stats, buffer reset, CSV export,
 // direct USB connection, hardware simulation, and live mini oscilloscope preview.
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Activity,
   Gauge,
@@ -68,6 +68,11 @@ export function TelemetryMonitor() {
 
   const [selectedBaud, setSelectedBaud] = useState<number>(115200);
   const [selectedSimMode, setSelectedSimMode] = useState<SimMode>('ecg');
+  const [isWebSerialSupported, setIsWebSerialSupported] = useState(true);
+
+  useEffect(() => {
+    setIsWebSerialSupported(typeof navigator !== 'undefined' && 'serial' in navigator);
+  }, []);
 
   const hz = hardwareStatus.packetsPerSec;
 
@@ -201,6 +206,12 @@ export function TelemetryMonitor() {
           <span className="text-[10px] text-muted-foreground font-mono">Web Serial</span>
         </div>
 
+        {!isWebSerialSupported && (
+          <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-600 dark:text-amber-400 leading-snug">
+            <strong>Chromium Required:</strong> Native Web Serial DAQ requires Google Chrome, Microsoft Edge, Opera, or Brave. On Safari or Firefox, please test telemetry using the virtual simulator below.
+          </div>
+        )}
+
         {hardwareStatus.isConnected && !hardwareStatus.isSimulated ? (
           <div className="space-y-2">
             <div className="p-2.5 rounded-lg border border-emerald-500/30 dark:border-emerald-500/30 bg-muted/50 text-xs font-mono flex items-center justify-between text-foreground">
@@ -248,11 +259,20 @@ export function TelemetryMonitor() {
                 });
                 await connect(selectedBaud);
               }}
-              disabled={hardwareStatus.isConnected}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 border border-neutral-700/60 dark:border-neutral-300/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_4px_rgba(0,0,0,0.25)] transition-all active:scale-[0.99] disabled:opacity-40"
+              disabled={hardwareStatus.isConnected || !isWebSerialSupported}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 border border-neutral-700/60 dark:border-neutral-300/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_4px_rgba(0,0,0,0.25)] transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Plug className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-600" />
-              Connect USB Device
+              {isWebSerialSupported ? (
+                <>
+                  <Plug className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-600" />
+                  Connect USB Device
+                </>
+              ) : (
+                <>
+                  <Plug className="w-3.5 h-3.5 opacity-40" />
+                  Web Serial Unsupported (Use Chrome/Edge)
+                </>
+              )}
             </button>
           </div>
         )}
