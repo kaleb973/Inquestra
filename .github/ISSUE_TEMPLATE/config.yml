@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security Vulnerability Reporting
-    url: https://github.com/kaleb973/Inquestra/security/advisories
-    about: Please report security vulnerabilities privately via GitHub Security Advisories.
-  - name: Inquestra Contact Form
     url: https://inquestra.org/contact
-    about: For non-bug inquiries, institutional pilots, or questions.
+    about: Please report security vulnerabilities privately via our secure disclosure channel.
+  - name: Inquestra Contact & Support
+    url: https://inquestra.org/contact
+    about: For non-bug inquiries, questions, or institutional pilot requests.

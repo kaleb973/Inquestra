@@ -1,11 +1,11 @@
 # Inquestra
 
 [![Website](https://img.shields.io/badge/workspace-inquestra.org-10b981?style=flat-square)](https://inquestra.org)
-[![Last Commit](https://img.shields.io/github/last-commit/kaleb973/Inquestra?style=flat-square&color=0ea5e9)](https://github.com/kaleb973/Inquestra/commits/main)
-[![GitHub Stars](https://img.shields.io/github/stars/kaleb973/Inquestra?style=flat-square&color=10b981)](https://github.com/kaleb973/Inquestra/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Hardware DAQ](https://img.shields.io/badge/Hardware-Web_Serial_API-f59e0b?style=flat-square)](https://inquestra.org/hardware)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?style=flat-square)](https://www.typescriptlang.org/)
+[![Roadmap](https://img.shields.io/badge/Roadmap-Active-6366f1?style=flat-square)](ROADMAP.md)
 
 **Inquestra** is an open, browser-based Electronic Lab Notebook (ELN) and research workspace spanning **Life Sciences, Chemistry, Biotech, Materials Science, and Engineering**. It unifies structured protocol execution, reagent inventory logging, chemical structure lookup, oligonucleotide analysis, literature citations, immutable SHA-256 provenance, and real-time **Web Serial API** instrument telemetry inside a single zero-install tab.
 

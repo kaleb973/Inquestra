@@ -17,16 +17,17 @@ Only the latest release on the `main` branch is actively supported with security
 
 ## Reporting a Vulnerability
 
-**Please do not report security vulnerabilities via public GitHub issues, discussions, or social media.**
+**Please do not report security vulnerabilities via public GitHub issues, pull requests, or social media.**
 
 To report a vulnerability responsibly:
 
-1. **GitHub Private Vulnerability Reporting (Preferred):**  
-   Navigate to the [Security Advisories tab](https://github.com/kaleb973/Inquestra/security/advisories) on GitHub and click **"Report a vulnerability"**. This allows confidential triage, verification, and coordinated patch creation.
+1. **Secure Web Disclosure (Primary):**  
+   Submit disclosures directly through our secure contact channel at:  
+   **[https://inquestra.org/contact](https://inquestra.org/contact)**  
+   or via email to **`support@inquestra.org`** with the subject line `[SECURITY DISCLOSURE]`.
 
-2. **Direct Contact:**  
-   If GitHub Private Reporting is unavailable, you may submit disclosures through our secure contact channel at:  
-   **[https://inquestra.org/contact](https://inquestra.org/contact)**
+2. **GitHub Private Vulnerability Reporting:**  
+   If you have a GitHub account and the repository has Private Vulnerability Reporting enabled, you may navigate to the repository's **Security** tab and click **"Report a vulnerability"** to open a confidential advisory.
 
 ### What to Include in Your Report
 To help us triage and resolve the issue quickly, please provide:

@@ -112,5 +112,5 @@ Never commit real API credentials, service role tokens, or private keys. All sen
 
 ## Questions & Community
 
-- Have questions or want to discuss a feature before building it? Open an issue with the **Feature Request** template or join the GitHub Discussions.
+- Have questions or want to discuss a feature before building it? Open an issue using the [Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml) template or reach out via our [Contact Form](https://inquestra.org/contact).
 - Found a security vulnerability? Please review [SECURITY.md](SECURITY.md) for our responsible disclosure process.

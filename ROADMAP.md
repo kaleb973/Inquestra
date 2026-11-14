@@ -44,29 +44,23 @@ This document captures upcoming feature pillars and strategic initiatives for In
 
 ---
 
-## 5. Operational & Security Checkpoints
-- **Target Date**: October 15, 2026 (14-day observation window)
-- **Action Item**: Transition DMARC enforcement policy from monitoring to strict quarantine.
-  - Review Cloudflare DMARC Management dashboard for Resend and team mail volume.
-  - Verify 100% SPF/DKIM alignment and 0 legitimate false-positive rejections.
-  - In Cloudflare DNS records, update `_dmarc` TXT record value:
-    ```text
-    v=DMARC1; p=quarantine; pct=100; rua=mailto:bdce8a7102084d3293bc8f03ff81a100@dmarc-reports.cloudflare.net; aspf=r; adkim=r
-    ```
+## 5. Production Hardening & Edge Security
+- **Concept**: Enterprise-grade infrastructure resilience and zero-trust edge protection.
+- **Key Capabilities**:
+  - Zero-trust rate limiting and anomaly scoring on authentication and trial export endpoints.
+  - Automated deployment skew detection (`src/lib/deploymentSkew.ts`) preventing client-side cache desynchronization during rolling releases.
+  - Strict transactional email provenance with 100% SPF, DKIM, and DMARC enforcement.
 
 ---
 
-## 6. Stripe & SaaS Billing Architecture (Phase 4 Milestone)
-- **Status**: Deferred / Staged for execution when institutional monetization begins.
-- **Specification Reference**: Full blueprint, security guardrails, and activation checklist documented in [`docs/PHASE_4_PRD.md`](docs/PHASE_4_PRD.md#31-stripe-launch--security-architecture-blueprint-activate-when-billing-starts).
-- **Key Implementation Highlights**:
-  - **Prisma Schema Updates**: Add `stripeCustomerId`, `stripeSubscriptionId`, `stripePriceId`, `subscriptionTier` (`FREE`, `PRO`, `ENTERPRISE`), and `subscriptionStatus` to `Organization`.
-  - **Endpoints**:
-    - `POST /api/stripe/checkout`: Initiates checkout with idempotency keys (`checkout_org_${orgId}_tier_${tier}`).
-    - `POST /api/stripe/portal`: Self-service seat management, invoicing, and cancellation.
-    - `POST /api/stripe/webhook`: Cryptographically verified (`req.text()` + `stripe.webhooks.constructEvent`) to handle `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`.
-  - **Security & Anti-Abuse**: Server-only secret key isolation, Stripe Radar SCA/3DS enabled, and hard software usage caps on metered R2 storage before billing sync.
+## 6. Multi-Tier Lab & Institutional Subscriptions (Stripe)
+- **Concept**: Self-service billing infrastructure for university departments and commercial labs requiring managed cloud persistence and dedicated support.
+- **Key Capabilities**:
+  - Integration with Stripe Checkout and Customer Portal for self-service seat allocation, invoicing, and team billing.
+  - Prisma `Organization` subscription models linking team seats to storage quotas and enterprise features.
+  - Cryptographically verified webhook pipeline (`src/app/api/webhooks/stripe/route.ts`) handling real-time subscription lifecycle events.
+  - Hard usage guardrails on Cloudflare R2 object storage to prevent runaway telemetry archive costs.
 
 ---
-*Created: September 19, 2026 | Last Updated: November 5, 2026*
+*Maintained by Inquestra Contributors*
 
