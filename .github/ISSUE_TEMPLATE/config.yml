@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Reporting
+    url: https://inquestra.org/contact
+    about: Please report security vulnerabilities privately via our secure disclosure channel.
+  - name: Inquestra Contact & Support
+    url: https://inquestra.org/contact
+    about: For non-bug inquiries, questions, or institutional pilot requests.

@@ -1,0 +1,48 @@
+name: Feature Request
+description: Suggest an idea or enhancement for Inquestra
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Community feedback is welcome! Please explain the problem you are trying to solve and how this feature would help laboratory researchers.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear description of the pain point or experimental bottleneck.
+      placeholder: I am always frustrated when...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Desired Feature
+      description: A clear description of what you want to happen.
+      placeholder: It would be great if Inquestra could...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Workarounds Considered
+      description: Any alternative solutions or features you've considered.
+  - type: dropdown
+    id: scientific-discipline
+    attributes:
+      label: Target Scientific Domain
+      description: Which research discipline does this primarily benefit?
+      options:
+        - "Cross-Disciplinary / Core ELN"
+        - "Molecular Biology & Genomics"
+        - "Wet-Lab Chemistry & Synthesis"
+        - "Cell Biology & Assays"
+        - "Materials Science & Mechanical Testing"
+        - "Hardware Telemetry / Web Serial Instrumentation"
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to submit a PR to help implement this feature.
