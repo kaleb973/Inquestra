@@ -74,6 +74,8 @@ interface AdminTabsProps {
     items: { id: string; name: string }[];
   })[];
   currentUser?: { id: string; email: string; role: Role };
+  initialTab?: string;
+  targetId?: string;
 }
 
 const ROLE_COLORS: Record<string, string> = {
@@ -99,6 +101,8 @@ function ProjectsTab({
   projects: ProjectWithLead[];
   orgUsers: (User & { createdAt: Date })[];
   currentUser?: { id: string; email: string; role: Role };
+  initialTab?: string;
+  targetId?: string;
 }) {
   const canManage = currentUser?.role === 'PI' || currentUser?.role === 'ADMIN';
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
@@ -314,8 +318,15 @@ export function AdminTabs({
   inventoryAlerts,
   storageLocations,
   currentUser,
+  initialTab,
+  targetId,
 }: AdminTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const validTabs: TabId[] = ['overview', 'projects', 'protocols', 'inventory', 'equipment', 'teams', 'audit', 'settings'];
+  const mappedInitialTab = initialTab === 'storage' ? 'inventory' : initialTab;
+  const resolvedInitialTab: TabId = mappedInitialTab && validTabs.includes(mappedInitialTab as TabId)
+    ? (mappedInitialTab as TabId)
+    : 'overview';
+  const [activeTab, setActiveTab] = useState<TabId>(resolvedInitialTab);
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: 'overview',  label: 'Overview',   icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
@@ -574,13 +585,13 @@ export function AdminTabs({
         {/* ── INVENTORY ────────────────────────────────────────────── */}
         {activeTab === 'inventory' && (
           <div className="space-y-8">
-            <InventoryManager items={inventory} locations={storageLocations} />
-            <StorageManager locations={storageLocations} />
+            <InventoryManager items={inventory} locations={storageLocations} targetId={targetId} />
+            <StorageManager locations={storageLocations} targetId={targetId} />
           </div>
         )}
 
         {/* ── EQUIPMENT ────────────────────────────────────────────── */}
-        {activeTab === 'equipment' && <EquipmentManager items={equipment} />}
+        {activeTab === 'equipment' && <EquipmentManager items={equipment} targetId={targetId} />}
 
         {/* ── TEAMS ────────────────────────────────────────────────── */}
         {activeTab === 'teams' && (

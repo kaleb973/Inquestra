@@ -107,6 +107,7 @@ export async function addStorageLocation(formData: FormData) {
 
   const name = DOMPurify.sanitize(formData.get('name') as string);
   const type = DOMPurify.sanitize(formData.get('type') as string);
+  const barcode = DOMPurify.sanitize(formData.get('barcode') as string || '');
   const parentId = formData.get('parentId') as string || null;
 
   try {
@@ -114,6 +115,7 @@ export async function addStorageLocation(formData: FormData) {
       data: {
         name,
         type,
+        barcode: barcode || null,
         parentId,
         organizationId: dbUser.organizationId,
       },
@@ -205,6 +207,32 @@ export async function updateInventoryStock(id: string, newQuantity: number) {
   }
 }
 
+export async function updateInventoryBarcode(id: string, newBarcode: string) {
+  const { dbUser, error } = await verifyAdminAccess();
+  if (error || !dbUser) return { success: false, error };
+
+  const sanitized = DOMPurify.sanitize(newBarcode).trim();
+
+  try {
+    const item = await prisma.inventoryItem.findUnique({ where: { id } });
+    if (item?.organizationId !== dbUser.organizationId) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    await prisma.inventoryItem.update({
+      where: { id },
+      data: {
+        barcode: sanitized || null,
+      },
+    });
+    await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_BARCODE_UPDATED', `Updated barcode for ${item.name} to ${sanitized || 'None'}`);
+    revalidatePath('/app/admin');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function deleteInventoryItem(id: string) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
@@ -228,7 +256,8 @@ export async function addEquipment(formData: FormData) {
   if (error || !dbUser) return { success: false, error };
 
   const name = DOMPurify.sanitize(formData.get('name') as string);
-  const serialNumber = DOMPurify.sanitize(formData.get('serialNumber') as string);
+  const serialNumber = DOMPurify.sanitize(formData.get('serialNumber') as string || '');
+  const barcode = DOMPurify.sanitize(formData.get('barcode') as string || '');
   const lastCalibrated = new Date(formData.get('lastCalibrated') as string);
   const calibrationFreq = parseInt(formData.get('calibrationFreq') as string, 10);
   const status = DOMPurify.sanitize(formData.get('status') as string);
@@ -237,7 +266,8 @@ export async function addEquipment(formData: FormData) {
     await prisma.equipment.create({
       data: {
         name,
-        serialNumber,
+        serialNumber: serialNumber || null,
+        barcode: barcode || null,
         lastCalibrated,
         calibrationFreq,
         status,

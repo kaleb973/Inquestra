@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { addStorageLocation } from '@/actions/adminActions';
 import { Loader2, Box, FolderTree, QrCode } from 'lucide-react';
 import type { StorageLocation } from '@prisma/client';
@@ -11,11 +11,28 @@ type PopulatedLocation = StorageLocation & {
   items: { id: string; name: string }[];
 };
 
-export function StorageManager({ locations }: { locations: PopulatedLocation[] }) {
+export function StorageManager({
+  locations,
+  targetId,
+}: {
+  locations: PopulatedLocation[];
+  targetId?: string;
+}) {
   const [isPending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<BarcodeLabelItem | null>(null);
+
+  useEffect(() => {
+    if (!targetId) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`storage-location-${targetId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [targetId]);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,12 +65,12 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
       {error && <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
 
       {showAdd && (
-        <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm flex gap-4 items-end">
-          <div className="flex-1">
+        <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Location Name</label>
             <input required name="name" placeholder="e.g. -80°C Freezer A" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
           </div>
-          <div className="w-48">
+          <div className="w-44">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
             <select name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
               <option value="FREEZER">Freezer / Fridge</option>
@@ -70,7 +87,11 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
               ))}
             </select>
           </div>
-          <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
+          <div className="w-48">
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Custom Barcode (Optional)</label>
+            <input name="barcode" placeholder="e.g. RACK-A-01" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary font-mono" />
+          </div>
+          <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm rounded transition-colors disabled:opacity-50 shadow-sm h-[38px]">
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
           </button>
         </form>
@@ -88,6 +109,7 @@ export function StorageManager({ locations }: { locations: PopulatedLocation[] }
             location={loc}
             allLocations={locations}
             onSelectLabel={setSelectedLabel}
+            targetId={targetId}
           />
         ))}
       </div>
@@ -106,16 +128,26 @@ function LocationNode({
   location,
   allLocations,
   onSelectLabel,
+  targetId,
 }: {
   location: PopulatedLocation;
   allLocations: PopulatedLocation[];
   onSelectLabel: (item: BarcodeLabelItem) => void;
+  targetId?: string;
 }) {
   // Find children since our simple prisma include only went one level deep
   const children = allLocations.filter((l) => l.parentId === location.id);
-  
+  const isTarget = !!targetId && (location.id === targetId || location.barcode === targetId);
+
   return (
-    <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+    <div
+      id={`storage-location-${location.id}`}
+      className={`bg-card border rounded-xl p-4 shadow-sm transition-all duration-500 ${
+        isTarget
+          ? 'border-emerald-500 ring-2 ring-emerald-500/60 bg-emerald-500/10'
+          : 'border-border'
+      }`}
+    >
       <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-3">
         <div className="flex items-center gap-2">
           <Box className="w-4 h-4 text-foreground" />
@@ -123,6 +155,11 @@ function LocationNode({
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-foreground font-mono">
             {location.type}
           </span>
+          {location.barcode && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono">
+              #{location.barcode}
+            </span>
+          )}
         </div>
         <button
           onClick={() =>
@@ -160,6 +197,7 @@ function LocationNode({
               location={child}
               allLocations={allLocations}
               onSelectLabel={onSelectLabel}
+              targetId={targetId}
             />
           ))}
         </div>
