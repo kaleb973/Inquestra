@@ -64,25 +64,25 @@ const STATUS_CONFIG: Record<TrialStatus, StatusConfig> = {
     tooltip: 'Lifecycle: Draft (Protocol setup / in planning)',
   },
   ACTIVE: {
-    dotClass: 'bg-primary ring-2 ring-primary/20 shadow-[0_0_6px_rgba(56,189,248,0.4)]',
+    dotClass: 'bg-primary',
     badgeClass: 'bg-primary/10 text-primary border border-primary/30',
     label: 'Active',
     tooltip: 'Lifecycle: Active (Live telemetry acquisition / execution in progress)',
   },
   IN_REVIEW: {
-    dotClass: 'bg-caution ring-2 ring-caution/20 shadow-[0_0_6px_rgba(245,158,11,0.4)]',
+    dotClass: 'bg-caution',
     badgeClass: 'bg-caution/10 text-caution border border-caution/30',
     label: 'In Review',
     tooltip: 'Lifecycle: In Review (Pending peer or QA verification)',
   },
   COMPLETED: {
-    dotClass: 'bg-phosphor ring-2 ring-phosphor/20 shadow-[0_0_6px_rgba(34,197,94,0.4)]',
+    dotClass: 'bg-phosphor',
     badgeClass: 'bg-phosphor/10 text-phosphor border border-phosphor/30',
     label: 'Completed',
     tooltip: 'Lifecycle: Completed (Acquisition finished & cryptographically sealed)',
   },
   FAILED: {
-    dotClass: 'bg-critical ring-2 ring-critical/20 shadow-[0_0_6px_rgba(239,68,68,0.4)]',
+    dotClass: 'bg-critical',
     badgeClass: 'bg-critical/10 text-critical border border-critical/30',
     label: 'Failed',
     tooltip: 'Lifecycle: Failed (Sensor anomaly or protocol deviation)',
@@ -1288,7 +1288,7 @@ export function LeftSidebar() {
                         className="relative flex items-center justify-center p-0.5 shrink-0"
                       >
                         <span
-                          className={`w-2 h-2 rounded-full shrink-0 transition-transform hover:scale-125 ${
+                          className={`w-2 h-2 rounded-full shrink-0 ${
                             STATUS_CONFIG[t.status as TrialStatus]?.dotClass || 'bg-muted-foreground'
                           }`}
                         />
