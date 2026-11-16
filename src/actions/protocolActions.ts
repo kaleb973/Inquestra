@@ -9,6 +9,7 @@ import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import DOMPurify from 'isomorphic-dompurify';
+import { STANDARD_PROTOCOLS, buildTipTapProtocolDoc } from '@/lib/protocols/standardProtocols';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -211,4 +212,137 @@ export async function deleteProtocol(protocolId: string) {
 
   revalidatePath('/app/protocols');
   return { success: true };
+}
+
+/**
+ * Clones a verified standard laboratory SOP into the user's organization ProtocolTemplate table.
+ * Automatically publishes it so it is available for all lab researchers.
+ */
+export async function adoptStandardProtocol(slug: string) {
+  const dbUser = await getAuthenticatedUser();
+  const standard = STANDARD_PROTOCOLS.find((p) => p.slug === slug);
+  if (!standard) throw new Error(`Standard protocol '${slug}' not found.`);
+
+  // Check if an existing protocol with the same name exists
+  const existing = await prisma.protocolTemplate.findFirst({
+    where: {
+      organizationId: dbUser.organizationId,
+      name: standard.name,
+    },
+  });
+
+  if (existing) {
+    return { success: true, protocolId: existing.id, isExisting: true };
+  }
+
+  const contentDoc = buildTipTapProtocolDoc(standard);
+
+  const protocol = await prisma.protocolTemplate.create({
+    data: {
+      name: standard.name,
+      description: standard.description,
+      content: contentDoc as unknown as Prisma.InputJsonValue,
+      version: 1,
+      isPublished: true,
+      organizationId: dbUser.organizationId,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: dbUser.id,
+      organizationId: dbUser.organizationId,
+      action: 'PROTOCOL_ADOPTED',
+      entityType: 'ProtocolTemplate',
+      entityId: protocol.id,
+      details: { name: standard.name, category: standard.category, slug },
+    },
+  });
+
+  revalidatePath('/app/protocols');
+  return { success: true, protocolId: protocol.id, isExisting: false };
+}
+
+/**
+ * Creates an active Trial directly from an organization or standard protocol.
+ * Immediately ready for bench execution.
+ */
+export async function createTrialFromProtocol(input: {
+  protocolId?: string;
+  standardSlug?: string;
+  trialTitle?: string;
+}) {
+  const dbUser = await getAuthenticatedUser();
+
+  // Find or create active project
+  let project = await prisma.project.findFirst({
+    where: { organizationId: dbUser.organizationId, status: 'ACTIVE' },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  if (!project) {
+    project = await prisma.project.create({
+      data: {
+        name: 'General Research & Bench Trials',
+        code: 'GEN-01',
+        description: 'Default bench workspace for protocol runs and experimental observations.',
+        organizationId: dbUser.organizationId,
+        leadId: dbUser.id,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  let title = input.trialTitle ? DOMPurify.sanitize(input.trialTitle.trim()) : '';
+  let contentValue: Prisma.InputJsonValue = { type: 'doc', content: [] };
+  let linkedProtocolId: string | null = null;
+
+  if (input.protocolId) {
+    const protocol = await prisma.protocolTemplate.findFirst({
+      where: { id: input.protocolId, organizationId: dbUser.organizationId },
+    });
+    if (!protocol) throw new Error('Protocol not found.');
+
+    linkedProtocolId = protocol.id;
+    if (!title) title = `Run: ${protocol.name} (v${protocol.version})`;
+    contentValue = protocol.content as Prisma.InputJsonValue;
+  } else if (input.standardSlug) {
+    const standard = STANDARD_PROTOCOLS.find((p) => p.slug === input.standardSlug);
+    if (!standard) throw new Error(`Standard protocol '${input.standardSlug}' not found.`);
+
+    if (!title) title = `Run: ${standard.name}`;
+    contentValue = buildTipTapProtocolDoc(standard) as unknown as Prisma.InputJsonValue;
+  } else {
+    throw new Error('Either protocolId or standardSlug must be provided.');
+  }
+
+  const trial = await prisma.trial.create({
+    data: {
+      title,
+      content: contentValue,
+      status: 'ACTIVE',
+      projectId: project.id,
+      userId: dbUser.id,
+      protocolId: linkedProtocolId,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: dbUser.id,
+      organizationId: dbUser.organizationId,
+      action: 'TRIAL_CREATED_FROM_PROTOCOL',
+      entityType: 'Trial',
+      entityId: trial.id,
+      details: {
+        title,
+        protocolId: linkedProtocolId,
+        standardSlug: input.standardSlug,
+      },
+    },
+  });
+
+  revalidatePath('/app');
+  revalidatePath('/app/protocols');
+  return { success: true, trialId: trial.id };
 }
