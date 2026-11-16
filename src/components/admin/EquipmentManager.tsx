@@ -1,17 +1,34 @@
 'use client';
 // src/components/admin/EquipmentManager.tsx
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { addEquipment, updateEquipmentStatus } from '@/actions/adminActions';
 import { Loader2, Plus, Calendar, AlertCircle, CheckCircle2, QrCode } from 'lucide-react';
 import type { Equipment } from '@prisma/client';
 import { BarcodeLabel, type BarcodeLabelItem } from '@/components/admin/BarcodeLabel';
 
-export function EquipmentManager({ items }: { items: Equipment[] }) {
+export function EquipmentManager({
+  items,
+  targetId,
+}: {
+  items: Equipment[];
+  targetId?: string;
+}) {
   const [isPending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<BarcodeLabelItem | null>(null);
+
+  useEffect(() => {
+    if (!targetId) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`equipment-item-${targetId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [targetId]);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,14 +68,18 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
       {error && <div className="p-3 bg-critical/10 border border-critical/30 text-critical text-sm rounded">{error}</div>}
 
       {showAdd && (
-        <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+        <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm grid grid-cols-2 md:grid-cols-6 gap-4 items-end">
           <div className="col-span-2 md:col-span-1">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Equipment Name</label>
             <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">Serial Number</label>
-            <input name="serialNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
+            <input name="serialNumber" placeholder="e.g. SN-98231" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500 font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Custom Barcode</label>
+            <input name="barcode" placeholder="e.g. EQ-PH-001" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500 font-mono" />
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">Last Calibrated</label>
@@ -83,8 +104,17 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
         )}
         {items.map(item => {
           const overdue = isOverdue(new Date(item.lastCalibrated), item.calibrationFreq);
+          const isTarget = !!targetId && (item.id === targetId || item.barcode === targetId);
           return (
-            <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex flex-col relative overflow-hidden shadow-sm">
+            <div
+              key={item.id}
+              id={`equipment-item-${item.id}`}
+              className={`bg-card border rounded-xl p-4 flex flex-col relative overflow-hidden shadow-sm transition-all duration-500 ${
+                isTarget
+                  ? 'border-emerald-500 ring-2 ring-emerald-500/60 bg-emerald-500/10'
+                  : 'border-border'
+              }`}
+            >
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -106,7 +136,14 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground font-mono mt-1">SN: {item.serialNumber || 'N/A'}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <p className="text-xs text-muted-foreground font-mono">SN: {item.serialNumber || 'N/A'}</p>
+                    {item.barcode && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono">
+                        #{item.barcode}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -115,7 +152,7 @@ export function EquipmentManager({ items }: { items: Equipment[] }) {
                       setSelectedLabel({
                         id: item.id,
                         name: item.name,
-                        barcode: item.serialNumber ?? null,
+                        barcode: item.barcode ?? item.serialNumber ?? null,
                         subtitle: `Status: ${item.status}`,
                         type: 'equipment',
                       })

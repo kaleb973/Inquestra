@@ -3,7 +3,15 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 import { AdminTabs } from '@/components/admin/AdminTabs';
 
-export default async function AdminPage() {
+interface AdminPageProps {
+  searchParams?: Promise<{ tab?: string; id?: string }>;
+}
+
+export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const initialTab = params.tab;
+  const targetId = params.id;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -107,6 +115,8 @@ export default async function AdminPage() {
       inventoryAlerts={inventoryAlerts}
       storageLocations={storageLocations as Parameters<typeof AdminTabs>[0]['storageLocations']}
       currentUser={{ id: dbUser.id, email: dbUser.email, role: dbUser.role }}
+      initialTab={initialTab}
+      targetId={targetId}
     />
   );
 }

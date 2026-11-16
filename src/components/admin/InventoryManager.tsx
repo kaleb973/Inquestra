@@ -1,7 +1,7 @@
 'use client';
 // src/components/admin/InventoryManager.tsx
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { addInventoryItem, updateInventoryStock, deleteInventoryItem } from '@/actions/adminActions';
 import { Loader2, Plus, Trash2, QrCode } from 'lucide-react';
 import type { InventoryItem, StorageLocation } from '@prisma/client';
@@ -9,11 +9,30 @@ import { BarcodeLabel, type BarcodeLabelItem } from '@/components/admin/BarcodeL
 
 type PopulatedItem = InventoryItem & { location: { name: string } | null };
 
-export function InventoryManager({ items, locations }: { items: PopulatedItem[], locations: StorageLocation[] }) {
+export function InventoryManager({
+  items,
+  locations,
+  targetId,
+}: {
+  items: PopulatedItem[];
+  locations: StorageLocation[];
+  targetId?: string;
+}) {
   const [isPending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<BarcodeLabelItem | null>(null);
+
+  useEffect(() => {
+    if (!targetId) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`inventory-item-${targetId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [targetId]);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -113,6 +132,24 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                Custom / Vendor Barcode (Scan or Type)
+              </label>
+              <input
+                name="barcode"
+                placeholder="Scan manufacturer barcode with gun or enter SKU (e.g. SIGMA-A4503, 012345678905)..."
+                className="w-full bg-background border border-border rounded px-3 py-2 text-xs text-foreground font-mono focus:outline-none focus:border-primary placeholder:text-muted-foreground/60"
+              />
+            </div>
+            <div className="flex items-end">
+              <p className="text-[10px] text-muted-foreground pb-2 leading-tight">
+                Supports manufacturer UPC/EAN barcodes, Sigma-Aldrich/NEB catalog codes, or existing lab rack stickers.
+              </p>
+            </div>
+          </div>
+
           <div className="flex justify-end pt-2 border-t border-border mt-2">
             <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
               {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Item'}
@@ -138,11 +175,32 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
             {items.length === 0 && (
               <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground">No inventory items.</td></tr>
             )}
-            {items.map((item) => (
-              <tr key={item.id} className="hover:bg-muted/40 transition-colors">
+            {items.map((item) => {
+              const isTarget = !!targetId && (item.id === targetId || item.barcode === targetId);
+              return (
+                <tr
+                  key={item.id}
+                  id={`inventory-item-${item.id}`}
+                  className={`transition-all duration-500 ${
+                    isTarget
+                      ? 'bg-emerald-500/15 ring-2 ring-emerald-500/60 font-semibold'
+                      : 'hover:bg-muted/40'
+                  }`}
+                >
                 <td className="px-5 py-3 text-foreground font-medium">
-                  {item.name}
-                  {(item.quantity < item.thresholdValue) && <span className="ml-2 text-[9px] font-bold text-amber-600 dark:text-amber-400 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 rounded">LOW STOCK</span>}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span>{item.name}</span>
+                    {item.barcode && (
+                      <span className="text-[9px] font-mono text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded">
+                        #{item.barcode}
+                      </span>
+                    )}
+                    {item.quantity < item.thresholdValue && (
+                      <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                        LOW STOCK
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-5 py-3">
                   <span className="text-[10px] bg-muted border border-border px-2 py-0.5 rounded text-foreground font-mono">
@@ -193,7 +251,8 @@ export function InventoryManager({ items, locations }: { items: PopulatedItem[],
                   </div>
                 </td>
               </tr>
-            ))}
+            );
+          })}
           </tbody>
         </table>
       </div>

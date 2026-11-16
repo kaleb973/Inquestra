@@ -6,7 +6,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { Printer, Download, X, Loader2 } from 'lucide-react';
+import { Printer, Download, X, Loader2, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,8 +30,9 @@ interface BarcodeLabelProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Construct a canonical URL for the QR payload.
- * When scanned, this URL can deep-link into the Inquestra admin page.
+ * Construct universal canonical URL for the QR payload.
+ * When scanned by any camera, phone, or tablet, this routes to /scan?code=...
+ * for instant specimen identification without requiring a pre-existing login session.
  */
 function buildQrPayload(item: BarcodeLabelItem): string {
   const base =
@@ -38,9 +40,8 @@ function buildQrPayload(item: BarcodeLabelItem): string {
       ? window.location.origin
       : 'https://inquestra.org';
 
-  if (item.type === 'inventory') return `${base}/app/admin?tab=inventory&id=${item.id}`;
-  if (item.type === 'storage') return `${base}/app/admin?tab=storage&id=${item.id}`;
-  return `${base}/app/admin?tab=equipment&id=${item.id}`;
+  const code = item.barcode || item.id;
+  return `${base}/scan?code=${encodeURIComponent(code)}`;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -170,6 +171,16 @@ export function BarcodeLabel({ item, onClose }: BarcodeLabelProps) {
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground/60 mt-1 font-mono">
               Inquestra LIMS · {item.type}
             </p>
+            <div className="mt-2">
+              <Link
+                href={`/scan?code=${encodeURIComponent(item.barcode || item.id)}`}
+                target="_blank"
+                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"
+              >
+                Test Resolver Link
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
           </div>
         </div>
 

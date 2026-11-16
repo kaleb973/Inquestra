@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
-import { Tag, Plus, X, Activity, Box, FileKey, History, Quote, PanelRightClose, MapPin } from 'lucide-react';
+import { Tag, Plus, X, Activity, Box, FileKey, History, Quote, PanelRightClose, MapPin, QrCode } from 'lucide-react';
 import { useNotebookStore, RightDrawerMode } from '@/store/useNotebookStore';
 import { TelemetryMonitor } from '@/components/hardware/TelemetryMonitor';
 import { VersionHistory } from '@/components/editor/tools/VersionHistory';
@@ -248,19 +248,37 @@ export function RightDrawer() {
                 <span className="text-[10px] text-muted-foreground font-mono">LIMS-lite</span>
               </div>
               <p className="text-[11px] text-muted-foreground mb-3">
-                Click any item or <span className="text-emerald-500 font-medium">Use in Note</span> to log chemical usage in your trial notebook.
+                Scan with a barcode gun or click <span className="text-emerald-500 font-medium">Use in Note</span> to link chemicals to your protocol.
               </p>
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search reagents, plasmids, lot #..."
+                  placeholder="Scan barcode or search reagent, lot #..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors shadow-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchResults.length === 1) {
+                      e.preventDefault();
+                      insertReagentIntoDoc({
+                        name: searchResults[0].name,
+                        unit: searchResults[0].unit,
+                      });
+                      setSearchQuery('');
+                    }
+                  }}
+                  className="w-full bg-background border border-border rounded-lg pl-9 pr-8 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors shadow-sm"
                 />
                 <div className="absolute left-3 top-2.5 text-muted-foreground">
-                  <Box className="w-3.5 h-3.5" />
+                  <QrCode className="w-3.5 h-3.5" />
                 </div>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             </div>
             
