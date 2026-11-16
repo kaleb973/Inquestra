@@ -535,6 +535,36 @@ function buildSlashCommands(): SlashCommand[] {
           .run();
       },
     },
+    {
+      title: 'Protocol: Tensile Test (Materials)',
+      description: 'ASTM tensile modulus, yield strength, and elongation-to-failure materials testing SOP',
+      category: 'Protocols & SOPs',
+      keywords: ['tensile', 'tensile test', 'materials', 'mechanical', 'utm', 'astm', 'modulus', 'stress', 'strain', 'protocol'],
+      icon: <ClipboardList className="w-4 h-4 text-blue-500" />,
+      command: ({ editor, range }: { editor: Editor; range: Range }) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'protocolBlock',
+            attrs: {
+              title: 'Tensile & Materials Mechanical Testing SOP',
+              version: 1,
+              steps: [
+                { id: 'mat-1', text: 'Measure specimen gauge dimensions (width, thickness) at 3 locations with calibrated micrometer; compute average cross-section area.', checked: false, checkedAt: null, deviation: null },
+                { id: 'mat-2', text: 'Power on UTM and zero load cell and crosshead displacement transducers.', checked: false, checkedAt: null, deviation: null },
+                { id: 'mat-3', text: 'Mount specimen axially in wedge grips; verify uniform clamping pressure without slippage.', checked: false, checkedAt: null, deviation: null },
+                { id: 'mat-4', text: 'Attach axial extensometer; zero strain channel and set crosshead test speed (e.g. 5.0 mm/min).', checked: false, checkedAt: null, deviation: null },
+                { id: 'mat-5', text: 'Initiate tensile test; stream load-displacement telemetry through yield point, UTS, and fracture.', checked: false, checkedAt: null, deviation: null, timerDuration: 300 },
+                { id: 'mat-6', text: 'Remove extensometer prior to specimen rupture to prevent transducer shock damage.', checked: false, checkedAt: null, deviation: null },
+                { id: 'mat-7', text: 'Calculate Youngs Modulus (E), 0.2% Offset Yield Strength, Ultimate Tensile Strength, and Fracture Elongation percentage.', checked: false, checkedAt: null, deviation: null },
+              ],
+            },
+          })
+          .run();
+      },
+    },
 
     // ── Scientific Blocks ──
     {

@@ -30,6 +30,8 @@ import {
   Bell,
   Volume2,
   VolumeX,
+  CheckCircle2,
+  ClipboardCheck,
 } from 'lucide-react';
 import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
@@ -310,11 +312,34 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
   const [showDeviation, setShowDeviation] = useState<string | null>(null);
   const [deviationDraft, setDeviationDraft] = useState('');
   const [isMuted, setIsMuted] = useState(false);
+  const [copiedLog, setCopiedLog] = useState(false);
 
   const update = useCallback(
     (patch: Partial<ProtocolAttrs>) => updateAttributes({ ...attrs, ...patch }),
     [attrs, updateAttributes]
   );
+
+  const completedCount = attrs.steps.filter((s) => s.checked).length;
+  const totalCount = attrs.steps.length;
+  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const nextVersion = (attrs.version || 1) + 1;
+
+  const handleCopyExecutionLog = () => {
+    const lines = [
+      `### Protocol Execution Log: ${attrs.title} (v${attrs.version})`,
+      `Executed at: ${new Date().toISOString()}`,
+      `Completed Steps: ${completedCount}/${totalCount} (${progressPct}%)`,
+      '',
+      ...attrs.steps.map((s, i) => {
+        const timeStr = s.checkedAt ? new Date(s.checkedAt).toLocaleString() : 'Pending';
+        const devStr = s.deviation ? ` [Deviation: ${s.deviation}]` : '';
+        return `${i + 1}. [${s.checked ? 'x' : ' '}] ${s.text} — ${timeStr}${devStr}`;
+      }),
+    ];
+    navigator.clipboard.writeText(lines.join('\n'));
+    setCopiedLog(true);
+    setTimeout(() => setCopiedLog(false), 2500);
+  };
 
   // ── Step mutations ─────────────────────────────────────────────────────────
 
@@ -402,11 +427,6 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
       steps: freshSteps,
     });
   };
-
-  const completedCount = attrs.steps.filter((s) => s.checked).length;
-  const totalCount = attrs.steps.length;
-  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-  const nextVersion = (attrs.version || 1) + 1;
 
   return (
     <NodeViewWrapper className="my-4">
@@ -588,6 +608,31 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
             </div>
           ))}
         </div>
+
+        {/* All Steps Completed Execution Seal */}
+        {completedCount === totalCount && totalCount > 0 && (
+          <div className="mx-4 mb-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between flex-wrap gap-2 animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <div>
+                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  Protocol Execution Complete ({totalCount}/{totalCount} Steps Verified)
+                </p>
+                <p className="text-[10px] text-muted-foreground font-mono">
+                  All steps timestamped · Ready for compliance sign-off or next replicate run
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyExecutionLog}
+              className="px-2.5 py-1 text-[11px] font-medium rounded bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-sm flex items-center gap-1.5"
+            >
+              <ClipboardCheck className="w-3.5 h-3.5" />
+              {copiedLog ? 'Copied Log!' : 'Copy Execution Log'}
+            </button>
+          </div>
+        )}
 
         {/* Add step footer */}
         <div className="px-4 pb-3">
