@@ -12,9 +12,21 @@ import { ProvenanceInteractiveDemo } from '@/components/marketing/ProvenanceInte
 import { PilotInterestForm } from '@/components/marketing/PilotInterestForm';
 
 export const metadata: Metadata = {
-  title: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+  title: {
+    absolute: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+  },
   description:
-    'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Air-gapped data ownership.',
+    'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Air-gapped data ownership.',
+  openGraph: {
+    title: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+    description:
+      'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Air-gapped data ownership.',
+  },
+  twitter: {
+    title: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+    description:
+      'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Air-gapped data ownership.',
+  },
 };
 
 export default function MarketingPage() {

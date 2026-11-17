@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Inquestra vs Benchling vs LabArchives — ELN Comparison',
+  title: {
+    absolute: 'Inquestra vs Benchling vs LabArchives — ELN Comparison',
+  },
   description:
     'Compare Inquestra, Benchling, LabArchives, and SciNote. Pricing, supported disciplines, learning curve, and DAQ compared side by side for academic labs.',
 };

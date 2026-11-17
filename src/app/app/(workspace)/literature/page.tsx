@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import { LiteratureLibrary, type SavedPaperItem } from '@/components/literature/LiteratureLibrary';
 
 export const metadata = {
-  title: 'Literature & Citations | Inquestra',
+  title: 'Literature and Citations',
   description: 'Scientific literature discovery, peer-reviewed citations, and open-access research library.',
 };
 

@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: '%s — Inquestra',
   },
   description:
-    'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
+    'Free electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Free for all labs.',
   metadataBase: new URL('https://inquestra.org'),
   openGraph: {
     type: 'website',
@@ -44,21 +44,21 @@ export const metadata: Metadata = {
     siteName: 'Inquestra',
     title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
     description:
-    'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
+      'Free electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Free for all labs.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
     description:
-      'Free electronic lab notebook (ELN) for life sciences, chemistry & engineering. Protocols, chemical inventory, molecular structures & DAQ. Free for all labs.',
+      'Free electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Free for all labs.',
   },
   icons: {
     icon: [
-      { url: '/icon.svg?v=2', type: 'image/svg+xml' },
-      { url: '/favicon.ico?v=2', sizes: 'any' },
+      { url: '/favicon.ico?v=4', sizes: 'any' },
+      { url: '/icon.svg?v=4', type: 'image/svg+xml' },
     ],
     apple: [
-      { url: '/apple-icon?v=2', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-icon?v=4', sizes: '180x180', type: 'image/png' },
     ],
   },
   robots: {

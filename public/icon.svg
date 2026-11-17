@@ -1,35 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 88 88" fill="none">
   <style>
-    path, circle {
+    .wave-solid {
       stroke: #0f172a;
-      fill: #0f172a;
+      fill: none;
     }
     .wave-dashed {
       stroke: #0f172a;
       fill: none;
       opacity: 0.5;
     }
-    .wave-solid {
-      fill: none;
+    .node {
+      fill: #0f172a;
     }
     @media (prefers-color-scheme: dark) {
-      path, circle {
-        stroke: #f8fafc;
-        fill: #f8fafc;
-      }
+      .wave-solid,
       .wave-dashed {
         stroke: #f8fafc;
-        fill: none;
-        opacity: 0.5;
       }
-      .wave-solid {
-        fill: none;
+      .node {
+        fill: #f8fafc;
       }
     }
   </style>
-  <path class="wave-solid" d="M 20 50 C 20 20, 50 20, 50 50 C 50 80, 80 80, 80 50" stroke-width="8" stroke-linecap="round" />
-  <path class="wave-dashed" d="M 20 50 C 20 80, 50 80, 50 50 C 50 20, 80 20, 80 50" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 10" />
-  <circle cx="20" cy="50" r="8" />
-  <circle cx="80" cy="50" r="8" />
-  <circle cx="50" cy="50" r="6" />
+  <path class="wave-solid" d="M 20 50 C 20 20, 50 20, 50 50 C 50 80, 80 80, 80 50" stroke-width="8.5" stroke-linecap="round" />
+  <path class="wave-dashed" d="M 20 50 C 20 80, 50 80, 50 50 C 50 20, 80 20, 80 50" stroke-width="8.5" stroke-linecap="round" stroke-dasharray="10 10" />
+  <circle class="node" cx="20" cy="50" r="8" />
+  <circle class="node" cx="80" cy="50" r="8" />
+  <circle class="node" cx="50" cy="50" r="6" />
 </svg>

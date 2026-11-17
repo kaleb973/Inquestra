@@ -3,7 +3,7 @@ import { ArrowRight, Cpu } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Hardware DAQ & Telemetry Ingestion — Inquestra',
+  title: 'Hardware DAQ and Telemetry Ingestion',
   description:
     'Browser Web Serial telemetry ingestion for ESP32, Arduino, and lab sensors. Zero driver installation, 1 kHz sampling, and sub-millisecond latency.',
 };

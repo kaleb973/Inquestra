@@ -21,7 +21,7 @@ interface ScanPageProps {
 }
 
 export const metadata = {
-  title: 'Specimen & Location Resolver | Inquestra',
+  title: 'Specimen and Location Resolver',
   description: 'Instant mobile barcode and QR code lookup for lab specimens, freezer storage, and instruments.',
 };
 

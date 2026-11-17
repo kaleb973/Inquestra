@@ -3,7 +3,7 @@ import { ArrowRight, ShieldCheck, Lock, FileCheck, Key, CheckCircle, AlertCircle
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cryptographic Provenance & 21 CFR Part 11 Technical Controls — Inquestra',
+  title: 'Cryptographic Provenance and 21 CFR Part 11 Technical Controls',
   description:
     'Immutable data provenance, SHA-256 trial hashing, ISO 8601 UTC timestamps, and 21 CFR Part 11 technical controls for life sciences, chemistry, and engineering.',
 };
