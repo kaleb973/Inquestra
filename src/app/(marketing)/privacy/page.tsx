@@ -3,7 +3,7 @@ import { Lock } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Inquestra',
+  title: 'Privacy Policy',
   description: 'Enterprise data privacy, security, and telemetry confidentiality policy for Inquestra platform.',
 };
 

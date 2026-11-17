@@ -3,7 +3,7 @@ import { ArrowRight, Database } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'System Architecture & Telemetry Pipeline — Inquestra',
+  title: 'System Architecture and Telemetry Pipeline',
   description:
     'Technical architecture of Inquestra: 4-tier telemetry pipeline, off-main-thread Web Workers, Zustand reactive state, and offline-first PostgreSQL sync.',
 };

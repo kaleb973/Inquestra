@@ -3,7 +3,7 @@ import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Inquestra',
+  title: 'Terms of Service',
   description: 'Enterprise terms of service, acceptable use, and compliance policies for Inquestra research platform.',
 };
 

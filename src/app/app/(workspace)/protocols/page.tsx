@@ -9,7 +9,7 @@ import { ProtocolManager } from '@/components/protocols/ProtocolManager';
 import type { ProtocolSummary } from '@/components/protocols/ProtocolLibrary';
 
 export const metadata = {
-  title: 'Protocol & SOP Library | Inquestra',
+  title: 'Protocol and SOP Library',
   description: 'Standard Operating Procedures, lab protocols, and verified assay templates.',
 };
 

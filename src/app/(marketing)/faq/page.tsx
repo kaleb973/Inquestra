@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Clock, Cpu, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Frequently Asked Questions — Inquestra Free Electronic Lab Notebook',
+  title: {
+    absolute: 'Frequently Asked Questions — Inquestra Free Electronic Lab Notebook',
+  },
   description:
     'Direct answers about Inquestra ELN: guest mode without signup, native Web Serial API bench hardware DAQ, free academic access, 21 CFR Part 11 provenance, sequence tools, and roadmap.',
 };
