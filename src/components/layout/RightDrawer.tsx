@@ -428,13 +428,12 @@ export function RightDrawer() {
                   try {
                     const res = await sealTrial(cloudTrialId);
                     if (res.success) {
-                      // Reload to reflect sealed state
                       window.location.reload();
                     } else {
-                      alert(res.error || 'Seal failed');
+                      console.warn('Seal failed:', res.error);
                     }
                   } catch (err) {
-                    alert(err instanceof Error ? err.message : 'Seal failed');
+                    console.error('Seal error:', err);
                   }
                 }
               }}

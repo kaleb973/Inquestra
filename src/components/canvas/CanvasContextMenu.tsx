@@ -86,27 +86,27 @@ export function CanvasContextMenu({
     <div
       ref={menuRef}
       style={{ top: `${Math.max(12, posY)}px`, left: `${Math.max(12, posX)}px` }}
-      className="fixed z-50 w-56 rounded-xl bg-card border border-border shadow-2xl py-1.5 text-xs text-foreground font-sans animate-in fade-in-50 zoom-in-95 duration-100 divide-y divide-border/50"
+      className="fixed z-50 w-52 rounded-lg bg-popover/95 backdrop-blur-sm border border-border shadow-lg p-1 text-xs text-popover-foreground font-sans animate-in fade-in-50 zoom-in-95 duration-75 select-none"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-mono">
-        <span className="font-semibold text-foreground">Insert Scientific Node</span>
+      <div className="px-2 py-1 text-[10px] text-muted-foreground font-mono uppercase tracking-wider border-b border-border/50 mb-1">
+        Insert Block
       </div>
 
-      <div className="py-1">
+      <div className="space-y-0.5">
         <button
           onClick={() => insertNode('interactiveChart', { csvData: null })}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <BarChart3 className="w-3.5 h-3.5 text-blue-500" />
-          <span>Live Telemetry Chart</span>
+          <BarChart3 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <span>Telemetry Chart</span>
         </button>
 
         <button
           onClick={() => insertNode('reagentBlock')}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <FlaskConical className="w-3.5 h-3.5 text-emerald-500" />
+          <FlaskConical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span>Reagent Deduction</span>
         </button>
 
@@ -114,34 +114,26 @@ export function CanvasContextMenu({
           onClick={() =>
             insertNode('protocolBlock', { title: 'New Protocol', version: 1, steps: [] })
           }
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <ClipboardList className="w-3.5 h-3.5 text-amber-500" />
+          <ClipboardList className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span>Protocol Checklist</span>
         </button>
 
         <button
           onClick={() => insertNode('moleculeBlock')}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <FlaskConical className="w-3.5 h-3.5 text-muted-foreground" />
-          <span>Chemical Molecule (SMILES)</span>
+          <FlaskConical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <span>Molecule (SMILES)</span>
         </button>
 
         <button
           onClick={() => insertNode('mathBlock')}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <span className="w-3.5 h-3.5 font-serif italic font-bold text-center">∑</span>
-          <span>KaTeX Math Formula</span>
-        </button>
-
-        <button
-          onClick={handleUploadCSV}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
-        >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-sky-500" />
-          <span>Import Laboratory CSV</span>
+          <span className="w-3.5 h-3.5 font-serif italic text-muted-foreground text-center shrink-0">∑</span>
+          <span>Math Formula</span>
         </button>
 
         <button
@@ -149,14 +141,24 @@ export function CanvasContextMenu({
             editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
             onClose();
           }}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <Table2 className="w-3.5 h-3.5 text-muted-foreground" />
+          <Table2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span>Data Table</span>
         </button>
       </div>
 
-      <div className="py-1">
+      <div className="my-1 h-px bg-border/50" />
+
+      <div className="space-y-0.5">
+        <button
+          onClick={handleUploadCSV}
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <span>Import CSV…</span>
+        </button>
+
         <button
           onClick={() => {
             onClose();
@@ -166,13 +168,13 @@ export function CanvasContextMenu({
               window.dispatchEvent(new CustomEvent('inquestra:trigger-snapshot'));
             }
           }}
-          className="w-full flex items-center justify-between px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+          className="w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
         >
-          <div className="flex items-center gap-2.5">
-            <Bookmark className="w-3.5 h-3.5 text-primary" />
+          <div className="flex items-center gap-2">
+            <Bookmark className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <span>Save Snapshot</span>
           </div>
-          <kbd className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">
+          <kbd className="text-[9px] font-mono text-muted-foreground bg-muted px-1 py-0.5 rounded border border-border">
             Ctrl+S
           </kbd>
         </button>

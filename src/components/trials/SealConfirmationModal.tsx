@@ -11,6 +11,7 @@ interface SealConfirmationModalProps {
   trialTitle: string;
   isOpen: boolean;
   isSealing: boolean;
+  error?: string | null;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -19,6 +20,7 @@ export function SealConfirmationModal({
   trialTitle,
   isOpen,
   isSealing,
+  error,
   onClose,
   onConfirm,
 }: SealConfirmationModalProps) {
@@ -61,6 +63,13 @@ export function SealConfirmationModal({
 
         {/* Content */}
         <div className="p-5 space-y-4 text-xs">
+          {error && (
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-destructive/15 border border-destructive/30 text-destructive text-xs leading-relaxed animate-in fade-in-50">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <p>{error}</p>
+            </div>
+          )}
+
           <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <div className="space-y-1">

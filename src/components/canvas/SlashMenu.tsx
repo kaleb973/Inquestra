@@ -82,22 +82,22 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
 
     return (
       <div
-        className="bg-card/95 backdrop-blur-md border border-border/80 rounded-xl shadow-2xl shadow-black/50 w-72 max-h-80 overflow-y-auto overscroll-contain py-1.5 z-50 focus:outline-none divide-y divide-border/20"
+        className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-lg w-64 max-h-72 overflow-y-auto overscroll-contain p-1 z-50 focus:outline-none select-none"
         role="listbox"
         aria-label="Slash commands"
         onWheel={(e) => e.stopPropagation()}
       >
-        <div className="px-3 py-1 text-[10px] uppercase font-mono font-semibold tracking-wider text-muted-foreground/80">
-          Commands &amp; Blocks
+        <div className="px-2 py-1 text-[10px] uppercase font-mono tracking-wider text-muted-foreground border-b border-border/50 mb-0.5">
+          Insert Block
         </div>
-        <div className="py-1">
+        <div className="space-y-0.5">
           {items.map((item, index) => {
             const showCategoryHeader =
               Boolean(item.category) && (!index || item.category !== items[index - 1]?.category);
             return (
               <div key={item.title}>
                 {showCategoryHeader && (
-                  <div className="px-3 pt-2 pb-1 text-[9px] uppercase font-mono font-semibold tracking-wider text-muted-foreground/70">
+                  <div className="px-2 pt-1.5 pb-0.5 text-[9px] uppercase font-mono tracking-wider text-muted-foreground/70">
                     {item.category}
                   </div>
                 )}
@@ -108,18 +108,18 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
                   role="option"
                   aria-selected={index === selectedIndex}
                   onClick={() => selectItem(index)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors cursor-pointer ${
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-colors cursor-pointer ${
                     index === selectedIndex
                       ? 'bg-accent text-accent-foreground'
                       : 'hover:bg-muted/60 text-foreground'
                   }`}
                 >
-                  <span className="p-1.5 rounded-md bg-muted border border-border/60 text-foreground shrink-0 flex items-center justify-center">
+                  <span className="w-5 h-5 rounded bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0 text-xs">
                     {item.icon}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold tracking-tight">{item.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate leading-relaxed">
+                    <p className="text-xs font-medium tracking-tight truncate">{item.title}</p>
+                    <p className="text-[10px] text-muted-foreground truncate leading-tight">
                       {item.description}
                     </p>
                   </div>

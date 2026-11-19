@@ -813,7 +813,7 @@ function buildSlashCommands(): SlashCommand[] {
     },
     {
       title: 'Sign Trial (21 CFR § 11)',
-      description: 'Apply electronic signature — seals trial for regulatory compliance',
+      description: 'Apply electronic signature to seal trial record',
       category: 'Actions & Compliance',
       keywords: ['sign', 'signature', 'seal', 'attest', 'cfr', 'part11', 'witness', 'electronic', 'lock', 'approve'],
       icon: <FileLock2 className="w-4 h-4 text-emerald-500" />,
@@ -1128,8 +1128,14 @@ export function EditorCanvas() {
 
       // If trial is not synced yet (no cloudTrialId), store is updated in localStorage
       if (!currentCloudTrialId) {
-        setSaveStatus('SAVED');
-        setLastSavedAt(new Date().toISOString());
+        setSaveStatus('SAVING');
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        saveTimeoutRef.current = setTimeout(() => {
+          setSaveStatus('SAVED');
+          setLastSavedAt(new Date().toISOString());
+        }, 250);
         return;
       }
 
@@ -1170,7 +1176,11 @@ export function EditorCanvas() {
     if (pendingSaveRef.current) {
       const payload = pendingSaveRef.current;
       pendingSaveRef.current = null;
-      executeServerSave(payload);
+      // Only execute server save if the outgoing trial actually has an active cloud link
+      const state = useNotebookStore.getState();
+      if (state.cloudProjectId && state.cloudTrialId && state.cloudTrialId === payload.trialId) {
+        executeServerSave(payload);
+      }
     }
   }, [executeServerSave]);
 
@@ -1365,7 +1375,6 @@ export function EditorCanvas() {
           .run();
       } catch (err) {
         console.error('CSV parse error:', err);
-        alert(err instanceof Error ? err.message : 'Failed to parse CSV file');
       }
     },
     []
@@ -1497,7 +1506,7 @@ export function EditorCanvas() {
                       type="button"
                       onClick={() => window.location.reload()}
                       className="text-amber-500 hover:text-amber-400 flex items-center gap-1.5 font-medium transition-colors cursor-pointer"
-                      title="A new version of Inquestra was deployed to the server. Your draft is preserved locally in browser storage — click to reload."
+                      title="A new version of Inquestra was deployed to the server. Your draft is preserved locally in browser storage: click to reload."
                     >
                       <RotateCw className="w-3 h-3" />
                       Update deployed · Click to reload
@@ -1510,16 +1519,26 @@ export function EditorCanvas() {
                       title={saveError || 'Autosave failed. Click to retry.'}
                     >
                       <AlertCircle className="w-3 h-3" />
-                      Save failed — click to retry
+                      Save failed: click to retry
                     </button>
                   )
+                ) : (saveStatus === 'SAVING') ? (
+                  <span className="text-primary flex items-center gap-1.5 animate-pulse">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>{cloudTrialId ? 'Saving to cloud…' : 'Saving locally…'}</span>
+                  </span>
+                ) : (saveStatus === 'UNSAVED') ? (
+                  <span className="text-amber-500 flex items-center gap-1.5">
+                    <Circle className="w-2 h-2 fill-amber-500" />
+                    <span>Unsaved changes</span>
+                  </span>
                 ) : (
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Check className="w-3 h-3 text-emerald-500" />
                     {formattedTime
-                      ? `${cloudTrialId ? 'Cloud trial' : 'Local notebook'} · Updated ${formattedTime}`
+                      ? `${cloudTrialId ? 'Cloud experiment' : 'Local notebook'} · Updated ${formattedTime}`
                       : cloudTrialId
-                        ? 'Cloud trial'
+                        ? 'Cloud experiment'
                         : 'Local notebook'}
                   </span>
                 )}
@@ -1569,13 +1588,12 @@ export function EditorCanvas() {
                   try {
                     const res = await sealTrial(cloudTrialId);
                     if (res.success) {
-                      alert('Trial successfully sealed.');
                       window.location.reload();
                     } else {
-                      alert(res.error || 'Seal failed');
+                      console.warn('Seal trial failed:', res.error);
                     }
                   } catch (err) {
-                    alert(err instanceof Error ? err.message : 'Seal failed');
+                    console.error('Seal trial error:', err);
                   }
                 }
               }}

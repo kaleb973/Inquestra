@@ -39,16 +39,23 @@ const ALLOWED_TIPTAP_NODES = new Set([
   'tableCell',
   'taskList',
   'taskItem',
-  // Custom Inquestra instrument nodes
+  // Custom Inquestra instrument nodes (supporting both block and node naming conventions)
   'protocolBlock',
   'timerBlock',
+  'reagentBlock',
   'reagentNode',
   'interactiveChart',
+  'moleculeBlock',
   'moleculeNode',
+  'sequenceBlock',
   'sequenceNode',
+  'mathBlock',
   'mathNode',
+  'equipmentBlock',
   'equipmentNode',
+  'trialReferenceBlock',
   'trialReference',
+  'citationBlock',
   'citationNode',
 ]);
 
@@ -247,6 +254,10 @@ export async function extractSafeTrialJsonFromZip(file: File): Promise<string> {
  * Sanitizes an attribute value based on its key to prevent XSS / protocol smuggling.
  */
 function sanitizeNodeAttribute(key: string, value: unknown): unknown {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
   if (typeof value === 'string') {
     if (key === 'href' || key === 'src') {
       const lower = value.trim().toLowerCase();
