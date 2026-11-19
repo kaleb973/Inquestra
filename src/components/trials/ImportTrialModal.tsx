@@ -67,7 +67,12 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
   }, [cachedProjects, selectedProjectId]);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setTargetDestination(isGuest ? 'LOCAL' : 'CLOUD');
+      if (cachedProjects.length > 0 && !selectedProjectId) {
+        setSelectedProjectId(cachedProjects[0].id);
+      }
+    } else {
       // Reset state on close
       setSelectedFile(null);
       setAuditReport(null);
@@ -76,7 +81,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
       setIsProcessing(false);
       setDragActive(false);
     }
-  }, [open]);
+  }, [open, isGuest, cachedProjects, selectedProjectId]);
 
   useEffect(() => {
     if (!open) return;
@@ -142,7 +147,27 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
         updatedAt: validatedTrial.updatedAt,
       };
 
+      const newSummary: TrialSummaryItem = {
+        id: validatedTrial.id,
+        title: validatedTrial.title,
+        status: 'DRAFT',
+        updatedAt: validatedTrial.updatedAt,
+        createdAt: validatedTrial.createdAt,
+        projectId: 'local',
+        metadata: validatedTrial.metadata,
+      };
+
       addLocalTrial(localTrialDoc);
+      setCachedTrials([newSummary, ...cachedTrials.filter((t) => t.id !== validatedTrial.id)]);
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('inquestra:trial-imported', {
+            detail: { trial: newSummary, doc: localTrialDoc },
+          })
+        );
+      }
+
       onClose();
       return;
     }
@@ -190,11 +215,45 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
         });
         setSaveStatus('SAVED');
 
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('inquestra:trial-imported', {
+              detail: { trial: newSummary, doc: cloudDoc },
+            })
+          );
+        }
+
         onClose();
       } catch (err) {
-        setErrorMessage(
-          err instanceof Error ? err.message : 'Failed to save imported trial to cloud database.'
-        );
+        console.warn('Cloud import creation rejected, falling back to local sandbox mount:', err);
+        const fallbackLocalDoc: TrialDocument = {
+          id: validatedTrial.id,
+          title: validatedTrial.title,
+          content: validatedTrial.content,
+          status: 'DRAFT',
+          metadata: validatedTrial.metadata,
+          createdAt: validatedTrial.createdAt,
+          updatedAt: validatedTrial.updatedAt,
+        };
+        const fallbackSummary: TrialSummaryItem = {
+          id: validatedTrial.id,
+          title: validatedTrial.title,
+          status: 'DRAFT',
+          updatedAt: validatedTrial.updatedAt,
+          createdAt: validatedTrial.createdAt,
+          projectId: 'local',
+          metadata: validatedTrial.metadata,
+        };
+        addLocalTrial(fallbackLocalDoc);
+        setCachedTrials([fallbackSummary, ...cachedTrials.filter((t) => t.id !== validatedTrial.id)]);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('inquestra:trial-imported', {
+              detail: { trial: fallbackSummary, doc: fallbackLocalDoc },
+            })
+          );
+        }
+        onClose();
       }
     });
   };
@@ -286,7 +345,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
                       Click to browse or drop an export archive here
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Accepts <span className="font-mono text-foreground font-medium">trial.json</span> or Inquestra <span className="font-mono text-foreground font-medium">.zip</span> archives (up to 10MB)
+                      Accepts <span className="font-mono text-foreground font-medium">trial.json</span> or Inquestra <span className="font-mono text-foreground font-medium">.zip</span> archives (restores protocol notes, reagents, and structures)
                     </p>
                   </div>
                 </div>
@@ -442,6 +501,14 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
                   )}
                 </div>
               )}
+
+              {/* Workspace Safety Clarification */}
+              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 text-xs text-foreground flex items-center gap-2.5">
+                <FileText className="w-4 h-4 text-primary shrink-0" />
+                <span className="leading-relaxed">
+                  <strong>Safe Workspace Import:</strong> Your existing experiments remain saved in your sidebar. The imported trial will open immediately in your canvas as a new editable draft.
+                </span>
+              </div>
             </div>
           )}
 

@@ -188,3 +188,97 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Download raw TipTap document JSON directly for importing into another Inquestra workspace.
+ */
+export function exportTrialAsJson(payload: ExportPayload): void {
+  const jsonExport = JSON.stringify(
+    {
+      title: payload.title,
+      status: payload.status,
+      createdAt: payload.createdAt,
+      updatedAt: payload.updatedAt,
+      checksum: payload.checksum ?? null,
+      sealedAt: payload.sealedAt ?? null,
+      signatures: payload.signatures || [],
+      metadata: payload.metadata,
+      doc: payload.content,
+    },
+    null,
+    2
+  );
+
+  const blob = new Blob([jsonExport], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const slug =
+    payload.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 40) || 'trial';
+
+  a.href = url;
+  a.download = `${slug}_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Download clean Markdown document.
+ */
+export function exportTrialAsMarkdown(payload: ExportPayload): void {
+  const td = new TurndownService({
+    headingStyle: 'atx',
+    bulletListMarker: '-',
+    codeBlockStyle: 'fenced',
+  });
+
+  const signatures = payload.signatures || [];
+  const isSealed = !!payload.checksum;
+
+  const frontmatter = [
+    '---',
+    `title: "${payload.title}"`,
+    `status: ${payload.status}`,
+    `created: ${payload.createdAt}`,
+    `updated: ${payload.updatedAt}`,
+    ...(payload.checksum ? [`checksum_sha256: "${payload.checksum}"`] : []),
+    ...(payload.sealedAt ? [`sealed_at: "${payload.sealedAt}"`] : []),
+    '---',
+    '',
+    `# ${payload.title}`,
+    '',
+  ].join('\n');
+
+  let markdownBody = td.turndown(payload.html || '<p></p>');
+
+  if (signatures.length > 0 || isSealed) {
+    markdownBody += '\n\n---\n\n## 21 CFR Part 11 Electronic Signatures & Compliance\n\n';
+    if (isSealed) {
+      markdownBody += `> **Cryptographic Seal (SHA-256):** \`${payload.checksum}\`  \n`;
+      markdownBody += `> **Sealed At:** ${payload.sealedAt ? new Date(payload.sealedAt).toLocaleString() : 'N/A'}\n\n`;
+    }
+    markdownBody += '| Role | Signer | Date (UTC) | Legal Meaning |\n|---|---|---|---|\n';
+    for (const sig of signatures) {
+      markdownBody += `| **${sig.role}** | ${sig.user.email} (${sig.user.role}) | ${new Date(sig.signedAt).toISOString()} | ${sig.meaning} |\n`;
+    }
+  }
+
+  const markdown = frontmatter + markdownBody;
+  const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const slug =
+    payload.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 40) || 'trial';
+
+  a.href = url;
+  a.download = `${slug}_${Date.now()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}

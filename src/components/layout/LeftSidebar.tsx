@@ -564,9 +564,21 @@ export function LeftSidebar() {
         prev.map((t) => (t.id === detail.trialId ? { ...t, status: detail.status } : t))
       );
     };
+
+    const handleTrialImported = (e: Event) => {
+      const detail = (e as CustomEvent<{ trial: TrialSummaryItem; doc: import('@/types/inquestra').TrialDocument }>).detail;
+      if (!detail?.trial) return;
+      setTrials((prev) => [detail.trial, ...prev.filter((t) => t.id !== detail.trial.id)]);
+      handleSelectTrial(detail.trial.id);
+    };
+
     window.addEventListener('inquestra:trial-status-updated', handleStatusUpdate);
-    return () => window.removeEventListener('inquestra:trial-status-updated', handleStatusUpdate);
-  }, []);
+    window.addEventListener('inquestra:trial-imported', handleTrialImported);
+    return () => {
+      window.removeEventListener('inquestra:trial-status-updated', handleStatusUpdate);
+      window.removeEventListener('inquestra:trial-imported', handleTrialImported);
+    };
+  }, [handleSelectTrial]);
 
   // Handler for manual project switcher
   const handleSelectProject = useCallback(async (newProjectId: string) => {
@@ -706,7 +718,13 @@ export function LeftSidebar() {
   };
 
   const handleRenameTrial = async (targetTrial: TrialSummaryItem, newTitle: string) => {
-    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+    const isLocal =
+      isGuest ||
+      targetTrial.projectId === 'local' ||
+      !cloudProjectId ||
+      localTrials.some((t) => t.id === targetTrial.id);
+
+    if (isLocal) {
       const now = new Date().toISOString();
       if (targetTrial.id === activeTrial.id) {
         useNotebookStore.getState().updateTitle(newTitle);
@@ -717,6 +735,9 @@ export function LeftSidebar() {
           ),
         }));
       }
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, title: newTitle } : t))
+      );
       return;
     }
     try {
@@ -728,12 +749,24 @@ export function LeftSidebar() {
         useNotebookStore.getState().updateTitle(newTitle);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to rename experiment');
+      console.error('Failed to rename trial on server, updating locally:', err);
+      if (activeTrial.id === targetTrial.id) {
+        useNotebookStore.getState().updateTitle(newTitle);
+      }
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, title: newTitle } : t))
+      );
     }
   };
 
   const handleDuplicateTrial = async (targetTrial: TrialSummaryItem) => {
-    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+    const isLocal =
+      isGuest ||
+      targetTrial.projectId === 'local' ||
+      !cloudProjectId ||
+      localTrials.some((t) => t.id === targetTrial.id);
+
+    if (isLocal) {
       const source =
         localTrials.find((t) => t.id === targetTrial.id) ??
         (activeTrial.id === targetTrial.id ? activeTrial : null);
@@ -762,17 +795,59 @@ export function LeftSidebar() {
         handleSelectTrial(res.trial.id);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to duplicate experiment');
+      console.error('Failed to duplicate trial on server, cloning locally:', err);
+      const source = activeTrial.id === targetTrial.id ? activeTrial : null;
+      const now = new Date().toISOString();
+      const localId =
+        typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      const cloned: import('@/types/inquestra').TrialDocument = {
+        id: localId,
+        title: `${targetTrial.title} (Copy)`,
+        content: source?.content
+          ? (JSON.parse(JSON.stringify(source.content)) as Record<string, unknown>)
+          : { type: 'doc', content: [] },
+        status: 'DRAFT',
+        metadata: (source?.metadata ?? targetTrial.metadata ?? []).map((m) => ({ ...m })),
+        createdAt: now,
+        updatedAt: now,
+      };
+      addLocalTrial(cloned);
     }
   };
 
-  const handleDeleteTrial = async (targetTrial: TrialSummaryItem) => {
-    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+  const handleDeleteTrial = async (targetTrial: TrialSummaryItem): Promise<{ success: boolean; error?: string } | void> => {
+    const isLocal =
+      isGuest ||
+      targetTrial.projectId === 'local' ||
+      !cloudProjectId ||
+      localTrials.some((t) => t.id === targetTrial.id);
+
+    if (isLocal) {
       deleteLocalTrial(targetTrial.id);
-      return;
+      setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
+      if (activeTrial.id === targetTrial.id) {
+        const remaining = (localTrials || []).filter((t) => t.id !== targetTrial.id);
+        if (remaining.length > 0 && remaining[0]?.id) {
+          selectLocalTrial(remaining[0].id);
+        } else {
+          handleNewTrial();
+        }
+      }
+      return { success: true };
     }
+
     try {
-      await deleteTrial(targetTrial.id);
+      const res = await deleteTrial(targetTrial.id);
+      if (!res.success) {
+        // Fallback: if not found on server or unauthorized, purge from local state
+        if (res.error?.includes('not found') || res.error?.includes('Unauthorized')) {
+          deleteLocalTrial(targetTrial.id);
+          setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
+          return { success: true };
+        }
+        return { success: false, error: res.error || 'Failed to delete experiment' };
+      }
+
       setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
       if (activeTrial.id === targetTrial.id) {
         const remaining = trials.filter((t) => t.id !== targetTrial.id);
@@ -782,19 +857,32 @@ export function LeftSidebar() {
           handleNewTrial();
         }
       }
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete experiment');
+      return { success: true };
+    } catch (err: unknown) {
+      console.error('Delete trial network exception:', err);
+      deleteLocalTrial(targetTrial.id);
+      setTrials((prev) => prev.filter((t) => t.id !== targetTrial.id));
+      return { success: true };
     }
   };
 
   const handleSetCategory = async (targetTrial: TrialSummaryItem, category: string) => {
-    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+    const isLocal =
+      isGuest ||
+      targetTrial.projectId === 'local' ||
+      !cloudProjectId ||
+      localTrials.some((t) => t.id === targetTrial.id);
+
+    if (isLocal) {
       const currentMeta = targetTrial.metadata || [];
       const filteredMeta = currentMeta.filter(
         (m) => !['category', 'type'].includes(m.key.toLowerCase())
       );
       const newMeta = category ? [...filteredMeta, { id: 'cat', key: 'category', value: category }] : filteredMeta;
       updateLocalTrialMetadata(targetTrial.id, newMeta);
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, metadata: newMeta } : t))
+      );
       return;
     }
     try {
@@ -824,12 +912,24 @@ export function LeftSidebar() {
         }));
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to set category');
+      console.error('Failed to set category on server, updating locally:', err);
+      const currentMeta = targetTrial.metadata || [];
+      const filteredMeta = currentMeta.filter(
+        (m) => !['category', 'type'].includes(m.key.toLowerCase())
+      );
+      const newMeta = category ? [...filteredMeta, { id: 'cat', key: 'category', value: category }] : filteredMeta;
+      updateLocalTrialMetadata(targetTrial.id, newMeta);
     }
   };
 
   const handleChangeStatus = async (targetTrial: TrialSummaryItem, newStatus: TrialStatus) => {
-    if (isGuest || targetTrial.projectId === 'local' || !cloudProjectId) {
+    const isLocal =
+      isGuest ||
+      targetTrial.projectId === 'local' ||
+      !cloudProjectId ||
+      localTrials.some((t) => t.id === targetTrial.id);
+
+    if (isLocal) {
       useNotebookStore.getState().updateTrialStatusEverywhere(targetTrial.id, newStatus);
       setTrials((prev) =>
         prev.map((t) => (t.id === targetTrial.id ? { ...t, status: newStatus } : t))
@@ -846,8 +946,7 @@ export function LeftSidebar() {
     try {
       const res = await updateTrialStatus(targetTrial.id, newStatus);
       if (!res.success) {
-        alert(res.error || 'Failed to update status');
-        return;
+        console.warn('Update trial status warning, applying locally:', res.error);
       }
       useNotebookStore.getState().updateTrialStatusEverywhere(targetTrial.id, newStatus);
       setTrials((prev) =>
@@ -861,7 +960,11 @@ export function LeftSidebar() {
         );
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update status');
+      console.error('Failed to update status on server, applying locally:', err);
+      useNotebookStore.getState().updateTrialStatusEverywhere(targetTrial.id, newStatus);
+      setTrials((prev) =>
+        prev.map((t) => (t.id === targetTrial.id ? { ...t, status: newStatus } : t))
+      );
     }
   };
 
@@ -886,7 +989,21 @@ export function LeftSidebar() {
         } as TrialSummaryItem;
       });
     }
-    return trials.map((t) => {
+    const cloudTrialIds = new Set(trials.map((t) => t.id));
+    const unmergedLocal: TrialSummaryItem[] = (localTrials || [])
+      .filter((lt) => !cloudTrialIds.has(lt.id))
+      .map((lt) => ({
+        id: lt.id,
+        title: lt.id === activeTrial.id ? (activeTrial.title || lt.title) : lt.title,
+        status: lt.id === activeTrial.id ? (activeTrial.status || lt.status) : lt.status,
+        metadata: lt.id === activeTrial.id ? (activeTrial.metadata || lt.metadata) : lt.metadata,
+        createdAt: lt.createdAt,
+        updatedAt: lt.updatedAt || lt.createdAt,
+        projectId: 'local',
+      }));
+
+    const merged = [...unmergedLocal, ...trials];
+    return merged.map((t) => {
       if (t.id === activeTrial.id) {
         return {
           ...t,
@@ -1036,35 +1153,29 @@ export function LeftSidebar() {
 
           {/* Project dropdown */}
           {projectMenuOpen && (
-            <div className="mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+            <div className="mt-1 bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto p-1 text-xs select-none space-y-0.5">
               {/* All Projects Option */}
               <button
                 onClick={() => {
                   handleSelectProject('ALL');
                   setProjectMenuOpen(false);
                 }}
-                className={`w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-accent transition-colors border-b border-border/30 ${
-                  !activeProjectId || activeProjectId === 'ALL' ? 'bg-muted/60' : ''
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left transition-colors ${
+                  !activeProjectId || activeProjectId === 'ALL'
+                    ? 'bg-accent text-accent-foreground font-medium'
+                    : 'text-foreground hover:bg-muted'
                 }`}
               >
-                <FolderOpen
-                  className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                    !activeProjectId || activeProjectId === 'ALL' ? 'text-primary' : 'text-muted-foreground'
-                  }`}
-                />
-                <div className="min-w-0 flex-1">
-                  <span
-                    className={`text-xs font-medium block truncate ${
-                      !activeProjectId || activeProjectId === 'ALL' ? 'text-primary font-semibold' : 'text-foreground'
-                    }`}
-                  >
-                    All Projects
-                  </span>
-                  <span className="text-[10px] text-muted-foreground block">
-                    Entire organization workspace
-                  </span>
+                <div className="flex items-center gap-2 truncate">
+                  <FolderOpen className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="truncate">All Projects</span>
                 </div>
+                <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                  {trials.length}
+                </span>
               </button>
+
+              <div className="my-1 h-px bg-border/50" />
 
               {projects.map((p) => (
                 <button
@@ -1073,35 +1184,19 @@ export function LeftSidebar() {
                     handleSelectProject(p.id);
                     setProjectMenuOpen(false);
                   }}
-                  className={`w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-accent transition-colors border-b border-border/30 last:border-0 ${
-                    p.id === activeProjectId ? 'bg-muted/60' : ''
+                  className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left transition-colors ${
+                    p.id === activeProjectId
+                      ? 'bg-accent text-accent-foreground font-medium'
+                      : 'text-foreground hover:bg-muted'
                   }`}
                 >
-                  <FolderOpen
-                    className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                      p.id === activeProjectId ? 'text-primary' : 'text-muted-foreground'
-                    }`}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <span
-                      className={`text-xs font-medium block truncate ${
-                        p.id === activeProjectId ? 'text-primary font-semibold' : 'text-foreground'
-                      }`}
-                    >
-                      {p.name}
-                    </span>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {p.lead && (
-                        <span className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
-                          <UserIcon className="w-2.5 h-2.5 shrink-0" />
-                          {p.lead.email?.split('@')?.[0] ?? 'Lead'}
-                        </span>
-                      )}
-                      <span className="text-[10px] text-muted-foreground shrink-0">
-                        {p._count.trials} trial{p._count.trials !== 1 ? 's' : ''}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2 truncate">
+                    <FolderOpen className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate">{p.name}</span>
                   </div>
+                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                    {p._count.trials}
+                  </span>
                 </button>
               ))}
             </div>
@@ -1470,6 +1565,10 @@ export function LeftSidebar() {
           onDelete={handleDeleteTrial}
           onSetCategory={handleSetCategory}
           onChangeStatus={handleChangeStatus}
+          onExport={(targetTrial) => {
+            handleSelectTrial(targetTrial.id);
+            window.dispatchEvent(new CustomEvent('inquestra:trigger-export'));
+          }}
         />
       )}
     </>

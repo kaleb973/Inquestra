@@ -29,7 +29,7 @@ interface TrialContextMenuProps {
   onClose: () => void;
   onRename: (trial: TrialSummaryItem, newTitle: string) => Promise<void>;
   onDuplicate: (trial: TrialSummaryItem) => Promise<void>;
-  onDelete: (trial: TrialSummaryItem) => Promise<void>;
+  onDelete: (trial: TrialSummaryItem) => Promise<{ success: boolean; error?: string } | void>;
   onSetCategory: (trial: TrialSummaryItem, category: string) => Promise<void>;
   onChangeStatus: (trial: TrialSummaryItem, status: TrialStatus) => Promise<void>;
   onExport?: (trial: TrialSummaryItem) => void;
@@ -73,6 +73,7 @@ export function TrialContextMenu({
   const [dialogMode, setDialogMode] = useState<'NONE' | 'RENAME' | 'CATEGORY' | 'DELETE'>('NONE');
   const [renameValue, setRenameValue] = useState(trial.title);
   const [categoryValue, setCategoryValue] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showStatusSubmenu, setShowStatusSubmenu] = useState(false);
@@ -83,6 +84,7 @@ export function TrialContextMenu({
   useEffect(() => {
     if (!isOpen) {
       setDialogMode('NONE');
+      setDeleteError(null);
       setShowStatusSubmenu(false);
       setCopiedId(false);
       return;
@@ -184,10 +186,17 @@ export function TrialContextMenu({
   const handleExecuteDelete = async () => {
     if (isSubmitting || isSealed) return;
     setIsSubmitting(true);
+    setDeleteError(null);
     try {
-      await onDelete(trial);
+      const res = await onDelete(trial);
+      if (res && typeof res === 'object' && res.success === false) {
+        setDeleteError(res.error || 'Failed to delete experiment.');
+        return;
+      }
       setDialogMode('NONE');
       onClose();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete experiment.');
     } finally {
       setIsSubmitting(false);
     }
@@ -200,26 +209,26 @@ export function TrialContextMenu({
         <div
           ref={menuRef}
           style={{ top: `${adjustedPos.top}px`, left: `${adjustedPos.left}px` }}
-          className="fixed z-50 w-56 rounded-xl bg-card border border-border shadow-2xl py-1.5 text-xs text-foreground font-sans animate-in fade-in-50 zoom-in-95 duration-100 divide-y divide-border/50"
+          className="fixed z-50 w-48 rounded-lg bg-popover/95 backdrop-blur-sm border border-border shadow-lg p-1 text-xs text-popover-foreground font-sans animate-in fade-in-50 zoom-in-95 duration-75 select-none"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header identity */}
-          <div className="px-3 py-1.5 text-[10px] text-muted-foreground truncate font-mono">
-            <span className="font-semibold text-foreground">{trial.title}</span>
+          <div className="px-2 py-1 text-[10px] text-muted-foreground truncate font-mono border-b border-border/50 mb-1">
+            <span className="font-medium text-foreground">{trial.title}</span>
           </div>
 
           {/* Primary Operations */}
-          <div className="py-1">
+          <div className="space-y-0.5">
             <button
               onClick={() => {
                 if (isSealed) return;
                 setDialogMode('RENAME');
               }}
               disabled={isSealed}
-              className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>Rename Experiment</span>
+              <Edit3 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <span>Rename</span>
             </button>
 
             <button
@@ -228,10 +237,10 @@ export function TrialContextMenu({
                 setDialogMode('CATEGORY');
               }}
               disabled={isSealed}
-              className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Tag className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>Set Category / Tag…</span>
+              <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <span>Set tag…</span>
             </button>
 
             <div className="relative">
@@ -241,18 +250,18 @@ export function TrialContextMenu({
                   setShowStatusSubmenu(!showStatusSubmenu);
                 }}
                 disabled={isSealed}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center gap-2.5">
-                  <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span>Change Status</span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span>Status</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground font-mono uppercase">{trial.status}</span>
               </button>
 
               {/* Status Submenu */}
               {showStatusSubmenu && !isSealed && (
-                <div className="absolute left-full top-0 ml-1 w-36 rounded-lg bg-card border border-border shadow-xl py-1 text-xs animate-in fade-in-50 zoom-in-95 duration-100">
+                <div className="absolute left-full top-0 ml-1 w-32 rounded-lg bg-popover/95 backdrop-blur-sm border border-border shadow-lg p-1 text-xs animate-in fade-in-50 zoom-in-95 duration-75">
                   {STATUS_OPTIONS.map((opt) => (
                     <button
                       key={opt.status}
@@ -261,10 +270,10 @@ export function TrialContextMenu({
                         setShowStatusSubmenu(false);
                         onClose();
                       }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+                      className="w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${opt.dotClass}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${opt.dotClass}`} />
                         <span>{opt.label}</span>
                       </div>
                       {trial.status === opt.status && <Check className="w-3 h-3 text-primary" />}
@@ -285,27 +294,24 @@ export function TrialContextMenu({
                 }
               }}
               disabled={isSubmitting}
-              className="w-full flex items-start gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
             >
-              <Copy className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <div>Duplicate as Draft</div>
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  Branch an editable copy with steps &amp; metadata
-                </div>
-              </div>
+              <Copy className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <span>Duplicate</span>
             </button>
           </div>
 
+          <div className="my-1 h-px bg-border/50" />
+
           {/* Utility Operations */}
-          <div className="py-1">
+          <div className="space-y-0.5">
             <button
               onClick={handleCopyId}
-              className="w-full flex items-center justify-between px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
             >
-              <div className="flex items-center gap-2.5">
-                <Share2 className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>Copy Experiment ID</span>
+              <div className="flex items-center gap-2">
+                <Share2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span>Copy ID</span>
               </div>
               {copiedId && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
             </button>
@@ -316,31 +322,33 @@ export function TrialContextMenu({
                   onExport(trial);
                   onClose();
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-accent hover:text-foreground transition-colors"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
               >
-                <Download className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>Export as ZIP</span>
+                <Download className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span>Export ZIP…</span>
               </button>
             )}
           </div>
 
+          <div className="my-1 h-px bg-border/50" />
+
           {/* Destructive Zone */}
-          <div className="py-1">
+          <div>
             {isSealed ? (
               <div
-                className="flex items-center gap-2.5 px-3 py-1.5 text-muted-foreground/60 text-[11px] cursor-not-allowed"
-                title="21 CFR Part 11: Sealed experiments are immutable and cannot be deleted"
+                className="flex items-center gap-2 px-2 py-1.5 text-muted-foreground/60 text-xs cursor-not-allowed"
+                title="Sealed experiments are immutable and cannot be deleted"
               >
-                <Lock className="w-3.5 h-3.5 text-amber-500/80" />
+                <Lock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span>Sealed (Locked)</span>
               </div>
             ) : (
               <button
                 onClick={() => setDialogMode('DELETE')}
-                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left text-destructive hover:bg-destructive/10 transition-colors"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-destructive hover:bg-destructive/10 transition-colors"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete Experiment…</span>
+                <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                <span>Delete…</span>
               </button>
             )}
           </div>
@@ -455,6 +463,11 @@ export function TrialContextMenu({
             <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to delete <strong className="text-foreground">{trial.title}</strong>? All draft revisions and metadata will be permanently removed.
             </p>
+            {deleteError && (
+              <div className="p-2.5 rounded-lg border border-destructive/40 bg-destructive/10 text-destructive text-xs leading-relaxed animate-in fade-in-50">
+                {deleteError}
+              </div>
+            )}
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"

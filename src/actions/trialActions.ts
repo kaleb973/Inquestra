@@ -316,7 +316,11 @@ export async function restoreTrialRevision(revisionId: string) {
     },
   });
 
-  revalidatePath('/app');
+  try {
+    revalidatePath('/app');
+  } catch (revErr) {
+    console.warn('[Cache] Non-fatal revalidatePath error in restoreTrialRevision:', revErr);
+  }
   return { success: true, newTrialId: restored.id };
 }
 
@@ -380,7 +384,11 @@ export async function signTrial(
     },
   });
 
-  revalidatePath('/app');
+  try {
+    revalidatePath('/app');
+  } catch (revErr) {
+    console.warn('[Cache] Non-fatal revalidatePath error in signTrial:', revErr);
+  }
   return { success: true, signatureId: signature.id };
 }
 
@@ -627,7 +635,11 @@ export async function createNewTrial(
     include: { metadata: true },
   });
 
-  revalidatePath('/app');
+  try {
+    revalidatePath('/app');
+  } catch (revErr) {
+    console.warn('[Cache] Non-fatal revalidatePath error in createNewTrial:', revErr);
+  }
   return trial;
 }
 
@@ -804,183 +816,237 @@ export async function updateTrialStatus(
  * Rename a trial/experiment.
  * Sealed trials cannot be renamed.
  */
-export async function renameTrial(trialId: string, newTitle: string) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+export async function renameTrial(
+  trialId: string,
+  newTitle: string
+): Promise<{ success: boolean; error?: string; trial?: import('@prisma/client').Trial }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Unauthorized: active session required.' };
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) return { success: false, error: 'User not found.' };
 
-  const trial = await prisma.trial.findFirst({
-    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
-  });
-  if (!trial) throw new Error('Trial not found');
-  if (trial.checksum) throw new Error('Cannot rename a sealed experiment.');
+    const trial = await prisma.trial.findFirst({
+      where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+    });
+    if (!trial) return { success: false, error: 'Trial not found.' };
+    if (trial.checksum) return { success: false, error: 'Cannot rename a sealed experiment.' };
 
-  const cleanTitle = DOMPurify.sanitize(newTitle.trim()) || 'Untitled Experiment';
+    const cleanTitle = DOMPurify.sanitize(newTitle.trim()) || 'Untitled Experiment';
 
-  const updated = await prisma.trial.update({
-    where: { id: trialId },
-    data: { title: cleanTitle },
-  });
+    const updated = await prisma.trial.update({
+      where: { id: trialId },
+      data: { title: cleanTitle },
+    });
 
-  await prisma.auditLog.create({
-    data: {
-      userId: dbUser.id,
-      organizationId: dbUser.organizationId,
-      action: 'TRIAL_RENAMED',
-      entityType: 'Trial',
-      entityId: trialId,
-      details: {
-        message: `Experiment renamed from "${trial.title}" to "${cleanTitle}".`,
-        previousTitle: trial.title,
-        newTitle: cleanTitle,
+    await prisma.auditLog.create({
+      data: {
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+        action: 'TRIAL_RENAMED',
+        entityType: 'Trial',
+        entityId: trialId,
+        details: {
+          message: `Experiment renamed from "${trial.title}" to "${cleanTitle}".`,
+          previousTitle: trial.title,
+          newTitle: cleanTitle,
+        },
       },
-    },
-  });
+    });
 
-  revalidatePath('/app');
-  return { success: true, trial: updated };
+    try {
+      revalidatePath('/app');
+    } catch (revErr) {
+      console.warn('[Cache] Non-fatal revalidatePath error in renameTrial:', revErr);
+    }
+    return { success: true, trial: updated };
+  } catch (err: unknown) {
+    console.error('renameTrial error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Failed to rename experiment',
+    };
+  }
 }
 
 /**
  * Duplicate an experiment and its metadata as a new DRAFT experiment.
  */
-export async function duplicateTrial(trialId: string) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+export async function duplicateTrial(
+  trialId: string
+): Promise<{ success: boolean; error?: string; trial?: import('@prisma/client').Trial & { metadata: import('@prisma/client').MetadataEntry[] } }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Unauthorized: active session required.' };
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) return { success: false, error: 'User not found.' };
 
-  const trial = await prisma.trial.findFirst({
-    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
-    include: { metadata: true },
-  });
-  if (!trial) throw new Error('Trial not found');
+    const trial = await prisma.trial.findFirst({
+      where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+      include: { metadata: true },
+    });
+    if (!trial) return { success: false, error: 'Trial not found.' };
 
-  const newTitle = `Copy of ${trial.title}`;
-  const duplicated = await prisma.trial.create({
-    data: {
-      title: newTitle,
-      content: trial.content as Prisma.InputJsonValue,
-      status: 'DRAFT',
-      projectId: trial.projectId,
-      userId: dbUser.id,
-      metadata: {
-        create: trial.metadata.map((m) => ({ key: m.key, value: m.value })),
+    const newTitle = `Copy of ${trial.title}`;
+    const duplicated = await prisma.trial.create({
+      data: {
+        title: newTitle,
+        content: trial.content as Prisma.InputJsonValue,
+        status: 'DRAFT',
+        projectId: trial.projectId,
+        userId: dbUser.id,
+        metadata: {
+          create: trial.metadata.map((m) => ({ key: m.key, value: m.value })),
+        },
       },
-    },
-    include: { metadata: true },
-  });
+      include: { metadata: true },
+    });
 
-  await prisma.auditLog.create({
-    data: {
-      userId: dbUser.id,
-      organizationId: dbUser.organizationId,
-      action: 'TRIAL_DUPLICATED',
-      entityType: 'Trial',
-      entityId: duplicated.id,
-      details: {
-        message: `Duplicated experiment "${trial.title}" into new draft "${newTitle}".`,
-        sourceTrialId: trialId,
-        newTrialId: duplicated.id,
+    await prisma.auditLog.create({
+      data: {
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+        action: 'TRIAL_DUPLICATED',
+        entityType: 'Trial',
+        entityId: duplicated.id,
+        details: {
+          message: `Duplicated experiment "${trial.title}" into new draft "${newTitle}".`,
+          sourceTrialId: trialId,
+          newTrialId: duplicated.id,
+        },
       },
-    },
-  });
+    });
 
-  revalidatePath('/app');
-  return { success: true, trial: duplicated };
+    try {
+      revalidatePath('/app');
+    } catch (revErr) {
+      console.warn('[Cache] Non-fatal revalidatePath error in duplicateTrial:', revErr);
+    }
+    return { success: true, trial: duplicated };
+  } catch (err: unknown) {
+    console.error('duplicateTrial error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Failed to duplicate experiment',
+    };
+  }
 }
 
 /**
  * Delete an unsealed trial.
  * Sealed trials strictly cannot be deleted under 21 CFR Part 11 immutable provenance.
  */
-export async function deleteTrial(trialId: string) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+export async function deleteTrial(trialId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Unauthorized: active session required.' };
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) return { success: false, error: 'User not found.' };
 
-  const trial = await prisma.trial.findFirst({
-    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
-  });
-  if (!trial) throw new Error('Trial not found');
+    const trial = await prisma.trial.findFirst({
+      where: { id: trialId, project: { organizationId: dbUser.organizationId } },
+    });
+    if (!trial) return { success: false, error: 'Trial not found' };
 
-  if (trial.checksum) {
-    throw new Error('21 CFR Part 11 Violation: Sealed experiments are immutable and cannot be deleted.');
-  }
+    if (trial.checksum) {
+      return {
+        success: false,
+        error: '21 CFR Part 11 Violation: Sealed experiments are immutable and cannot be deleted.',
+      };
+    }
 
-  await prisma.$transaction([
-    prisma.metadataEntry.deleteMany({ where: { trialId } }),
-    prisma.trialRevision.deleteMany({ where: { trialId } }),
-    prisma.trialInventory.deleteMany({ where: { trialId } }),
-    prisma.trialEquipment.deleteMany({ where: { trialId } }),
-    prisma.signature.deleteMany({ where: { trialId } }),
-    prisma.telemetryStream.deleteMany({ where: { trialId } }),
-    prisma.trial.delete({ where: { id: trialId } }),
-    prisma.auditLog.create({
-      data: {
-        userId: dbUser.id,
-        organizationId: dbUser.organizationId,
-        action: 'TRIAL_DELETED',
-        entityType: 'Trial',
-        entityId: trialId,
-        details: {
-          message: `Deleted unsealed experiment "${trial.title}" (ID: ${trialId}).`,
-          deletedTitle: trial.title,
+    await prisma.$transaction([
+      prisma.metadataEntry.deleteMany({ where: { trialId } }),
+      prisma.trialRevision.deleteMany({ where: { trialId } }),
+      prisma.trialInventory.deleteMany({ where: { trialId } }),
+      prisma.trialEquipment.deleteMany({ where: { trialId } }),
+      prisma.signature.deleteMany({ where: { trialId } }),
+      prisma.telemetryStream.deleteMany({ where: { trialId } }),
+      prisma.trial.delete({ where: { id: trialId } }),
+      prisma.auditLog.create({
+        data: {
+          userId: dbUser.id,
+          organizationId: dbUser.organizationId,
+          action: 'TRIAL_DELETED',
+          entityType: 'Trial',
+          entityId: trialId,
+          details: {
+            message: `Deleted unsealed experiment "${trial.title}" (ID: ${trialId}).`,
+            deletedTitle: trial.title,
+          },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
 
-  revalidatePath('/app');
-  return { success: true };
+    return { success: true };
+  } catch (err: unknown) {
+    console.error('deleteTrial error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Failed to delete experiment',
+    };
+  }
 }
 
 /**
  * Set or update category metadata tag on a trial.
  */
-export async function setTrialCategory(trialId: string, category: string) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+export async function setTrialCategory(
+  trialId: string,
+  category: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'Unauthorized: active session required.' };
 
-  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
-  if (!dbUser) throw new Error('User not found');
+    const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (!dbUser) return { success: false, error: 'User not found.' };
 
-  const trial = await prisma.trial.findFirst({
-    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
-  });
-  if (!trial) throw new Error('Trial not found');
-  if (trial.checksum) throw new Error('Cannot modify metadata on a sealed experiment.');
-
-  const cleanCategory = DOMPurify.sanitize(category.trim());
-
-  await prisma.$transaction(async (tx) => {
-    await tx.metadataEntry.deleteMany({
-      where: {
-        trialId,
-        key: { in: ['category', 'Category', 'type', 'Type'] },
-      },
+    const trial = await prisma.trial.findFirst({
+      where: { id: trialId, project: { organizationId: dbUser.organizationId } },
     });
+    if (!trial) return { success: false, error: 'Trial not found' };
+    if (trial.checksum) return { success: false, error: 'Cannot modify metadata on a sealed experiment.' };
 
-    if (cleanCategory) {
-      await tx.metadataEntry.create({
-        data: {
+    const cleanCategory = DOMPurify.sanitize(category.trim());
+
+    await prisma.$transaction(async (tx) => {
+      await tx.metadataEntry.deleteMany({
+        where: {
           trialId,
-          key: 'category',
-          value: cleanCategory,
+          key: { in: ['category', 'Category', 'type', 'Type'] },
         },
       });
-    }
-  });
 
-  revalidatePath('/app');
-  return { success: true };
+      if (cleanCategory) {
+        await tx.metadataEntry.create({
+          data: {
+            trialId,
+            key: 'category',
+            value: cleanCategory,
+          },
+        });
+      }
+    });
+
+    try {
+      revalidatePath('/app');
+    } catch (revErr) {
+      console.warn('[Cache] Non-fatal revalidatePath error in setTrialCategory:', revErr);
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    console.error('setTrialCategory error:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Failed to set category',
+    };
+  }
 }

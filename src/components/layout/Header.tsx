@@ -24,10 +24,12 @@ import {
   PanelRight,
   MoreVertical,
   RotateCw,
+  Laptop,
 } from 'lucide-react';
 import { isDeploymentSkewError, notifyDeploymentSkew } from '@/lib/deploymentSkew';
 import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal';
 import { ImportTrialModal } from '@/components/trials/ImportTrialModal';
+import { ExportTrialModal } from '@/components/trials/ExportTrialModal';
 import { Logo } from '@/components/ui/Logo';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { syncTrialToCloud } from '@/actions/syncActions';
@@ -39,7 +41,7 @@ import { checkLabCompliance, getCurrentUserProfile } from '@/actions/adminAction
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { trackAnalyticsEvent } from '@/lib/analytics/events';
 import posthog from 'posthog-js';
-import type { TrialStatus, MetadataEntry } from '@/types/inquestra';
+import type { TrialStatus, MetadataEntry, TrialSummaryItem } from '@/types/inquestra';
 import type { User } from '@supabase/supabase-js';
 import type { Role } from '@prisma/client';
 
@@ -94,6 +96,7 @@ export function Header() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSealModal, setShowSealModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [snapshotSuccess, setSnapshotSuccess] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
@@ -198,18 +201,47 @@ export function Header() {
         }
         setSaveStatus('ERROR');
       } else if (result.cloudTrialId && result.cloudProjectId) {
-        setCloudIds({
-          cloudTrialId: result.cloudTrialId,
-          cloudProjectId: result.cloudProjectId,
-        });
-        setSaveStatus('SAVED');
-        setLastSavedAt(new Date().toISOString());
-        setSaveError(null);
+        const newCloudTrialId = result.cloudTrialId;
+        const newCloudProjectId = result.cloudProjectId;
+        const prevId = useNotebookStore.getState().activeTrial.id;
+
+        useNotebookStore.setState((s) => ({
+          activeTrial: {
+            ...s.activeTrial,
+            id: newCloudTrialId,
+          },
+          localTrials: s.localTrials.filter((t) => t.id !== prevId && t.id !== newCloudTrialId),
+          cloudTrialId: newCloudTrialId,
+          cloudProjectId: newCloudProjectId,
+          saveStatus: 'SAVED',
+          lastSavedAt: new Date().toISOString(),
+          saveError: null,
+        }));
+
+        // Notify LeftSidebar to add/update this trial in trials list
+        const updatedSummary: TrialSummaryItem = {
+          id: newCloudTrialId,
+          title,
+          status: status as TrialStatus,
+          updatedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          projectId: newCloudProjectId,
+          metadata: metadata,
+        };
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('inquestra:trial-imported', {
+              detail: { trial: updatedSummary, doc: useNotebookStore.getState().activeTrial },
+            })
+          );
+        }
+
         setSnapshotSuccess(true);
         setTimeout(() => setSnapshotSuccess(false), 2500);
       }
     });
-  }, [user, title, status, metadata, cloudTrialId, cloudProjectId, setCloudIds, setSaveStatus, setLastSavedAt, setSaveError, startTransition]);
+  }, [user, title, status, metadata, cloudTrialId, cloudProjectId, setSaveStatus, setSaveError, startTransition]);
 
   // Listen to global shortcut trigger from EditorCanvas or elsewhere
   useEffect(() => {
@@ -222,7 +254,7 @@ export function Header() {
 
   // Listen for slash-command triggered export and seal events
   useEffect(() => {
-    const handleExportEvent = () => { handleExport(); };
+    const handleExportEvent = () => { setShowExportModal(true); };
     const handleSealEvent = () => { handleOpenSealModal(); };
     const handleImportEvent = () => { setShowImportModal(true); };
     window.addEventListener('inquestra:trigger-export', handleExportEvent);
@@ -312,19 +344,25 @@ export function Header() {
     }
   };
 
+  const [sealError, setSealError] = useState<string | null>(null);
+
   const [isSealing, setIsSealing] = useState(false);
   const handleOpenSealModal = () => {
     if (!user) {
-      alert(
-        'Permanent cryptographic trial sealing and dual-signature manifests require an authenticated account.\n\nPlease sign in to sync and seal your trial, or use Export (Ctrl+E) to download a portable JSON/ZIP archive.'
+      setSealError(
+        'Permanent cryptographic trial sealing and dual-signature manifests require an authenticated account. Please sign in to sync and seal, or use Export to download a portable JSON/ZIP archive.'
       );
+      setShowSealModal(true);
       return;
     }
+    setSealError(null);
     setShowSealModal(true);
   };
 
   const handleExecuteSeal = () => {
+    if (!user) return;
     setIsSealing(true);
+    setSealError(null);
     startTransition(async () => {
       try {
         let targetId = cloudTrialId || activeTrialId;
@@ -342,7 +380,7 @@ export function Header() {
           });
 
           if (!syncResult.success && !syncResult.error?.includes('sealed')) {
-            alert(syncResult.error || 'Failed to sync trial before sealing.');
+            setSealError(syncResult.error || 'Failed to sync trial before sealing.');
             setIsSealing(false);
             return;
           }
@@ -358,7 +396,7 @@ export function Header() {
 
         const sealRes = await sealTrial(targetId);
         if (!sealRes.success) {
-          alert(sealRes.error || 'Failed to seal trial');
+          setSealError(sealRes.error || 'Failed to seal trial.');
           setIsSealing(false);
           return;
         }
@@ -379,7 +417,8 @@ export function Header() {
         // Force reload to grab latest DB state
         window.location.reload(); 
       } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Failed to seal trial');
+        console.error('Failed to seal trial:', err);
+        setSealError(err instanceof Error ? err.message : 'Failed to seal trial.');
         setIsSealing(false);
       }
     });
@@ -452,8 +491,7 @@ export function Header() {
                   if (cloudTrialId) {
                     const res = await updateTrialStatus(cloudTrialId, newStatus);
                     if (!res.success) {
-                      alert(res.error || 'Failed to update status');
-                      return;
+                      console.warn('Status update warning from server:', res.error);
                     }
                   }
                   useNotebookStore.getState().updateTrialStatusEverywhere(targetId, newStatus);
@@ -469,7 +507,8 @@ export function Header() {
                     );
                   }
                 } catch (err) {
-                  alert(err instanceof Error ? err.message : 'Status update failed');
+                  console.error('Status update network error:', err);
+                  useNotebookStore.getState().updateTrialStatusEverywhere(targetId, newStatus);
                 }
               });
             }}
@@ -494,36 +533,37 @@ export function Header() {
           </span>
         )}
 
-        {/* Single Authoritative Save Status Indicator */}
-        {!user ? (
-          saveStatus === 'UNSAVED' ? (
-            <span
-              className="flex items-center gap-1.5 text-xs text-amber-500 font-mono"
-              title="Saving changes to browser storage…"
-            >
-              <Circle className="w-2 h-2 fill-amber-500 shrink-0" />
-              <span className="hidden sm:inline">Saving locally…</span>
-            </span>
-          ) : (
-            <span
-              className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono font-medium"
-              title="Private to this device. All changes are auto-saved locally in browser storage."
-            >
-              <Check className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Saved locally</span>
-            </span>
-          )
-        ) : (saveStatus === 'SAVING' || isPending) ? (
+        {/* Scope Badge: Cloud Project vs Local Draft */}
+        {isSynced ? (
+          <span
+            className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-primary/10 text-primary border border-primary/25"
+            title="Synced to your organization's cloud project"
+          >
+            <Cloud className="w-3 h-3 shrink-0" />
+            <span>Cloud</span>
+          </span>
+        ) : (
+          <span
+            className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-muted text-muted-foreground border border-border"
+            title="Stored locally in this browser. Not synced to cloud."
+          >
+            <Laptop className="w-3 h-3 shrink-0" />
+            <span>Local Draft</span>
+          </span>
+        )}
+
+        {/* Real-time Save Status Indicator */}
+        {(saveStatus === 'SAVING' || isPending) ? (
           <span className="flex items-center gap-1.5 text-xs text-primary font-mono animate-pulse">
             <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
-            <span className="hidden sm:inline">Saving…</span>
+            <span className="hidden sm:inline">{isSynced ? 'Saving to cloud…' : 'Saving locally…'}</span>
           </span>
         ) : (saveStatus === 'ERROR' || syncError) ? (
           isDeploymentSkewError(saveError || syncError) ? (
             <button
               onClick={() => window.location.reload()}
               className="flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 font-mono cursor-pointer transition-colors"
-              title="A new version of Inquestra was deployed to the server. Your draft is preserved locally — click to reload."
+              title="A new version of Inquestra was deployed to the server. Your draft is preserved locally: click to reload."
             >
               <RotateCw className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">Update deployed (Reload)</span>
@@ -531,20 +571,12 @@ export function Header() {
           ) : (
             <span
               className="flex items-center gap-1.5 text-xs text-critical font-mono"
-              title={saveError || syncError || 'Sync failed'}
+              title={saveError || syncError || 'Save failed'}
             >
               <AlertCircle className="w-3.5 h-3.5 text-critical shrink-0" />
               <span className="hidden sm:inline">Save failed</span>
             </span>
           )
-        ) : !isSynced ? (
-          <span
-            className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono"
-            title="Saved locally — click Save to back up to cloud"
-          >
-            <Circle className="w-2 h-2 fill-muted-foreground/70 shrink-0" />
-            <span className="hidden sm:inline">Local draft</span>
-          </span>
         ) : saveStatus === 'UNSAVED' ? (
           <span
             className="flex items-center gap-1.5 text-xs text-amber-500 font-mono"
@@ -555,15 +587,15 @@ export function Header() {
           </span>
         ) : (
           <span
-            className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono"
-            title="All changes synced to cloud"
+            className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono font-medium"
+            title={isSynced ? 'All changes synced to cloud' : 'All changes saved locally in browser storage'}
           >
             <Check className="w-3.5 h-3.5 shrink-0" />
-            <span className="hidden sm:inline">Saved</span>
+            <span className="hidden sm:inline">{isSynced ? 'Saved' : 'Saved locally'}</span>
           </span>
         )}
 
-        {/* Back up to Cloud (Guests) or Save Snapshot button (Logged in users) */}
+        {/* Back up to Cloud (Guests) or Save / Snapshot button (Logged in users) */}
         {!user ? (
           <Link
             href="/app/signup?redirectTo=/app"
@@ -582,13 +614,17 @@ export function Header() {
           <button
             onClick={handleSaveSnapshot}
             disabled={isPending || saveStatus === 'SAVING'}
-            title={isSynced ? 'Autosave is active. Click or press Ctrl+S to save a numbered revision checkpoint.' : 'Save trial to cloud database'}
+            title={
+              isSynced
+                ? 'Autosave is active. Click or press Ctrl+S to save a numbered revision checkpoint.'
+                : 'Upload this local draft to your cloud database'
+            }
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors ${
               snapshotSuccess
                 ? 'bg-phosphor/15 text-phosphor border-phosphor/40 font-semibold'
                 : isSynced
                 ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
-                : 'bg-muted/60 text-foreground border-border hover:bg-accent'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 font-medium'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isPending || saveStatus === 'SAVING' ? (
@@ -607,7 +643,7 @@ export function Header() {
                 ? 'Saved!'
                 : isSynced
                 ? 'Snapshot'
-                : 'Save'}
+                : 'Save to Cloud'}
             </span>
           </button>
         )}
@@ -624,21 +660,16 @@ export function Header() {
           <span className="hidden sm:inline">Import</span>
         </button>
 
-        {/* Download / Export button */}
+        {/* Export button */}
         <button
           type="button"
-          onClick={handleExport}
-          disabled={isExporting}
-          title="Download notes and protocol as ZIP (Markdown + JSON)"
-          aria-label="Export trial as ZIP"
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={() => setShowExportModal(true)}
+          title="Export experiment as ZIP, JSON, Markdown, or PDF"
+          aria-label="Export experiment"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium border border-border bg-muted/60 text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {isExporting ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Download className="w-3.5 h-3.5" />
-          )}
-          <span className="hidden sm:inline">{isExporting ? 'Downloading…' : 'Download'}</span>
+          <Download className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="hidden sm:inline">Export</span>
         </button>
 
         {/* Print button (desktop) */}
@@ -686,7 +717,7 @@ export function Header() {
           </button>
 
           {showMoreMenu && (
-            <div className="absolute right-0 mt-2 w-72 rounded-lg border border-border bg-popover text-popover-foreground shadow-xl p-1.5 z-50 text-xs animate-in fade-in-50 zoom-in-95 duration-100">
+            <div className="absolute right-0 mt-2 w-52 rounded-lg border border-border bg-popover/95 backdrop-blur-sm text-popover-foreground shadow-lg p-1 z-50 text-xs animate-in fade-in-50 zoom-in-95 duration-75 select-none">
               {/* Import in dropdown */}
               <button
                 type="button"
@@ -694,13 +725,10 @@ export function Header() {
                   setShowMoreMenu(false);
                   setShowImportModal(true);
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent text-left transition-colors"
               >
-                <Upload className="w-4 h-4 text-muted-foreground shrink-0" />
-                <div>
-                  <div className="font-medium text-foreground">Import Trial Archive</div>
-                  <div className="text-[10px] text-muted-foreground">Restore from trial.json or .zip bundle</div>
-                </div>
+                <Upload className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span>Import Archive…</span>
               </button>
 
               {/* Export in dropdown */}
@@ -708,16 +736,12 @@ export function Header() {
                 type="button"
                 onClick={() => {
                   setShowMoreMenu(false);
-                  handleExport();
+                  setShowExportModal(true);
                 }}
-                disabled={isExporting}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent text-left transition-colors"
               >
-                <Download className="w-4 h-4 text-muted-foreground shrink-0" />
-                <div>
-                  <div className="font-medium text-foreground">Export Trial Archive</div>
-                  <div className="text-[10px] text-muted-foreground">Download ZIP with Markdown, CSV, and JSON</div>
-                </div>
+                <Download className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span>Export Experiment…</span>
               </button>
 
               {/* Print in dropdown */}
@@ -727,27 +751,24 @@ export function Header() {
                   setShowMoreMenu(false);
                   window.print();
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors"
+                className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-accent text-left transition-colors"
               >
-                <Printer className="w-4 h-4 text-muted-foreground shrink-0" />
-                <div>
-                  <div className="font-medium text-foreground">Print to PDF</div>
-                  <div className="text-[10px] text-muted-foreground">Formatted paper or PDF output (Ctrl+P)</div>
+                <div className="flex items-center gap-2">
+                  <Printer className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span>Print</span>
                 </div>
+                <kbd className="text-[9px] font-mono text-muted-foreground bg-muted px-1 py-0.5 rounded border border-border">
+                  Ctrl+P
+                </kbd>
               </button>
 
-              <div className="my-1.5 h-px bg-border" />
+              <div className="my-1 h-px bg-border/50" />
 
-              {/* 21 CFR Part 11 Regulatory Sealing Option */}
+              {/* Regulatory Sealing Option */}
               {checksum ? (
-                <div className="px-2.5 py-2 rounded-md bg-muted/40 text-muted-foreground">
-                  <div className="flex items-center gap-1.5 font-medium text-foreground">
-                    <ShieldCheck className="w-4 h-4 text-caution" />
-                    <span>Trial Sealed (SHA-256)</span>
-                  </div>
-                  <div className="text-[10px] font-mono mt-0.5 truncate text-muted-foreground" title={checksum}>
-                    Hash: {checksum.slice(0, 16)}...
-                  </div>
+                <div className="px-2 py-1.5 rounded-md bg-muted/40 text-muted-foreground flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span className="truncate">Sealed ({checksum.slice(0, 8)}…)</span>
                 </div>
               ) : (
                 <button
@@ -756,37 +777,12 @@ export function Header() {
                     setShowMoreMenu(false);
                     handleOpenSealModal();
                   }}
-                  className="w-full flex items-start gap-2.5 px-2.5 py-2 rounded-md hover:bg-destructive/10 text-left transition-colors group"
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-destructive hover:bg-destructive/10 text-left transition-colors"
                 >
-                  <Shield className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-medium text-destructive group-hover:underline">
-                      Seal Trial (21 CFR Part 11)
-                    </div>
-                    <div className="text-[10px] text-muted-foreground leading-snug">
-                      Irreversible cryptographic lock. All data becomes permanently read-only.
-                    </div>
-                  </div>
+                  <Shield className="w-3.5 h-3.5 shrink-0" />
+                  <span>Seal Trial Record…</span>
                 </button>
               )}
-
-              <div className="my-1.5 h-px bg-border" />
-
-              {/* Shortcut reference */}
-              <div className="px-2.5 py-1 text-[10px] text-muted-foreground font-mono space-y-1">
-                <div className="flex justify-between items-center">
-                  <span>Toggle Sidebar</span>
-                  <kbd className="bg-muted px-1.5 py-0.5 rounded text-[9px] border border-border">Ctrl+B</kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Toggle Telemetry</span>
-                  <kbd className="bg-muted px-1.5 py-0.5 rounded text-[9px] border border-border">Ctrl+J</kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Save Snapshot</span>
-                  <kbd className="bg-muted px-1.5 py-0.5 rounded text-[9px] border border-border">Ctrl+S</kbd>
-                </div>
-              </div>
             </div>
           )}
         </div>
@@ -899,7 +895,11 @@ export function Header() {
         trialTitle={title}
         isOpen={showSealModal}
         isSealing={isSealing}
-        onClose={() => setShowSealModal(false)}
+        error={sealError}
+        onClose={() => {
+          setShowSealModal(false);
+          setSealError(null);
+        }}
         onConfirm={handleExecuteSeal}
       />
 
@@ -907,6 +907,12 @@ export function Header() {
         open={showImportModal}
         onClose={() => setShowImportModal(false)}
         isGuest={!user}
+      />
+
+      <ExportTrialModal
+        open={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onOpenImport={() => setShowImportModal(true)}
       />
     </header>
   );

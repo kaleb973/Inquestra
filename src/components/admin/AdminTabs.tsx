@@ -161,7 +161,7 @@ function ProjectsTab({
           <FolderOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">No projects yet.</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Create one from the sidebar — use the project switcher at the top left.
+            Create one from the sidebar using the project switcher at the top left.
           </p>
         </div>
       ) : (

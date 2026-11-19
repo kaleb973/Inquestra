@@ -215,7 +215,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             </button>
 
             {showHighlightPalette && (
-              <div className="absolute top-full left-0 mt-1.5 bg-card border border-border rounded-lg shadow-2xl p-1.5 flex items-center gap-1 z-50">
+              <div className="absolute top-full left-0 mt-1.5 bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-1.5 flex items-center gap-1.5 z-50">
                 {HIGHLIGHT_COLORS.map((c) => (
                   <button
                     key={c.label}
@@ -224,7 +224,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                       editor.chain().focus().setHighlight({ color: c.color }).run();
                       setShowHighlightPalette(false);
                     }}
-                    className="w-5 h-5 rounded-full border border-black/10 hover:scale-110 transition-transform"
+                    className="w-4 h-4 rounded-full border border-black/15 hover:scale-110 transition-transform"
                     style={{ backgroundColor: c.color }}
                     title={c.label}
                   />
@@ -432,41 +432,41 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           </button>
 
           {showTableMenu && editor.isActive('table') && (
-            <div className="absolute top-full left-0 mt-1.5 bg-card border border-border rounded-lg shadow-2xl p-1.5 space-y-1 w-44 z-50 text-xs">
+            <div className="absolute top-full left-0 mt-1.5 bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-1 space-y-0.5 w-40 z-50 text-xs">
               <button
                 type="button"
                 onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTableMenu(false); }}
-                className="w-full text-left px-2 py-1 rounded hover:bg-muted flex items-center gap-1.5 text-foreground"
+                className="w-full text-left px-2 py-1.5 rounded-md hover:bg-accent flex items-center gap-2 text-foreground"
               >
-                <Plus className="w-3 h-3 text-emerald-500" /> Add Row
+                <Plus className="w-3.5 h-3.5 text-muted-foreground" /> Add Row
               </button>
               <button
                 type="button"
                 onClick={() => { editor.chain().focus().addColumnAfter().run(); setShowTableMenu(false); }}
-                className="w-full text-left px-2 py-1 rounded hover:bg-muted flex items-center gap-1.5 text-foreground"
+                className="w-full text-left px-2 py-1.5 rounded-md hover:bg-accent flex items-center gap-2 text-foreground"
               >
-                <Plus className="w-3 h-3 text-emerald-500" /> Add Column
+                <Plus className="w-3.5 h-3.5 text-muted-foreground" /> Add Column
               </button>
               <button
                 type="button"
                 onClick={() => { editor.chain().focus().deleteRow().run(); setShowTableMenu(false); }}
-                className="w-full text-left px-2 py-1 rounded hover:bg-muted flex items-center gap-1.5 text-muted-foreground hover:text-destructive"
+                className="w-full text-left px-2 py-1.5 rounded-md hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-destructive"
               >
-                <Trash2 className="w-3 h-3" /> Delete Row
+                <Trash2 className="w-3.5 h-3.5" /> Delete Row
               </button>
               <button
                 type="button"
                 onClick={() => { editor.chain().focus().deleteColumn().run(); setShowTableMenu(false); }}
-                className="w-full text-left px-2 py-1 rounded hover:bg-muted flex items-center gap-1.5 text-muted-foreground hover:text-destructive"
+                className="w-full text-left px-2 py-1.5 rounded-md hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-destructive"
               >
-                <Trash2 className="w-3 h-3" /> Delete Column
+                <Trash2 className="w-3.5 h-3.5" /> Delete Column
               </button>
               <button
                 type="button"
                 onClick={() => { editor.chain().focus().deleteTable().run(); setShowTableMenu(false); }}
-                className="w-full text-left px-2 py-1 rounded hover:bg-destructive/10 text-destructive flex items-center gap-1.5 border-t border-border/60 pt-1"
+                className="w-full text-left px-2 py-1.5 rounded-md hover:bg-destructive/10 text-destructive flex items-center gap-2 border-t border-border/50 pt-1 mt-0.5"
               >
-                <Trash2 className="w-3 h-3" /> Delete Table
+                <Trash2 className="w-3.5 h-3.5" /> Delete Table
               </button>
             </div>
           )}
@@ -541,7 +541,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         </button>
 
         {showMoreMenu && (
-          <div className="absolute top-full right-0 mt-1.5 bg-card border border-border rounded-lg shadow-2xl p-2 w-52 z-50 space-y-2 text-xs">
+          <div className="absolute top-full right-0 mt-1.5 bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-1.5 w-48 z-50 space-y-1.5 text-xs select-none">
             <div>
               <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground px-1 mb-1">
                 Scripts &amp; Marks
