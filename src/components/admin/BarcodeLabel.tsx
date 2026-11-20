@@ -83,7 +83,7 @@ export function BarcodeLabel({ item, onClose }: BarcodeLabelProps) {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Label — ${item.name}</title>
+          <title>Label: ${item.name}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Courier New', monospace; padding: 16px; }

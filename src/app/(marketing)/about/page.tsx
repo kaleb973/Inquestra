@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'About Inquestra — Free ELN Built for Researchers',
+    absolute: 'About Inquestra: Free ELN Built for Researchers',
   },
   description:
     'About Inquestra: a free electronic lab notebook (ELN) for life sciences, chemistry, and engineering, built by researchers for reproducible lab documentation.',
@@ -17,7 +17,7 @@ export default function AboutPage() {
     name: 'Inquestra',
     url: 'https://inquestra.org',
     description:
-      'Inquestra builds free, open research infrastructure for scientists. The flagship product is a browser-based Electronic Lab Notebook for life sciences, chemistry, biotech, materials science, and engineering.',
+      'Inquestra builds open research tools for scientists, centering on a browser-based Electronic Lab Notebook that runs locally on your machine.',
     foundingDate: '2024',
     sameAs: ['https://github.com/kaleb973/Inquestra'],
   };
@@ -30,20 +30,17 @@ export default function AboutPage() {
       />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="pt-32 pb-16 border-b border-border">
+      <section className="pt-16 sm:pt-20 pb-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4">
             About · Inquestra
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl font-normal tracking-tight text-foreground mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
             Built by researchers. Free for researchers.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-            Inquestra is a free, browser-based Electronic Lab Notebook (ELN) for life sciences,
-            chemistry, biotech, materials science, and engineering. It was built out of frustration
-            with the fragmented, expensive, and domain-narrow state of scientific documentation
-            tools — and a belief that every researcher deserves a professional, unified workspace
-            without a licensing fee or an IT department.
+            Inquestra is a free, browser-based Electronic Lab Notebook built for experimental researchers.
+            It was created to replace scattered spreadsheets and proprietary software with an open, local-first workspace.
           </p>
         </div>
       </section>
@@ -51,28 +48,26 @@ export default function AboutPage() {
       {/* ── The problem we solve ─────────────────────────────────────────────── */}
       <section className="py-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-6">
             The problem
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
-            Scientific research today involves at least five disconnected tools: a word processor for
+            Scientific research today involves multiple disconnected tools: a word processor for
             protocols, a spreadsheet for inventory, a citation manager for references, a molecular
             drawing program for structures, and a separate data logger for instrument output. When a
-            rotating student joins a lab, onboarding means installing and learning all five — and
-            then keeping them in sync manually.
+            rotating student joins a lab, onboarding means installing and learning every program, then
+            keeping them in sync manually.
           </p>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
             The ELN market exists to solve this problem, but most solutions reproduce it in a
-            different form: they lock you into a single scientific domain (molecular biology, or
-            physical science, but rarely both), charge per-user licensing fees that academic labs
-            cannot sustain across rotating students, or require institutional IT infrastructure just
-            to get started.
+            different form: they lock you into a single scientific domain, charge per-user licensing
+            fees that academic labs cannot sustain across rotating students, or require institutional
+            IT infrastructure just to get started.
           </p>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             Inquestra is built on the premise that this is unnecessary. A single, well-designed,
             browser-based workspace can serve a molecular biologist, a materials scientist, and an
-            electrical engineer in the same research group — with no installation, no subscription,
-            and no compromise on features.
+            electrical engineer in the same research group without complex installations or subscriptions.
           </p>
         </div>
       </section>
@@ -80,11 +75,11 @@ export default function AboutPage() {
       {/* ── What Inquestra is ────────────────────────────────────────────────── */}
       <section className="py-16 border-b border-border bg-muted/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-6">
             What Inquestra is
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
-            Inquestra is an Electronic Lab Notebook (ELN) for the full breadth of experimental
+            Inquestra is an Electronic Lab Notebook for the full breadth of experimental
             science. In a single browser tab, researchers can:
           </p>
           <ul className="space-y-3 text-sm text-muted-foreground">
@@ -94,7 +89,7 @@ export default function AboutPage() {
             </li>
             <li className="flex gap-3">
               <span className="text-emerald-500 font-bold mt-0.5 shrink-0">→</span>
-              <span>Manage chemical and biological inventories — reagents, standards, samples, instruments — with lot tracking and automatic protocol linkage</span>
+              <span>Manage chemical and biological inventories (reagents, standards, samples, instruments) with lot tracking and automatic protocol linkage</span>
             </li>
             <li className="flex gap-3">
               <span className="text-emerald-500 font-bold mt-0.5 shrink-0">→</span>
@@ -110,13 +105,12 @@ export default function AboutPage() {
             </li>
             <li className="flex gap-3">
               <span className="text-emerald-500 font-bold mt-0.5 shrink-0">→</span>
-              <span>Generate cryptographic audit trails and verifiable exports adhering to 21 CFR Part 11 technical controls</span>
+              <span>Generate cryptographic audit trails and verifiable exports with tamper-evident checksums</span>
             </li>
           </ul>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-6">
-            All of this is free, with no per-researcher licensing cost, no mandatory account
-            creation, and no software to install. Researchers can start in a guest workspace
-            immediately and sync to a free account when they are ready to persist their data.
+            Inquestra runs directly in your browser with local storage. You can start working immediately in guest mode,
+            and export your experiments as standard Markdown, JSON, and CSV archives whenever you want.
           </p>
         </div>
       </section>
@@ -124,7 +118,7 @@ export default function AboutPage() {
       {/* ── Who it is for ────────────────────────────────────────────────────── */}
       <section className="py-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-6">
             Who Inquestra is for
           </h2>
           <div className="grid sm:grid-cols-2 gap-6 text-sm text-muted-foreground">
@@ -132,16 +126,14 @@ export default function AboutPage() {
               <h3 className="text-foreground font-semibold mb-2">Students and rotating researchers</h3>
               <p className="leading-relaxed">
                 Undergraduates, graduate students, and postdoctoral fellows who need a professional
-                research notebook from day one — without waiting for institutional licenses or
-                on-boarding tutorials.
+                research notebook from day one without waiting for institutional licenses or onboarding tutorials.
               </p>
             </div>
             <div>
               <h3 className="text-foreground font-semibold mb-2">Academic lab groups</h3>
               <p className="leading-relaxed">
-                University research groups in life sciences, chemistry, biotech, materials science,
-                or engineering that need a shared protocol library, inventory system, and
-                reproducible experimental record.
+                University research groups that need shared protocols, inventory tracking, and
+                reproducible experiment records without per-seat software licenses.
               </p>
             </div>
             <div>
@@ -155,7 +147,7 @@ export default function AboutPage() {
             <div>
               <h3 className="text-foreground font-semibold mb-2">Multidisciplinary research groups</h3>
               <p className="leading-relaxed">
-                Labs that span molecular biology, chemistry, and hardware instrumentation — where
+                Labs that span molecular biology, chemistry, and hardware instrumentation where
                 domain-specific tools like Benchling leave gaps in the workflow.
               </p>
             </div>
@@ -166,7 +158,7 @@ export default function AboutPage() {
       {/* ── Founder & Engineering Leadership ─────────────────────────────── */}
       <section className="py-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-6">
             Founder &amp; Engineering Leadership
           </h2>
           <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-4">
@@ -203,13 +195,13 @@ export default function AboutPage() {
       {/* ── Trust signals & open source ──────────────────────────────────────── */}
       <section className="py-16 border-b border-border bg-muted/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-6">
             Open development
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
             Inquestra is developed openly on GitHub. The source code is inspectable, issues are
             tracked publicly, and contributions from the research community are welcome. Scientific
-            software should be auditable — particularly software involved in data provenance and
+            software should be auditable, particularly software involved in data provenance and
             audit trails.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -236,12 +228,11 @@ export default function AboutPage() {
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-4">
-            Try Inquestra in your browser — free.
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
+            Try Inquestra in your browser for free.
           </h2>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-            No credit card. No institutional affiliation required. Launch the workspace and start
-            your first protocol today.
+            Opens in your browser. No account needed to start your first protocol.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link

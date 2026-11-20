@@ -2,7 +2,7 @@
 // src/actions/storageActions.ts
 // Cloudflare R2 presigned URL generation for direct browser-to-bucket upload.
 // Bypasses Vercel serverless completely — zero egress fees.
-// Enforces tenant isolation, 21 CFR Part 11 immutability, and CWE-1236/XSS protection.
+// Enforces tenant isolation, cryptographic immutability, and CWE-1236/XSS protection.
 
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';

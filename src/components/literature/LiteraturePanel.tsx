@@ -1,7 +1,7 @@
 'use client';
 // src/components/literature/LiteraturePanel.tsx
 // Right drawer tab for literature discovery, Europe PMC search, and trial citations.
-// Fully compliant with Europe PMC open access terms and 21 CFR Part 11 audit logging.
+// Fully compliant with Europe PMC open access terms with append-only audit logging.
 
 import { useState, useEffect, useCallback, useTransition } from 'react';
 import {
@@ -151,7 +151,7 @@ export function LiteraturePanel() {
 
   const handleUnlink = async (trialPaperId: string) => {
     if (isSealed) {
-      alert('This experiment is sealed under 21 CFR Part 11. Citations cannot be removed.');
+      alert('This experiment is cryptographically sealed. Citations cannot be removed from completed records.');
       return;
     }
     startTransition(async () => {

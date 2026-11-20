@@ -39,7 +39,7 @@ export function LabSettings({ org }: { org: Organization }) {
                   ? 'bg-muted text-foreground border-border' 
                   : 'bg-muted text-muted-foreground border-border'
               }`}>
-                {isStrict ? 'Strict Mode (GLP / 21 CFR Part 11)' : 'Flexible Bench Mode'}
+                {isStrict ? 'Strict Mode (GLP / Audit Locked)' : 'Flexible Bench Mode'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
@@ -168,7 +168,7 @@ export function LabSettings({ org }: { org: Organization }) {
               <div className="p-3 flex items-start gap-2 font-medium text-foreground">
                 <ShieldAlert className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
                 <div>
-                  <div>21 CFR Part 11 Audit Trail</div>
+                  <div>Immutable Audit Trail</div>
                   <div className="text-[10px] text-muted-foreground font-normal">Regulatory inspection readiness</div>
                 </div>
               </div>
@@ -196,7 +196,7 @@ export function LabSettings({ org }: { org: Organization }) {
           </div>
           <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/30 rounded-lg">
             <span className="text-foreground font-medium block mb-1">Choose Strict Mode if:</span>
-            You are operating in regulated biopharma, clinical trials, GMP/GLP manufacturing, or pre-clinical safety studies where FDA 21 CFR Part 11 requires immutable material verification and zero unverified chemical usage.
+            You are operating in regulated biopharma, translational research, or pre-clinical safety studies where internal SOPs require immutable material verification and zero unverified chemical usage.
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@
 - **Zero-Signup Local Mode:** Start documenting immediately at [inquestra.org/app](https://inquestra.org/app). Trials, metadata, checklists, and molecular blocks persist automatically in browser `localStorage` with zero procurement or IT approval.
 - **Native Bench Hardware DAQ (Web Serial API):** Stream live serial telemetry directly from Arduino, ESP32, potentiostats, balances, pH meters, and microcontrollers into embedded interactive charts without Python middleware or proprietary vendor dongles.
 - **Molecular & Analytical Primitives Inline:** Resolve compound names or IUPAC identifiers into canonical SMILES, formula, molar mass, and InChIKey via PubChem; calculate DNA/RNA oligonucleotide length, GC%, Wallace & salt-adjusted melting temperature ($T_m$), and reverse complements in real time.
-- **Immutable Data Provenance:** Draft notes sync optionally to PostgreSQL (via Prisma ORM), append revision snapshots, and lock completed experiments with SHA-256 hash seals and signed audit logs designed around **21 CFR Part 11** electronic record workflows.
+- **Immutable Data Provenance:** Draft notes sync optionally to PostgreSQL (via Prisma ORM), append revision snapshots, and lock completed experiments with SHA-256 hash seals and append-only audit logs designed to support institutional compliance and reproducibility.
 - **TypeScript-Strict & Self-Hostable:** Built on Next.js App Router, React, TipTap, Zustand, Tailwind CSS, and PostgreSQL with zero `any` types across client/server boundaries.
 
 ---
@@ -32,7 +32,7 @@
 | **IUPAC / Name → SMILES + InChIKey** | **Yes (PubChem live lookup + 2D render)** | Enterprise Add-on | Limited | Chem module |
 | **Primer GC% & Tm Calculator** | **Yes (Wallace + Salt-adjusted inline)** | Yes | No | Limited |
 | **Interactive Step Checklists & Timers** | **Yes (per-step timestamps + deviations)** | Structured tables | Rich text | Task checklists |
-| **SHA-256 Record Sealing & Audit Trail** | **Yes (21 CFR Part 11-ready workflow)** | Enterprise tier | Institutional tier | Premium tier |
+| **SHA-256 Record Sealing & Audit Trail** | **Yes (Cryptographic digest & audit log)** | Enterprise tier | Institutional tier | Premium tier |
 | **Transparent Codebase & Self-Hosting** | **Open repository (Next.js + Postgres)** | Closed SaaS | Closed SaaS | Open-core / Cloud |
 
 > Full matrix available at [inquestra.org/compare](https://inquestra.org/compare).

@@ -186,7 +186,7 @@ function MoleculeNode({ node, updateAttributes, deleteNode }: NodeViewProps) {
       );
     } catch (err) {
       console.error('[MoleculeNode] draw error:', err);
-      setError('Render error — check SMILES syntax');
+      setError('Render error: check SMILES syntax');
     }
   }, [smiles]);
 
@@ -211,7 +211,7 @@ function MoleculeNode({ node, updateAttributes, deleteNode }: NodeViewProps) {
         )}/property/IsomericSMILES,MolecularFormula,MolecularWeight,IUPACName,InChIKey/JSON`;
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) {
-          setLookupError('Compound not found — enter SMILES manually');
+          setLookupError('Compound not found. Enter SMILES manually.');
           return;
         }
 
@@ -225,7 +225,7 @@ function MoleculeNode({ node, updateAttributes, deleteNode }: NodeViewProps) {
           '';
 
         if (!prop || !resolvedSmiles) {
-          setLookupError('Compound not found — enter SMILES manually');
+          setLookupError('Compound not found. Enter SMILES manually.');
           return;
         }
 
@@ -241,9 +241,9 @@ function MoleculeNode({ node, updateAttributes, deleteNode }: NodeViewProps) {
         setError(null);
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
-          setLookupError('Lookup timed out — enter SMILES manually');
+          setLookupError('Lookup timed out. Enter SMILES manually.');
         } else {
-          setLookupError('Compound not found — enter SMILES manually');
+          setLookupError('Compound not found. Enter SMILES manually.');
         }
       } finally {
         clearTimeout(timeoutId);
@@ -470,7 +470,7 @@ function MoleculeNode({ node, updateAttributes, deleteNode }: NodeViewProps) {
                 {(formula || mw) && (
                   <p className="text-xs font-mono text-foreground">
                     {formula ? formatSubscriptFormula(formula) : ''}
-                    {formula && mw ? ' — ' : ''}
+                    {formula && mw ? ' · ' : ''}
                     {mw ? `MW: ${mw} g/mol` : ''}
                   </p>
                 )}

@@ -24,25 +24,25 @@ import type { Role } from '@prisma/client';
 const ROLE_META: Record<Role, { label: string; level: string; color: string; duties: string }> = {
   PI: {
     label: 'Principal Investigator',
-    level: 'Level 4 — Lab Director',
+    level: 'Level 4: Lab Director',
     color: 'text-foreground bg-muted border-violet-500/30',
     duties: 'Full lab governance, trial sealing, team management, and regulatory oversight.',
   },
   ADMIN: {
     label: 'Lab Administrator',
-    level: 'Level 3 — Lab Manager',
+    level: 'Level 3: Lab Manager',
     color: 'text-foreground bg-muted border-border',
     duties: 'Inventory management, equipment calibration, squad assignments, and compliance monitoring.',
   },
   RESEARCHER: {
     label: 'Bench Researcher',
-    level: 'Level 2 — Scientist',
+    level: 'Level 2: Scientist',
     color: 'text-sky-700 dark:text-sky-300 bg-sky-500/10 border-sky-500/30',
     duties: 'Create and run trials, link reagents, record telemetry, and sign experiments as author.',
   },
   VIEWER: {
     label: 'Compliance Auditor',
-    level: 'Level 1 — Read-Only',
+    level: 'Level 1: Read-Only',
     color: 'text-muted-foreground bg-muted border-border',
     duties: 'View sealed trials, inspect the audit ledger, and download research packages.',
   },
@@ -373,8 +373,7 @@ function JoinPageContent() {
           </form>
 
           <p className="text-[10px] text-center text-muted-foreground leading-relaxed">
-            By joining, you acknowledge your compliance duties under{' '}
-            <span className="font-medium">FDA 21 CFR Part 11</span> and your lab&apos;s GLP policies.
+            By joining, you agree to follow your laboratory&apos;s standard operating procedures and data integrity guidelines.
           </p>
         </div>
 

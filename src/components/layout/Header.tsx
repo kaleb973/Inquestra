@@ -699,7 +699,7 @@ export function Header() {
           </div>
         )}
 
-        {/* More Actions Dropdown (contains Print, Export, and dangerous 21 CFR Part 11 Seal action) */}
+        {/* More Actions Dropdown (contains Print, Export, and permanent record seal action) */}
         <div className="relative" ref={moreMenuRef}>
           <button
             type="button"

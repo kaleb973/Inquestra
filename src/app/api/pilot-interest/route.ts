@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
       from: 'Inquestra Pilot <support@inquestra.org>',
       to: [notifyEmail],
       reply_to: sanitized.email,
-      subject: `New Pilot Interest: ${sanitized.institution} — ${sanitized.name}`,
+      subject: `New Pilot Interest: ${sanitized.institution} / ${sanitized.name}`,
       html: `
         <h2>New Pilot Lab Interest</h2>
         <table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;line-height:1.6">
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       from: 'Inquestra Pilot Program <support@inquestra.org>',
       to: [sanitized.email],
       reply_to: 'support@inquestra.org',
-      subject: `Inquestra Pilot Lab Access — Application Received (${sanitized.institution})`,
+      subject: `Inquestra Pilot Lab Access: Application Received (${sanitized.institution})`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#18181b;line-height:1.6">
           <div style="border-bottom:1px solid #e4e4e7;padding-bottom:16px;margin-bottom:20px">

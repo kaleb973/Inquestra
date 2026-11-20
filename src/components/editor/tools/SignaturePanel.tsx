@@ -1,6 +1,6 @@
 'use client';
 // src/components/editor/tools/SignaturePanel.tsx
-// 21 CFR Part 11 electronic signature workflow panel.
+// Electronic signature and audit trail panel.
 // Attaches to the bottom of the trial canvas when the trial is cloud-synced.
 
 import { useEffect, useState, useTransition } from 'react';
@@ -119,7 +119,7 @@ export function SignaturePanel({
           Electronic Signatures
         </h3>
         <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded">
-          21 CFR Part 11
+          Audit Verified
         </span>
         {isSealed && (
           <span className="ml-auto text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">

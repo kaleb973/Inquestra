@@ -38,14 +38,14 @@ export function VersionHistory({ trialId, isSynced }: VersionHistoryProps) {
   }, [trialId, isSynced]);
 
   const handleRestore = (rev: Revision) => {
-    if (!confirm(`Restore the version from ${new Date(rev.savedAt).toLocaleString()}?\n\nThis creates a new draft trial — it does not overwrite the current one.`)) return;
+    if (!confirm(`Restore the version from ${new Date(rev.savedAt).toLocaleString()}?\n\nThis creates a new draft trial; it does not overwrite the current one.`)) return;
     setRestoringId(rev.id);
     startTransition(async () => {
       try {
         const result = await restoreTrialRevision(rev.id);
         if (result.success) {
           setRestoreSuccess(
-            `Restored as a new draft. Find it in your trial list as "Restored — ${rev.title}".`
+            `Restored as a new draft. Find it in your trial list as "Restored: ${rev.title}".`
           );
           setTimeout(() => setRestoreSuccess(null), 6000);
         }
@@ -159,7 +159,7 @@ export function VersionHistory({ trialId, isSynced }: VersionHistoryProps) {
 
       <div className="px-4 py-3 border-t border-border bg-muted/20">
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Restoring creates a new draft trial — it never overwrites sealed or original data.
+          Restoring creates a new draft trial; it never overwrites sealed or original data.
         </p>
       </div>
     </div>

@@ -1,8 +1,8 @@
 // src/lib/provenance.ts
-// Phase 4 & Enterprise Hardening — SHA-256 cryptographic trial sealing engine.
+// SHA-256 cryptographic trial sealing engine.
 // Called when Trial.status transitions ACTIVE → COMPLETED or when electronically signed.
 // Produces a deterministic, tamper-evident checksum stored in Trial.checksum.
-// Satisfies FDA 21 CFR Part 11 requirements for unalterable electronic research records.
+// Provides cryptographic integrity verification for unalterable electronic research records.
 
 import { createHash } from 'crypto';
 
@@ -77,7 +77,7 @@ export function generateTrialHash(
 
 /**
  * Verifies a stored checksum against a reconstructed payload.
- * Returns true only if hashes match — any tamper causes false.
+ * Returns true only if hashes match; any tampering returns false.
  */
 export function verifyTrialChecksum(
   payload: CanonicalTrialPayload,

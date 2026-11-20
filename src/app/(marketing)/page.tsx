@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import {
   ArrowRight,
-  Lock,
   Database,
-  Activity,
+  ShieldCheck,
+  HardDrive,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { ScientificWorkspacePreview } from '@/components/marketing/ScientificWorkspacePreview';
@@ -13,19 +13,19 @@ import { PilotInterestForm } from '@/components/marketing/PilotInterestForm';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+    absolute: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
   },
   description:
-    'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Air-gapped data ownership.',
+    'An open electronic lab notebook that stores your notes, materials, and serial instrument data directly on your machine.',
   openGraph: {
-    title: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+    title: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
     description:
-      'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Air-gapped data ownership.',
+      'An open electronic lab notebook that stores your notes, materials, and serial instrument data directly on your machine.',
   },
   twitter: {
-    title: 'Inquestra — Local-First Electronic Lab Notebook (ELN)',
+    title: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
     description:
-      'Free, local-first electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Air-gapped data ownership.',
+      'An open electronic lab notebook that stores your notes, materials, and serial instrument data directly on your machine.',
   },
 };
 
@@ -42,7 +42,7 @@ export default function MarketingPage() {
       priceCurrency: 'USD',
     },
     description:
-      'Local-first Electronic Research Notebook for Life Sciences, Chemistry, Biotech, Materials, and Engineering. Unifies protocol execution, chemical inventory LIMS, molecular structures, literature citations, 21 CFR Part 11 technical controls, and bench instrumentation DAQ.',
+      'Browser-based research notebook that combines protocol tracking, chemical storage, and serial instrumentation on your local machine.',
   };
 
   return (
@@ -52,7 +52,7 @@ export default function MarketingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* ── FAQPage JSON-LD for AEO / AI Answer Engines ───────────────────────────── */}
+      {/* FAQPage JSON-LD for Search & AI Answer Engines */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -65,7 +65,7 @@ export default function MarketingPage() {
                 name: 'What is Inquestra?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Inquestra is a free, local-first Electronic Lab Notebook (ELN) for life sciences, chemistry, biotech, materials science, and engineering research. It unifies scientific protocols, chemical inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature citations, 21 CFR Part 11 technical controls (cryptographic audit trails), and bench hardware data acquisition in one workspace.',
+                  text: 'Inquestra is a browser-based notebook for experimental laboratory work. It lets researchers run step-by-step protocols, track chemical aliquots, and capture real-time measurements from bench instruments on their local machine.',
                 },
               },
               {
@@ -73,7 +73,7 @@ export default function MarketingPage() {
                 name: 'Is Inquestra free for academic labs and students?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. Inquestra is completely free for individual researchers, students, postdocs, and academic labs. There is no subscription fee, no credit card required, and no per-user licensing cost. The full notebook, chemical inventory LIMS, molecular structure tools, and literature citation manager run locally on your device with complete data ownership.',
+                  text: 'Yes. Inquestra is free to use without subscriptions. All notes and instrument telemetry remain stored on your machine.',
                 },
               },
               {
@@ -81,15 +81,15 @@ export default function MarketingPage() {
                 name: 'Does Inquestra support molecular biology research?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. Inquestra supports molecular biology, life sciences, chemistry, biotech, materials science, and engineering. It supports PCR protocols, gel electrophoresis documentation, primer and reagent inventory, 2D molecular structure rendering via SMILES and PubChem, and integration with Europe PMC and PubMed for literature citations.',
+                  text: 'Yes. It includes built-in primitives for PCR protocols, primer tracking, 2D SMILES rendering via PubChem, and inline DOI lookups through PubMed and Europe PMC.',
                 },
               },
               {
                 '@type': 'Question',
-                name: 'How does Inquestra compare to Benchling, LabArchives, and SciNote?',
+                name: 'How does Inquestra handle data ownership?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Unlike cloud-only platforms that store your research on remote servers, Inquestra is local-first: your unpublished data remains stored securely in your browser (IndexedDB) with zero cloud vendor lock-in and instant one-click exports. Additionally, Inquestra uniquely bridges molecular biology, synthetic chemistry, and physical bench DAQ (W3C Web Serial) at zero cost.',
+                  text: 'Inquestra stores your unpublished experiments and telemetry locally in your browser using IndexedDB. You can export complete records as Markdown notes and CSV files at any time.',
                 },
               },
               {
@@ -106,23 +106,21 @@ export default function MarketingPage() {
       />
 
       {/* ── 1. Hero Section ────────────────────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-20 lg:pt-38 lg:pb-28 border-b border-border">
+      <section className="relative pt-16 pb-20 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-foreground mb-6 leading-[1.12] text-balance">
-            The local-first notebook for your protocols, chemistry, and bench data.
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.12] text-balance">
+            The local-first notebook for experimental science.
           </h1>
 
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
-            Air-gapped data sovereignty with native Web Serial instrumentation, molecular structures, chemical inventory, and cryptographic audit trails.
+            A browser-native research notebook with built-in serial instrument capture. Your experimental records never leave your machine.
           </p>
 
-          {/* ── AEO Definition Block — crawlable, visually subtle ─────────────────── */}
+          {/* AEO Definition Block */}
           <p className="sr-only">
-            Inquestra is a local-first electronic lab notebook (ELN) for life sciences, chemistry, biotech,
-            materials science, and engineering research. It unifies scientific protocols, chemical
-            inventory LIMS, molecular structure visualization, PubMed and Europe PMC literature
-            citations, 21 CFR Part 11 technical controls, and bench hardware data acquisition in one
-            browser-based workspace. Free and open for academic researchers with full data ownership.
+            Inquestra is an open-source electronic lab notebook for experimental science. It combines
+            protocol tracking, reagent lots, 2D molecular structures, and serial instrument recording
+            within a local browser workspace.
           </p>
 
           {/* Primary Action Buttons */}
@@ -150,72 +148,50 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 2. The 6 Core Pillars of Inquestra ────────────────────────────────────────── */}
-      <section id="features" className="py-24 border-b border-border">
+      {/* ── 2. Unified Notebook Engine ────────────────────────────────────────────── */}
+      <section id="features" className="py-24 border-b border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
-            {/* Left: primary callout */}
-            <div>
-              <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-                Every stage of the scientific lifecycle in one place.
-              </h2>
-              <p className="text-muted-foreground text-sm mt-4 leading-relaxed">
-                Scientific discoveries happen across wet lab synthesis, molecular assays, mathematical
-                modeling, inventory management, and physical measurements. Inquestra provides native
-                scientific tools for every phase — without stitching together a five-app stack.
+          <div className="max-w-2xl mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              A block-based canvas built for experimental research.
+            </h2>
+            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
+              Standard text editors ignore experimental workflows. Inquestra embeds interactive step timers, chemical structures, and literature citations directly into your notes.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border border border-border rounded-xl overflow-hidden bg-card/40">
+            {/* Capability 1: Protocol Execution */}
+            <div className="p-6 sm:p-8 space-y-3">
+              <span className="font-mono text-xs text-primary font-semibold uppercase tracking-wider">Protocol Execution</span>
+              <h3 className="text-lg font-semibold text-foreground">
+                Step Timers &amp; SOP Checklists
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Step-by-step procedure checklists with synchronized countdown timers for incubation periods and wash steps. Inline KaTeX formulas calculate dilution factors and reaction stoichiometry directly inside your protocol notes.
               </p>
-              <Link
-                href="/app"
-                className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-foreground hover:text-foreground/70 transition-colors"
-              >
-                Open the workspace <ArrowRight className="w-4 h-4" />
-              </Link>
             </div>
 
-            {/* Right: vertical feature list */}
-            <div className="border-l border-border pl-8 space-y-6">
-              <div>
-                <p className="text-sm font-medium text-foreground">Scientific Protocol Canvas</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  TipTap block editor with native SMILES structures, nucleotide sequences, KaTeX
-                  equations, and live execution timers. Commands: /molecule · /sequence · /math
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">SOPs &amp; Interactive Step Timers</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Reproducible checklists with synchronized incubation, centrifuge, and wash timers.
-                  Commands: /protocol · /timer · /checklist
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">LIMS &amp; Chemical Inventory</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Track reagents, antibodies, primers, and cell lines. Inline /reagent deduction
-                  automates chain-of-custody at bench execution.
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">PubMed &amp; Europe PMC Citations</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Search peer-reviewed literature in context. Insert verified DOIs and generate
-                  formatted bibliographies (Nature, APA, IEEE). Commands: /citation
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">Audit Trails &amp; Cryptographic Provenance</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Time-stamped versioning captures procedure edits, reagent calibrations, and author attestation.
-                  Technical Controls: 21 CFR § 11 · ISO 8601 UTC
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">Integrated Instrument DAQ (Optional)</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Connect biopotentials, load cells, and pressure sensors via W3C Web Serial — no
-                  drivers or terminal scripts. Transports: Web Serial · CSV Ingestion
-                </p>
-              </div>
+            {/* Capability 2: Chemical & Biological LIMS */}
+            <div className="p-6 sm:p-8 space-y-3">
+              <span className="font-mono text-xs text-emerald-500 font-semibold uppercase tracking-wider">Inventory LIMS</span>
+              <h3 className="text-lg font-semibold text-foreground">
+                Reagents &amp; Lot Tracking
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Log chemical batches, antibody aliquots, and primer stocks across cold storage or room temperature. Deducting materials during an experiment records manufacturer lot numbers and balances automatically.
+              </p>
+            </div>
+
+            {/* Capability 3: Molecular Primitives & Citations */}
+            <div className="p-6 sm:p-8 space-y-3">
+              <span className="font-mono text-xs text-sky-500 font-semibold uppercase tracking-wider">Chemical &amp; Sequence Tools</span>
+              <h3 className="text-lg font-semibold text-foreground">
+                Molecules &amp; DOI Citations
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Draw 2D chemical structures from SMILES strings, calculate oligonucleotide melting temperatures, and link literature DOIs in context.
+              </p>
             </div>
           </div>
         </div>
@@ -225,12 +201,11 @@ export default function MarketingPage() {
       <section className="py-24 border-b border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mb-12">
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Purpose-built for your laboratory workflow.
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Validated across laboratory disciplines.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Whether you are running PCR gels, synthesizing compounds, testing polymer mechanics, or
-              measuring electrical biopotentials, Inquestra adapts to your domain.
+              From molecular biology assays and chemical synthesis to physical testing and instrumentation.
             </p>
           </div>
 
@@ -246,43 +221,43 @@ export default function MarketingPage() {
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">Molecular &amp; Cell Biology</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Plasmid cloning, DNA/RNA sequence verification, antibody aliquot management (-80°C), cell culture feeding timers.
-                    <span className="block mt-1 font-mono">Primer design · Cell passaging · Western blots</span>
+                    Plasmid cloning, DNA sequence verification, antibody aliquot tracking, and cell culture feeding timers.
+                    <span className="block mt-1 font-mono">Primer design · Cell culture passaging</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">Chemistry &amp; Biochemistry</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    2D chemical structures from SMILES, stoichiometry computation, reagent lot tracking, GHS safety data sheets.
-                    <span className="block mt-1 font-mono">SMILES structures · Enzyme kinetics · GHS safety</span>
+                    2D chemical structures from SMILES, stoichiometry computation, reagent lot tracking, and GHS safety data sheets.
+                    <span className="block mt-1 font-mono">SMILES structures · Kinetic calculations</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">Biotech &amp; Biopharma R&amp;D</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Batch records, SOP checklists, real-time deviation logging, cryptographic audit trails with dual-signature sign-offs (Part 11 technical controls).
-                    <span className="block mt-1 font-mono">SOP management · Deviation logs · 21 CFR § 11 Controls</span>
+                    Batch records, SOP checklists, real-time deviation logging, and cryptographic audit records.
+                    <span className="block mt-1 font-mono">SOP checklists · Audit logging</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">Materials Science &amp; Physics</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Tensile test stress-strain curves, load cell deformation recording, continuum mechanics modeling with KaTeX.
-                    <span className="block mt-1 font-mono">Stress-strain curves · Load cells · KaTeX modeling</span>
+                    Tensile test stress-strain curves, load cell deformation recording, and continuum mechanics modeling.
+                    <span className="block mt-1 font-mono">Stress-strain curves · Material deformation</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Bioengineering &amp; Devices</td>
+                  <td className="px-5 py-4 font-medium text-foreground align-top">Instrumentation &amp; Devices</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Biopotential telemetry (EMG, ECG), hemodynamic waveforms, design history files (DHF) with zero loose CSV files.
-                    <span className="block mt-1 font-mono">Web Serial DAQ · Biopotentials · Design history files</span>
+                    Biopotential telemetry (EMG, ECG), hemodynamic waveforms, design records, and raw sensor logs.
+                    <span className="block mt-1 font-mono">Web Serial DAQ · Waveform telemetry</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">Academic Core Facilities</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Graduate student onboarding, shared equipment clearances, institutional research provenance across grants.
-                    <span className="block mt-1 font-mono">Equipment tracking · Protocol sharing · Grant archives</span>
+                    Student onboarding, shared equipment schedules, and keeping protocol records organized across projects.
+                    <span className="block mt-1 font-mono">Equipment logging · Protocol archives</span>
                   </td>
                 </tr>
               </tbody>
@@ -291,182 +266,72 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 4. The Fragmented Reality vs Inquestra ─────────────────────────────────── */}
-      <section className="py-24 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              A unified workbench for protocols, chemistry, and bench data.
-            </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Multi-disciplinary research suffers when laboratory protocols, chemical inventory, and bench telemetry
-              live in disconnected silos. Here is how Inquestra establishes a cohesive, local-first workflow.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* The Fragmented Reality */}
-            <div className="bg-card border border-border p-7 rounded-xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <span className="text-xs font-mono uppercase text-muted-foreground font-semibold">
-                  Fragmented Laboratory Software
-                </span>
-                <span className="text-[10px] font-mono text-critical bg-critical/10 border border-critical/20 px-2 py-0.5 rounded">
-                  High Error Rate
-                </span>
-              </div>
-              <div className="space-y-3.5 text-xs text-muted-foreground leading-relaxed">
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Generic Document Editors (Word, Notion, Google Docs)
-                  </span>
-                  No native chemistry, molecular structure drawing, or biological sequence support. Equations require clumsy image
-                  copy-pasting, and incubation timers exist only on phones or kitchen timers.
-                </div>
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Disconnected Spreadsheets for Reagent Inventory
-                  </span>
-                  Chemical lot numbers, antibody aliquots, and buffer volumes tracked in spreadsheets that are never updated
-                  at the moment of bench execution, leading to expired stock errors and failed experiments.
-                </div>
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Isolated Literature Silos (Zotero, Mendeley, Desktop PDFs)
-                  </span>
-                  Theoretical rationale and published protocols live in separate citation managers, forcing researchers to
-                  manually copy DOIs and lose track of protocol references over time.
-                </div>
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Unverified Desktop CSV Files &amp; Terminal Scripts
-                  </span>
-                  Instrument data saved to loose desktop folders without cryptographic hashing or audit trails,
-                  creating severe reproducibility vulnerabilities during peer review or regulatory audits.
-                </div>
-              </div>
-            </div>
-
-            {/* The Inquestra Standard */}
-            <div className="bg-card border border-border p-7 rounded-xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <span className="text-xs font-mono uppercase text-phosphor font-semibold">
-                  The Inquestra Integrated Standard
-                </span>
-                <span className="text-[10px] font-mono text-phosphor bg-phosphor/10 border border-phosphor/30 px-2 py-0.5 rounded font-semibold">
-                  Local-First Lab Workspace
-                </span>
-              </div>
-              <div className="space-y-3.5 text-xs text-muted-foreground leading-relaxed">
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Native Scientific Protocol Canvas
-                  </span>
-                  SMILES 2D molecular structures, nucleotide color-coded DNA/RNA sequences, KaTeX mathematical equations,
-                  and live execution timers integrated directly into notes.
-                </div>
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Inline LIMS &amp; Reagent Deduction
-                  </span>
-                  Typing <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-semibold">/reagent</code> automatically
-                  deducts volumes from your inventory, checking expiration dates and logging consumption directly in the note.
-                </div>
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Direct PubMed &amp; Europe PMC Citation Integration
-                  </span>
-                  Search peer-reviewed literature in real time. Link scientific rationale, protocol citations, and DOI references
-                  directly to experimental steps with automatic bibliography formatting.
-                </div>
-                <div className="p-3.5 bg-background border border-border rounded-lg">
-                  <span className="font-semibold text-foreground block mb-1 text-sm font-sans">
-                    Tamper-Evident Record of Execution
-                  </span>
-                  Completed trials seal protocol text, reagent lots, and raw telemetry into an immutable,
-                  tamper-evident audit log with cryptographic non-repudiation (21 CFR Part 11 technical controls).
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 5. Regulatory Compliance & Data Integrity ──────────────────────── */}
-      <section id="provenance" className="py-24 border-b border-border bg-muted/10">
+      {/* ── 4. Data Integrity & Cryptographic Provenance ───────────────────────── */}
+      <section id="provenance" className="py-24 border-b border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-14">
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              Data integrity &amp; cryptographic provenance.
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Tamper-evident cryptographic verification.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Scientific trust is earned through mathematical verification. Inquestra cryptographically seals completed trials so protocol steps,
-              reagent lot deductions, and sensor telemetry maintain an unbroken, tamper-evident record.
+              When an experiment concludes, Inquestra cryptographically seals the completed record. Completed protocol entries and recorded sensor data cannot be modified without failing checksum verification.
             </p>
           </div>
 
           <ProvenanceInteractiveDemo />
 
-          {/* 21 CFR Part 11 Technical Controls — horizontal spec strip */}
+          {/* Three Core Data Guarantees */}
           <div className="mt-14 border-t border-b border-border py-8 flex flex-wrap gap-y-8">
             <div className="flex-1 min-w-56 pr-8 border-r border-border last:border-r-0">
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5" />
-                21 CFR § 11.10(b)
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                SHA-256 Record Sealing
               </p>
-              <p className="text-sm font-medium text-foreground mb-1">Audit Trail Controls</p>
+              <p className="text-sm font-medium text-foreground mb-1">Cryptographic Fingerprint</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Computer-generated, time-stamped records independently log the date, time, and operator of all
-                trial additions, calibrations, and seals. Modifications preserve complete differential histories.
+                When an experiment concludes, Inquestra computes a SHA-256 digest covering your notebook text and captured sensor values. Any subsequent modification triggers an immediate checksum mismatch.
               </p>
             </div>
             <div className="flex-1 min-w-56 px-8 border-r border-border last:border-r-0">
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Database className="w-3.5 h-3.5" />
-                21 CFR § 11.50
+                <Database className="w-3.5 h-3.5 text-primary" />
+                Append-Only History
               </p>
-              <p className="text-sm font-medium text-foreground mb-1">Electronic Signature Controls</p>
+              <p className="text-sm font-medium text-foreground mb-1">Traceable Revisions</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Manifests display the printed name of the signer, date/time stamp, and the explicit meaning of the
-                signature (Author Execution, Technical Review, or Principal Investigator Sign-Off).
+                Every draft save generates an auditable, timestamped revision snapshot.
+                You can review the full differential history and restore previous states at any time.
               </p>
             </div>
             <div className="flex-1 min-w-56 pl-8">
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5" />
-                Air-Gapped Data Sovereignty
+                <HardDrive className="w-3.5 h-3.5 text-primary" />
+                Local &amp; Lab Ownership
               </p>
-              <p className="text-sm font-medium text-foreground mb-1">Local-First (FAIR Principles)</p>
+              <p className="text-sm font-medium text-foreground mb-1">Local Mode or Lab DB</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Unpublished IP and experimental notes remain stored locally in your browser (IndexedDB). Zero unvetted cloud
-                exposure. Export everything to open JSON, CSV, or PDF archives at any moment with zero vendor lock-in.
+                Draft notes and active sensor capture run locally in browser IndexedDB without mandatory accounts. Connect to your lab&apos;s PostgreSQL database or export signed Markdown and CSV bundles when ready to archive.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 6. Integrated Bench DAQ ──────────────────────────────────────────────────── */}
-      <section id="hardware" className="py-24 border-b border-border">
+      {/* ── 5. Integrated Bench DAQ ──────────────────────────────────────────────────── */}
+      <section id="hardware" className="py-24 border-b border-border bg-muted/10 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-muted text-muted-foreground text-xs font-mono uppercase tracking-wider mb-4">
-              <Activity className="w-3.5 h-3.5 text-phosphor" />
-              <span>Optional Hardware Ingestion</span>
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight">
-              When your study needs physical data, connect directly.
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Connect bench instruments directly to your notes.
             </h2>
             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              If your research involves physical sensors &mdash; spectrophotometers, balances, load cells, temperature arrays,
-              or biopotentials &mdash; Inquestra can ingest continuous telemetry straight into your notebook note via browser Web Serial.
-              No custom drivers or terminal scripts required.
+              Ingest continuous sensor data straight into your notebook via browser Web Serial. Connect analytical balances, temperature probes, load cells, or custom microcontrollers without installing device drivers.
             </p>
           </div>
 
           <FirmwareShowcase />
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-muted/10 border border-border text-xs font-mono">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-background border border-border text-xs font-mono">
             <div className="flex items-center gap-3 text-muted-foreground">
               <span className="text-foreground font-semibold">Supported Modalities:</span>
               <span>Load Cells · Temperature Probes · Biopotentials (EMG/ECG) · Pressure Sensors · Bench Meters</span>
@@ -482,125 +347,81 @@ export default function MarketingPage() {
         </div>
       </section>
 
-
-      {/* ── 6b. Free for Academic Research ──────────────────────────────────────────── */}
-      <section className="py-24 border-b border-border" id="academic">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-4">
-              Free for every researcher. No exceptions.
+      {/* ── 6. Laboratory Architecture & Data Lifecycle ──────────────────────────── */}
+      <section className="py-24 border-b border-border scroll-mt-20" id="academic">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-14">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Built for offline laboratory benches and self-hosted research teams.
             </h2>
-            <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Inquestra is free for individual researchers, students, postdoctoral fellows, academic
-              labs, and university research groups — permanently, with no subscription, no credit
-              card, and no per-user licensing fee.
+            <p className="text-base text-muted-foreground mt-3 leading-relaxed">
+              Most laboratory notebooks force research data into proprietary clouds behind recurring subscriptions.
+              Inquestra gives individual scientists a zero-install local workspace, with optional PostgreSQL synchronization for collaborative research groups.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-start mb-20">
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">What is included for free</h3>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Full scientific protocol notebook with rich text, tables, equations, molecular structures, and timers</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Chemical and biological inventory LIMS — unlimited reagents, standards, and samples</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>2D chemical structure rendering from SMILES and live PubChem compound lookup</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>PubMed and Europe PMC literature citation manager</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Cryptographic audit trails and 21 CFR Part 11 technical controls</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Hardware DAQ integration for Arduino, ESP32, and USB instruments</span></li>
-                <li className="flex gap-2"><span className="text-emerald-500 font-bold mt-0.5">✓</span><span>Open JSON, CSV, and PDF export — zero vendor lock-in</span></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Built for academic environments</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                Inquestra is designed for the realities of academic research: rotating undergraduate
-                and graduate students who need to get productive immediately, postdoctoral researchers
-                managing multiple concurrent experiments, and professors who need reproducible,
-                audit-ready documentation for grant reporting and publication.
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Zero installation or IT infrastructure. Runs directly in standard modern web browsers via
-                Web Serial, WebAssembly, and IndexedDB. On shared or communal lab bench computers, instant one-click
-                JSON and CSV exports protect your experimental trials from local browser cache resets.
-              </p>
-            </div>
-          </div>
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Visual Lifecycle Flow */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="p-5 rounded-xl border border-border bg-card/40 space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="font-semibold text-foreground">1. At the Bench (Zero-Install Local Mode)</span>
+                  <span className="text-primary text-[11px]">Browser IndexedDB</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Draft protocols, track reagent deductions, and log USB serial telemetry directly in your browser. Runs completely offline in tissue culture hoods, cold rooms, or field stations without sign-up or network access.
+                </p>
+              </div>
 
-          {/* ── ELN Comparison Table ─────────────────────────────────────────────────── */}
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-6 text-center">
-              Inquestra vs Benchling vs LabArchives vs SciNote
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 text-foreground font-semibold">Feature</th>
-                    <th className="text-left py-3 px-4 text-emerald-500 font-semibold">Inquestra</th>
-                    <th className="text-left py-3 px-4 text-muted-foreground font-semibold">Benchling</th>
-                    <th className="text-left py-3 px-4 text-muted-foreground font-semibold">LabArchives</th>
-                    <th className="text-left py-3 px-4 text-muted-foreground font-semibold">SciNote</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Price for academics</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Free, always</td>
-                    <td className="py-3 px-4 text-muted-foreground">Free academic tier (limited)</td>
-                    <td className="py-3 px-4 text-muted-foreground">Institution license required</td>
-                    <td className="py-3 px-4 text-muted-foreground">Free tier (storage limits)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Data storage &amp; sovereignty</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Local-first (Air-gapped in browser, zero cloud lock-in)</td>
-                    <td className="py-3 px-4 text-muted-foreground">Proprietary cloud (US/EU hosted)</td>
-                    <td className="py-3 px-4 text-muted-foreground">Proprietary cloud</td>
-                    <td className="py-3 px-4 text-muted-foreground">Proprietary cloud or self-hosted</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Scientific disciplines</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Life sciences, chemistry, biotech, materials, engineering</td>
-                    <td className="py-3 px-4 text-muted-foreground">Molecular biology, genetics, biotech</td>
-                    <td className="py-3 px-4 text-muted-foreground">General science (all disciplines)</td>
-                    <td className="py-3 px-4 text-muted-foreground">Life sciences, medical research</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Learning curve for students</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Minimal — productive in minutes</td>
-                    <td className="py-3 px-4 text-muted-foreground">Moderate — specialized UI</td>
-                    <td className="py-3 px-4 text-muted-foreground">Low — simple document-based</td>
-                    <td className="py-3 px-4 text-muted-foreground">Low to moderate</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Hardware DAQ integration</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — Arduino, ESP32, USB instruments</td>
-                    <td className="py-3 px-4 text-muted-foreground">No</td>
-                    <td className="py-3 px-4 text-muted-foreground">No</td>
-                    <td className="py-3 px-4 text-muted-foreground">No</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Chemical inventory LIMS</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — built-in, free</td>
-                    <td className="py-3 px-4 text-muted-foreground">Yes (Benchling Registry)</td>
-                    <td className="py-3 px-4 text-muted-foreground">Limited</td>
-                    <td className="py-3 px-4 text-muted-foreground">Yes (inventory module)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Audit trails &amp; provenance</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">Yes — SHA-256 technical controls</td>
-                    <td className="py-3 px-4 text-muted-foreground">Enterprise tier only</td>
-                    <td className="py-3 px-4 text-muted-foreground">Yes</td>
-                    <td className="py-3 px-4 text-muted-foreground">Yes</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-foreground font-medium">Setup required</td>
-                    <td className="py-3 px-4 text-emerald-500 font-semibold">None — browser only</td>
-                    <td className="py-3 px-4 text-muted-foreground">Account + onboarding</td>
-                    <td className="py-3 px-4 text-muted-foreground">Institution account</td>
-                    <td className="py-3 px-4 text-muted-foreground">Account required</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="p-5 rounded-xl border border-border bg-card/40 space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="font-semibold text-foreground">2. In the Laboratory (Team Collaboration)</span>
+                  <span className="text-emerald-500 text-[11px]">PostgreSQL &amp; RLS</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Connect your group to a self-hosted or managed PostgreSQL instance for centralized reagent inventory, shared equipment calibration logs, and role-based permissions without per-user licensing fees.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-xl border border-border bg-card/40 space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="font-semibold text-foreground">3. For Publication &amp; Archiving (Open Portability)</span>
+                  <span className="text-sky-500 text-[11px]">CommonMark &amp; CSV</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Export complete experiments as self-contained ZIP packages containing human-readable Markdown notes, raw sensor CSV files, and SHA-256 checksums that any collaborator or reviewer can verify from the command line.
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column: Open-Source Principles Card */}
+            <div className="lg:col-span-5 p-6 rounded-xl border border-border bg-muted/20 space-y-4 text-xs">
+              <h3 className="text-sm font-semibold text-foreground">
+                Why we built an open, local-first notebook
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Academic research and early-stage biotechnology thrive when experimental records belong entirely to the laboratory producing them.
+              </p>
+              <div className="space-y-3 pt-2 border-t border-border">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-primary font-mono font-bold">✓</span>
+                  <span className="text-muted-foreground">
+                    <strong className="text-foreground">No account required:</strong> Open the app URL on any bench computer and start executing protocols immediately.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-primary font-mono font-bold">✓</span>
+                  <span className="text-muted-foreground">
+                    <strong className="text-foreground">No vendor lock-in:</strong> Open standard schemas (CommonMark, CSV, JSON) ensure your research remains readable decades from now.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-primary font-mono font-bold">✓</span>
+                  <span className="text-muted-foreground">
+                    <strong className="text-foreground">Free for academia:</strong> All core research tools are open source and free for students, postdocs, and PIs.
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -610,20 +431,12 @@ export default function MarketingPage() {
       <section className="py-24 border-b border-border bg-muted/10" id="pilot">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-4">
+            <h2 className="text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
               Partner with Inquestra on your bench.
             </h2>
             <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Inquestra is onboarding academic research groups and biotech teams for the pilot program.
-              Work directly with the lead developer to import existing protocols, calibrate custom instrument profiles,
-              and configure team workspace permissions.
+              We collaborate directly with academic research groups and biotech teams to connect custom bench hardware, import existing protocols, or deploy dedicated team instances.
             </p>
-            {/* Pilot value — plain list, no cards */}
-            <ul className="mt-8 text-sm text-muted-foreground space-y-2 text-left max-w-md mx-auto">
-              <li>— Individual researchers retain full free access to the core notebook, LIMS, and local DAQ tools.</li>
-              <li>— Collaborate directly with the creator of Inquestra to tailor custom protocol blocks and data export schemas.</li>
-              <li>— Assistance setting up self-hosted institutional PostgreSQL instances, team SSO, and importing existing lab SOPs.</li>
-            </ul>
           </div>
 
           {/* Clean Intake Form */}
@@ -633,7 +446,7 @@ export default function MarketingPage() {
                 Request Pilot Lab Access &amp; Lab Onboarding
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Share research focus, lab setup, and protocol needs. Inquiries are reviewed within 48 hours.
+                Tell us about your experimental setup. We review inquiries within two business days.
               </p>
             </div>
             <PilotInterestForm />
@@ -644,11 +457,11 @@ export default function MarketingPage() {
       {/* ── 8. Final Call to Action ─────────────────────────────────────────────────── */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
             Start organizing your research in one unified notebook.
           </h2>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-            No mandatory sales calls. No credit card required. Launch the workspace right in your browser.
+            Free and open source. Start drafting immediately in your browser.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link

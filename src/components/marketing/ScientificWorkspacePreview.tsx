@@ -45,7 +45,7 @@ export function ScientificWorkspacePreview() {
           <span className="text-muted-foreground">/</span>
           <span className="text-muted-foreground">Protocols</span>
           <span className="text-muted-foreground">/</span>
-          <span className="text-foreground font-mono">PR-2026-ASSAY-04</span>
+          <span className="text-foreground font-mono">PR-2026-PCR-01</span>
         </div>
 
         {/* View Switcher Tabs */}
@@ -127,7 +127,7 @@ export function ScientificWorkspacePreview() {
             <CheckCircle2 className="w-3 h-3" />
             <span>Encrypted &amp; Cached</span>
           </span>
-          <span className="hidden sm:inline">21 CFR § 11 Audit Trail Active</span>
+          <span className="hidden sm:inline">Cryptographic Audit Trail Active</span>
         </div>
       </div>
 
@@ -142,15 +142,15 @@ export function ScientificWorkspacePreview() {
                 <span className="px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
                   STANDARD OPERATING PROCEDURE
                 </span>
-                <span>Version 3.2</span>
+                <span>Version 2.1</span>
                 <span>·</span>
-                <span>Biochemistry &amp; Analytical Lab</span>
+                <span>Molecular Biology Lab</span>
               </div>
-              <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground">
-                Enzyme Kinetics &amp; Interfacial Impedance Assay
+              <h2 className="font-sans text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                Genomic DNA Extraction &amp; PCR Amplification
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Objective: Quantify substrate turnover kinetics and interfacial double-layer capacitance across functionalized surface substrates.
+                Objective: Extract high-purity genomic DNA from cultured HEK293T cells and confirm target locus amplification by PCR and gel electrophoresis.
               </p>
             </div>
 
@@ -160,7 +160,7 @@ export function ScientificWorkspacePreview() {
               <div className="p-4 rounded-xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="font-semibold text-foreground uppercase tracking-wider">
-                    Phase 1: Reagent Preparation &amp; Inventory Deduction
+                    Phase 1: Cell Lysis &amp; DNA Extraction
                   </span>
                   <span className="text-phosphor text-[11px]">Synced with Lab Inventory</span>
                 </div>
@@ -169,17 +169,17 @@ export function ScientificWorkspacePreview() {
                   <div className="flex items-center gap-2 p-2 rounded bg-background border border-border">
                     <FlaskConical className="w-4 h-4 text-primary shrink-0" />
                     <span className="font-mono text-muted-foreground">Deducted:</span>
-                    <span className="font-semibold text-foreground">Dulbecco&apos;s Modified Eagle Medium (DMEM 1X)</span>
-                    <span className="text-muted-foreground">· 50 mL</span>
-                    <span className="ml-auto font-mono text-[11px] text-muted-foreground">Lot #DM-8891-B</span>
+                    <span className="font-semibold text-foreground">Buffer AL (Lysis Buffer)</span>
+                    <span className="text-muted-foreground">· 200 µL</span>
+                    <span className="ml-auto font-mono text-[11px] text-muted-foreground">Lot #AL-2026-07</span>
                   </div>
 
                   <div className="flex items-center gap-2 p-2 rounded bg-background border border-border">
                     <FlaskConical className="w-4 h-4 text-primary shrink-0" />
                     <span className="font-mono text-muted-foreground">Deducted:</span>
-                    <span className="font-semibold text-foreground">Collagenase Type II (0.1% Solution)</span>
-                    <span className="text-muted-foreground">· 10 mL</span>
-                    <span className="ml-auto font-mono text-[11px] text-muted-foreground">Lot #CL-4012</span>
+                    <span className="font-semibold text-foreground">Proteinase K Solution (20 mg/mL)</span>
+                    <span className="text-muted-foreground">· 20 µL</span>
+                    <span className="ml-auto font-mono text-[11px] text-muted-foreground">Lot #PK-5091-B</span>
                   </div>
                 </div>
               </div>
@@ -191,10 +191,10 @@ export function ScientificWorkspacePreview() {
                     <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[11px]">
                       2
                     </span>
-                    <span className="font-semibold text-foreground uppercase">Incubation &amp; Cellular Attachment</span>
+                    <span className="font-semibold text-foreground uppercase">Lysis Incubation at 56°C</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed pl-7">
-                    Transfer seeded scaffolds to 37°C humidified incubator with 5% CO2. Maintain quiescent culture environment.
+                    Incubate lysate at 56°C with periodic vortexing every 5 minutes to ensure complete proteinase K digestion.
                   </p>
                 </div>
 
@@ -215,41 +215,43 @@ export function ScientificWorkspacePreview() {
                 </div>
               </div>
 
-              {/* Block 3: Molecular Structure & Biophysical Formula Dual Card */}
+              {/* Block 3: Molecular Structure & PCR Formula Dual Card */}
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Molecular Structure Preview */}
                 <div className="p-4 rounded-xl border border-border bg-card space-y-2">
                   <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
                     <span className="flex items-center gap-1.5 font-semibold text-foreground">
                       <FlaskConical className="w-3.5 h-3.5 text-primary" />
-                      Molecular Compound
+                      PCR Substrate (dATP)
                     </span>
-                    <span className="text-[10px]">SMILES: C1=NC(=C2C...</span>
+                    <span className="text-[10px]">PubChem CID: 65069</span>
                   </div>
                   <div className="bg-background rounded-lg p-3 border border-border text-center">
-                    <div className="text-xs font-semibold text-foreground">Adenosine Triphosphate (ATP Disodium Salt)</div>
-                    <div className="text-[11px] font-mono text-muted-foreground mt-0.5">MW: 551.14 g/mol · CAS: 987-65-5</div>
+                    <div className="text-xs font-semibold text-foreground">2&apos;-Deoxyadenosine 5&apos;-Triphosphate</div>
+                    <div className="text-[11px] font-mono text-muted-foreground mt-0.5 truncate">
+                      SMILES: C1C(C(OC1N2C=NC3=C(N=CN=C32)N)COP(=O)...
+                    </div>
                     <div className="mt-2 text-[11px] text-muted-foreground italic bg-muted/30 py-1 px-2 rounded">
-                      Concentration: 5.0 mM in Krebs-Henseleit Buffer
+                      Working conc.: 200 µM in 1X PCR master mix
                     </div>
                   </div>
                 </div>
 
-                {/* Biophysical Equation (KaTeX) */}
+                {/* PCR Thermocycling Parameters */}
                 <div className="p-4 rounded-xl border border-border bg-card space-y-2">
                   <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
                     <span className="flex items-center gap-1.5 font-semibold text-foreground">
                       <Sigma className="w-3.5 h-3.5 text-primary" />
-                      Reaction Kinetics &amp; Impedance
+                      Thermocycler Program
                     </span>
-                    <span className="text-[10px]">Michaelis-Menten / Randles</span>
+                    <span className="text-[10px]">35 cycles · 2h est.</span>
                   </div>
                   <div className="bg-background rounded-lg p-3 border border-border text-center flex flex-col justify-center min-h-[76px]">
                     <div className="font-mono text-sm text-foreground font-semibold">
-                      v = (V_max · [S]) / (K_m + [S])
+                      95°C → 60°C → 72°C
                     </div>
                     <div className="text-[11px] font-mono text-muted-foreground mt-1">
-                      Substrate velocity modeling &amp; dual-layer electrochemical fit
+                      Denaturation · Annealing · Extension
                     </div>
                   </div>
                 </div>
@@ -260,12 +262,12 @@ export function ScientificWorkspacePreview() {
                 <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
                   <span className="flex items-center gap-1.5 font-semibold text-foreground">
                     <Dna className="w-3.5 h-3.5 text-purple-400" />
-                    Target Primer Sequence (Cardiomyocyte Troponin T2)
+                    Forward Primer: GAPDH (Housekeeping Control)
                   </span>
-                  <span className="text-[10px]">Forward Primer · Tm: 59.4°C</span>
+                  <span className="text-[10px]">Forward · Tm: 58.9°C</span>
                 </div>
                 <div className="bg-background rounded-lg p-2.5 border border-border font-mono text-xs flex flex-wrap gap-1">
-                  {['5\'-', 'A', 'T', 'G', 'C', 'C', 'T', 'A', 'A', 'G', 'C', 'T', 'G', 'C', 'A', 'T', 'G', 'A', 'C', 'C', 'G', 'T', 'A', '-3\''].map((ch, i) => (
+                  {['5\'-', 'G', 'T', 'C', 'T', 'C', 'C', 'T', 'C', 'T', 'G', 'A', 'C', 'T', 'T', 'C', 'A', 'A', 'C', 'A', 'G', 'C', 'G', '-3\''].map((ch, i) => (
                     <span
                       key={i}
                       className={cn(
@@ -280,7 +282,7 @@ export function ScientificWorkspacePreview() {
                       {ch}
                     </span>
                   ))}
-                  <span className="ml-auto text-[11px] text-muted-foreground self-center">22 bp · GC: 50.0%</span>
+                  <span className="ml-auto text-[11px] text-muted-foreground self-center">22 bp · GC: 52.4%</span>
                 </div>
               </div>
             </div>
@@ -317,31 +319,31 @@ export function ScientificWorkspacePreview() {
                 </thead>
                 <tbody className="divide-y divide-border text-muted-foreground">
                   <tr className="hover:bg-muted/20">
-                    <td className="py-3 px-4 font-semibold text-foreground">Dulbecco&apos;s PBS (1X, Sterile)</td>
-                    <td className="py-3 px-4">#PB-2026-904</td>
-                    <td className="py-3 px-4">Cold Room 4°C · Shelf 2</td>
-                    <td className="py-3 px-4 text-foreground font-medium">4,250 mL</td>
+                    <td className="py-3 px-4 font-semibold text-foreground">Tris-EDTA Buffer (TE, pH 8.0)</td>
+                    <td className="py-3 px-4">#TE-2026-012</td>
+                    <td className="py-3 px-4">Cold Room 4°C · Shelf 1</td>
+                    <td className="py-3 px-4 text-foreground font-medium">500 mL</td>
                     <td className="py-3 px-4 text-phosphor">Active · Sealed</td>
                   </tr>
                   <tr className="hover:bg-muted/20">
-                    <td className="py-3 px-4 font-semibold text-foreground">Paraformaldehyde 4% in PBS</td>
-                    <td className="py-3 px-4">#PF-8841-A</td>
-                    <td className="py-3 px-4">Flammables Cabinet B</td>
-                    <td className="py-3 px-4 text-foreground font-medium">475 mL</td>
+                    <td className="py-3 px-4 font-semibold text-foreground">Proteinase K Solution (20 mg/mL)</td>
+                    <td className="py-3 px-4">#PK-5091-B</td>
+                    <td className="py-3 px-4">-20°C Freezer Box 3</td>
+                    <td className="py-3 px-4 text-foreground font-medium">1.0 mL (aliquoted)</td>
                     <td className="py-3 px-4 text-phosphor">Active</td>
                   </tr>
                   <tr className="hover:bg-muted/20">
-                    <td className="py-3 px-4 font-semibold text-foreground">Anti-Troponin T2 Rabbit mAb</td>
-                    <td className="py-3 px-4">#AB-7702-X</td>
-                    <td className="py-3 px-4">-80°C Freezer Bay 2</td>
-                    <td className="py-3 px-4 text-foreground font-medium">80 µL (4 aliquots)</td>
-                    <td className="py-3 px-4 text-phosphor">Verified Antibody</td>
+                    <td className="py-3 px-4 font-semibold text-foreground">dNTP Mix (10 mM each)</td>
+                    <td className="py-3 px-4">#DN-4401-X</td>
+                    <td className="py-3 px-4">-20°C Freezer Box 1</td>
+                    <td className="py-3 px-4 text-foreground font-medium">200 µL (8 aliquots)</td>
+                    <td className="py-3 px-4 text-phosphor">Verified</td>
                   </tr>
                   <tr className="hover:bg-muted/20">
-                    <td className="py-3 px-4 font-semibold text-foreground">Gelatin Methacryloyl (GelMA)</td>
-                    <td className="py-3 px-4">#GM-1092-C</td>
-                    <td className="py-3 px-4">Desiccator Chamber 1</td>
-                    <td className="py-3 px-4 text-foreground font-medium">15.4 g</td>
+                    <td className="py-3 px-4 font-semibold text-foreground">Taq DNA Polymerase (5 U/µL)</td>
+                    <td className="py-3 px-4">#TQ-1092-C</td>
+                    <td className="py-3 px-4">-20°C Freezer Box 1</td>
+                    <td className="py-3 px-4 text-foreground font-medium">250 U remaining</td>
                     <td className="py-3 px-4 text-phosphor">Quality Cleared</td>
                   </tr>
                 </tbody>
@@ -389,35 +391,35 @@ export function ScientificWorkspacePreview() {
             <div className="space-y-3">
               <div className="p-4 rounded-xl border border-border bg-card space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                  <span className="text-primary font-semibold">Nature Biotechnology (2024)</span>
-                  <span>PMID: 38412901 · DOI: 10.1038/s41587-024-01182-1</span>
+                  <span className="text-primary font-semibold">Science (1988)</span>
+                  <span>PMID: 2448875 · DOI: 10.1126/science.2448875</span>
                 </div>
                 <h4 className="text-sm font-semibold text-foreground">
-                  Electromechanical synchronization of engineered human cardiac tissue on nanofibrous scaffolds
+                  Primer-directed enzymatic amplification of DNA with a thermostable DNA polymerase
                 </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Demonstrates 2.4-fold enhancement in longitudinal action potential conduction velocity using oriented electrospun polyurethane matrices.
+                  Demonstrates automated amplification kinetics using Thermus aquaticus (Taq) polymerase across 30+ thermal cycles without enzyme replenishment.
                 </p>
                 <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-phosphor">Cited in Section 3.1: Protocol Electrophysiological Rationale</span>
-                  <span className="text-muted-foreground">Direct Markdown Citation: [@NBT2024]</span>
+                  <span className="text-phosphor">Cited in Section 1.2: Thermostable Polymerase Kinetics</span>
+                  <span className="text-muted-foreground">Direct Markdown Citation: [@Science1988]</span>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl border border-border bg-card space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                  <span className="text-primary font-semibold">Biomaterials (2023)</span>
-                  <span>PMID: 36729014 · DOI: 10.1016/j.biomaterials.2023.122049</span>
+                  <span className="text-primary font-semibold">Clinical Chemistry (2009)</span>
+                  <span>PMID: 19246619 · DOI: 10.1373/clinchem.2008.112797</span>
                 </div>
                 <h4 className="text-sm font-semibold text-foreground">
-                  Viscoelastic characterization of photopolymerized hydrogel constructs under physiological cyclic strain
+                  The MIQE Guidelines: Minimum Information for Publication of Quantitative Real-Time PCR Experiments
                 </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Establishes standard frequency sweep protocols (0.1–10 Hz) for evaluating loss and storage moduli in tissue replacements.
+                  Establishes experimental reporting guidelines for target specificity, annealing temperature tolerance, template purity, and extraction yield.
                 </p>
                 <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-phosphor">Cited in Section 4.2: Mechanical Testing Parameters</span>
-                  <span className="text-muted-foreground">Direct Markdown Citation: [@Biomaterials2023]</span>
+                  <span className="text-phosphor">Cited in Section 2.4: Primer Specificity &amp; QC Criteria</span>
+                  <span className="text-muted-foreground">Direct Markdown Citation: [@ClinChem2009]</span>
                 </div>
               </div>
             </div>
@@ -431,7 +433,7 @@ export function ScientificWorkspacePreview() {
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Bench Instrument &amp; Sensor Acquisition</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Optional direct ingestion for sensors, load cells, biopotentials, and microcontrollers via browser Web Serial.
+                  Direct telemetry capture for thermal cyclers, analytical balances, probes, and custom DAQ hardware via browser Web Serial.
                 </p>
               </div>
               <span className="text-xs font-mono px-2.5 py-1 rounded bg-primary/10 text-primary border border-primary/20">
@@ -442,8 +444,8 @@ export function ScientificWorkspacePreview() {
             <div className="grid md:grid-cols-12 gap-6 bg-card border border-border rounded-xl p-5">
               <div className="md:col-span-7 space-y-3">
                 <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-muted-foreground uppercase">Channel 01: Biopotential ECG (mV)</span>
-                  <span className="text-phosphor font-semibold">1,000 Hz Live Stream</span>
+                  <span className="text-muted-foreground uppercase">Channel 01: Peltier Block Temperature (°C)</span>
+                  <span className="text-phosphor font-semibold">5 Hz Live Telemetry</span>
                 </div>
                 <div className="h-36 w-full bg-background border border-border rounded-lg relative flex items-end p-2 gap-1 overflow-hidden">
                   <div className="absolute inset-0 grid grid-rows-3 grid-cols-6 pointer-events-none opacity-20 border-b border-border">
@@ -451,13 +453,14 @@ export function ScientificWorkspacePreview() {
                       <div key={i} className="border-r border-t border-border/40" />
                     ))}
                   </div>
-                  {[45, 48, 52, 90, 18, 46, 50, 48, 51, 52, 88, 20, 47, 51, 49, 53, 92, 16, 45, 52, 50, 48, 52, 89, 19, 48, 52, 50, 47].map((h, idx) => (
-                    <div key={idx} className="flex-1 bg-phosphor/80 rounded-t-xs" style={{ height: `${h}%` }} />
+                  {/* PCR 3-step thermal cycle simulation: 95°C Denature, 58°C Anneal, 72°C Extend */}
+                  {[95, 95, 95, 58, 58, 58, 58, 72, 72, 72, 95, 95, 95, 58, 58, 58, 58, 72, 72, 72, 95, 95, 95, 58, 58, 58, 58, 72, 72].map((temp, idx) => (
+                    <div key={idx} className="flex-1 bg-phosphor/80 rounded-t-xs" style={{ height: `${(temp / 100) * 100}%` }} title={`${temp}°C`} />
                   ))}
                 </div>
                 <div className="flex justify-between items-center text-[11px] font-mono text-muted-foreground">
-                  <span>Transport: Off-thread Web Worker</span>
-                  <span className="text-phosphor">Zero UI Frame Drops</span>
+                  <span>Cycle Stage: 72.0 °C Extension (Cycle 18/35)</span>
+                  <span className="text-phosphor">±0.08 °C Stability</span>
                 </div>
               </div>
 
@@ -466,13 +469,13 @@ export function ScientificWorkspacePreview() {
                   <div className="text-muted-foreground uppercase text-[10px] font-semibold">Instrument Connection</div>
                   <div className="p-2.5 rounded bg-background border border-border text-[11px] space-y-1">
                     <div>Port: USB CDC (/dev/ttyACM0)</div>
-                    <div>Baud: 115,200 (up to 921,600)</div>
-                    <div>Compatible: ESP32, Teensy, Arduino, DAQ cards</div>
-                    <div className="text-phosphor">Status: Connected directly to note buffer</div>
+                    <div>Baud: 115,200 (serial streaming)</div>
+                    <div>Device: OpenPCR / Peltier PID Controller</div>
+                    <div className="text-phosphor">Status: Logging cycle profile to note</div>
                   </div>
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  When your protocol requires live sensor logging, readings append straight into the notebook note without separate logging programs.
+                  When your protocol requires instrument logging, temperature sweeps, balance measurements, or sensor streams append straight into your notebook without external logger apps.
                 </p>
               </div>
             </div>
@@ -484,13 +487,13 @@ export function ScientificWorkspacePreview() {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="border-b border-border pb-4 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-foreground">Immutable Audit Trail &amp; Regulatory Sealing</h3>
+                <h3 className="text-lg font-semibold text-foreground">Immutable Audit Trail &amp; Verification</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Technical controls supporting 21 CFR Part 11, GAMP 5, and institutional peer-review verification.
+                  Append-only revision records and SHA-256 integrity verification.
                 </p>
               </div>
               <span className="text-xs font-mono px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                Record Status: Cryptographically Sealed
+                Record Status: Sealed &amp; Validated
               </span>
             </div>
 
@@ -501,29 +504,29 @@ export function ScientificWorkspacePreview() {
                   <span className="text-phosphor">ISO 8601 UTC TIMESTAMPED</span>
                 </div>
                 <div className="p-2 rounded bg-background border border-border text-[10px] text-foreground truncate select-all">
-                  4f53cda18c2e8697b91d2938e3e4a5d89f10928374a56b2c1d0e9f8a7b6c5d4e
+                  1cfa3f0f0064c27d6cb034f4166e559daa8a07edc944ae590ff3b6d3e10f5d9e
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-3 rounded bg-background border border-border space-y-1">
-                  <div className="text-muted-foreground text-[10px] uppercase">Author Signature (§ 11.50)</div>
-                  <div className="font-semibold text-foreground">Instrument Operator [OP-4091]</div>
+                  <div className="text-muted-foreground text-[10px] uppercase">Author Signature</div>
+                  <div className="font-semibold text-foreground">KH: Protocol Author</div>
                   <div className="text-muted-foreground text-[11px]">Reason: Authorship &amp; Protocol Execution</div>
-                  <div className="text-phosphor text-[10px]">Verified: ECDSA Signature Applied</div>
+                  <div className="text-phosphor text-[10px]">Verified: Signature Applied</div>
                 </div>
 
                 <div className="p-3 rounded bg-background border border-border space-y-1">
-                  <div className="text-muted-foreground text-[10px] uppercase">PI Reviewer Signature (§ 11.50)</div>
-                  <div className="font-semibold text-foreground">Principal Investigator [PI-7021]</div>
+                  <div className="text-muted-foreground text-[10px] uppercase">PI Reviewer Signature</div>
+                  <div className="font-semibold text-foreground">PI Reviewer: Lab Lead</div>
                   <div className="text-muted-foreground text-[11px]">Reason: Technical Review &amp; Approval</div>
                   <div className="text-phosphor text-[10px]">Verified: Dual-Attestation Sealed</div>
                 </div>
               </div>
 
               <div className="text-[11px] text-muted-foreground leading-relaxed pt-1">
-                Any post-sealing modification to protocol text, telemetry samples, or reagent records invalidates the mathematical checksum,
-                preventing silent alterations during peer review or regulatory audits.
+                Any modification to protocol text, telemetry samples, or reagent records invalidates the mathematical checksum,
+                preventing silent alterations during peer review or grant audits.
               </div>
             </div>
           </div>
@@ -532,8 +535,8 @@ export function ScientificWorkspacePreview() {
 
       {/* Footer Info Pill */}
       <div className="px-6 py-3 bg-muted/40 border-t border-border flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-muted-foreground">
-        <span>The complete research environment for modern scientific discovery</span>
-        <span className="text-foreground font-medium">TipTap Canvas · LIMS · Citations · Optional DAQ · 21 CFR § 11</span>
+        <span>Trial record PR-2026-PCR-01 · 5 Hz Peltier Block Temperature Log</span>
+        <span className="text-foreground font-medium">Local workspace draft</span>
       </div>
     </div>
   );

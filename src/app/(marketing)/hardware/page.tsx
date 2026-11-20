@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function HardwarePage() {
   return (
-    <div className="pt-28 pb-24">
+    <div className="pt-16 sm:pt-20 pb-24">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
         <div className="max-w-3xl">
@@ -18,13 +18,13 @@ export default function HardwarePage() {
             <Cpu className="w-3.5 h-3.5 text-phosphor" />
             <span>Platform / Hardware Instrumentation · Last updated November 2026</span>
           </div>
-          <h1 className="font-display text-4xl sm:text-6xl font-normal tracking-tight text-foreground mb-6 leading-[1.15]">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground mb-6 leading-[1.15]">
             Direct silicon-to-browser telemetry. Zero drivers required.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            Inquestra communicates directly with microcontrollers and analog front-ends via the native W3C Web Serial API.
-            Stream continuous multi-channel biopotential, hemodynamic, and force transducer signals directly into your
-            experimental notebook buffer with zero intermediate daemons.
+            Inquestra communicates directly with microcontrollers and lab instruments via the native W3C Web Serial API.
+            Stream continuous multi-channel signals (from analytical balances, load cells, and temperature arrays to
+            potentiostats and sensors) directly into your notebook with no extra software to install.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <Link
@@ -105,11 +105,11 @@ export default function HardwarePage() {
         </div>
       </section>
 
-      {/* Architecture Section — spec strip replaces 3-col card grid */}
+      {/* Architecture Section: spec strip replaces 3-col card grid */}
       <section className="border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-3xl mb-10">
-            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
               Eliminating the fragile workstation bridge.
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">
@@ -153,7 +153,7 @@ export default function HardwarePage() {
       <section className="py-20 border-t border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
-            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
               Validated silicon targets &amp; benchmarks.
             </h2>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
@@ -178,35 +178,35 @@ export default function HardwarePage() {
                   <td className="py-3.5 px-4">240 MHz Dual-Core Xtensa LX7</td>
                   <td className="py-3.5 px-4 font-mono">921,600 baud</td>
                   <td className="py-3.5 px-4 font-mono">1,000 Hz / 8 ch</td>
-                  <td className="py-3.5 px-4">High-speed biopotential DAQ, wearable sensor arrays</td>
+                  <td className="py-3.5 px-4">High-speed sensor arrays, multi-channel bench DAQ</td>
                 </tr>
                 <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">PJRC Teensy 4.1</td>
                   <td className="py-3.5 px-4">600 MHz ARM Cortex-M7</td>
                   <td className="py-3.5 px-4 font-mono">480 Mbps USB HS</td>
                   <td className="py-3.5 px-4 font-mono">2,500 Hz / 16 ch</td>
-                  <td className="py-3.5 px-4">Ultra-fast electrophysiology, multi-electrode arrays</td>
+                  <td className="py-3.5 px-4">High-speed spectroscopy, multi-channel transducer arrays</td>
                 </tr>
                 <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Arduino Uno R4 / Mega</td>
                   <td className="py-3.5 px-4">48 MHz Renesas RA4M1 / 16 MHz AVR</td>
                   <td className="py-3.5 px-4 font-mono">115,200 baud</td>
                   <td className="py-3.5 px-4 font-mono">250 Hz / 4 ch</td>
-                  <td className="py-3.5 px-4">Classroom biomechanics, standard bench prototyping</td>
+                  <td className="py-3.5 px-4">Classroom lab stations, teaching benches, standard prototyping</td>
                 </tr>
                 <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Nordic nRF52840</td>
                   <td className="py-3.5 px-4">64 MHz ARM Cortex-M4F</td>
                   <td className="py-3.5 px-4 font-mono">460,800 baud</td>
                   <td className="py-3.5 px-4 font-mono">500 Hz / 6 ch</td>
-                  <td className="py-3.5 px-4">In vivo telemetry, implantable telemetry models</td>
+                  <td className="py-3.5 px-4">Field measurements, wireless sensor nodes, portable logging</td>
                 </tr>
                 <tr className="hover:bg-muted/10 transition-colors">
                   <td className="py-3.5 px-4 font-medium text-foreground font-mono">Raspberry Pi RP2040</td>
                   <td className="py-3.5 px-4">133 MHz Dual-Core Cortex-M0+</td>
                   <td className="py-3.5 px-4 font-mono">921,600 baud</td>
                   <td className="py-3.5 px-4 font-mono">1,000 Hz / 4 ch</td>
-                  <td className="py-3.5 px-4">Microfluidic pressure feedback, automated syringes</td>
+                  <td className="py-3.5 px-4">Microfluidic pressure feedback, automated syringe pumps, flow control</td>
                 </tr>
               </tbody>
             </table>
@@ -218,7 +218,7 @@ export default function HardwarePage() {
       <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
-            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
               Pre-calibrated for laboratory transducers &amp; instruments.
             </h2>
           </div>
@@ -235,43 +235,43 @@ export default function HardwarePage() {
               <tbody className="divide-y divide-border">
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">
-                    <span className="block text-xs font-mono text-muted-foreground mb-1">01 / BIOPOTENTIAL</span>
-                    ECG, EMG &amp; EEG
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">01 / TEMPERATURE &amp; ANALYTICAL</span>
+                    RTDs, pH &amp; Probes
                   </td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
-                    Direct integration with instrumentation amplifier front-ends. Software 50/60 Hz notch filtering and 0.5–500 Hz bandpass.
+                    Direct integration with analog and digital sensor front-ends. Continuous temperature, pH, conductivity, and dissolved oxygen monitoring.
                   </td>
-                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">AD8232, ADS1298</td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">MAX31865, ADS1115</td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">
-                    <span className="block text-xs font-mono text-muted-foreground mb-1">02 / HEMODYNAMICS</span>
-                    PPG &amp; Pulse Oximetry
-                  </td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
-                    Dual red/infrared photoplethysmography decoding for SpO₂ and arterial waveform contour analysis.
-                  </td>
-                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">MAX30102, AFE4490</td>
-                </tr>
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">
-                    <span className="block text-xs font-mono text-muted-foreground mb-1">03 / BIOMECHANICS</span>
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">02 / MATERIALS &amp; MECHANICS</span>
                     Force Plates &amp; Load Cells
                   </td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
-                    Full-bridge Wheatstone strain gauge telemetry with zero-tare and dynamic calibration curves.
+                    Full-bridge Wheatstone strain gauge telemetry with zero-tare and dynamic calibration curves for stress-strain tests.
                   </td>
                   <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">HX711, INA125</td>
                 </tr>
                 <tr className="hover:bg-muted/5 transition-colors">
                   <td className="px-5 py-4 font-medium text-foreground align-top">
-                    <span className="block text-xs font-mono text-muted-foreground mb-1">04 / MICROFLUIDICS</span>
-                    Pressure &amp; Temperature
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">03 / ELECTROCHEMISTRY &amp; SIGNALS</span>
+                    Potentiostats &amp; Biopotentials
                   </td>
                   <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
-                    Piezoresistive pressure transducers and PT100/PT1000 RTD resistance probes for continuous bioreactor monitoring.
+                    Cyclic voltammetry sweeps, impedance spectra, and differential voltage measurements with active digital filtering.
                   </td>
-                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">MS5803, MAX31865</td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">AD8232, ADS1298</td>
+                </tr>
+                <tr className="hover:bg-muted/5 transition-colors">
+                  <td className="px-5 py-4 font-medium text-foreground align-top">
+                    <span className="block text-xs font-mono text-muted-foreground mb-1">04 / FLUIDICS &amp; PRESSURE</span>
+                    Pressure &amp; Flow Meters
+                  </td>
+                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">
+                    Piezoresistive pressure transducers, differential pressure flow sensors, and microfluidic feedback loops.
+                  </td>
+                  <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">MS5803, SDP810</td>
                 </tr>
               </tbody>
             </table>
@@ -282,7 +282,7 @@ export default function HardwarePage() {
       {/* CTA */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 text-center">
         <div className="p-10 rounded-xl bg-card border border-border shadow-sm">
-          <h3 className="font-display text-2xl sm:text-3xl text-foreground mb-3 font-normal">
+          <h3 className="text-2xl sm:text-3xl text-foreground mb-3 font-bold">
             Ready to interface your bench hardware?
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">

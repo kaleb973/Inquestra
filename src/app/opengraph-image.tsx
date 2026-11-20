@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Inquestra — Hardware DAQ & Electronic Lab Notebook for Life Sciences, Chemistry & Engineering';
+export const alt = 'Inquestra: Open Electronic Lab Notebook';
 export const size = {
   width: 1200,
   height: 630,
@@ -61,7 +61,7 @@ export default function OpenGraphImage() {
             Inquestra
           </span>
           <span style={{ marginLeft: '12px', fontSize: '14px', color: '#00E599', padding: '6px 12px', borderRadius: '6px', border: '1px solid rgba(0, 229, 153, 0.3)', backgroundColor: 'rgba(0, 229, 153, 0.08)', fontWeight: 600 }}>
-            21 CFR Part 11 Technical Controls
+            Local-First · Open Source
           </span>
         </div>
 
@@ -87,7 +87,7 @@ export default function OpenGraphImage() {
               maxWidth: '900px',
             }}
           >
-            Direct Web Serial streaming from ESP32, Arduino &amp; Teensy sensors into cryptographically sealed laboratory notebooks.
+            Direct Web Serial streaming from bench instruments into tamper-evident notebook records.
           </p>
         </div>
 

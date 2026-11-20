@@ -31,7 +31,7 @@ export default function BillingPage() {
             Inquestra is free while in open development.
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm leading-relaxed">
-            All core research tools — protocol editing, chemical inventory LIMS, sequence calculations, and hardware DAQ — are free to use. There are no subscriptions, paywalls, or feature gates.
+            All core research tools, including protocol editing, chemical inventory LIMS, sequence calculations, and hardware DAQ, are free to use. There are no subscriptions, paywalls, or feature gates.
           </p>
         </div>
 

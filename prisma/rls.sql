@@ -1,6 +1,6 @@
 -- prisma/rls.sql
--- Inquestra — Enterprise PostgreSQL Row-Level Security (RLS) & Multi-Tenant Isolation
--- Compliant with 21 CFR Part 11, HIPAA, and GLP reproducibility standards.
+-- Inquestra: PostgreSQL Row-Level Security (RLS) & Multi-Tenant Isolation
+-- Supporting GLP reproducibility standards and tamper-evident audit trails.
 -- Safe to execute idempotently in the Supabase SQL Editor.
 
 -- ==============================================================================
@@ -246,7 +246,7 @@ FOR ALL USING (
 );
 
 -- ==============================================================================
--- 10. COMPLIANCE: IMMUTABLE AUDIT LOG & ELECTRONIC SIGNATURES (21 CFR Part 11)
+-- 10. COMPLIANCE: IMMUTABLE AUDIT LOG & ELECTRONIC SIGNATURES
 -- ==============================================================================
 
 -- Electronic Signatures: Viewable by org members; Insertable by signer; NEVER updatable or deletable!

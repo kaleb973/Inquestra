@@ -1,7 +1,7 @@
 'use client';
 // src/components/admin/LabClearanceDossier.tsx
 // Role-tailored onboarding & clearance dossier for scientific research laboratories.
-// Displays regulatory mandates (21 CFR Part 11), granular authority bounds, interactive mission checklist,
+// Displays regulatory guidelines and data integrity bounds, interactive mission checklist,
 // and direct "Ask Higher-Up" escalation requests.
 
 import { useState, useEffect, useTransition } from 'react';
@@ -65,7 +65,7 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
     bgClass: 'bg-violet-50 dark:bg-violet-950/20',
     badgeClass: 'bg-violet-100 dark:bg-violet-950/50 text-violet-800 dark:text-violet-300 border-violet-300 dark:border-violet-800',
     authorizedList: [
-      'Final legal seal & signature on completed trials (21 CFR Part 11)',
+      'Final cryptographic seal & signature on completed trials',
       'Assign & promote members across all clearance levels',
       'Create, restructure, or disband Research Squads',
       'Configure Organization-wide Strict Mode & compliance controls',
@@ -76,12 +76,12 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
       'Cannot delete sealed trials with cryptographic checksums',
     ],
     regulatoryMandate:
-      'Under FDA 21 CFR § 11.100 and GLP guidelines, the Principal Investigator bears ultimate accountability for data integrity, signature authenticity, and SOP adherence within the research organization.',
+      'Under Good Laboratory Practices (GLP) and data integrity guidelines, the Principal Investigator bears primary accountability for data provenance, signature authenticity, and SOP adherence within the research organization.',
     checklist: [
       { id: 'pi_1', label: 'Verify Lab Strict Mode Policy', desc: 'Ensure calibration and reagent blockades are configured.' },
       { id: 'pi_2', label: 'Review Research Squad Assignments', desc: 'Confirm bench researchers are assigned to appropriate cores.' },
       { id: 'pi_3', label: 'Inspect Calibration & Maintenance Queue', desc: 'Audit equipment overdue for routine bench calibration.' },
-      { id: 'pi_4', label: 'Examine Electronic Signatures Audit Trail', desc: 'Verify Part 11 signature logs and checksum verification.' },
+      { id: 'pi_4', label: 'Examine Electronic Signatures Audit Trail', desc: 'Verify signature logs and SHA-256 checksum verification.' },
     ],
   },
   ADMIN: {
@@ -395,12 +395,12 @@ export function LabClearanceDossier({
             </div>
           </div>
 
-          {/* Regulatory Mandate (21 CFR Part 11) */}
+          {/* Regulatory & Governance Mandate */}
           <div className="p-4 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/15 border border-indigo-200 dark:border-indigo-900/40 flex items-start gap-3">
             <Info className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
             <div>
               <div className="text-xs font-semibold text-indigo-800 dark:text-muted-foreground uppercase tracking-wider">
-                FDA 21 CFR Part 11 & GLP Regulatory Mandate
+                Data Integrity &amp; GLP Compliance Mandate
               </div>
               <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
                 {config.regulatoryMandate}

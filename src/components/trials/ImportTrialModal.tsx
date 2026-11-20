@@ -432,7 +432,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
                   </div>
                 </div>
                 <div className="border-t border-emerald-500/15 pt-2 text-[11px] text-muted-foreground">
-                  <strong>21 CFR Part 11 Rule:</strong> Imported as a clean <span className="text-foreground font-semibold">DRAFT</span>. Any previous signatures are preserved as read-only historical notes, and previous cryptographic seals are reset.
+                  <strong>Data Provenance Rule:</strong> Imported as a clean <span className="text-foreground font-semibold">DRAFT</span>. Any previous signatures are preserved as read-only historical notes, and previous cryptographic seals are reset.
                 </div>
               </div>
 

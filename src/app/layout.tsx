@@ -31,26 +31,26 @@ const serifDisplay = DM_Serif_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Inquestra — Free Electronic Lab Notebook (ELN)',
-    template: '%s — Inquestra',
+    default: 'Inquestra: Open Electronic Lab Notebook',
+    template: '%s | Inquestra',
   },
   description:
-    'Free electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Free for all labs.',
+    'A local-first electronic lab notebook with built-in serial instrument capture. Your experimental data never leaves your browser.',
   metadataBase: new URL('https://inquestra.org'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://inquestra.org',
     siteName: 'Inquestra',
-    title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
+    title: 'Inquestra: Open Electronic Lab Notebook',
     description:
-      'Free electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Free for all labs.',
+      'A local-first electronic lab notebook with built-in serial instrument capture. Your experimental data never leaves your browser.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Inquestra — Free Electronic Lab Notebook (ELN)',
+    title: 'Inquestra: Open Electronic Lab Notebook',
     description:
-      'Free electronic lab notebook (ELN) for life sciences, chemistry, and engineering. Protocols, chemical inventory, molecular structures, and DAQ. Free for all labs.',
+      'A local-first electronic lab notebook with built-in serial instrument capture. Your experimental data never leaves your browser.',
   },
   icons: {
     icon: [

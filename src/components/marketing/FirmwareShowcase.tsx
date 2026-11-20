@@ -21,40 +21,45 @@ const SNIPPETS: Record<CodeTab, CodeSnippet> = {
     title: 'ESP32-S3 Firmware (C++)',
     badge: 'Hardware DAQ',
     language: 'cpp',
-    description: 'High-speed analog transducer sampling with FreeRTOS ring-buffer queue and USB-CDC telemetry stream.',
-    code: `// Inquestra DAQ Firmware for ESP32-S3 (Arduino Core / ESP-IDF)
-// Continuous 1,000 Hz instrument telemetry sampling with hardware timer
+    description: 'Factory-calibrated analog transducer sampling with non-blocking timing and USB-CDC streaming.',
+    code: `// ESP32-S3 Bench Instrumentation Telemetry Stream
+// Streams timestamped calibrated readings to Inquestra Web Serial buffer
 
 #include <Arduino.h>
+#include "esp_adc_cal.h"
 
-const int SENSOR_PIN = 1;        // ADC1_CH0 (GPIO 1)
-hw_timer_t *timer = NULL;
-volatile uint32_t sampleCount = 0;
+#define ADC_CHANNEL        ADC1_CHANNEL_0 // GPIO 1
+#define ADC_ATTENUATION    ADC_ATTEN_DB_12 // 0–3.1V dynamic range
+#define SAMPLE_INTERVAL_US 10000 // 100 Hz acquisition cadence
 
-void IRAM_ATTR onSampleTimer() {
-  sampleCount++;
-}
+static esp_adc_cal_characteristics_t adc_chars;
+static uint32_t last_sample_us = 0;
 
 void setup() {
-  // High-speed native USB CDC at 921,600 baud
-  Serial.begin(921600);
-  analogReadResolution(12);       // 12-bit ADC (0 - 4095)
+  // Initialize native USB CDC (virtual COM port)
+  Serial.begin(115200);
+  while (!Serial && millis() < 3000) { yield(); }
 
-  // Configure 1 kHz hardware timer ISR
-  timer = timerBegin(1000000);   // 1 MHz base
-  timerAttachInterrupt(timer, &onSampleTimer);
-  timerAlarm(timer, 1000, true, 0); // 1,000 ticks = 1 ms interval
+  analogReadResolution(12);
+  analogSetPinAttenuation(1, ADC_ATTENUATION);
+  esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTENUATION, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+
+  // Send channel header for Inquestra parser
+  Serial.println("# inquestra:format=csv,channels=time_ms,value,unit=mV");
 }
 
 void loop() {
-  static uint32_t lastProcessed = 0;
-  if (sampleCount != lastProcessed) {
-    lastProcessed = sampleCount;
-    int raw = analogRead(SENSOR_PIN);
-    float voltage = (raw * 3.3f) / 4095.0f; // Scale to volts
+  uint32_t now_us = micros();
+  if (now_us - last_sample_us >= SAMPLE_INTERVAL_US) {
+    last_sample_us = now_us;
 
-    // Emits standard Inquestra CSV frame: [timestamp_ms],[voltage_mv]
-    Serial.printf("%lu,%.4f\\n", millis(), voltage * 1000.0f);
+    uint32_t raw = analogRead(1);
+    uint32_t mv = esp_adc_cal_raw_to_voltage(raw, &adc_chars);
+
+    // Formatted stream frame: [time_ms],[calibrated_mv]
+    Serial.print(now_us / 1000);
+    Serial.print(',');
+    Serial.println(mv);
   }
 }`,
   },
@@ -63,36 +68,33 @@ void loop() {
     title: 'Arduino Uno / Mega (C++)',
     badge: 'Standard Microcontroller',
     language: 'cpp',
-    description: 'Standard 115,200 baud streaming for Arduino boards. Compatible with laboratory strain gauges, photodiode detectors, and analytical probes.',
-    code: `// Inquestra Basic DAQ for Arduino Uno / Nano / Mega
-// Compatible with load cells, optical detectors, and analog front-ends
+    description: 'Non-blocking sensor streaming for Arduino boards. Compatible with laboratory strain gauges, photodiode detectors, and analytical probes.',
+    code: `// Laboratory Sensor Ingestion for Arduino Uno / Nano / Mega
+// Compatible with strain gauges, thermistors, and photodiode amplifiers
 
-const int SENSOR_CH0 = A0;
-const int SENSOR_CH1 = A1;
+const uint8_t PROBE_PIN = A0;
+const uint16_t CADENCE_MS = 20; // 50 Hz sampling rate
+
+unsigned long next_sample_ms = 0;
 
 void setup() {
-  // Standard high-reliability bench baud rate
   Serial.begin(115200);
-  while (!Serial) { ; } // Wait for USB connection
+  while (!Serial) { ; }
+
+  // Channel header for Inquestra parser
+  Serial.println("# inquestra:channels=time_ms,ch0_raw");
 }
 
 void loop() {
   unsigned long now = millis();
-  int raw0 = analogRead(SENSOR_CH0);
-  int raw1 = analogRead(SENSOR_CH1);
+  if (now >= next_sample_ms) {
+    next_sample_ms = now + CADENCE_MS;
 
-  // Convert 10-bit ADC (0-1023) to millivolts (5.0V reference)
-  float ch0_mv = (raw0 * 5000.0) / 1023.0;
-  float ch1_mv = (raw1 * 5000.0) / 1023.0;
-
-  // Stream comma-separated values to Inquestra browser buffer
-  Serial.print(now);
-  Serial.print(",");
-  Serial.print(ch0_mv, 2);
-  Serial.print(",");
-  Serial.println(ch1_mv, 2);
-
-  delay(2); // ~500 Hz acquisition loop
+    int raw = analogRead(PROBE_PIN);
+    Serial.print(now);
+    Serial.print(',');
+    Serial.println(raw);
+  }
 }`,
   },
   webserial: {
@@ -142,7 +144,7 @@ import pandas as pd
 import numpy as np
 
 # Load sealed trial manifest and telemetry stream
-with open("trial_TR-2026-SCI_manifest.json", "r") as f:
+with open("trial_manifest.json", "r") as f:
     manifest = json.load(f)
 
 # Verify SHA-256 data integrity before running statistical model
@@ -156,7 +158,7 @@ print(f"Cryptographic verification passed: {computed_hash}")
 df = pd.read_csv("telemetry_stream.csv")
 sampling_freq = 1000.0 # 1 kHz
 
-# Compute Power Spectral Density (PSD) for muscle fatigue assessment
+# Compute Power Spectral Density (PSD) of sensor signal
 from scipy import signal
 frequencies, psd = signal.welch(df["ch0_mv"], fs=sampling_freq, nperseg=1024)
 mean_freq = np.sum(frequencies * psd) / np.sum(psd)
@@ -176,13 +178,19 @@ export function FirmwareShowcase() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const TAB_LABELS: Record<CodeTab, string> = {
+    esp32: 'ESP32-S3 (C++)',
+    arduino: 'Arduino (C++)',
+    webserial: 'Web Serial (TS)',
+    python: 'Analysis (Python)',
+  };
+
   return (
-    <div className="bg-card border border-border rounded-xl shadow-xl overflow-hidden text-left">
+    <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden text-left">
       {/* Tab Navigation Header */}
-      <div className="flex flex-wrap items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5 gap-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+      <div className="flex flex-wrap items-center justify-between border-b border-border bg-muted/20 px-4 py-2 gap-2">
+        <div className="flex items-center gap-1 overflow-x-auto">
           {(Object.keys(SNIPPETS) as CodeTab[]).map((tab) => {
-            const item = SNIPPETS[tab];
             const isActive = activeTab === tab;
             return (
               <button
@@ -190,13 +198,13 @@ export function FirmwareShowcase() {
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-mono transition-colors whitespace-nowrap',
+                  'px-3 py-1.5 rounded text-xs font-mono transition-colors whitespace-nowrap',
                   isActive
                     ? 'bg-background text-foreground font-semibold border border-border shadow-2xs'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                 )}
               >
-                {item.title?.split(' ')?.[0] ?? ''}
+                {TAB_LABELS[tab]}
               </button>
             );
           })}
@@ -206,30 +214,30 @@ export function FirmwareShowcase() {
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono text-muted-foreground hover:text-foreground border border-border bg-background hover:bg-muted/60 transition-colors"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono text-muted-foreground hover:text-foreground border border-border bg-background hover:bg-muted/40 transition-colors"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-phosphor" />
+              <Check className="w-3.5 h-3.5 text-emerald-500" />
               <span>Copied</span>
             </>
           ) : (
             <>
               <Copy className="w-3.5 h-3.5" />
-              <span>Copy Code</span>
+              <span>Copy</span>
             </>
           )}
         </button>
       </div>
 
       {/* Code Header Bar */}
-      <div className="px-5 py-3 border-b border-border/80 bg-background/50 flex flex-wrap items-center justify-between gap-2">
+      <div className="px-5 py-3 border-b border-border bg-background flex flex-wrap items-center justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold text-foreground font-sans">
               {activeSnippet.title}
             </h4>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-muted text-foreground border border-border">
               {activeSnippet.badge}
             </span>
           </div>
@@ -240,16 +248,16 @@ export function FirmwareShowcase() {
       </div>
 
       {/* Code Block Container */}
-      <div className="p-4 sm:p-5 bg-background font-mono text-xs overflow-x-auto leading-relaxed text-foreground/90 max-h-[380px]">
+      <div className="p-4 sm:p-5 bg-muted/10 font-mono text-xs overflow-x-auto leading-relaxed text-foreground max-h-[380px] border-b border-border">
         <pre className="whitespace-pre">
           <code>{activeSnippet.code}</code>
         </pre>
       </div>
 
       {/* Footer Info */}
-      <div className="px-5 py-2.5 bg-muted/30 border-t border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-        <span>No proprietary libraries or drivers needed</span>
-        <span className="text-phosphor">Standard ANSI C++ / ES2022 / Python 3</span>
+      <div className="px-5 py-2.5 bg-muted/20 flex flex-wrap items-center justify-between text-[11px] font-mono text-muted-foreground gap-2">
+        <span>Protocol: Standard comma-separated telemetry frames over USB-CDC</span>
+        <span>Driverless W3C Web Serial in Chromium browsers</span>
       </div>
     </div>
   );

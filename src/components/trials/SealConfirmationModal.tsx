@@ -1,6 +1,6 @@
 'use client';
 // src/components/trials/SealConfirmationModal.tsx
-// Two-step verification modal for 21 CFR Part 11 cryptographic experiment sealing.
+// Two-step verification modal for cryptographic experiment sealing.
 // Prevents accidental single-click sealing and ensures deliberate regulatory sign-off.
 
 import { useState, useEffect } from 'react';
@@ -73,7 +73,7 @@ export function SealConfirmationModal({
           <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">21 CFR Part 11 Regulatory Lock</p>
+              <p className="font-semibold text-foreground">Cryptographic Provenance Lock</p>
               <p className="leading-relaxed text-[11px]">
                 Sealing is <strong>strictly permanent and irreversible</strong>. A cryptographic SHA-256 hash will be generated. All further editing, status transitions, and data modifications will be locked.
               </p>

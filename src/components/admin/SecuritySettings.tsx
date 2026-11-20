@@ -382,7 +382,7 @@ export function SecuritySettings() {
                     onClick={() => { setMfaState('verifying'); setOtpError(null); }}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors"
                   >
-                    Next — Enter Code →
+                    Next: Enter Code →
                   </button>
                 </div>
               </>

@@ -19,7 +19,7 @@ export default function NotFound() {
             <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
               404 / Port Unreachable
             </p>
-            <h1 className="font-display text-2xl font-normal text-foreground">
+            <h1 className="text-2xl font-bold text-foreground">
               Research Record Not Found
             </h1>
           </div>
