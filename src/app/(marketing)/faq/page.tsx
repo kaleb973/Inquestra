@@ -4,10 +4,10 @@ import { ArrowRight, CheckCircle2, Clock, Cpu, ShieldCheck } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Frequently Asked Questions — Inquestra Free Electronic Lab Notebook',
+    absolute: 'Frequently Asked Questions: Inquestra Free Electronic Lab Notebook',
   },
   description:
-    'Direct answers about Inquestra ELN: guest mode without signup, native Web Serial API bench hardware DAQ, free academic access, 21 CFR Part 11 provenance, sequence tools, and roadmap.',
+    'Answers to common questions about Inquestra: offline usage, hardware data capture, local storage, sequence tools, and data export.',
 };
 
 interface FaqItem {
@@ -30,7 +30,7 @@ const FAQ_ITEMS: readonly FaqItem[] = [
     category: 'Access & Licensing',
     question: 'Is Inquestra free for academic research?',
     answer:
-      'Yes. Inquestra is built as free, open research infrastructure for academic researchers, students, university labs, iGEM teams, and independent scientists—whether running locally in the browser or synced to an optional PostgreSQL/Supabase workspace.',
+      'Yes. Inquestra is built as free, open research infrastructure for academic researchers, students, university labs, iGEM teams, and independent scientists, whether running locally in the browser or synced to an optional PostgreSQL workspace.',
   },
   {
     id: 'serial-hardware',
@@ -42,9 +42,9 @@ const FAQ_ITEMS: readonly FaqItem[] = [
   {
     id: 'glp-gmp-compliance',
     category: 'Compliance & Provenance',
-    question: 'Does Inquestra support GLP/GMP compliance?',
+    question: 'Does Inquestra support data integrity compliance?',
     answer:
-      'Inquestra implements 21 CFR Part 11-ready workflow primitives—immutable SHA-256 record sealing, append-only revision snapshots, timestamped protocol step execution, deviation notes, and electronic signature audit logs. However, Inquestra is not a pre-certified turn-key GxP/GMP system; regulated organizations must perform their own environment-specific IQ/OQ/PQ validation.',
+      'Inquestra implements verification primitives: immutable SHA-256 record sealing, append-only revision snapshots, timestamped protocol step execution, deviation notes, and audit logs. Regulated organizations must validate their specific procedures against institutional standards.',
   },
   {
     id: 'crispr-guide-design',
@@ -72,7 +72,7 @@ const FAQ_ITEMS: readonly FaqItem[] = [
     category: 'Hardware & Data',
     question: 'Can I export my experimental records and raw telemetry?',
     answer:
-      'Yes. Inquestra imposes zero vendor lock-in. Sequence blocks export directly as FASTA, hardware DAQ charts import and export CSV traces, completed protocols print to clean PDF/HTML documentation, and cloud Postgres schemas remain fully transparent.',
+      'Yes. Inquestra imposes zero vendor lock-in. Sequence blocks export directly as FASTA, hardware DAQ charts import and export CSV traces, completed protocols print or export as ZIP archives (Markdown, JSON, and CSV), and cloud Postgres schemas remain fully transparent.',
   },
 ];
 
@@ -98,17 +98,16 @@ export default function FaqPage() {
       />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="pt-32 pb-16 border-b border-border">
+      <section className="pt-16 sm:pt-20 pb-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4">
             Documentation · Frequently Asked Questions
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl font-normal tracking-tight text-foreground mb-6 leading-tight">
-            Straight answers on Inquestra&apos;s ELN capabilities, compliance, and roadmap.
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
+            Questions about Inquestra, answered plainly.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            No marketing vagueness: here is exactly what Inquestra runs today across wet-lab biology,
-            chemistry, materials science, and hardware DAQ—and what is still in active development.
+            What Inquestra actually does today across wet-lab biology, chemistry, materials science, and hardware DAQ, and what is still being built.
           </p>
         </div>
       </section>
@@ -163,8 +162,8 @@ export default function FaqPage() {
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl font-normal text-foreground tracking-tight mb-4">
-            Inspect the workspace directly — no account required.
+          <h2 className="text-3xl font-bold text-foreground tracking-tight mb-4">
+            Inspect the workspace directly with no account required.
           </h2>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
             Open the browser workspace to test protocol execution timers, sequence Tm calculations,

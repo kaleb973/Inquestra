@@ -4,17 +4,17 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Enterprise terms of service, acceptable use, and compliance policies for Inquestra research platform.',
+  description: 'Terms of service and acceptable use policies for the Inquestra research platform.',
 };
 
 export default function TermsOfServicePage() {
   return (
-    <div className="pt-28 pb-20">
+    <div className="pt-16 sm:pt-20 pb-20">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 border-b border-border pb-8">
-          <h1 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-3">
             Terms of Service
           </h1>
           <p className="text-muted-foreground text-xs font-mono">
@@ -46,27 +46,29 @@ export default function TermsOfServicePage() {
 
           {/* Section 2 */}
           <section>
-            <h2 className="text-base font-semibold text-foreground mb-3">2. 21 CFR Part 11 Electronic Records &amp; Signatures</h2>
+            <h2 className="text-base font-semibold text-foreground mb-3">2. Data Integrity Controls &amp; Compliance Primitives</h2>
             <p className="mb-3">
-              Inquestra incorporates technical design controls tailored for compliance with the United States Food and
-              Drug Administration (FDA) regulations set forth in <strong>Title 21 of the Code of Federal Regulations Part 11
-              (21 CFR Part 11)</strong>, Good Laboratory Practices (GLP), and Good Clinical Practices (GCP):
+              Inquestra incorporates technical design controls designed to support data integrity workflows, including principles from
+              Good Laboratory Practices (GLP) and FDA 21 CFR Part 11 guidelines:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
               <li>
-                <strong className="text-foreground">Electronic Signatures:</strong> Electronic signatures executed on Inquestra
-                (including Author, Witness, and Principal Investigator approval roles) are designed to be the legally binding
-                equivalent of handwritten signatures.
+                <strong className="text-foreground">Electronic Signatures:</strong> Signature workflows executed on Inquestra
+                (including Author, Witness, and Principal Investigator roles) record identity, UTC timestamps, and explicit signing intent.
               </li>
               <li>
-                <strong className="text-foreground">Credential Integrity:</strong> Users are prohibited from sharing credentials,
-                session tokens, or passkeys. Any action performed under your authenticated session will be attributed to your identity
-                in the immutable audit ledger.
+                <strong className="text-foreground">Credential Integrity:</strong> Users are responsible for maintaining credential security.
+                Actions performed under an authenticated session are recorded to the append-only audit trail.
               </li>
               <li>
                 <strong className="text-foreground">Tamper-Evident Hashing:</strong> Once an experiment trial is cryptographically sealed,
-                its contents, metadata, and linked hardware telemetry streams are permanently locked with a SHA-256 checksum. Any attempt
-                to alter historical records will fail integrity checks.
+                its contents, metadata, and linked hardware telemetry streams are bound by a SHA-256 checksum. Any post-hoc modification
+                fails validation.
+              </li>
+              <li>
+                <strong className="text-foreground">Regulatory Disclaimer:</strong> While Inquestra provides technical integrity primitives,
+                formal compliance with FDA 21 CFR Part 11 or GxP requirements depends on an organization&apos;s complete system validation,
+                standard operating procedures, and institutional controls. Inquestra does not independently certify regulatory compliance for your facility.
               </li>
             </ul>
           </section>
@@ -87,28 +89,13 @@ export default function TermsOfServicePage() {
 
           {/* Section 4 */}
           <section>
-            <h2 className="text-base font-semibold text-foreground mb-3">4. Commercial Subscriptions &amp; Automatic Renewal Terms</h2>
+            <h2 className="text-base font-semibold text-foreground mb-3">4. Access &amp; Future Services</h2>
             <p className="mb-3">
-              Inquestra offers both free open-core software tiers and optional commercial subscription tiers (e.g., Pro, Enterprise).
-              In compliance with applicable consumer protection and Automatic Renewal Laws (including California Business and Professions
-              Code § 17600 et seq.):
+              Inquestra is provided free of charge during open development. All core research features, protocol tools,
+              and local hardware DAQ capabilities are accessible without subscription fees. If paid managed services
+              or institutional support tiers are offered in the future, terms will be presented clearly prior to enrollment,
+              and no charges will be incurred without your affirmative consent.
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-              <li>
-                <strong className="text-foreground">Recurring Billing:</strong> If you enroll in a paid subscription, your payment method
-                will be charged recurringly at the frequency stated at checkout (monthly or annually) until you cancel.
-              </li>
-              <li>
-                <strong className="text-foreground">Unconditional Online Cancellation:</strong> You may cancel your subscription at any time
-                directly within the application via your <Link href="/app/billing" className="text-primary hover:underline">Workspace Billing Settings</Link> or
-                by contacting billing support. No phone calls or retention hurdles are required.
-              </li>
-              <li>
-                <strong className="text-foreground">Effect of Cancellation:</strong> Upon cancellation, your subscription will continue through
-                the conclusion of your current paid billing period without further recurring charges. Export access to your scientific data
-                remains available.
-              </li>
-            </ul>
           </section>
 
           {/* Section 5 */}
@@ -121,7 +108,7 @@ export default function TermsOfServicePage() {
             </p>
             <div className="p-4 bg-card border border-border rounded-lg space-y-1.5 text-xs font-mono text-muted-foreground">
               <p className="font-semibold text-foreground text-sm font-sans mb-1">Designated DMCA Copyright Notices:</p>
-              <p>Inquestra — Legal &amp; Compliance Team</p>
+              <p>Inquestra: Legal &amp; Compliance Team</p>
               <p>Email: <span className="text-foreground font-semibold select-all">legal@inquestra.org</span></p>
               <p className="pt-1 font-sans">
                 <Link href="/contact" className="text-primary hover:underline">

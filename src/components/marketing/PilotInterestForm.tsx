@@ -50,7 +50,7 @@ export function PilotInterestForm() {
         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         <h3 className="text-lg font-semibold text-foreground">You&apos;re on the list.</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Bench requirements are reviewed within 48 hours followed by access instructions. No sales pressure &mdash; strictly technical lab onboarding.
+          Bench requirements are reviewed within 48 hours followed by access instructions. No sales pitch, just getting your lab set up.
         </p>
       </div>
     );
@@ -68,7 +68,7 @@ export function PilotInterestForm() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Alex Morgan"
+            placeholder="Your name"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
@@ -81,7 +81,7 @@ export function PilotInterestForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="e.g. alex.morgan@institution.edu"
+            placeholder="your@email.edu"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
@@ -97,7 +97,7 @@ export function PilotInterestForm() {
             required
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
-            placeholder="e.g. Molecular Biology Core, Dept. of Chemistry, or Bioengineering Lab"
+            placeholder="Wilson Lab, MIT"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
@@ -109,7 +109,7 @@ export function PilotInterestForm() {
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            placeholder="Principal Investigator, Postdoc, Lab Manager…"
+            placeholder="PI, Postdoc, or Lab Manager"
             className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
           />
         </div>
@@ -123,7 +123,7 @@ export function PilotInterestForm() {
         <textarea
           value={useCase}
           onChange={(e) => setUseCase(e.target.value)}
-          placeholder="e.g. Enzyme kinetic assays, molecular cloning SOPs, chemical reagent lot tracking, live sensor logging, or mechanical testing…"
+          placeholder="qPCR workflows, primer aliquot tracking, and balance telemetry"
           rows={3}
           className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
         />
@@ -154,7 +154,7 @@ export function PilotInterestForm() {
       </button>
 
       <p className="text-[11px] text-muted-foreground text-center">
-        Free pilot. No credit card. 48-hour response window.
+        Free pilot onboarding. Reviewed within 48 hours.
       </p>
     </form>
   );

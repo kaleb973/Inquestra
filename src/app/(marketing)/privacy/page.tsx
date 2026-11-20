@@ -4,17 +4,17 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Enterprise data privacy, security, and telemetry confidentiality policy for Inquestra platform.',
+  description: 'Data privacy, security, and research data confidentiality policies for the Inquestra platform.',
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="pt-28 pb-20">
+    <div className="pt-16 sm:pt-20 pb-20">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 border-b border-border pb-8">
-          <h1 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-3">
             Privacy Policy
           </h1>
           <p className="text-muted-foreground text-xs font-mono">
@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
         <div className="space-y-10 text-muted-foreground text-sm leading-relaxed">
           {/* Section 1 */}
           <section>
-            <h2 className="text-base font-semibold text-foreground mb-3">1. Executive Overview &amp; Research Confidentiality</h2>
+            <h2 className="text-base font-semibold text-foreground mb-3">1. Overview &amp; Research Confidentiality</h2>
             <p className="mb-3">
               Inquestra (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;)
               respects the confidentiality of your scientific research, intellectual property, and personal information.
@@ -75,8 +75,8 @@ export default function PrivacyPolicyPage() {
                 FAIR metadata tags, sensor sample streams (e.g., ESP32/Arduino data via Web Serial), inventory lots, and equipment calibration dates.
               </li>
               <li>
-                <strong className="text-foreground">Audit Trail &amp; Signature Logs:</strong> Under FDA 21 CFR Part 11 requirements, we record
-                timestamped events (user ID, action type, IP address, and cryptographic signatures) to maintain immutable data provenance.
+                <strong className="text-foreground">Audit Trail &amp; Signature Logs:</strong> To maintain immutable data provenance and tamper-evident audit logs, we record
+                timestamped events (user ID, action type, IP address, and cryptographic signatures).
               </li>
             </ul>
           </section>
@@ -114,7 +114,7 @@ export default function PrivacyPolicyPage() {
             <p>
               All communication between your browser and our servers is secured using modern Transport Layer Security (TLS 1.3).
               Stored databases and uploaded telemetry binary archives are encrypted at rest using AES-256. Experimental trials sealed
-              under our Part 11 module are cryptographically bound using deterministic SHA-256 checksums to ensure tamper-evident
+              in the workspace are cryptographically bound using deterministic SHA-256 checksums to ensure tamper-evident
               integrity.
             </p>
           </section>
@@ -136,7 +136,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-foreground mb-3">9. Privacy Inquiries &amp; Data Protection Office</h2>
             <div className="p-4 bg-card border border-border rounded-lg space-y-1.5 text-xs font-mono text-muted-foreground">
-              <p className="font-semibold text-foreground text-sm font-sans mb-1">Inquestra — Data Protection &amp; Compliance</p>
+              <p className="font-semibold text-foreground text-sm font-sans mb-1">Inquestra: Data Protection &amp; Compliance</p>
               <p>Legal &amp; Privacy: <span className="text-foreground font-semibold select-all">legal@inquestra.org</span></p>
               <p>Platform Support: <span className="text-foreground font-semibold select-all">support@inquestra.org</span></p>
               <p className="pt-1 font-sans">

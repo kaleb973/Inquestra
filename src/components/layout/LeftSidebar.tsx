@@ -1275,7 +1275,7 @@ export function LeftSidebar() {
                 In experimental research and laboratory data acquisition, a <strong>trial</strong> is an individual data collection cycle, protocol execution, or telemetry run.
               </p>
               <p className="leading-relaxed">
-                In Inquestra, every entry is also a full <strong>Electronic Research Notebook (ERN)</strong> document that tracks rich hypotheses, protocol executions (SOPs), LIMS reagent deductions, telemetry graphs, and 21 CFR Part 11 seals.
+                In Inquestra, every entry is also a full <strong>Electronic Research Notebook (ERN)</strong> document that tracks rich hypotheses, protocol executions (SOPs), LIMS reagent deductions, telemetry graphs, and cryptographic SHA-256 seals.
               </p>
             </div>
           )}

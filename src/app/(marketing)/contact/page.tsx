@@ -18,17 +18,17 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="pt-28 pb-20">
+    <div className="pt-16 sm:pt-20 pb-20">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <h1 className="font-display text-3xl sm:text-5xl font-normal text-foreground tracking-tight mb-4">
-            Direct communication channels
+          <h1 className="text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
+            Get in touch
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-            Have inquiries regarding telemetry hardware integrations, lab clearance onboarding,
-            or regulatory compliance controls? Direct technical assistance is available for bench researchers.
+            Questions about hardware integrations, importing existing protocols, or setting up Inquestra for your lab?
+            You can reach out directly.
           </p>
         </div>
 
@@ -95,9 +95,9 @@ export default function ContactPage() {
               <div className="w-10 h-10 rounded bg-muted flex items-center justify-center mb-5 text-foreground">
                 <Shield className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Legal, Governance &amp; Compliance</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">General &amp; Privacy Inquiries</h2>
               <p className="text-xs text-muted-foreground leading-relaxed mb-6">
-                Official inquiries regarding 21 CFR Part 11 electronic records, NIH FAIR metadata retention, and GDPR/CCPA requests.
+                Questions about data privacy, open source development, security disclosures, or collaboration.
               </p>
 
               <div className="bg-background border border-border rounded p-3 mb-6 flex items-center justify-between">
@@ -145,14 +145,13 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* SLA Card */}
+        {/* Response Note */}
         <div className="mt-10 p-6 rounded-lg bg-card border border-border text-center">
           <p className="text-xs font-medium text-foreground mb-1">
-            Research &amp; Institutional Response Cadence
+            Response time
           </p>
           <p className="text-xs text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            All inquiries sent to Inquestra are routed through encrypted institutional forwarders.
-            Technical and regulatory inquiries are reviewed within one business day.
+            Messages go directly to the builder. You can expect a response within one business day.
           </p>
         </div>
       </main>

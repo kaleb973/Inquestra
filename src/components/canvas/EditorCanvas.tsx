@@ -812,10 +812,10 @@ function buildSlashCommands(): SlashCommand[] {
       },
     },
     {
-      title: 'Sign Trial (21 CFR § 11)',
-      description: 'Apply electronic signature to seal trial record',
+      title: 'Sign & Seal Trial Record',
+      description: 'Apply cryptographic signature and hash seal to trial record',
       category: 'Actions & Compliance',
-      keywords: ['sign', 'signature', 'seal', 'attest', 'cfr', 'part11', 'witness', 'electronic', 'lock', 'approve'],
+      keywords: ['sign', 'signature', 'seal', 'attest', 'hash', 'witness', 'electronic', 'lock', 'approve'],
       icon: <FileLock2 className="w-4 h-4 text-emerald-500" />,
       command: (_params: { editor: Editor; range: Range }) => {
         _params.editor.chain().focus().deleteRange(_params.range).run();

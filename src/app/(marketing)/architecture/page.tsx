@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ArchitecturePage() {
   return (
-    <div className="pt-28 pb-24">
+    <div className="pt-16 sm:pt-20 pb-24">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
         <div className="max-w-3xl">
@@ -18,7 +18,7 @@ export default function ArchitecturePage() {
             <Database className="w-3.5 h-3.5 text-phosphor" />
             <span>Platform / Engineering &amp; Architecture · Last updated November 2026</span>
           </div>
-          <h1 className="font-display text-4xl sm:text-6xl font-normal tracking-tight text-foreground mb-6 leading-[1.15]">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground mb-6 leading-[1.15]">
             Engineered for high-frequency telemetry &amp; immutable storage.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
@@ -42,7 +42,7 @@ export default function ArchitecturePage() {
           </div>
         </div>
 
-        {/* 4-Tier Pipeline — horizontal flow diagram */}
+        {/* 4-Tier Pipeline: horizontal flow diagram */}
         <div className="mt-14 bg-card border border-border rounded-lg overflow-hidden shadow-xl p-8">
           <div className="border-b border-border pb-4 mb-8">
             <span className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
@@ -60,7 +60,7 @@ export default function ArchitecturePage() {
               <span className="text-[10px] font-mono text-muted-foreground">TIER 01</span>
               <h4 className="font-semibold text-sm text-foreground mt-1 mb-2">Silicon &amp; ADC</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Microcontrollers (ESP32-S3, Teensy 4.1, Arduino) capture analog sensor biopotentials and emit structured UART byte frames.
+                Microcontrollers (ESP32-S3, Teensy 4.1, Arduino) sample sensor signals and emit structured serial frames.
               </p>
               <p className="mt-3 font-mono text-[10px] text-muted-foreground">Transport: USB-CDC / UART</p>
             </div>
@@ -98,7 +98,7 @@ export default function ArchitecturePage() {
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Local IndexedDB provides offline resilience. Finalized trials sync to PostgreSQL via Prisma ORM with SHA-256 seals.
               </p>
-              <p className="mt-3 font-mono text-[10px] text-primary">Integrity: 21 CFR § 11</p>
+              <p className="mt-3 font-mono text-[10px] text-primary">Integrity: SHA-256 Verified</p>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function ArchitecturePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+              <h2 className="font-sans text-3xl font-bold text-foreground tracking-tight">
                 Why off-main-thread Web Workers are essential for bench DAQ.
               </h2>
               <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
@@ -143,12 +143,12 @@ export default function ArchitecturePage() {
         </div>
       </section>
 
-      {/* Offline Resilience — prose + table */}
+      {/* Offline Resilience: prose + table */}
       <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+              <h2 className="text-3xl font-bold text-foreground tracking-tight">
                 Offline-first resilience for critical lab benches.
               </h2>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
@@ -169,17 +169,17 @@ export default function ArchitecturePage() {
                 <tbody className="divide-y divide-border">
                   <tr className="hover:bg-muted/5 transition-colors">
                     <td className="px-5 py-4 font-medium text-foreground align-top text-xs">Local IndexedDB Caching</td>
-                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">Browser IndexedDB — packets and protocol edits persisted in real time</td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">Browser IndexedDB: packets and protocol edits persisted in real time</td>
                     <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">None required</td>
                   </tr>
                   <tr className="hover:bg-muted/5 transition-colors">
                     <td className="px-5 py-4 font-medium text-foreground align-top text-xs">Automatic Reconnection Sync</td>
-                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">PostgreSQL via Prisma — validated local buffer synced on reconnect without data collisions</td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">PostgreSQL via Prisma: validated local buffer synced on reconnect without data collisions</td>
                     <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">Restored automatically</td>
                   </tr>
                   <tr className="hover:bg-muted/5 transition-colors">
                     <td className="px-5 py-4 font-medium text-foreground align-top text-xs">Air-Gapped Standalone Mode</td>
-                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">Local cryptographic export to USB storage for restricted military, biosecurity, or high-containment laboratories</td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed align-top">Local export to file or external storage for air-gapped lab computers and private networks</td>
                     <td className="px-5 py-4 text-xs font-mono text-muted-foreground align-top">Not required</td>
                   </tr>
                 </tbody>
@@ -192,7 +192,7 @@ export default function ArchitecturePage() {
       {/* CTA Box */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 text-center">
         <div className="p-10 rounded-xl bg-card border border-border shadow-sm">
-          <h3 className="font-display text-2xl sm:text-3xl text-foreground mb-3 font-normal">
+          <h3 className="text-2xl sm:text-3xl text-foreground mb-3 font-bold">
             Test the telemetry pipeline yourself.
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">

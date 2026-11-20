@@ -2,7 +2,7 @@
 // src/actions/literatureActions.ts
 // Scientific Literature & Citations Server Actions
 // Integrates with Europe PMC REST API (44M+ scientific & life science articles) and manages
-// lab-wide references and experiment-linked citations with 21 CFR Part 11 audit trails.
+// lab-wide references and experiment-linked citations with tamper-evident audit trails.
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
@@ -538,7 +538,7 @@ export async function deletePaperFromLibrary(paperId: string) {
   const sealedTrial = paper.trials.find((t) => t.trial.checksum !== null);
   if (sealedTrial) {
     throw new Error(
-      `Cannot delete paper: cited in sealed experiment "${sealedTrial.trial.title}" under 21 CFR Part 11.`
+      `Cannot delete paper: cited in sealed experiment "${sealedTrial.trial.title}". Sealed experiments are immutable.`
     );
   }
 

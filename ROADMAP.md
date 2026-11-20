@@ -14,8 +14,8 @@ This document captures upcoming feature pillars and strategic initiatives for In
 
 ---
 
-## 2. 2-Person Electronic Signatures & Witnessing (21 CFR Part 11)
-- **Concept**: Regulatory-grade dual-signoff workflow for compliance with FDA 21 CFR Part 11 and GLP/GxP.
+## 2. 2-Person Electronic Signatures & Witnessing
+- **Concept**: Dual-signoff workflow supporting GLP and institutional audit trail policies.
 - **Key Capabilities**:
   - Author Signature step: primary researcher signs with credential challenge and legal statement of truth.
   - Witness / PI Review step: countersigning workflow with peer review, password verification, and legal witnessing statement.

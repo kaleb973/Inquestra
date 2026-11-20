@@ -5,7 +5,7 @@
 // 2. In-memory Zip-Slip & Zip-bomb protection.
 // 3. Prompt injection neutralization & invisible Unicode stripping.
 // 4. Recursive TipTap AST validation & DOMPurify sanitization.
-// 5. 21 CFR Part 11 provenance reset (forces DRAFT, strips forged seals, archives signatures).
+// 5. Data provenance reset (forces DRAFT, strips forged seals, archives signatures).
 
 import JSZip from 'jszip';
 import DOMPurify from 'isomorphic-dompurify';
@@ -372,7 +372,7 @@ function sanitizeTipTapNode(
 
 /**
  * Main ingestion & sanitization pipeline.
- * Takes raw JSON text and produces a sanitized, 21 CFR Part 11-controlled Trial Document.
+ * Takes raw JSON text and produces a sanitized, controlled Trial Document.
  */
 export function sanitizeAndNormalizeTrialImport(rawJsonString: string): ValidatedTrialImport {
   const parsed = safeJsonParse(rawJsonString);
@@ -436,7 +436,7 @@ export function sanitizeAndNormalizeTrialImport(rawJsonString: string): Validate
     });
   }
 
-  // 4. Archive Historical Signatures (Zero-Trust Part 11 Rule)
+  // 4. Archive Historical Signatures (Zero-Trust Provenance Rule)
   // We NEVER trust external signatures as active DB signatures.
   // We archive them as informational metadata notes.
   let importedSignaturesCount = 0;
@@ -494,7 +494,7 @@ export function sanitizeAndNormalizeTrialImport(rawJsonString: string): Validate
 
   const now = new Date().toISOString();
 
-  // Part 11 strict mandate: Imported trials MUST start as DRAFT
+  // Provenance mandate: Imported trials MUST start as DRAFT
   return {
     id: newId,
     title: cleanTitle,
@@ -538,7 +538,7 @@ export async function processSafeTrialImportFile(file: File): Promise<{
     },
     part11ResetCheck: {
       passed: true,
-      message: '21 CFR Part 11 integrity enforced: Trial initialized as DRAFT with new cryptographic identity.',
+      message: 'Data provenance enforced: Trial initialized as DRAFT with new cryptographic identity.',
     },
   };
 

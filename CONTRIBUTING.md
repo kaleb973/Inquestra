@@ -14,7 +14,7 @@ All contributors and maintainers are expected to abide by the [Code of Conduct](
 
 ## Development Prerequisites
 
-- **Node.js**: v20.x or higher
+- **Node.js**: v22.x or higher
 - **npm**: v10.x or higher
 - **Git**
 - **Modern Chromium-based browser** (Chrome, Edge, Brave, Opera) if testing the native [W3C Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API) hardware telemetry features.

@@ -26,10 +26,18 @@ export default function DemoPage() {
     return () => clearInterval(interval);
   }, [isRunning, isSealed]);
 
-  const handleSeal = () => {
+  const handleSeal = async () => {
     setIsSealed(true);
     setIsRunning(false);
-    setChecksum("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    try {
+      const msg = new TextEncoder().encode(`trial_demo_stream:${samplesCount}:${Date.now()}`);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msg);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      setChecksum(hashHex);
+    } catch {
+      setChecksum("f663c9411d8a0366f692f86ddbf366bb28809e56c365662c47f624abe72c001d");
+    }
   };
 
   const handleReset = () => {
@@ -40,15 +48,15 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="pt-28 pb-16">
+    <div className="pt-16 sm:pt-20 pb-16">
       {/* Main Interactive Demo Container */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-8">
-          <h1 className="font-display text-3xl sm:text-4xl font-normal text-foreground tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
             Hardware Acquisition &amp; Protocol Sealing In Real Time
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Test the live streaming engine below. Toggle sampling rates, observe incoming serial biopotential
+            Test the live streaming engine below. Toggle sampling rates, observe incoming serial
             telemetry packets, and execute a cryptographic seal to lock the trial record.
           </p>
         </div>
@@ -118,7 +126,7 @@ export default function DemoPage() {
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-phosphor" />
                   <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                    Live Channel: Cardiac Lead II (ECG Biopotential)
+                    Live Channel: Transducer Analog Input (mV)
                   </span>
                 </div>
                 <span className="text-xs font-mono text-phosphor">
@@ -165,13 +173,13 @@ export default function DemoPage() {
                   Audit Ledger &amp; Integrity
                 </span>
                 <h3 className="font-semibold text-sm text-foreground mb-4">
-                  21 CFR Part 11 Trial Package
+                  Cryptographic Trial Record
                 </h3>
 
                 <div className="space-y-3 text-xs font-mono">
                   <div className="bg-background p-2.5 rounded border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px]">Protocol ID</span>
-                    <span className="text-foreground">TR-ECG-2026-LIVE</span>
+                    <span className="text-foreground">PR-2026-LIVE-01</span>
                   </div>
 
                   <div className="bg-background p-2.5 rounded border border-border space-y-1">
@@ -184,7 +192,7 @@ export default function DemoPage() {
                   <div className="bg-background p-2.5 rounded border border-border space-y-1">
                     <span className="text-muted-foreground block text-[10px]">Electronic Signature</span>
                     <span className="text-foreground">
-                      {isSealed ? "Verified: Principal Investigator [PI Attestation Verified]" : "Awaiting Sealing Signature"}
+                      {isSealed ? "Verified: Lead Researcher [Signed on record]" : "Awaiting Sealing Signature"}
                     </span>
                   </div>
                 </div>

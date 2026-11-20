@@ -333,7 +333,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
       ...attrs.steps.map((s, i) => {
         const timeStr = s.checkedAt ? new Date(s.checkedAt).toLocaleString() : 'Pending';
         const devStr = s.deviation ? ` [Deviation: ${s.deviation}]` : '';
-        return `${i + 1}. [${s.checked ? 'x' : ' '}] ${s.text} — ${timeStr}${devStr}`;
+        return `${i + 1}. [${s.checked ? 'x' : ' '}] ${s.text} · ${timeStr}${devStr}`;
       }),
     ];
     navigator.clipboard.writeText(lines.join('\n'));
@@ -469,7 +469,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
             <button
               type="button"
               onClick={forkProtocol}
-              title={`Replicate Protocol (v${nextVersion}) — Inserts a fresh, unchecked copy below with all steps preserved for your next run.`}
+              title={`Replicate Protocol (v${nextVersion}): Inserts a fresh, unchecked copy below with all steps preserved for your next run.`}
               aria-label={`Replicate protocol as version ${nextVersion}`}
               className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-border/70 bg-background/70 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-colors"
             >
@@ -502,7 +502,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
         <div className="px-4 py-3 space-y-1.5">
           {attrs.steps.length === 0 && (
             <p className="text-muted-foreground text-xs italic text-center py-2">
-              No steps yet — add one below
+              No steps yet. Add one below.
             </p>
           )}
 

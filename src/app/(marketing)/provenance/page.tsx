@@ -3,14 +3,14 @@ import { ArrowRight, ShieldCheck, Lock, FileCheck, Key, CheckCircle, AlertCircle
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cryptographic Provenance and 21 CFR Part 11 Technical Controls',
+  title: 'Cryptographic Provenance and Audit Verification',
   description:
-    'Immutable data provenance, SHA-256 trial hashing, ISO 8601 UTC timestamps, and 21 CFR Part 11 technical controls for life sciences, chemistry, and engineering.',
+    'Tamper-evident record hashing, SHA-256 trial checksums, and immutable audit logs for experimental science.',
 };
 
 export default function ProvenancePage() {
   return (
-    <div className="pt-28 pb-24">
+    <div className="pt-16 sm:pt-20 pb-24">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
         <div className="max-w-3xl">
@@ -18,13 +18,12 @@ export default function ProvenancePage() {
             <ShieldCheck className="w-3.5 h-3.5 text-phosphor" />
             <span>Platform / Data Integrity &amp; Provenance · Last updated November 2026</span>
           </div>
-          <h1 className="font-display text-4xl sm:text-6xl font-normal tracking-tight text-foreground mb-6 leading-[1.15]">
-            Zero silent mutations. Immutable research integrity.
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground mb-6 leading-[1.15]">
+            Tamper-evident verification for experimental research.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            Scientific irreproducibility thrives in the gap between physical sensor capture and report publication.
-            Inquestra cryptographically binds hardware telemetry, notebook protocol logs, and reagent deductions into
-            a deterministic SHA-256 digest providing the core technical controls required for FDA 21 CFR Part 11 readiness.
+            Inquestra computes a SHA-256 cryptographic digest across your notes, reagent lot records, and captured instrument logs when an experiment concludes.
+            Anyone can independently verify that records have not been altered since sealing.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <Link
@@ -48,8 +47,8 @@ export default function ProvenancePage() {
           <div className="bg-muted/70 px-4 py-2.5 border-b border-border flex items-center justify-between font-mono text-xs">
             <div className="flex items-center gap-2">
               <Lock className="w-3.5 h-3.5 text-caution" />
-              <span className="font-semibold text-foreground">Cryptographic Trial Dossier</span>
-              <span className="text-muted-foreground">#TR-2026-9042 · Sealed &amp; Validated</span>
+              <span className="font-semibold text-foreground">Experiment Record &amp; Audit Certificate</span>
+              <span className="text-muted-foreground">#PR-2026-PCR-01 · Sealed &amp; Validated</span>
             </div>
             <span className="text-caution font-medium bg-caution/10 border border-caution/30 px-2 py-0.5 rounded text-[10px]">
               IMMUTABLE RECORD
@@ -66,21 +65,21 @@ export default function ProvenancePage() {
                 <div className="flex items-start justify-between border-b border-border pb-3">
                   <div>
                     <div className="text-foreground font-semibold">Author Execution Signature</div>
-                    <div className="text-muted-foreground text-[11px]">Research Specialist · Bench Station 01 Lead</div>
+                    <div className="text-muted-foreground text-[11px]">KH · Protocol Author</div>
                   </div>
                   <span className="text-phosphor text-[11px]">SEAL APPLIED</span>
                 </div>
                 <div className="flex items-start justify-between border-b border-border pb-3">
                   <div>
                     <div className="text-foreground font-semibold">Principal Investigator Counter-Sign</div>
-                    <div className="text-muted-foreground text-[11px]">Principal Investigator · Lab Director [ID: PI-7021 · Verified ECDSA]</div>
+                    <div className="text-muted-foreground text-[11px]">Principal Investigator · Lab Lead [Verified ECDSA signature]</div>
                   </div>
                   <span className="text-phosphor text-[11px]">CO-SIGNED</span>
                 </div>
                 <div className="pt-1 text-[11px] text-muted-foreground space-y-1">
                   <div>Deterministic Digest (SHA-256):</div>
                   <div className="text-foreground select-all bg-muted/40 p-1.5 rounded truncate font-mono text-[10px]">
-                    4f53cda18c2e8697b91d2938e3e4a5d89f10928374a56b2c1d0e9f8a7b6c5d4e
+                    1cfa3f0f0064c27d6cb034f4166e559daa8a07edc944ae590ff3b6d3e10f5d9e
                   </div>
                 </div>
               </div>
@@ -89,7 +88,7 @@ export default function ProvenancePage() {
             <div className="lg:col-span-5 bg-card border border-border rounded p-4 flex flex-col justify-between font-mono text-xs space-y-4">
               <div>
                 <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-                  Part 11 Attestation Manifest
+                  Data Integrity Manifest
                 </div>
                 <ul className="space-y-2 text-[11px] text-muted-foreground">
                   <li className="flex items-center gap-2">
@@ -112,7 +111,7 @@ export default function ProvenancePage() {
               </div>
               <div className="pt-3 border-t border-border flex items-center justify-between text-[11px]">
                 <span className="text-muted-foreground">Audit Status</span>
-                <span className="text-phosphor font-semibold">INSPECTION-READY</span>
+                <span className="text-phosphor font-semibold">AUDIT VERIFIED</span>
               </div>
             </div>
           </div>
@@ -123,7 +122,7 @@ export default function ProvenancePage() {
       <section className="py-16 border-t border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
-            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
               How Inquestra seals experimental trials.
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">
@@ -166,15 +165,15 @@ export default function ProvenancePage() {
         </div>
       </section>
 
-      {/* Feature Section 2: FDA 21 CFR Part 11 Compliance Table */}
+      {/* Feature Section 2: Data Integrity & Regulatory Technical Alignment */}
       <section className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
-            <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
-              FDA 21 CFR Part 11 Technical Controls Alignment.
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
+              Data Integrity &amp; Standards Alignment.
             </h2>
             <p className="text-sm text-muted-foreground mt-2">
-              FDA 21 CFR Part 11 requires both software technical controls and organizational standard operating procedures (SOPs). Inquestra provides the automated cryptographic controls required for technical compliance.
+              Inquestra provides cryptographic primitives, immutable audit logging, and electronic signature workflows designed to support institutional compliance requirements (such as GLP and FDA 21 CFR Part 11).
             </p>
           </div>
 
@@ -182,33 +181,33 @@ export default function ProvenancePage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/50 border-b border-border text-foreground font-mono">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">CFR § Clause</th>
-                  <th className="py-3.5 px-4 font-semibold">Regulatory Requirement</th>
+                  <th className="py-3.5 px-4 font-semibold">Standard / Guideline</th>
+                  <th className="py-3.5 px-4 font-semibold">Integrity Objective</th>
                   <th className="py-3.5 px-4 font-semibold">Inquestra Architectural Implementation</th>
                   <th className="py-3.5 px-4 font-semibold">Technical Control Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border font-sans text-muted-foreground">
                 <tr className="hover:bg-muted/20">
-                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.10 (a)</td>
+                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">21 CFR § 11.10 (a)</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Validation of Closed Systems</td>
                   <td className="py-3.5 px-4">Deterministic state machine validation, automated end-to-end integration test suites</td>
                   <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
-                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.10 (e)</td>
+                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">21 CFR § 11.10 (e)</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Time-Stamped Audit Trails</td>
                   <td className="py-3.5 px-4">Computer-generated, append-only PostgreSQL audit ledger logging actor, timestamp, action &amp; hash</td>
                   <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
-                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.50</td>
+                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">21 CFR § 11.50</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Signature Manifestations</td>
                   <td className="py-3.5 px-4">Contains printed name, UTC timestamp, and explicit signing reason (Author, Reviewer, Principal Investigator)</td>
                   <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
                 </tr>
                 <tr className="hover:bg-muted/20">
-                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">§ 11.70</td>
+                  <td className="py-3.5 px-4 font-mono text-foreground font-medium">21 CFR § 11.70</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Signature Linking</td>
                   <td className="py-3.5 px-4">Cryptographic signature is inextricably hashed into the trial record block; cannot be excised or transferred</td>
                   <td className="py-3.5 px-4 font-mono text-phosphor">CONTROLS ACTIVE</td>
@@ -222,6 +221,10 @@ export default function ProvenancePage() {
               </tbody>
             </table>
           </div>
+
+          <div className="mt-4 p-3.5 bg-muted/20 border border-border rounded-lg text-[11px] text-muted-foreground leading-relaxed">
+            <strong className="text-foreground">Regulatory Disclaimer:</strong> While Inquestra provides the technical controls and cryptographic primitives shown above, formal regulatory compliance (such as FDA 21 CFR Part 11, GLP, or GMP) requires formal institutional system validation (IQ/OQ/PQ), physical access controls, and procedural SOP adherence by the operating laboratory.
+          </div>
         </div>
       </section>
 
@@ -230,7 +233,7 @@ export default function ProvenancePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="space-y-4">
-              <h2 className="font-display text-3xl font-normal text-foreground tracking-tight">
+              <h2 className="text-3xl font-bold text-foreground tracking-tight">
                 Inspect and verify exports in standard terminal tools.
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -245,10 +248,10 @@ export default function ProvenancePage() {
 
             <div className="bg-card border border-border rounded-lg p-5 font-mono text-xs text-foreground space-y-3 shadow-sm">
               <div className="text-muted-foreground">{''}</div>
-              <div className="text-muted-foreground">$ unzip trial_TR-2026-9042_sealed.zip</div>
+              <div className="text-muted-foreground">$ unzip trial_PR-2026-PCR-01_sealed.zip</div>
               <div>$ sha256sum -c checksums.sha256</div>
               <div className="p-2.5 rounded bg-muted/30 border border-border space-y-1 text-[11px]">
-                <div className="text-phosphor">telemetry_raw_1000hz.csv: OK</div>
+                <div className="text-phosphor">temperature_cycle_log.csv: OK</div>
                 <div className="text-phosphor">protocol_observations.md: OK</div>
                 <div className="text-phosphor">lims_reagent_manifest.json: OK</div>
                 <div className="text-phosphor">audit_trail_ledger.json: OK</div>
@@ -262,7 +265,7 @@ export default function ProvenancePage() {
       {/* CTA Box */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 text-center">
         <div className="p-10 rounded-xl bg-card border border-border shadow-sm">
-          <h3 className="font-display text-2xl sm:text-3xl text-foreground mb-3 font-normal">
+          <h3 className="text-2xl sm:text-3xl text-foreground mb-3 font-bold">
             Protect your lab&apos;s data provenance.
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">

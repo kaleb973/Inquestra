@@ -111,7 +111,7 @@ const SaveTrialSchema = z.object({
 
 /**
  * Atomic save for trial content, metadata, and status.
- * Enforces organization tenant boundary, 21 CFR Part 11 immutability (sealed trials rejected),
+ * Enforces organization tenant boundary, cryptographic immutability (sealed trials rejected),
  * and creates a TrialRevision snapshot only when explicitly requested (manual save or milestone).
  */
 export async function saveTrial(input: SaveTrialInput): Promise<SaveTrialResult> {
@@ -295,7 +295,7 @@ export async function restoreTrialRevision(revisionId: string) {
 
   const restored = await prisma.trial.create({
     data: {
-      title: `Restored — ${revision.title} (${new Date(revision.savedAt).toLocaleString()})`,
+      title: `Restored: ${revision.title} (${new Date(revision.savedAt).toLocaleString()})`,
       content: revision.content as Prisma.InputJsonValue,
       status: 'DRAFT',
       projectId: revision.trial.projectId,
@@ -325,7 +325,7 @@ export async function restoreTrialRevision(revisionId: string) {
 }
 
 /**
- * Sign a trial electronically (21 CFR Part 11).
+ * Sign a trial electronically with audit attribution.
  * Role-gated: AUTHOR for researchers, WITNESS/PI_APPROVAL for PIs and Admins.
  * The trial must be synced to cloud (have a DB record) before signing.
  */
@@ -938,7 +938,7 @@ export async function duplicateTrial(
 
 /**
  * Delete an unsealed trial.
- * Sealed trials strictly cannot be deleted under 21 CFR Part 11 immutable provenance.
+ * Sealed trials strictly cannot be deleted due to cryptographic record immutability.
  */
 export async function deleteTrial(trialId: string): Promise<{ success: boolean; error?: string }> {
   try {
@@ -957,7 +957,7 @@ export async function deleteTrial(trialId: string): Promise<{ success: boolean; 
     if (trial.checksum) {
       return {
         success: false,
-        error: '21 CFR Part 11 Violation: Sealed experiments are immutable and cannot be deleted.',
+        error: 'Data Integrity Violation: Sealed experiments are cryptographically locked and cannot be deleted.',
       };
     }
 

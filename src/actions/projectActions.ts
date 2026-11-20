@@ -1,7 +1,7 @@
 'use server';
 // src/actions/projectActions.ts
 // Project lifecycle server actions — create, fetch, update, delete.
-// All writes are append-audited for 21 CFR Part 11 immutable provenance.
+// All writes are append-audited for immutable data provenance.
 
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';

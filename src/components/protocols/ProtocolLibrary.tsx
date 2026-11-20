@@ -134,7 +134,7 @@ function NewProtocolModal({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Western Blot — Standard Protocol v1"
+              placeholder="e.g. Western Blot: Standard Protocol v1"
               className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors font-sans"
               autoFocus
             />
