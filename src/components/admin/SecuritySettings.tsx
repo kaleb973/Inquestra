@@ -20,6 +20,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import DOMPurify from 'isomorphic-dompurify';
 
 type MfaState = 'loading' | 'inactive' | 'enrolling' | 'verifying' | 'active' | 'unenrolling';
 
@@ -337,7 +338,11 @@ export function SecuritySettings() {
                     ) : (
                       <div
                         className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:block select-none"
-                        dangerouslySetInnerHTML={{ __html: qrSvg }}
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(qrSvg, {
+                            USE_PROFILES: { svg: true },
+                          }),
+                        }}
                       />
                     )}
                   </div>

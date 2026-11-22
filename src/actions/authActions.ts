@@ -13,6 +13,7 @@ function getAppUrl(): string {
 }
 
 import { formatAuthError } from '@/lib/utils';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function signUp(formData: FormData) {
   const email = formData.get('email') as string;
@@ -135,6 +136,19 @@ export async function verifyMfaLogin(
   factorId: string,
   code: string
 ): Promise<VerifyMfaResult> {
+  const cleanCode = code.trim();
+  if (!/^\d{6}$/.test(cleanCode)) {
+    return { error: 'Verification code must be 6 digits.' };
+  }
+
+  // Rate-limit: max 5 attempts per 5 minutes per MFA factor to prevent brute-force guessing
+  const rateLimitResult = checkRateLimit(`mfa:${factorId}`, 5, 5 * 60 * 1000);
+  if (!rateLimitResult.success) {
+    return {
+      error: `Too many failed MFA attempts. Please wait ${rateLimitResult.retryAfterSeconds || 60} seconds before retrying.`,
+    };
+  }
+
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -149,7 +163,7 @@ export async function verifyMfaLogin(
     const { error: verifyError } = await supabase.auth.mfa.verify({
       factorId,
       challengeId: challengeData.id,
-      code,
+      code: cleanCode,
     });
 
     if (verifyError) {

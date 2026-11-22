@@ -41,6 +41,9 @@ const QUICK_TAGS = [
 // In-memory client cache to make switching between drawer tabs instantaneous
 const trialPapersClientCache = new Map<string, any[]>();
 
+const isSafeHttpUrl = (url: string | null | undefined): boolean =>
+  typeof url === 'string' && /^https?:\/\//i.test(url.trim());
+
 export function LiteraturePanel() {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
@@ -360,9 +363,9 @@ export function LiteraturePanel() {
                               DOI <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           )}
-                          {paper.pdfUrl && (
+                          {isSafeHttpUrl(paper.pdfUrl) && (
                             <a
-                              href={paper.pdfUrl}
+                              href={paper.pdfUrl!}
                               target="_blank"
                               rel="noreferrer"
                               className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5 font-medium"
@@ -543,9 +546,9 @@ export function LiteraturePanel() {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          {paper.pdfUrl && (
+                          {isSafeHttpUrl(paper.pdfUrl) && (
                             <a
-                              href={paper.pdfUrl}
+                              href={paper.pdfUrl!}
                               target="_blank"
                               rel="noreferrer"
                               className="p-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors"

@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { saveTrial } from '@/actions/trialActions';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface SyncPayload {
   title: string;
@@ -54,8 +55,15 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
 
     let cloudProjectId = payload.cloudProjectId;
 
-    // Auto-provision default project on first sync
-    if (!cloudProjectId) {
+    // Verify tenant boundary for existing project or auto-provision default project
+    if (cloudProjectId) {
+      const existingProject = await prisma.project.findFirst({
+        where: { id: cloudProjectId, organizationId: dbUser.organizationId },
+      });
+      if (!existingProject) {
+        return { success: false, error: 'Project not found or access denied.' };
+      }
+    } else {
       const defaultProject = await prisma.project.findFirst({
         where: { organizationId: dbUser.organizationId, name: 'Default Project' },
       });
@@ -73,6 +81,8 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
       }
     }
 
+    const cleanTitle = DOMPurify.sanitize(payload.title?.trim() || 'Untitled Trial').slice(0, 255);
+
     const contentValue = (typeof payload.content === 'object' && payload.content !== null)
       ? (JSON.parse(JSON.stringify(payload.content)) as Prisma.InputJsonValue)
       : ({} as Prisma.InputJsonValue);
@@ -81,7 +91,7 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
     if (payload.cloudTrialId) {
       const saveResult = await saveTrial({
         trialId: payload.cloudTrialId,
-        title: payload.title,
+        title: cleanTitle,
         content: payload.content,
         status: payload.status,
         metadata: payload.metadata,
@@ -98,7 +108,7 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
     } else {
       const trial = await prisma.trial.create({
         data: {
-          title: payload.title,
+          title: cleanTitle,
           content: contentValue,
           status: payload.status,
           projectId: cloudProjectId,
@@ -106,7 +116,10 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
           metadata: {
             create: (payload.metadata || [])
               .filter((m) => m.key.trim().length > 0 && m.value.trim().length > 0)
-              .map((m) => ({ key: m.key.trim(), value: m.value.trim() })),
+              .map((m) => ({
+                key: DOMPurify.sanitize(m.key.trim()).slice(0, 100),
+                value: DOMPurify.sanitize(m.value.trim()).slice(0, 500),
+              })),
           },
         },
       });

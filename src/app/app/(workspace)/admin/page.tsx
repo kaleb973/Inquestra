@@ -23,7 +23,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     include: { organization: true },
   });
 
-  if (!dbUser) redirect('/app');
+  if (!dbUser || (dbUser.role !== 'ADMIN' && dbUser.role !== 'PI')) {
+    redirect('/app');
+  }
 
   // Fetch all data in parallel — lean projections only for fast response.
   const [

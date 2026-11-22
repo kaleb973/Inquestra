@@ -72,6 +72,13 @@ export async function addInventoryItem(formData: FormData) {
   const quantity = parseFloat(formData.get('quantity') as string);
   const unit = DOMPurify.sanitize(formData.get('unit') as string);
   const thresholdValue = parseFloat(formData.get('thresholdValue') as string || '0');
+
+  if (isNaN(quantity) || !Number.isFinite(quantity) || quantity < 0) {
+    return { success: false, error: 'Quantity must be a non-negative finite number.' };
+  }
+  if (isNaN(thresholdValue) || !Number.isFinite(thresholdValue) || thresholdValue < 0) {
+    return { success: false, error: 'Threshold value must be a non-negative finite number.' };
+  }
   
   const expDateStr = formData.get('expirationDate') as string;
   const expirationDate = expDateStr ? new Date(expDateStr) : null;
@@ -187,6 +194,10 @@ export async function updateInventoryStock(id: string, newQuantity: number) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
+  if (typeof newQuantity !== 'number' || isNaN(newQuantity) || !Number.isFinite(newQuantity) || newQuantity < 0) {
+    return { success: false, error: 'Stock quantity must be a non-negative finite number.' };
+  }
+
   try {
     const item = await prisma.inventoryItem.findUnique({ where: { id } });
     if (item?.organizationId !== dbUser.organizationId) {
@@ -261,6 +272,10 @@ export async function addEquipment(formData: FormData) {
   const lastCalibrated = new Date(formData.get('lastCalibrated') as string);
   const calibrationFreq = parseInt(formData.get('calibrationFreq') as string, 10);
   const status = DOMPurify.sanitize(formData.get('status') as string);
+
+  if (isNaN(calibrationFreq) || calibrationFreq < 1 || calibrationFreq > 3650) {
+    return { success: false, error: 'Calibration frequency must be an integer between 1 and 3650 days.' };
+  }
 
   try {
     await prisma.equipment.create({

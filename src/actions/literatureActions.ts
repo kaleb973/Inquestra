@@ -10,6 +10,20 @@ import DOMPurify from 'isomorphic-dompurify';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
+function sanitizeSafeUrl(rawUrl?: string | null): string | null {
+  if (!rawUrl || typeof rawUrl !== 'string') return null;
+  const trimmed = rawUrl.trim();
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return trimmed;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 export interface LiteratureItem {
   id: string; // DOI, PMID, or generated
   title: string;
@@ -239,6 +253,9 @@ export async function savePaperToLibrary(payload: PaperPayload) {
   const rawAbstract = payload.abstractText || payload.abstract || null;
   const cleanAbstract = rawAbstract ? DOMPurify.sanitize(rawAbstract) : null;
 
+  const cleanUrl = sanitizeSafeUrl(payload.url);
+  const cleanPdfUrl = sanitizeSafeUrl(payload.pdfUrl);
+
   // Check if paper already exists in this org
   let existing = null;
   if (payload.doi) {
@@ -257,8 +274,8 @@ export async function savePaperToLibrary(payload: PaperPayload) {
         journal: payload.journal ? DOMPurify.sanitize(payload.journal) : undefined,
         pubYear: payload.pubYear ?? undefined,
         abstract: cleanAbstract ?? undefined,
-        url: payload.url || undefined,
-        pdfUrl: payload.pdfUrl || undefined,
+        url: cleanUrl || undefined,
+        pdfUrl: cleanPdfUrl || undefined,
         isOpenAccess: payload.isOpenAccess ?? undefined,
         tags: payload.tags ? Array.from(new Set([...existing.tags, ...payload.tags])) : undefined,
       },
@@ -274,8 +291,8 @@ export async function savePaperToLibrary(payload: PaperPayload) {
         pmid: payload.pmid || null,
         pmcid: payload.pmcid || null,
         abstract: cleanAbstract,
-        url: payload.url || null,
-        pdfUrl: payload.pdfUrl || null,
+        url: cleanUrl,
+        pdfUrl: cleanPdfUrl,
         isOpenAccess: payload.isOpenAccess || false,
         citationCount: payload.citationCount || 0,
         tags: payload.tags || [],
@@ -570,10 +587,15 @@ export async function updatePaperTags(paperId: string, tags: string[]) {
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
 
+  const paper = await prisma.researchPaper.findFirst({
+    where: { id: paperId, organizationId: dbUser.organizationId },
+  });
+  if (!paper) throw new Error('Paper not found or access denied');
+
   const cleanTags = tags.map((t) => DOMPurify.sanitize(t.trim())).filter((t) => t.length > 0);
 
   const updated = await prisma.researchPaper.update({
-    where: { id: paperId, organizationId: dbUser.organizationId },
+    where: { id: paper.id },
     data: { tags: cleanTags },
   });
 

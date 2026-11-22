@@ -78,6 +78,9 @@ const PRESET_TOPICS = [
   'Biomarkers',
 ];
 
+const isSafeHttpUrl = (url: string | null | undefined): boolean =>
+  typeof url === 'string' && /^https?:\/\//i.test(url.trim());
+
 export function LiteratureLibrary({
   initialPapers,
   orgName,
@@ -519,9 +522,9 @@ export function LiteratureLibrary({
                           DOI <ExternalLink className="w-3 h-3 text-muted-foreground" />
                         </a>
                       )}
-                      {paper.pdfUrl && (
+                      {isSafeHttpUrl(paper.pdfUrl) && (
                         <a
-                          href={paper.pdfUrl}
+                          href={paper.pdfUrl!}
                           target="_blank"
                           rel="noreferrer"
                           className="px-2 py-1 text-xs font-medium rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors flex items-center gap-1"
@@ -840,9 +843,9 @@ export function LiteratureLibrary({
                               DOI <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           )}
-                          {paper.pdfUrl && (
+                          {isSafeHttpUrl(paper.pdfUrl) && (
                             <a
-                              href={paper.pdfUrl}
+                              href={paper.pdfUrl!}
                               target="_blank"
                               rel="noreferrer"
                               className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5 font-medium"

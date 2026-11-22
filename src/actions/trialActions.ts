@@ -54,6 +54,16 @@ export async function createTrial(payload: TrialPayload) {
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User profile not found in database.');
 
+  const project = await prisma.project.findFirst({
+    where: {
+      id: validated.projectId,
+      organizationId: dbUser.organizationId,
+    },
+  });
+  if (!project) {
+    throw new Error('Project not found or access denied.');
+  }
+
   const contentValue = (typeof validated.content === 'object' && validated.content !== null)
     ? (JSON.parse(JSON.stringify(validated.content)) as Prisma.InputJsonValue)
     : ({} as Prisma.InputJsonValue);

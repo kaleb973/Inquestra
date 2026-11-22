@@ -59,13 +59,22 @@ export async function getTelemetryUploadUrl(trialId: string, filename: string, f
   }
 
   // Security: Check file size (max 50MB)
-  if (fileSize && fileSize > 50 * 1024 * 1024) {
-    throw new Error('File size exceeds the 50MB limit.');
+  if (fileSize !== undefined) {
+    if (typeof fileSize !== 'number' || !Number.isFinite(fileSize) || fileSize <= 0 || fileSize > 50 * 1024 * 1024) {
+      throw new Error('File size exceeds the 50MB limit or is invalid.');
+    }
   }
 
-  // Security: Validate file type to prevent execution
+  // Security: Validate file type to prevent execution and check against double extensions
   const allowedExtensions = ['.csv', '.txt', '.json'];
-  const lowerFilename = filename.toLowerCase();
+  const lowerFilename = filename.toLowerCase().trim();
+
+  // Guard against dangerous executable extensions anywhere in the filename (e.g. payload.php.csv)
+  const DANGEROUS_EXTENSIONS_REGEX = /\.(php|phtml|php3|php4|php5|phps|exe|sh|bash|bat|cmd|com|vbs|js|mjs|cjs|jar|war|py|pyc|rb|pl|cgi|asp|aspx|jsp|dll|so|wasm)(\.|$)/i;
+  if (DANGEROUS_EXTENSIONS_REGEX.test(lowerFilename)) {
+    throw new Error('Security Alert: Prohibited file type or double extension detected.');
+  }
+
   const matchedExt = allowedExtensions.find((ext) => lowerFilename.endsWith(ext));
   if (!matchedExt) {
     throw new Error('Invalid file type. Only CSV, TXT, and JSON are allowed.');
@@ -78,15 +87,15 @@ export async function getTelemetryUploadUrl(trialId: string, filename: string, f
       ? 'text/plain'
       : 'text/csv';
 
-  // Strip path traversal attempts
-  const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '');
-  const fileKey = `trials/${trialId}/${randomUUID()}-${safeFilename}`;
+  // Server-generated random filename prevents path traversal and polyglot execution
+  const serverGeneratedFilename = `${randomUUID()}${matchedExt}`;
+  const fileKey = `trials/${trialId}/${serverGeneratedFilename}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME!,
     Key: fileKey,
     ContentType: contentType,
-    ContentDisposition: `attachment; filename="${safeFilename}"`,
+    ContentDisposition: `attachment; filename="${serverGeneratedFilename}"`,
   });
 
   const uploadUrl = await getSignedUrl(r2, command, { expiresIn: 3600 });
@@ -104,6 +113,10 @@ export async function recordTelemetryStream(
   rowCount: number,
   sensorType: string = 'CSV_IMPORT'
 ) {
+  if (typeof rowCount !== 'number' || !Number.isFinite(rowCount) || !Number.isInteger(rowCount) || rowCount < 0) {
+    throw new Error('Invalid row count. Must be a non-negative integer.');
+  }
+  const cleanSensorType = sensorType.replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 50) || 'CSV_IMPORT';
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
@@ -123,7 +136,7 @@ export async function recordTelemetryStream(
       trialId,
       fileUrl,
       rowCount,
-      sensorType,
+      sensorType: cleanSensorType,
     },
   });
 

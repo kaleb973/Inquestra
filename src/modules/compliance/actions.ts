@@ -3,29 +3,66 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { generateTrialHash } from "@/lib/provenance";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import DOMPurify from "isomorphic-dompurify";
 
 export async function signAndSealTrial(data: {
   trialId: string;
-  userId: string;
-  organizationId: string;
+  userId?: string;
+  organizationId?: string;
   role: "AUTHOR" | "WITNESS" | "PI_APPROVAL";
   meaning: string;
 }) {
-  const trial = await prisma.trial.findUnique({
-    where: { id: data.trialId },
-    include: { metadata: true }
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("Unauthorized: active session required.");
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    select: { id: true, organizationId: true, role: true },
   });
 
-  if (!trial) throw new Error("Trial not found");
+  if (!dbUser) {
+    throw new Error("User record not found.");
+  }
+
+  // Tenant-isolated trial verification
+  const trial = await prisma.trial.findFirst({
+    where: {
+      id: data.trialId,
+      project: { organizationId: dbUser.organizationId },
+    },
+    include: { metadata: true },
+  });
+
+  if (!trial) {
+    throw new Error("Trial not found or access denied.");
+  }
+
+  const cleanMeaning = DOMPurify.sanitize(data.meaning.trim());
+  if (!cleanMeaning) {
+    throw new Error("Signature meaning/justification is required.");
+  }
+
+  // Derive acting user and organization strictly from verified server session
+  const activeUserId = dbUser.id;
+  const activeOrgId = dbUser.organizationId;
+
   if (trial.status === "COMPLETED" && trial.checksum) {
-    // If it's already sealed, we might just be adding a witness signature
+    // If it's already sealed, add witness or approval signature
     await prisma.signature.create({
       data: {
         trialId: trial.id,
-        userId: data.userId,
+        userId: activeUserId,
         role: data.role,
-        meaning: data.meaning
-      }
+        meaning: cleanMeaning,
+      },
     });
 
     await prisma.auditLog.create({
@@ -33,17 +70,17 @@ export async function signAndSealTrial(data: {
         action: "SIGNATURE_ADDED",
         entityType: "Trial",
         entityId: trial.id,
-        details: { role: data.role, meaning: data.meaning },
-        userId: data.userId,
-        organizationId: data.organizationId
-      }
+        details: { role: data.role, meaning: cleanMeaning },
+        userId: activeUserId,
+        organizationId: activeOrgId,
+      },
     });
 
     revalidatePath("/app/admin");
     return { success: true, message: "Witness signature applied." };
   }
 
-  // If we are the primary author sealing it
+  // Primary author sealing
   const timestamp = new Date().toISOString();
   const checksum = generateTrialHash(trial.content, trial.metadata, timestamp);
 
@@ -54,16 +91,16 @@ export async function signAndSealTrial(data: {
         status: "COMPLETED",
         checksum,
         sealedAt: timestamp,
-        sealedBy: data.userId
-      }
+        sealedBy: activeUserId,
+      },
     }),
     prisma.signature.create({
       data: {
         trialId: trial.id,
-        userId: data.userId,
+        userId: activeUserId,
         role: data.role,
-        meaning: data.meaning
-      }
+        meaning: cleanMeaning,
+      },
     }),
     prisma.auditLog.create({
       data: {
@@ -71,10 +108,10 @@ export async function signAndSealTrial(data: {
         entityType: "Trial",
         entityId: trial.id,
         details: { checksum, role: data.role },
-        userId: data.userId,
-        organizationId: data.organizationId
-      }
-    })
+        userId: activeUserId,
+        organizationId: activeOrgId,
+      },
+    }),
   ]);
 
   revalidatePath("/app/admin");
@@ -82,13 +119,33 @@ export async function signAndSealTrial(data: {
 }
 
 export async function verifyTrialSeal(trialId: string) {
-  const trial = await prisma.trial.findUnique({
-    where: { id: trialId },
-    include: { metadata: true }
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let orgFilter: { project?: { organizationId: string } } = {};
+  if (user) {
+    const dbUser = await prisma.user.findUnique({
+      where: { authId: user.id },
+      select: { organizationId: true },
+    });
+    if (dbUser) {
+      orgFilter = { project: { organizationId: dbUser.organizationId } };
+    }
+  }
+
+  const trial = await prisma.trial.findFirst({
+    where: { id: trialId, ...orgFilter },
+    include: { metadata: true },
   });
-  
+
   if (!trial || !trial.sealedAt || !trial.checksum) return false;
 
-  const recomputed = generateTrialHash(trial.content, trial.metadata, trial.sealedAt.toISOString());
+  const recomputed = generateTrialHash(
+    trial.content,
+    trial.metadata,
+    trial.sealedAt.toISOString()
+  );
   return recomputed === trial.checksum;
 }

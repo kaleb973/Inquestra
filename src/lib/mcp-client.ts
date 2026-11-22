@@ -24,6 +24,38 @@ export interface MCPServerConfig {
 const DEFAULT_MCP_TIMEOUT_MS = 10_000;
 
 /**
+ * Validates MCP server URL against SSRF and internal network probing.
+ */
+export function validateSafeMcpUrl(rawUrl: string): void {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    throw new Error('Invalid MCP server URL.');
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('Invalid MCP server protocol. Only HTTP and HTTPS are permitted.');
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    return;
+  }
+
+  const hostname = url.hostname.toLowerCase();
+  if (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    hostname === '169.254.169.254' ||
+    hostname.endsWith('.internal') ||
+    hostname.endsWith('.local')
+  ) {
+    throw new Error('SSRF Protection: Access to loopback, link-local, or private hostnames is blocked.');
+  }
+}
+
+/**
  * Calls a single tool on an MCP server via JSON-RPC 2.0 over HTTP POST.
  * Uses deadline timeouts and automatic retry with exponential backoff on transient failures.
  */
@@ -31,6 +63,7 @@ export async function callMCPTool(
   server: MCPServerConfig,
   tool: MCPToolCallParams
 ): Promise<MCPToolResult> {
+  validateSafeMcpUrl(server.url);
   const requestId = crypto.randomUUID();
 
   const headers: Record<string, string> = {
@@ -114,6 +147,7 @@ export async function callMCPTool(
 export async function listMCPTools(
   server: MCPServerConfig
 ): Promise<{ name: string; description: string }[]> {
+  validateSafeMcpUrl(server.url);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

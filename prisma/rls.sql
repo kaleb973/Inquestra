@@ -56,6 +56,8 @@ ALTER TABLE "InventoryItem" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "Equipment" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "TrialInventory" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "TrialEquipment" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ResearchPaper" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "TrialPaper" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "Signature" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "AuditLog" ENABLE ROW LEVEL SECURITY;
 
@@ -241,6 +243,23 @@ FOR ALL USING (
     SELECT 1 FROM "Trial" t
     JOIN "Project" p ON p.id = t."projectId"
     WHERE t.id = "TrialEquipment"."trialId"
+    AND p."organizationId" = internal.current_user_org_id()
+  )
+);
+
+DROP POLICY IF EXISTS "research_paper_tenant_all" ON "ResearchPaper";
+CREATE POLICY "research_paper_tenant_all" ON "ResearchPaper"
+FOR ALL USING (
+  "organizationId" = internal.current_user_org_id()
+);
+
+DROP POLICY IF EXISTS "trial_paper_join_all" ON "TrialPaper";
+CREATE POLICY "trial_paper_join_all" ON "TrialPaper"
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM "Trial" t
+    JOIN "Project" p ON p.id = t."projectId"
+    WHERE t.id = "TrialPaper"."trialId"
     AND p."organizationId" = internal.current_user_org_id()
   )
 );

@@ -21,11 +21,15 @@ async function getHmacKey(): Promise<CryptoKey> {
   const secret =
     process.env.DEVICE_TRUST_SECRET ||
     process.env.NEXTAUTH_SECRET ||
-    process.env.SUPABASE_JWT_SECRET ||
-    'inquestra-device-trust-secret-key-min-32-bytes!';
+    process.env.SUPABASE_JWT_SECRET;
 
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('DEVICE_TRUST_SECRET must be configured in production.');
+  }
+
+  const activeSecret = secret || 'inquestra-device-trust-secret-key-min-32-bytes!';
   const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
+  const keyData = encoder.encode(activeSecret);
 
   return crypto.subtle.importKey(
     'raw',

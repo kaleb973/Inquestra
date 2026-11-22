@@ -46,7 +46,17 @@ function buildQrPayload(item: BarcodeLabelItem): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function BarcodeLabel({ item, onClose }: BarcodeLabelProps) {
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function BarcodeLabel({
+ item, onClose }: BarcodeLabelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,11 +89,16 @@ export function BarcodeLabel({ item, onClose }: BarcodeLabelProps) {
     const canvas = canvasRef.current;
     const dataUrl = canvas ? canvas.toDataURL('image/png') : '';
 
+    const safeName = escapeHtml(item.name || '');
+    const safeSubtitle = item.subtitle ? escapeHtml(item.subtitle) : '';
+    const safeCode = escapeHtml(displayCode || '');
+    const safeType = escapeHtml(item.type || '');
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Label: ${item.name}</title>
+          <title>Label: ${safeName}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Courier New', monospace; padding: 16px; }
@@ -104,10 +119,10 @@ export function BarcodeLabel({ item, onClose }: BarcodeLabelProps) {
         <body>
           <div class="label">
             <img src="${dataUrl}" alt="QR Code" />
-            <div class="name">${item.name}</div>
-            ${item.subtitle ? `<div class="subtitle">${item.subtitle}</div>` : ''}
-            <div class="code">${displayCode}</div>
-            <div class="badge">Inquestra LIMS · ${item.type}</div>
+            <div class="name">${safeName}</div>
+            ${safeSubtitle ? `<div class="subtitle">${safeSubtitle}</div>` : ''}
+            <div class="code">${safeCode}</div>
+            <div class="badge">Inquestra LIMS · ${safeType}</div>
           </div>
           <script>window.onload = () => { window.print(); window.close(); }<\/script>
         </body>

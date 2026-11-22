@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const ReagentSchema = z.object({
   chemical: z.string().min(1).max(200),
-  quantity: z.number().positive(),
+  quantity: z.number().positive().finite().max(1_000_000),
   unit: z.string().min(1).max(20),
   trialId: z.string(),
 });
@@ -90,8 +90,11 @@ export async function deductReagent(payload: ReagentPayload) {
 
   // Link deduction to TrialInventory for traceability if trialId is valid
   if (validated.trialId && validated.trialId !== 'local') {
-    const trialExists = await prisma.trial.findUnique({
-      where: { id: validated.trialId }
+    const trialExists = await prisma.trial.findFirst({
+      where: {
+        id: validated.trialId,
+        project: { organizationId: dbUser.organizationId },
+      },
     });
     if (trialExists) {
       await prisma.trialInventory.upsert({

@@ -32,6 +32,10 @@ export async function createInviteLink(
     return { success: false, error: 'Only a Lab PI can invite another PI.' };
   }
 
+  if (typeof expiresInHours !== 'number' || !Number.isInteger(expiresInHours) || expiresInHours < 1 || expiresInHours > 168) {
+    return { success: false, error: 'Invite duration must be an integer between 1 and 168 hours (7 days).' };
+  }
+
   const token = await generateInviteToken(dbUser.organizationId, role, expiresInHours);
 
   await prisma.auditLog.create({
@@ -60,7 +64,15 @@ export async function previewInvite(token: string): Promise<{
   role: Role;
 } | { valid: false; error: string }> {
   try {
-    const { orgId, role } = await verifyInviteToken(token);
+    const { orgId, role, jti } = await verifyInviteToken(token);
+    if (jti) {
+      const alreadyRedeemed = await prisma.auditLog.findFirst({
+        where: { action: 'MEMBER_JOINED_VIA_INVITE', entityId: jti },
+      });
+      if (alreadyRedeemed) {
+        return { valid: false, error: 'This invite link has already been used.' };
+      }
+    }
     const org = await prisma.organization.findUnique({ where: { id: orgId } });
     if (!org) return { valid: false, error: 'Lab not found.' };
     return { valid: true, orgName: org.name, role };
@@ -88,12 +100,24 @@ export async function acceptInvite(
 
   let orgId: string;
   let role: Role;
+  let jti: string;
   try {
     const payload = await verifyInviteToken(token);
     orgId = payload.orgId;
     role = payload.role;
+    jti = payload.jti;
   } catch {
     return { success: false, error: 'This invite link has expired or is invalid.' };
+  }
+
+  // Enforce single-use token (Replay Attack Prevention)
+  if (jti) {
+    const alreadyRedeemed = await prisma.auditLog.findFirst({
+      where: { action: 'MEMBER_JOINED_VIA_INVITE', entityId: jti },
+    });
+    if (alreadyRedeemed) {
+      return { success: false, error: 'This invite link has already been used.' };
+    }
   }
 
   const org = await prisma.organization.findUnique({ where: { id: orgId } });
@@ -133,9 +157,10 @@ export async function acceptInvite(
       organizationId: orgId,
       action: 'MEMBER_JOINED_VIA_INVITE',
       entityType: 'User',
-      entityId: data.user.id,
+      entityId: jti || data.user.id,
       details: {
         message: `${cleanEmail} joined as ${role} via invite link.`,
+        jti,
       },
     },
   });

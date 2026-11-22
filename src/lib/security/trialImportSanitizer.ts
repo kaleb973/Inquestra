@@ -176,12 +176,45 @@ function safeJsonParse(jsonString: string): unknown {
 }
 
 /**
+ * Verifies binary magic bytes of an uploaded file against expected formats.
+ * Neutralizes polyglot files and renamed executables.
+ */
+export function verifyFileMagicBytes(buffer: ArrayBuffer | Uint8Array, expectedType: 'zip' | 'json'): boolean {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  if (expectedType === 'zip') {
+    if (bytes.length < 4) return false;
+    // Standard ZIP local file header (PK\x03\x04), empty ZIP (PK\x05\x06), or spanned (PK\x07\x08)
+    return (
+      bytes[0] === 0x50 &&
+      bytes[1] === 0x4B &&
+      ((bytes[2] === 0x03 && bytes[3] === 0x04) ||
+        (bytes[2] === 0x05 && bytes[3] === 0x06) ||
+        (bytes[2] === 0x07 && bytes[3] === 0x08))
+    );
+  }
+  if (expectedType === 'json') {
+    if (bytes.length === 0) return false;
+    // Leading non-whitespace character must be '{' (0x7B) or '[' (0x5B)
+    for (let i = 0; i < Math.min(bytes.length, 1024); i++) {
+      const b = bytes[i];
+      if (b === 0x20 || b === 0x09 || b === 0x0a || b === 0x0d) continue;
+      return b === 0x7b || b === 0x5b;
+    }
+    return false;
+  }
+  return false;
+}
+
+/**
  * Extracts and safely inspects trial.json from a ZIP archive in memory.
  */
 export async function extractSafeTrialJsonFromZip(file: File): Promise<string> {
   let zip: JSZip;
   try {
     const arrayBuffer = typeof file.arrayBuffer === 'function' ? await file.arrayBuffer() : file;
+    if (!verifyFileMagicBytes(arrayBuffer as ArrayBuffer, 'zip')) {
+      throw new Error('Security Alert: Corrupt or spoofed ZIP archive (invalid magic bytes header).');
+    }
     zip = await JSZip.loadAsync(arrayBuffer as ArrayBuffer);
   } catch (err) {
     if (err instanceof Error && err.message.startsWith('Security Alert')) {
@@ -546,6 +579,10 @@ export async function processSafeTrialImportFile(file: File): Promise<{
   if (file.name.toLowerCase().endsWith('.zip')) {
     jsonText = await extractSafeTrialJsonFromZip(file);
   } else {
+    const arrayBuffer = typeof file.arrayBuffer === 'function' ? await file.arrayBuffer() : file;
+    if (!verifyFileMagicBytes(arrayBuffer as ArrayBuffer, 'json')) {
+      throw new Error('Security Alert: Corrupt or invalid JSON document (invalid header bytes).');
+    }
     jsonText = await file.text();
   }
 
