@@ -410,6 +410,44 @@ export default function ComparePage() {
               </p>
             </div>
           </div>
+
+          {/* Dedicated In-Depth Comparison Guides */}
+          <div className="mt-12 p-6 rounded-xl border border-border bg-muted/10">
+            <h3 className="text-lg font-bold text-foreground mb-3">Looking for a Specific Alternative?</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Read our dedicated evaluations comparing migration steps, compliance, and bench usability:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                href="/compare/benchling-alternative"
+                className="p-4 rounded-lg border border-border bg-background hover:border-primary/50 transition-colors group flex items-center justify-between"
+              >
+                <div>
+                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    Best Benchling Alternative
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Why molecular biology & chemistry labs switch to Inquestra.
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-2 shrink-0" />
+              </Link>
+              <Link
+                href="/compare/labarchives-alternative"
+                className="p-4 rounded-lg border border-border bg-background hover:border-primary/50 transition-colors group flex items-center justify-between"
+              >
+                <div>
+                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    Best LabArchives Alternative
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Upgrading academic teams from legacy folder trees to modern canvas speed.
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-2 shrink-0" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
