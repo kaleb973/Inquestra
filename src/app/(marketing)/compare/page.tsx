@@ -83,20 +83,13 @@ export default function ComparePage() {
       />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────────── */}
-      <section className="pt-16 sm:pt-20 pb-16 border-b border-border">
+      <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4">
-            ELN Comparison · Last updated November 2026
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-tight">
             Inquestra vs Benchling vs LabArchives vs SciNote
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-            Choosing an Electronic Lab Notebook (ELN) for academic research means evaluating pricing,
-            supported scientific disciplines, ease of use for students, hardware integration, and
-            regulatory compliance. This page provides a factual, up-to-date comparison of the four
-            most commonly evaluated ELN platforms for university labs, graduate research groups, and
-            individual researchers.
+            Factual side-by-side comparison of pricing, disciplines, hardware DAQ support, and compliance across four ELN platforms.
           </p>
         </div>
       </section>
@@ -184,7 +177,7 @@ export default function ComparePage() {
           </p>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             <strong className="text-foreground">Pricing:</strong> SciNote has a free tier limited in
-            storage and team collaboration. The paid team plan unlocks larger storage quotas and
+            storage and team collaboration. The paid team plan provides larger storage quotas and
             priority support. SciNote is well-suited for regulated lab environments and
             teams with complex inventory needs, but does not include hardware DAQ or molecular
             structure tools.
@@ -234,7 +227,7 @@ export default function ComparePage() {
                 <tr className="bg-muted/5">
                   <td className="py-3.5 px-5 font-medium text-foreground">Molecular biology support</td>
                   <td className="py-3.5 px-5 text-emerald-500 font-semibold">Yes: PCR, gel electrophoresis, molecular structures, primer inventory</td>
-                  <td className="py-3.5 px-5 text-muted-foreground">Yes: industry-leading molecular tools</td>
+                  <td className="py-3.5 px-5 text-muted-foreground">Yes: dedicated molecular tools</td>
                   <td className="py-3.5 px-5 text-muted-foreground">Basic (notebook only)</td>
                   <td className="py-3.5 px-5 text-muted-foreground">Yes (protocols and inventory)</td>
                 </tr>
@@ -374,35 +367,35 @@ export default function ComparePage() {
             Pricing comparison for academic researchers
           </h2>
           <div className="grid sm:grid-cols-2 gap-6 text-sm">
-            <div className="border border-emerald-500/30 rounded-lg p-5 bg-emerald-500/5">
+            <div className="border border-phosphor/40 rounded-lg p-5 bg-phosphor/5">
               <h3 className="font-semibold text-foreground mb-2">Inquestra</h3>
-              <p className="text-emerald-500 font-bold text-lg mb-1">Free (open development)</p>
+              <p className="text-phosphor font-semibold text-lg mb-1">Free (open development)</p>
               <p className="text-muted-foreground">
                 Full notebook, inventory, molecular structures, citations, hardware DAQ, and audit
                 trails. Free for individual researchers, with core tools available directly in the browser.
               </p>
             </div>
-            <div className="border border-border rounded-lg p-5">
+            <div className="border border-border rounded-lg p-5 bg-card">
               <h3 className="font-semibold text-foreground mb-2">Benchling (Academic)</h3>
-              <p className="text-sky-400 font-bold text-lg mb-1">Free academic tier</p>
+              <p className="text-primary font-semibold text-lg mb-1">Free academic tier</p>
               <p className="text-muted-foreground">
                 Free for verified academic users. Advanced features, batch operations, and enterprise
                 compliance require commercial plans. Primarily focused on molecular biology and
                 biotech workflows.
               </p>
             </div>
-            <div className="border border-border rounded-lg p-5">
+            <div className="border border-border rounded-lg p-5 bg-card">
               <h3 className="font-semibold text-foreground mb-2">LabArchives</h3>
-              <p className="text-amber-400 font-bold text-lg mb-1">Institution license</p>
+              <p className="text-caution font-semibold text-lg mb-1">Institution license</p>
               <p className="text-muted-foreground">
                 Typically $10 to $15 per user per year at institutional scale; free to individual users only
                 when their university holds a site license. No free individual tier. Pricing varies
                 by institution size.
               </p>
             </div>
-            <div className="border border-border rounded-lg p-5">
+            <div className="border border-border rounded-lg p-5 bg-card">
               <h3 className="font-semibold text-foreground mb-2">SciNote</h3>
-              <p className="text-sky-400 font-bold text-lg mb-1">Free tier (limited)</p>
+              <p className="text-primary font-semibold text-lg mb-1">Free tier (limited)</p>
               <p className="text-muted-foreground">
                 Free community tier with limited storage (1 GB). Team plan starts at approximately
                 $149/user/year. Open-source self-hosted version available but requires server

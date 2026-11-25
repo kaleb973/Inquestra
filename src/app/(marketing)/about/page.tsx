@@ -30,17 +30,13 @@ export default function AboutPage() {
       />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="pt-16 sm:pt-20 pb-16 border-b border-border">
+      <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4">
-            About · Inquestra
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-tight">
             Built by researchers. Free for researchers.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-            Inquestra is a free, browser-based Electronic Lab Notebook built for experimental researchers.
-            It was created to replace scattered spreadsheets and proprietary software with an open, local-first workspace.
+            Inquestra is an open, local-first Electronic Lab Notebook replacing scattered spreadsheets and proprietary software.
           </p>
         </div>
       </section>
@@ -165,13 +161,13 @@ export default function AboutPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Kaleb</h3>
-                <p className="text-xs font-mono text-muted-foreground">Founder &amp; Lead Builder · Inquestra</p>
+                <p className="text-xs font-mono text-muted-foreground">Founder and Lead Builder, Inquestra</p>
               </div>
               <a
                 href="https://github.com/kaleb973"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
               >
                 github.com/kaleb973
                 <ArrowRight className="w-3.5 h-3.5" />

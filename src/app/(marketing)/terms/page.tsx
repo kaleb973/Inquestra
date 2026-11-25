@@ -111,8 +111,8 @@ export default function TermsOfServicePage() {
               <p>Inquestra: Legal &amp; Compliance Team</p>
               <p>Email: <span className="text-foreground font-semibold select-all">legal@inquestra.org</span></p>
               <p className="pt-1 font-sans">
-                <Link href="/contact" className="text-primary hover:underline">
-                  Visit Contact &amp; Inquiries Page →
+                <Link href="/contact" className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                  Visit Contact and Inquiries Page
                 </Link>
               </p>
             </div>

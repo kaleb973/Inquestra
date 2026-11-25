@@ -98,16 +98,13 @@ export default function FaqPage() {
       />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="pt-16 sm:pt-20 pb-16 border-b border-border">
+      <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4">
-            Documentation · Frequently Asked Questions
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-tight">
             Questions about Inquestra, answered plainly.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            What Inquestra actually does today across wet-lab biology, chemistry, materials science, and hardware DAQ, and what is still being built.
+            Capabilities across biology, chemistry, materials science, and hardware DAQ, plus our active roadmap.
           </p>
         </div>
       </section>
@@ -144,7 +141,7 @@ export default function FaqPage() {
               className="p-6 rounded-xl border border-border bg-card/40"
             >
               <div className="flex items-center justify-between gap-2 mb-2.5">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-500">
+                <span className="text-xs font-medium text-phosphor">
                   {item.category}
                 </span>
               </div>

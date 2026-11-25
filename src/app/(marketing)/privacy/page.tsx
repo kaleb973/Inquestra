@@ -140,8 +140,8 @@ export default function PrivacyPolicyPage() {
               <p>Legal &amp; Privacy: <span className="text-foreground font-semibold select-all">legal@inquestra.org</span></p>
               <p>Platform Support: <span className="text-foreground font-semibold select-all">support@inquestra.org</span></p>
               <p className="pt-1 font-sans">
-                <Link href="/contact" className="text-primary hover:underline">
-                  Visit Contact &amp; Support Page →
+                <Link href="/contact" className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                  Visit Contact and Support Page
                 </Link>
               </p>
             </div>

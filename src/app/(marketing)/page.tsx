@@ -4,6 +4,7 @@ import {
   Database,
   ShieldCheck,
   HardDrive,
+  Check,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { ScientificWorkspacePreview } from '@/components/marketing/ScientificWorkspacePreview';
@@ -52,7 +53,6 @@ export default function MarketingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* FAQPage JSON-LD for Search & AI Answer Engines */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -105,159 +105,170 @@ export default function MarketingPage() {
         }}
       />
 
-      {/* ── 1. Hero Section ────────────────────────────────────────────────────────── */}
-      <section className="relative pt-16 pb-20 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.12] text-balance">
-            The local-first notebook for experimental science.
-          </h1>
+      {/* ── 1. Stage Hero (Asymmetric Split, Live Workbench on Fold) ─────────────── */}
+      <section className="py-12 sm:py-16 lg:py-20 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            <div className="lg:col-span-5 space-y-6 text-left">
+              <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground leading-[1.06]">
+                Local-first notebook for experimental science.
+              </h1>
 
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed text-balance">
-            A browser-native research notebook with built-in serial instrument capture. Your experimental records never leave your machine.
-          </p>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
+                Execute protocols, track reagent lots, and capture live USB instruments in one workspace.
+              </p>
 
-          {/* AEO Definition Block */}
-          <p className="sr-only">
-            Inquestra is an open-source electronic lab notebook for experimental science. It combines
-            protocol tracking, reagent lots, 2D molecular structures, and serial instrument recording
-            within a local browser workspace.
-          </p>
+              <p className="sr-only">
+                Inquestra is an open-source electronic lab notebook for experimental science. It combines
+                protocol tracking, reagent lots, 2D molecular structures, and serial instrument recording
+                within a local browser workspace.
+              </p>
 
-          {/* Primary Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-14">
-            <Link
-              href="/app"
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-foreground text-background hover:bg-foreground/90 px-7 py-3.5 rounded text-sm font-semibold transition-colors shadow-sm"
-            >
-              Open Research Workspace
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/demo"
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
-            >
-              Explore Interactive Demo
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+                <Link
+                  href="/app"
+                  className="inline-flex justify-center items-center gap-2 bg-primary text-primary-foreground hover:opacity-95 px-6 h-12 rounded-md text-sm font-semibold transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Open Research Workspace
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/demo"
+                  className="inline-flex justify-center items-center gap-2 px-5 h-12 rounded-md text-sm font-medium border border-border bg-card text-foreground hover:bg-muted/60 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Explore Live Demo
+                </Link>
+              </div>
+
+              <dl className="grid grid-cols-3 gap-4 pt-6 border-t border-border text-xs">
+                <div>
+                  <dt className="text-muted-foreground font-medium">Storage</dt>
+                  <dd className="font-mono text-foreground font-medium mt-1">Browser IndexedDB</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground font-medium">Hardware</dt>
+                  <dd className="font-mono text-foreground font-medium mt-1">W3C Web Serial</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground font-medium">Integrity</dt>
+                  <dd className="font-mono text-phosphor font-medium mt-1">SHA-256 Digest</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="lg:col-span-7 min-w-0">
+              <ScientificWorkspacePreview />
+            </div>
           </div>
-        </div>
-
-        {/* Live Interactive Workspace Preview */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-          <ScientificWorkspacePreview />
         </div>
       </section>
 
-      {/* ── 2. Unified Notebook Engine ────────────────────────────────────────────── */}
-      <section id="features" className="py-24 border-b border-border scroll-mt-20">
+      {/* ── 2. Unified Notebook Engine (Asymmetric 1px Ruled Bento) ───────────────── */}
+      <section id="features" className="py-20 sm:py-24 border-b border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              A block-based canvas built for experimental research.
-            </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Standard text editors ignore experimental workflows. Inquestra embeds interactive step timers, chemical structures, and literature citations directly into your notes.
+          <div className="grid lg:grid-cols-12 gap-6 items-end mb-12">
+            <div className="lg:col-span-7">
+              <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+                A block-based canvas built for experimental work.
+              </h2>
+            </div>
+            <p className="lg:col-span-5 text-base text-muted-foreground leading-relaxed">
+              Embed synchronized protocol timers, reagent deductions, molecular structures, and literature DOIs straight inside your lab notes.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border border border-border rounded-xl overflow-hidden bg-card/40">
-            {/* Capability 1: Protocol Execution */}
-            <div className="p-6 sm:p-8 space-y-3">
-              <span className="font-mono text-xs text-primary font-semibold uppercase tracking-wider">Protocol Execution</span>
+          <div className="grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border border border-border rounded-lg overflow-hidden bg-card">
+            <div className="md:col-span-6 p-7 sm:p-8 space-y-3">
               <h3 className="text-lg font-semibold text-foreground">
-                Step Timers &amp; SOP Checklists
+                Step timers and SOP checklists
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Step-by-step procedure checklists with synchronized countdown timers for incubation periods and wash steps. Inline KaTeX formulas calculate dilution factors and reaction stoichiometry directly inside your protocol notes.
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Run step-by-step protocol checklists with synchronized countdown timers for incubations and wash steps. Inline KaTeX equations calculate dilutions and stoichiometry beside every note.
               </p>
             </div>
 
-            {/* Capability 2: Chemical & Biological LIMS */}
-            <div className="p-6 sm:p-8 space-y-3">
-              <span className="font-mono text-xs text-emerald-500 font-semibold uppercase tracking-wider">Inventory LIMS</span>
+            <div className="md:col-span-3 p-7 sm:p-8 space-y-3">
               <h3 className="text-lg font-semibold text-foreground">
-                Reagents &amp; Lot Tracking
+                Reagents and lot tracking
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Log chemical batches, antibody aliquots, and primer stocks across cold storage or room temperature. Deducting materials during an experiment records manufacturer lot numbers and balances automatically.
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Log chemical batches, antibody aliquots, and primer stocks. Protocol deductions record manufacturer lots automatically.
               </p>
             </div>
 
-            {/* Capability 3: Molecular Primitives & Citations */}
-            <div className="p-6 sm:p-8 space-y-3">
-              <span className="font-mono text-xs text-sky-500 font-semibold uppercase tracking-wider">Chemical &amp; Sequence Tools</span>
+            <div className="md:col-span-3 p-7 sm:p-8 space-y-3">
               <h3 className="text-lg font-semibold text-foreground">
-                Molecules &amp; DOI Citations
+                Molecules and DOI lookup
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Draw 2D chemical structures from SMILES strings, calculate oligonucleotide melting temperatures, and link literature DOIs in context.
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Render 2D chemical structures from SMILES strings, calculate primer melting temperatures, and cite PubMed DOIs inline.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 3. Dedicated Disciplines ──────────────────────────────────────────────────── */}
-      <section className="py-24 border-b border-border bg-muted/10">
+      {/* ── 3. Dedicated Disciplines (Full-Width Benchling Specification Table) ───── */}
+      <section className="py-20 sm:py-24 border-b border-border bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Validated across laboratory disciplines.
+            <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+              Structured across laboratory disciplines.
             </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              From molecular biology assays and chemical synthesis to physical testing and instrumentation.
+            <p className="text-base text-muted-foreground mt-3 leading-relaxed">
+              From molecular assays and chemical synthesis to physical instrumentation and core facilities.
             </p>
           </div>
 
-          <div className="border border-border rounded overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="border-y border-border overflow-x-auto">
+            <table className="w-full text-sm text-left">
               <thead>
-                <tr className="border-b border-border bg-muted/20">
-                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider w-1/3">Domain</th>
-                  <th className="text-left px-5 py-3 text-xs font-mono text-muted-foreground font-normal uppercase tracking-wider">Example workflows &amp; signals</th>
+                <tr className="border-b border-border">
+                  <th className="py-3.5 pr-6 text-sm text-foreground font-semibold w-1/3">Domain</th>
+                  <th className="py-3.5 px-4 text-sm text-foreground font-semibold">Workflows and signals</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Molecular &amp; Cell Biology</td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Plasmid cloning, DNA sequence verification, antibody aliquot tracking, and cell culture feeding timers.
-                    <span className="block mt-1 font-mono">Primer design · Cell culture passaging</span>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="py-4 pr-6 font-medium text-foreground align-top">Molecular and Cell Biology</td>
+                  <td className="py-4 px-4 text-muted-foreground leading-relaxed">
+                    Plasmid cloning, DNA sequence verification, antibody aliquot tracking, and cell culture timers.
+                    <span className="block mt-1 font-mono text-xs text-foreground/80">Primer design, Cell passaging</span>
                   </td>
                 </tr>
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Chemistry &amp; Biochemistry</td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    2D chemical structures from SMILES, stoichiometry computation, reagent lot tracking, and GHS safety data sheets.
-                    <span className="block mt-1 font-mono">SMILES structures · Kinetic calculations</span>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="py-4 pr-6 font-medium text-foreground align-top">Chemistry and Biochemistry</td>
+                  <td className="py-4 px-4 text-muted-foreground leading-relaxed">
+                    2D chemical structures from SMILES, stoichiometry computation, reagent lot tracking, and safety sheets.
+                    <span className="block mt-1 font-mono text-xs text-foreground/80">SMILES structures, Kinetic math</span>
                   </td>
                 </tr>
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Biotech &amp; Biopharma R&amp;D</td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="py-4 pr-6 font-medium text-foreground align-top">Biotech and Biopharma R&amp;D</td>
+                  <td className="py-4 px-4 text-muted-foreground leading-relaxed">
                     Batch records, SOP checklists, real-time deviation logging, and cryptographic audit records.
-                    <span className="block mt-1 font-mono">SOP checklists · Audit logging</span>
+                    <span className="block mt-1 font-mono text-xs text-foreground/80">SOP checklists, Audit logging</span>
                   </td>
                 </tr>
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Materials Science &amp; Physics</td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Tensile test stress-strain curves, load cell deformation recording, and continuum mechanics modeling.
-                    <span className="block mt-1 font-mono">Stress-strain curves · Material deformation</span>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="py-4 pr-6 font-medium text-foreground align-top">Materials Science and Physics</td>
+                  <td className="py-4 px-4 text-muted-foreground leading-relaxed">
+                    Tensile stress-strain curves, load cell deformation recording, and continuum modeling.
+                    <span className="block mt-1 font-mono text-xs text-foreground/80">Stress-strain curves, Load telemetry</span>
                   </td>
                 </tr>
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Instrumentation &amp; Devices</td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Biopotential telemetry (EMG, ECG), hemodynamic waveforms, design records, and raw sensor logs.
-                    <span className="block mt-1 font-mono">Web Serial DAQ · Waveform telemetry</span>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="py-4 pr-6 font-medium text-foreground align-top">Instrumentation and Devices</td>
+                  <td className="py-4 px-4 text-muted-foreground leading-relaxed">
+                    Differential analog telemetry, thermal profiles, design records, and raw sensor streams.
+                    <span className="block mt-1 font-mono text-xs text-foreground/80">Web Serial DAQ, Waveform logs</span>
                   </td>
                 </tr>
-                <tr className="hover:bg-muted/5 transition-colors">
-                  <td className="px-5 py-4 font-medium text-foreground align-top">Academic Core Facilities</td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground leading-relaxed">
-                    Student onboarding, shared equipment schedules, and keeping protocol records organized across projects.
-                    <span className="block mt-1 font-mono">Equipment logging · Protocol archives</span>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="py-4 pr-6 font-medium text-foreground align-top">Academic Core Facilities</td>
+                  <td className="py-4 px-4 text-muted-foreground leading-relaxed">
+                    Student onboarding, shared instrument logs, and cross-project protocol archives.
+                    <span className="block mt-1 font-mono text-xs text-foreground/80">Equipment logs, Protocol archives</span>
                   </td>
                 </tr>
               </tbody>
@@ -267,215 +278,220 @@ export default function MarketingPage() {
       </section>
 
       {/* ── 4. Data Integrity & Cryptographic Provenance ───────────────────────── */}
-      <section id="provenance" className="py-24 border-b border-border scroll-mt-20">
+      <section id="provenance" className="py-20 sm:py-24 border-b border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+          <div className="max-w-3xl mb-12">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
               Tamper-evident cryptographic verification.
             </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              When an experiment concludes, Inquestra cryptographically seals the completed record. Completed protocol entries and recorded sensor data cannot be modified without failing checksum verification.
+            <p className="text-base text-muted-foreground mt-3 leading-relaxed">
+              When a trial concludes, Inquestra seals the completed record under a SHA-256 digest so post-hoc edits trigger checksum mismatches.
             </p>
           </div>
 
           <ProvenanceInteractiveDemo />
 
-          {/* Three Core Data Guarantees */}
-          <div className="mt-14 border-t border-b border-border py-8 flex flex-wrap gap-y-8">
-            <div className="flex-1 min-w-56 pr-8 border-r border-border last:border-r-0">
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                SHA-256 Record Sealing
-              </p>
-              <p className="text-sm font-medium text-foreground mb-1">Cryptographic Fingerprint</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                When an experiment concludes, Inquestra computes a SHA-256 digest covering your notebook text and captured sensor values. Any subsequent modification triggers an immediate checksum mismatch.
+          <div className="mt-12 border-y border-border py-8 grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border gap-y-6">
+            <div className="md:pr-8 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+                <span>SHA-256 record sealing</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Computes a deterministic digest covering protocol text, material lots, and logged sensor arrays.
               </p>
             </div>
-            <div className="flex-1 min-w-56 px-8 border-r border-border last:border-r-0">
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Database className="w-3.5 h-3.5 text-primary" />
-                Append-Only History
-              </p>
-              <p className="text-sm font-medium text-foreground mb-1">Traceable Revisions</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Every draft save generates an auditable, timestamped revision snapshot.
-                You can review the full differential history and restore previous states at any time.
+            <div className="pt-6 md:pt-0 md:px-8 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Database className="w-4 h-4 text-primary shrink-0" />
+                <span>Append-only revision history</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Every draft save records a timestamped revision snapshot so labs can inspect diffs and restore prior states.
               </p>
             </div>
-            <div className="flex-1 min-w-56 pl-8">
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <HardDrive className="w-3.5 h-3.5 text-primary" />
-                Local &amp; Lab Ownership
-              </p>
-              <p className="text-sm font-medium text-foreground mb-1">Local Mode or Lab DB</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Draft notes and active sensor capture run locally in browser IndexedDB without mandatory accounts. Connect to your lab&apos;s PostgreSQL database or export signed Markdown and CSV bundles when ready to archive.
+            <div className="pt-6 md:pt-0 md:pl-8 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <HardDrive className="w-4 h-4 text-primary shrink-0" />
+                <span>Local mode or lab database</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Draft in browser IndexedDB with zero accounts, or sync to your lab&apos;s PostgreSQL server and export Markdown/CSV bundles.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 5. Integrated Bench DAQ ──────────────────────────────────────────────────── */}
-      <section id="hardware" className="py-24 border-b border-border bg-muted/10 scroll-mt-20">
+      {/* ── 5. Integrated Bench DAQ (Graphite Code Band) ────────────────────────── */}
+      <section id="hardware" className="py-20 sm:py-24 border-b border-border bg-muted/20 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Connect bench instruments directly to your notes.
+          <div className="max-w-3xl mb-12">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+              Connect bench instruments straight to notes.
             </h2>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-              Ingest continuous sensor data straight into your notebook via browser Web Serial. Connect analytical balances, temperature probes, load cells, or custom microcontrollers without installing device drivers.
+            <p className="text-base text-muted-foreground mt-3 leading-relaxed">
+              Stream continuous readings over browser Web Serial from balances, temperature probes, load cells, and microcontrollers without desktop drivers.
             </p>
           </div>
 
           <FirmwareShowcase />
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-background border border-border text-xs font-mono">
-            <div className="flex items-center gap-3 text-muted-foreground">
-              <span className="text-foreground font-semibold">Supported Modalities:</span>
-              <span>Load Cells · Temperature Probes · Biopotentials (EMG/ECG) · Pressure Sensors · Bench Meters</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 px-5 py-3.5 rounded-lg bg-card border border-border text-sm">
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <span className="text-foreground font-semibold">Supported modalities:</span>
+              <span>Load cells, temperature probes, differential channels, pressure sensors, bench meters</span>
             </div>
             <Link
               href="/hardware"
-              className="inline-flex items-center gap-1.5 text-primary hover:underline font-semibold"
+              className="inline-flex items-center gap-1.5 text-primary hover:underline font-semibold whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
             >
-              Explore Full Hardware DAQ Specifications
-              <ArrowRight className="w-3.5 h-3.5" />
+              Hardware DAQ specifications
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── 6. Laboratory Architecture & Data Lifecycle ──────────────────────────── */}
-      <section className="py-24 border-b border-border scroll-mt-20" id="academic">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Built for offline laboratory benches and self-hosted research teams.
+      {/* ── 6. Laboratory Architecture & Data Lifecycle (7/5 Split) ──────────────── */}
+      <section className="py-20 sm:py-24 border-b border-border scroll-mt-20" id="academic">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-12">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+              Built for offline benches and self-hosted teams.
             </h2>
             <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-              Most laboratory notebooks force research data into proprietary clouds behind recurring subscriptions.
-              Inquestra gives individual scientists a zero-install local workspace, with optional PostgreSQL synchronization for collaborative research groups.
+              Start locally in a single browser tab and optionally connect your own PostgreSQL instance as your group grows.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Visual Lifecycle Flow */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="p-5 rounded-xl border border-border bg-card/40 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-semibold text-foreground">1. At the Bench (Zero-Install Local Mode)</span>
-                  <span className="text-primary text-[11px]">Browser IndexedDB</span>
+          <div className="grid lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-7 divide-y divide-border border-y border-border">
+              <div className="py-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <h3 className="font-semibold text-foreground text-base">1. At the bench (Local Notebook)</h3>
+                  <span className="font-mono text-xs text-primary">Browser IndexedDB</span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Draft protocols, track reagent deductions, and log USB serial telemetry directly in your browser. Runs completely offline in tissue culture hoods, cold rooms, or field stations without sign-up or network access.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Draft protocols, deduct reagents, and capture USB serial telemetry completely offline in culture hoods, cold rooms, or field stations.
                 </p>
               </div>
 
-              <div className="p-5 rounded-xl border border-border bg-card/40 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-semibold text-foreground">2. In the Laboratory (Team Collaboration)</span>
-                  <span className="text-emerald-500 text-[11px]">PostgreSQL &amp; RLS</span>
+              <div className="py-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <h3 className="font-semibold text-foreground text-base">2. In the laboratory (Cloud Notebook)</h3>
+                  <span className="font-mono text-xs text-phosphor">PostgreSQL &amp; RLS</span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Connect your group to a self-hosted or managed PostgreSQL instance for centralized reagent inventory, shared equipment calibration logs, and role-based permissions without per-user licensing fees.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Connect to self-hosted or managed PostgreSQL for shared chemical inventories, equipment calibration logs, and role-based access without per-seat fees.
                 </p>
               </div>
 
-              <div className="p-5 rounded-xl border border-border bg-card/40 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-semibold text-foreground">3. For Publication &amp; Archiving (Open Portability)</span>
-                  <span className="text-sky-500 text-[11px]">CommonMark &amp; CSV</span>
+              <div className="py-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <h3 className="font-semibold text-foreground text-base">3. Publication and archiving</h3>
+                  <span className="font-mono text-xs text-muted-foreground">CommonMark &amp; CSV</span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Export complete experiments as self-contained ZIP packages containing human-readable Markdown notes, raw sensor CSV files, and SHA-256 checksums that any collaborator or reviewer can verify from the command line.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Export complete trials as self-contained ZIP bundles with readable Markdown, raw CSV streams, and verifiable SHA-256 manifests.
                 </p>
               </div>
             </div>
 
-            {/* Right Column: Open-Source Principles Card */}
-            <div className="lg:col-span-5 p-6 rounded-xl border border-border bg-muted/20 space-y-4 text-xs">
-              <h3 className="text-sm font-semibold text-foreground">
-                Why we built an open, local-first notebook
+            <div className="lg:col-span-5 p-6 sm:p-8 rounded-lg border border-border bg-card space-y-5">
+              <h3 className="text-lg font-semibold text-foreground">
+                Open infrastructure principles
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Academic research and early-stage biotechnology thrive when experimental records belong entirely to the laboratory producing them.
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Research records belong to the laboratory producing them, free from proprietary formats or lock-in.
               </p>
-              <div className="space-y-3 pt-2 border-t border-border">
-                <div className="flex items-start gap-2.5">
-                  <span className="text-primary font-mono font-bold">✓</span>
-                  <span className="text-muted-foreground">
-                    <strong className="text-foreground">No account required:</strong> Open the app URL on any bench computer and start executing protocols immediately.
+              <ul className="space-y-3.5 pt-4 border-t border-border text-sm text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-phosphor shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-foreground">No account required:</strong> Launch the workspace on any bench computer immediately.
                   </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="text-primary font-mono font-bold">✓</span>
-                  <span className="text-muted-foreground">
-                    <strong className="text-foreground">No vendor lock-in:</strong> Open standard schemas (CommonMark, CSV, JSON) ensure your research remains readable decades from now.
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-phosphor shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-foreground">Open standard formats:</strong> CommonMark, CSV, and JSON keep trials readable for decades.
                   </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="text-primary font-mono font-bold">✓</span>
-                  <span className="text-muted-foreground">
-                    <strong className="text-foreground">Free for academia:</strong> All core research tools are open source and free for students, postdocs, and PIs.
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-phosphor shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-foreground">Free for academia:</strong> Core ELN, LIMS, and Web Serial tools remain open for students and PIs.
                   </span>
-                </div>
-              </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 7. Pilot Lab Program ─────────────────────────────────────────────────────── */}
-      <section className="py-24 border-b border-border bg-muted/10" id="pilot">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
-              Partner with Inquestra on your bench.
-            </h2>
-            <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              We collaborate directly with academic research groups and biotech teams to connect custom bench hardware, import existing protocols, or deploy dedicated team instances.
-            </p>
-          </div>
-
-          {/* Clean Intake Form */}
-          <div className="bg-background border border-border rounded-2xl p-6 sm:p-8 shadow-xl">
-            <div className="mb-6 pb-4 border-b border-border text-left">
-              <h3 className="text-base font-semibold text-foreground">
-                Request Pilot Lab Access &amp; Lab Onboarding
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tell us about your experimental setup. We review inquiries within two business days.
+      {/* ── 7. Pilot Lab Program (5/7 Form Split) ───────────────────────────────── */}
+      <section className="py-20 sm:py-24 border-b border-border bg-muted/20" id="pilot">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-5 space-y-4 text-left">
+              <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+                Partner with Inquestra on your bench.
+              </h2>
+              <p className="text-base text-muted-foreground leading-relaxed">
+                We collaborate with academic groups and biotech teams to wire custom bench hardware, import existing SOPs, and deploy group PostgreSQL workspaces.
               </p>
+              <dl className="pt-4 border-t border-border space-y-2 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Onboarding review</dt>
+                  <dd className="font-mono text-foreground">Within 2 business days</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Academic cost</dt>
+                  <dd className="font-mono text-phosphor">$0 (pilot supported)</dd>
+                </div>
+              </dl>
             </div>
-            <PilotInterestForm />
+
+            <div className="lg:col-span-7 bg-card border border-border rounded-lg p-6 sm:p-8">
+              <div className="mb-6 pb-4 border-b border-border text-left">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Request Pilot Lab Access and Onboarding
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Share your experimental setup and hardware requirements.
+                </p>
+              </div>
+              <PilotInterestForm />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── 8. Final Call to Action ─────────────────────────────────────────────────── */}
+      {/* ── 8. Final Call to Action ─────────────────────────────────────────────── */}
       <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
-            Start organizing your research in one unified notebook.
-          </h2>
-          <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-            Free and open source. Start drafting immediately in your browser.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="max-w-2xl space-y-3">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+              Start organizing trials in one unified notebook.
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Free and open source. Launch locally in your browser without registration.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <Link
               href="/app"
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-foreground text-background hover:bg-foreground/90 px-8 py-3.5 rounded text-sm font-semibold transition-colors shadow-sm"
+              className="inline-flex justify-center items-center gap-2 bg-primary text-primary-foreground hover:opacity-95 px-7 h-12 rounded-md text-sm font-semibold transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Launch Research Workspace
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/demo"
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3.5 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
+              className="inline-flex justify-center items-center gap-2 px-6 h-12 rounded-md text-sm font-medium border border-border bg-card text-foreground hover:bg-muted/60 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Try In-Browser DAQ Simulator
+              Try DAQ Simulator
             </Link>
           </div>
         </div>

@@ -7,10 +7,10 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary/20">
+    <div className="marketing-shell min-h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary/20">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3.5 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg focus:text-xs focus:font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3.5 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:text-xs focus:font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Skip to main content
       </a>

@@ -88,30 +88,25 @@ export default function LabArchivesAlternativePage() {
       />
 
       {/* ── Hero Section ──────────────────────────────────────────────────────── */}
-      <section className="pt-16 sm:pt-24 pb-16 border-b border-border bg-gradient-to-b from-background to-muted/20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono bg-primary/10 text-primary border border-primary/20 mb-6">
-            <span>Academic Infrastructure Guide · 2026 Evaluation</span>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
+      <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-tight">
             The Modern Alternative to LabArchives
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed mb-8">
-            Many university labs are handed LabArchives licenses, only to find an antiquated 2005-era interface,
-            painful navigation, and zero support for modern hardware or chemical workflows. Discover why research groups
-            are switching to <strong className="text-foreground">Inquestra</strong>.
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed mb-8">
+            Replace legacy folder trees with a fast block canvas, chemical inventory, and direct USB hardware streaming.
           </p>
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Link
               href="/demo"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors shadow-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 h-11 rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-95 transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Test Live Sandbox Demo
+              Test Live Local Notebook Demo
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg border border-border bg-background hover:bg-muted font-medium text-foreground transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Start Free Academic Workspace
             </Link>

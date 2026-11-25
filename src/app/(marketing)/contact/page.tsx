@@ -52,7 +52,7 @@ export default function ContactPage() {
                 <button
                   type="button"
                   onClick={() => handleCopy('support@inquestra.org')}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-muted hover:bg-accent text-foreground transition-colors border border-border"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-muted hover:bg-accent text-foreground transition-colors border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
                   title="Copy email to clipboard"
                 >
                   {copiedEmail === 'support@inquestra.org' ? (
@@ -107,7 +107,7 @@ export default function ContactPage() {
                 <button
                   type="button"
                   onClick={() => handleCopy('legal@inquestra.org')}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-muted hover:bg-accent text-foreground transition-colors border border-border"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-muted hover:bg-accent text-foreground transition-colors border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
                   title="Copy email to clipboard"
                 >
                   {copiedEmail === 'legal@inquestra.org' ? (

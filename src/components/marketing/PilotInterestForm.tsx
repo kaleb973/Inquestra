@@ -1,7 +1,4 @@
 'use client';
-// src/components/marketing/PilotInterestForm.tsx
-// Inline form for capturing pilot lab interest directly on the marketing page.
-// Submits to /api/pilot-interest. No auth required.
 
 import { useState } from 'react';
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
@@ -46,11 +43,11 @@ export function PilotInterestForm() {
 
   if (state === 'success') {
     return (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+      <div className="flex flex-col items-center gap-3 py-8 text-center">
+        <CheckCircle2 className="w-10 h-10 text-phosphor" />
         <h3 className="text-lg font-semibold text-foreground">You&apos;re on the list.</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Bench requirements are reviewed within 48 hours followed by access instructions. No sales pitch, just getting your lab set up.
+          Bench requirements are reviewed within 48 hours followed by access instructions.
         </p>
       </div>
     );
@@ -60,85 +57,100 @@ export function PilotInterestForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Full Name <span className="text-red-500">*</span>
+          <label htmlFor="pilot-name" className="block text-sm font-medium text-foreground mb-1.5">
+            Full name <span className="text-critical">*</span>
           </label>
           <input
+            id="pilot-name"
+            name="name"
             type="text"
+            autoComplete="name"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
+            className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Institutional Email <span className="text-red-500">*</span>
+          <label htmlFor="pilot-email" className="block text-sm font-medium text-foreground mb-1.5">
+            Institutional email <span className="text-critical">*</span>
           </label>
           <input
+            id="pilot-email"
+            name="email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.edu"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
+            placeholder="researcher@university.edu"
+            className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Institution / Lab <span className="text-red-500">*</span>
+          <label htmlFor="pilot-institution" className="block text-sm font-medium text-foreground mb-1.5">
+            Institution or lab <span className="text-critical">*</span>
           </label>
           <input
+            id="pilot-institution"
+            name="institution"
             type="text"
+            autoComplete="organization"
             required
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
             placeholder="Wilson Lab, MIT"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
+            className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Your Role <span className="text-muted-foreground font-normal">(optional)</span>
+          <label htmlFor="pilot-role" className="block text-sm font-medium text-foreground mb-1.5">
+            Your role <span className="text-muted-foreground font-normal">(optional)</span>
           </label>
           <input
+            id="pilot-role"
+            name="role"
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="PI, Postdoc, or Lab Manager"
-            className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
+            className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-foreground mb-1.5">
-          What are you trying to track / measure?{' '}
+        <label htmlFor="pilot-usecase" className="block text-sm font-medium text-foreground mb-1.5">
+          What are you trying to track?{' '}
           <span className="text-muted-foreground font-normal">(optional)</span>
         </label>
         <textarea
+          id="pilot-usecase"
+          name="useCase"
           value={useCase}
           onChange={(e) => setUseCase(e.target.value)}
-          placeholder="qPCR workflows, primer aliquot tracking, and balance telemetry"
+          placeholder="qPCR workflows, reagent lot tracking, and balance telemetry"
           rows={3}
-          className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
+          className="w-full p-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
         />
       </div>
 
-      {state === 'error' && errorMsg && (
-        <p className="text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-          {errorMsg}
-        </p>
-      )}
+      <div className="min-h-[1.25rem]">
+        {state === 'error' && errorMsg && (
+          <p role="alert" className="text-xs text-critical bg-critical/10 border border-critical/25 rounded-md px-3 py-2">
+            {errorMsg}
+          </p>
+        )}
+      </div>
 
       <button
         type="submit"
         disabled={state === 'submitting'}
-        className="w-full flex items-center justify-center gap-2 bg-foreground text-background hover:bg-foreground/90 px-6 py-3 rounded text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full h-11 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:opacity-95 px-6 rounded-md text-sm font-semibold transition-opacity disabled:opacity-55 disabled:cursor-not-allowed whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
       >
         {state === 'submitting' ? (
           <>
@@ -147,13 +159,13 @@ export function PilotInterestForm() {
           </>
         ) : (
           <>
-            Request Pilot Access
+            Request Access
             <ArrowRight className="w-4 h-4" />
           </>
         )}
       </button>
 
-      <p className="text-[11px] text-muted-foreground text-center">
+      <p className="text-xs text-muted-foreground text-center">
         Free pilot onboarding. Reviewed within 48 hours.
       </p>
     </form>

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Play, Pause, RotateCcw, Shield, Terminal, Activity, ArrowRight } from "lucide-react";
+import { Play, Pause, RotateCcw, Shield, Activity, ArrowRight } from "lucide-react";
 
 export default function DemoPage() {
   const [isRunning, setIsRunning] = useState(true);
   const [samplesCount, setSamplesCount] = useState(1420);
-  const [rate, setRate] = useState(100);
+  const [rate] = useState(100);
   const [dataPoints, setDataPoints] = useState<number[]>([
     45, 52, 48, 56, 92, 14, 48, 51, 50, 47, 53, 89, 21, 46, 52, 48, 54, 94, 18, 47, 51, 50, 48, 55, 90, 19, 49, 52, 50, 48, 53, 51
   ]);
@@ -48,35 +48,34 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="pt-16 sm:pt-20 pb-16">
-      {/* Main Interactive Demo Container */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="pt-14 sm:pt-16 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
-            Hardware Acquisition &amp; Protocol Sealing In Real Time
+          <h1 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight mb-3">
+            Hardware acquisition and sealing in real time.
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Test the live streaming engine below. Toggle sampling rates, observe incoming serial
-            telemetry packets, and execute a cryptographic seal to lock the trial record.
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Toggle streaming, inspect incoming telemetry packets, and execute a SHA-256 cryptographic seal.
           </p>
         </div>
 
-        {/* Demo Dashboard Card */}
-        <div className="bg-card border border-border rounded-lg shadow-xl overflow-hidden">
-          {/* Controls Bar */}
-          <div className="p-4 bg-muted/40 border-b border-border flex flex-wrap items-center justify-between gap-4">
+        {/* Demo Instrument Panel (zero nested cards, zero shadow-xl, motion-reduce safe) */}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="p-4 bg-muted/50 border-b border-border flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => setIsRunning(!isRunning)}
                 disabled={isSealed}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-background border border-border hover:bg-accent text-foreground disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium bg-background border border-border hover:bg-muted text-foreground disabled:opacity-55 disabled:cursor-not-allowed transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
               >
                 {isRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                 {isRunning ? "Pause Stream" : "Resume Stream"}
               </button>
               <button
+                type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-background border border-border hover:bg-accent text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium bg-background border border-border hover:bg-muted text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
                 title="Reset Simulation"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -84,124 +83,116 @@ export default function DemoPage() {
               </button>
             </div>
 
-            <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${isRunning ? "bg-phosphor animate-pulse" : "bg-muted-foreground"}`} />
-                <span className="text-muted-foreground">DEVICE:</span>
+                <span className={`w-2 h-2 rounded-full ${isRunning ? "bg-phosphor motion-safe:animate-pulse" : "bg-muted-foreground"}`} />
+                <span className="text-muted-foreground">Device:</span>
                 <span className="text-foreground">Simulated ESP32-UART</span>
               </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="text-muted-foreground">THROUGHPUT:</span>
+              <div className="hidden sm:flex items-center gap-1.5">
+                <span className="text-muted-foreground">Rate:</span>
                 <span className="text-foreground">{rate} Hz</span>
               </div>
-              <div>
-                <span className="text-muted-foreground">SAMPLES:</span>
-                <span className="text-foreground font-semibold">{samplesCount.toLocaleString()}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Samples:</span>
+                <span className="text-foreground font-semibold num">{samplesCount.toLocaleString()}</span>
               </div>
             </div>
 
             <div>
               {isSealed ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-caution/10 border border-caution/30 text-caution">
+                <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-mono font-medium bg-caution/10 border border-caution/30 text-caution whitespace-nowrap">
                   <Shield className="w-3.5 h-3.5" />
                   Trial Sealed (Read-Only)
                 </div>
               ) : (
                 <button
+                  type="button"
                   onClick={handleSeal}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
                 >
                   <Shield className="w-3.5 h-3.5" />
-                  Seal Trial Record (SHA-256)
+                  Seal Trial Record
                 </button>
               )}
             </div>
           </div>
 
-          {/* Interactive Screen Grid */}
           <div className="grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border">
-            {/* Waveform Canvas Simulation */}
             <div className="md:col-span-8 p-6 bg-background">
-              <div className="flex justify-between items-center mb-3">
+              <div className="flex justify-between items-center mb-3 text-xs font-mono">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-phosphor" />
-                  <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                  <span className="text-muted-foreground">
                     Live Channel: Transducer Analog Input (mV)
                   </span>
                 </div>
-                <span className="text-xs font-mono text-phosphor">
-                  {isRunning ? "STREAMING ACTIVE" : isSealed ? "RECORD SEALED" : "STREAM PAUSED"}
+                <span className="text-phosphor font-medium">
+                  {isRunning ? "Streaming" : isSealed ? "Sealed" : "Paused"}
                 </span>
               </div>
 
-              {/* Graphical Display */}
-              <div className="h-64 w-full bg-muted/20 border border-border/80 rounded relative flex items-end p-3 gap-1.5 overflow-hidden">
-                <div className="absolute inset-0 grid grid-rows-6 grid-cols-8 pointer-events-none opacity-20 border-b border-border">
+              <div className="h-64 w-full bg-graphite rounded-md relative flex items-end p-3 gap-1.5 overflow-hidden">
+                <div className="absolute inset-0 grid grid-rows-6 grid-cols-8 pointer-events-none opacity-15">
                   {Array.from({ length: 48 }).map((_, i) => (
-                    <div key={i} className="border-r border-t border-border/40" />
+                    <div key={i} className="border-r border-t border-white/20" />
                   ))}
                 </div>
                 {dataPoints.map((h, i) => (
                   <div
                     key={i}
-                    className="flex-1 bg-phosphor/80 rounded-t-sm transition-all duration-100"
+                    className="flex-1 bg-phosphor/85 rounded-t-sm"
                     style={{ height: `${h}%` }}
                   />
                 ))}
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mt-4 text-xs font-mono">
-                <div className="bg-muted/30 p-2.5 rounded border border-border">
-                  <span className="text-muted-foreground block text-[10px]">Peak Amplitude</span>
-                  <span className="text-foreground font-semibold">1.42 mV</span>
+              <dl className="grid grid-cols-3 divide-x divide-border border-t border-border mt-4 pt-4 text-xs font-mono">
+                <div className="pr-4">
+                  <dt className="font-sans text-muted-foreground">Peak amplitude</dt>
+                  <dd className="text-foreground font-semibold mt-0.5">1.42 mV</dd>
                 </div>
-                <div className="bg-muted/30 p-2.5 rounded border border-border">
-                  <span className="text-muted-foreground block text-[10px]">Noise Floor (RMS)</span>
-                  <span className="text-foreground font-semibold">8.2 µV</span>
+                <div className="px-4">
+                  <dt className="font-sans text-muted-foreground">Noise floor (RMS)</dt>
+                  <dd className="text-foreground font-semibold mt-0.5">8.2 µV</dd>
                 </div>
-                <div className="bg-muted/30 p-2.5 rounded border border-border">
-                  <span className="text-muted-foreground block text-[10px]">Packet Loss</span>
-                  <span className="text-phosphor font-semibold">0.00% (Strict)</span>
+                <div className="pl-4">
+                  <dt className="font-sans text-muted-foreground">Packet loss</dt>
+                  <dd className="text-phosphor font-semibold mt-0.5">0.00%</dd>
                 </div>
-              </div>
+              </dl>
             </div>
 
-            {/* Protocol Metadata & Verification Ledger */}
-            <div className="md:col-span-4 p-6 bg-card flex flex-col justify-between">
+            <div className="md:col-span-4 p-6 bg-muted/20 flex flex-col justify-between">
               <div>
-                <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">
-                  Audit Ledger &amp; Integrity
-                </span>
-                <h3 className="font-semibold text-sm text-foreground mb-4">
-                  Cryptographic Trial Record
-                </h3>
+                <h2 className="font-semibold text-base text-foreground mb-4">
+                  Cryptographic trial record
+                </h2>
 
-                <div className="space-y-3 text-xs font-mono">
-                  <div className="bg-background p-2.5 rounded border border-border space-y-1">
-                    <span className="text-muted-foreground block text-[10px]">Protocol ID</span>
-                    <span className="text-foreground">PR-2026-LIVE-01</span>
+                <dl className="divide-y divide-border border-y border-border text-xs font-mono">
+                  <div className="py-3 space-y-1">
+                    <dt className="font-sans text-muted-foreground">Protocol ID</dt>
+                    <dd className="text-foreground font-medium">PR-2026-LIVE-01</dd>
                   </div>
-
-                  <div className="bg-background p-2.5 rounded border border-border space-y-1">
-                    <span className="text-muted-foreground block text-[10px]">Checksum Status</span>
-                    <span className={isSealed ? "text-caution truncate block" : "text-muted-foreground truncate block"}>
+                  <div className="py-3 space-y-1">
+                    <dt className="font-sans text-muted-foreground">Checksum status</dt>
+                    <dd className={isSealed ? "text-caution truncate block" : "text-muted-foreground truncate block"}>
                       {checksum}
-                    </span>
+                    </dd>
                   </div>
-
-                  <div className="bg-background p-2.5 rounded border border-border space-y-1">
-                    <span className="text-muted-foreground block text-[10px]">Electronic Signature</span>
-                    <span className="text-foreground">
-                      {isSealed ? "Verified: Lead Researcher [Signed on record]" : "Awaiting Sealing Signature"}
-                    </span>
+                  <div className="py-3 space-y-1">
+                    <dt className="font-sans text-muted-foreground">Electronic signature</dt>
+                    <dd className="text-foreground font-sans">
+                      {isSealed ? "Verified: Lead Researcher [Signed]" : "Awaiting sealing signature"}
+                    </dd>
                   </div>
-                </div>
+                </dl>
               </div>
 
               <div className="mt-8 pt-4 border-t border-border">
                 <Link
                   href="/app"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background hover:bg-foreground/90 rounded text-xs font-semibold transition-colors"
+                  className="w-full h-11 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:opacity-95 rounded-md text-xs font-semibold transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Connect Real ESP32 in Workspace
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -211,37 +202,33 @@ export default function DemoPage() {
           </div>
         </div>
 
-        {/* Technical Explainer */}
-        <div className="mt-12 grid md:grid-cols-3 gap-6 text-sm text-muted-foreground">
-          <div className="p-4 bg-muted/20 border border-border rounded">
-            <h4 className="font-semibold text-foreground text-xs uppercase font-mono mb-1">
-              Zero Drivers Required
-            </h4>
-            <p className="text-xs leading-relaxed">
-              Modern Chromium browsers expose direct hardware serial ports. Inquestra uses standard Web Serial
-              without needing custom USB kernel extensions or local bridge daemons.
+        <div className="mt-10 grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border border-y border-border py-6 text-sm text-muted-foreground">
+          <div className="py-3 md:py-0 md:pr-6">
+            <h3 className="font-semibold text-foreground text-base mb-1.5">
+              Zero drivers required
+            </h3>
+            <p className="text-sm leading-relaxed">
+              Modern Chromium browsers expose direct hardware serial ports via Web Serial without USB kernel extensions.
             </p>
           </div>
-          <div className="p-4 bg-muted/20 border border-border rounded">
-            <h4 className="font-semibold text-foreground text-xs uppercase font-mono mb-1">
-              High-Frequency Ingestion
-            </h4>
-            <p className="text-xs leading-relaxed">
-              Buffered streams process continuous analog sensor packets with microsecond accuracy,
-              formatting binary telemetry for instant tabular or graphical visualization.
+          <div className="py-3 md:py-0 md:px-6">
+            <h3 className="font-semibold text-foreground text-base mb-1.5">
+              High-frequency ingestion
+            </h3>
+            <p className="text-sm leading-relaxed">
+              Buffered streams process continuous analog sensor packets inside off-main-thread ring buffers.
             </p>
           </div>
-          <div className="p-4 bg-muted/20 border border-border rounded">
-            <h4 className="font-semibold text-foreground text-xs uppercase font-mono mb-1">
-              Deterministic Packaging
-            </h4>
-            <p className="text-xs leading-relaxed">
-              When an experiment concludes, the protocol, sensor arrays, notes, and reagent metadata are packed
-              into a single tamper-evident archive ready for regulatory submission.
+          <div className="py-3 md:py-0 md:pl-6">
+            <h3 className="font-semibold text-foreground text-base mb-1.5">
+              Deterministic packaging
+            </h3>
+            <p className="text-sm leading-relaxed">
+              When an experiment concludes, protocol notes, sensor arrays, and reagent lots seal into one archive.
             </p>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

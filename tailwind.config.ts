@@ -52,6 +52,12 @@ const config: Config = {
         phosphor: "hsl(var(--phosphor))",
         caution: "hsl(var(--caution))",
         critical: "hsl(var(--critical))",
+        graphite: {
+          DEFAULT: "var(--color-graphite)",
+          elevated: "var(--color-graphite-2)",
+          ink: "var(--color-graphite-ink)",
+          muted: "var(--color-graphite-muted)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
