@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Check, X, Shield, Zap, FolderTree, Cpu, FileSpreadsheet, Lock } from 'lucide-react';
+import { ArrowRight, Check, X, Shield, Zap, Cpu, FileSpreadsheet } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Best LabArchives Alternative for Universities & Research Labs | Inquestra',
@@ -94,7 +94,7 @@ export default function LabArchivesAlternativePage() {
             The Modern Alternative to LabArchives
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed mb-8">
-            Replace legacy folder trees with a fast block canvas, chemical inventory, and direct USB hardware streaming.
+            Replace folder trees with a block canvas and live USB streaming.
           </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Link
@@ -105,7 +105,7 @@ export default function LabArchivesAlternativePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/register"
+              href="/app/signup"
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Start Free Academic Workspace
@@ -127,43 +127,43 @@ export default function LabArchivesAlternativePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Zap className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Linear/Notion-Style Canvas Speed</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Fast Block Canvas Navigation</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                LabArchives requires navigating deep, slow folder trees. Inquestra provides a keyboard-first canvas with global instant search, slash commands, and zero lag.
+                LabArchives relies on deep folder trees. Inquestra gives you a keyboard-first block canvas with instant local search and slash-command blocks.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Integrated Reagent & Inventory Nodes</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Integrated Reagent &amp; Inventory Nodes</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Track chemical lot numbers, purity, CAS entries, and freezer locations right inside your experimental protocol rather than toggling separate inventory add-ons.
+                Track chemical lot numbers, purity specs, CAS entries, and storage shelf locations directly inside your active trial rather than in separate attachments.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Cpu className="w-5 h-5" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Real-Time Serial Instrument DAQ</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Connect balances, temperature probes, and serial DAQ boards directly to the browser via WebSerial. Data streams directly into live time-series plots.
+                Connect balances, temperature probes, and serial DAQ boards straight to your browser via Web Serial. Data streams into live time-series charts.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Shield className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Dual-Signoff Witnessing & Audit Integrity</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Dual-Signoff Witnessing &amp; Audit Integrity</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Both Author and PI can sign off with password-verified legal witnessing statements and cryptographic SHA-256 snapshots printed directly on exported PDF trial certificates.
+                Both Author and PI can countersign sealed trials with cryptographic SHA-256 snapshots printed onto exported verification certificates.
               </p>
             </div>
           </div>
@@ -173,16 +173,16 @@ export default function LabArchivesAlternativePage() {
       {/* ── Comparison Table ────────────────────────────────────────────────── */}
       <section className="py-20 border-b border-border bg-muted/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="mb-12">
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
               Head-to-Head Comparison
             </h2>
-            <p className="text-muted-foreground text-sm max-w-xl mx-auto">
-              Compare features and usability between Inquestra and LabArchives.
+            <p className="text-muted-foreground text-sm max-w-xl">
+              Compare capabilities and usability between Inquestra and LabArchives.
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-border bg-background">
+          <div className="overflow-x-auto rounded-lg border border-border bg-background">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -195,48 +195,48 @@ export default function LabArchivesAlternativePage() {
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Academic Cost</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Free for Academic Labs
+                    <Check className="w-4 h-4 text-phosphor" /> Free for Academic Labs
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Paid per-seat / Site License</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">User Interface</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Modern Canvas (TipTap / Linear-style)
+                    <Check className="w-4 h-4 text-phosphor" /> Block Canvas (TipTap)
                   </td>
-                  <td className="py-4 px-6 text-muted-foreground">Hierarchical Folder Tree (Legacy)</td>
+                  <td className="py-4 px-6 text-muted-foreground">Hierarchical Folder Tree</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Hardware Instrument DAQ</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Native WebSerial DAQ
+                    <Check className="w-4 h-4 text-phosphor" /> Native WebSerial DAQ
                   </td>
                   <td className="py-4 px-6 text-muted-foreground flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500" /> No hardware integration
+                    <X className="w-4 h-4 text-critical" /> No hardware integration
                   </td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Interactive Protocol Timers</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Built-in step timers & checklists
+                    <Check className="w-4 h-4 text-phosphor" /> Built-in step timers &amp; checklists
                   </td>
                   <td className="py-4 px-6 text-muted-foreground flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500" /> Static text only
+                    <X className="w-4 h-4 text-critical" /> Static text only
                   </td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Self-Hosting Option</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Own your Postgres database
+                    <Check className="w-4 h-4 text-phosphor" /> Own your Postgres database
                   </td>
                   <td className="py-4 px-6 text-muted-foreground flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500" /> Cloud SaaS only
+                    <X className="w-4 h-4 text-critical" /> Cloud SaaS only
                   </td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">2D Barcode Label Generation</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Native DataMatrix & QR
+                    <Check className="w-4 h-4 text-phosphor" /> Native DataMatrix &amp; QR
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Separate paid add-on</td>
                 </tr>
@@ -247,27 +247,29 @@ export default function LabArchivesAlternativePage() {
       </section>
 
       {/* ── Bottom CTA ──────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-primary/5 text-center">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-            Upgrade Your Lab&apos;s Daily Workflow
-          </h2>
-          <p className="text-base text-muted-foreground mb-8 leading-relaxed">
-            Free forever for academic research labs. No enterprise sales hurdles.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <section className="py-20 bg-primary/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
+              Move beyond folder trees.
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Free for academic research groups with zero enterprise procurement steps.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <Link
-              href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors shadow-md"
+              href="/app"
+              className="inline-flex items-center justify-center gap-2 px-6 h-11 rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-95 transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Start Free Academic Workspace
+              Open Research Workspace
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/demo"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-lg border border-border bg-background hover:bg-muted font-medium text-foreground transition-colors"
+              className="inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Try Interactive Sandbox
+              Launch Local Notebook Demo
             </Link>
           </div>
         </div>

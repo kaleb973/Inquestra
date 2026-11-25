@@ -89,7 +89,7 @@ export default function ComparePage() {
             Inquestra vs Benchling vs LabArchives vs SciNote
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-            Factual side-by-side comparison of pricing, disciplines, hardware DAQ support, and compliance across four ELN platforms.
+            How four electronic lab notebooks compare on pricing and hardware.
           </p>
         </div>
       </section>
@@ -456,14 +456,14 @@ export default function ComparePage() {
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link
               href="/app"
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-foreground text-background hover:bg-foreground/90 px-8 py-3.5 rounded text-sm font-semibold transition-colors shadow-sm"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-primary text-primary-foreground hover:opacity-95 px-8 py-3.5 rounded-md text-sm font-semibold transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Open Research Workspace
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/about"
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3.5 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3.5 rounded-md text-sm font-medium border border-border bg-card text-foreground hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               About the project
             </Link>

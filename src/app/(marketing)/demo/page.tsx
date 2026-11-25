@@ -147,18 +147,22 @@ export default function DemoPage() {
                 ))}
               </div>
 
-              <dl className="grid grid-cols-3 divide-x divide-border border-t border-border mt-4 pt-4 text-xs font-mono">
-                <div className="pr-4">
+              <dl className="flex flex-wrap items-center justify-between gap-6 border-t border-border mt-4 pt-4 text-xs font-mono">
+                <div>
                   <dt className="font-sans text-muted-foreground">Peak amplitude</dt>
                   <dd className="text-foreground font-semibold mt-0.5">1.42 mV</dd>
                 </div>
-                <div className="px-4">
+                <div>
                   <dt className="font-sans text-muted-foreground">Noise floor (RMS)</dt>
                   <dd className="text-foreground font-semibold mt-0.5">8.2 µV</dd>
                 </div>
-                <div className="pl-4">
+                <div>
                   <dt className="font-sans text-muted-foreground">Packet loss</dt>
                   <dd className="text-phosphor font-semibold mt-0.5">0.00%</dd>
+                </div>
+                <div>
+                  <dt className="font-sans text-muted-foreground">Digest mode</dt>
+                  <dd className="text-foreground font-semibold mt-0.5">SHA-256</dd>
                 </div>
               </dl>
             </div>
@@ -202,29 +206,21 @@ export default function DemoPage() {
           </div>
         </div>
 
-        <div className="mt-10 grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border border-y border-border py-6 text-sm text-muted-foreground">
-          <div className="py-3 md:py-0 md:pr-6">
+        <div className="mt-10 grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border border-y border-border py-6 text-sm text-muted-foreground">
+          <div className="md:col-span-6 py-3 md:py-0 md:pr-8">
             <h3 className="font-semibold text-foreground text-base mb-1.5">
-              Zero drivers required
+              Driverless Chromium Web Serial
             </h3>
             <p className="text-sm leading-relaxed">
-              Modern Chromium browsers expose direct hardware serial ports via Web Serial without USB kernel extensions.
+              Modern Chromium browsers expose bench serial ports without USB kernel extensions while Web Worker ring buffers keep continuous analog frames smooth.
             </p>
           </div>
-          <div className="py-3 md:py-0 md:px-6">
+          <div className="md:col-span-6 py-3 md:py-0 md:pl-8">
             <h3 className="font-semibold text-foreground text-base mb-1.5">
-              High-frequency ingestion
+              Deterministic archive sealing
             </h3>
             <p className="text-sm leading-relaxed">
-              Buffered streams process continuous analog sensor packets inside off-main-thread ring buffers.
-            </p>
-          </div>
-          <div className="py-3 md:py-0 md:pl-6">
-            <h3 className="font-semibold text-foreground text-base mb-1.5">
-              Deterministic packaging
-            </h3>
-            <p className="text-sm leading-relaxed">
-              When an experiment concludes, protocol notes, sensor arrays, and reagent lots seal into one archive.
+              When a trial concludes, protocol text locks together with the recorded sensor stream and linked reagent batches inside one SHA-256 package.
             </p>
           </div>
         </div>

@@ -20,10 +20,9 @@ export function MarketingFooter() {
               <span className="font-semibold text-base text-foreground tracking-tight">Inquestra</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-              A local-first electronic lab notebook unifying protocol execution, reagent inventory, molecular primitives, and bench hardware telemetry.
+              An open, local-first electronic lab notebook pairing interactive protocols with native browser instrument capture.
             </p>
             <div className="flex flex-wrap gap-5 text-sm">
-              <Link href="/about" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">About</Link>
               <Link href="/compare" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">Compare ELNs</Link>
               <Link href="/faq" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">FAQ</Link>
               <a

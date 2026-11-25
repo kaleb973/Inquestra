@@ -104,7 +104,7 @@ export default function FaqPage() {
             Questions about Inquestra, answered plainly.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            Capabilities across biology, chemistry, materials science, and hardware DAQ, plus our active roadmap.
+            Details on offline browser storage and serial hardware capture.
           </p>
         </div>
       </section>

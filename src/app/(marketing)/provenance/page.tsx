@@ -17,7 +17,7 @@ export default function ProvenancePage() {
             Tamper-evident verification for experimental research.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            Inquestra computes a SHA-256 cryptographic digest across notes, reagent lots, and instrument logs when a trial concludes.
+            Inquestra hashes notes and serial logs with SHA-256 upon trial completion.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -41,7 +41,7 @@ export default function ProvenancePage() {
           <div className="bg-muted/60 px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
             <div className="flex items-center gap-2.5">
               <Lock className="w-3.5 h-3.5 text-caution" />
-              <span className="font-semibold text-foreground">Experiment Record Certificate</span>
+              <span className="font-semibold text-foreground">Trial Record Certificate</span>
               <span className="text-muted-foreground">#PR-2026-PCR-01, Sealed</span>
             </div>
             <span className="text-caution font-medium bg-caution/10 px-2.5 py-0.5 rounded">
@@ -119,7 +119,7 @@ export default function ProvenancePage() {
               How Inquestra seals experimental trials.
             </h2>
             <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-              When an experiment concludes, Inquestra compiles the full context into a verifiable cryptographic block.
+              When a trial concludes, Inquestra compiles the full context into a verifiable cryptographic block.
             </p>
           </div>
 

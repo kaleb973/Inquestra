@@ -86,7 +86,7 @@ export function ScientificWorkspacePreview() {
             <div className="border-b border-border pb-4">
               <div className="flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground mb-1.5">
                 <span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
-                  Standard Operating Procedure
+                  Active Bench Protocol
                 </span>
                 <span className="font-mono">v2.1</span>
                 <span>Molecular Biology Lab</span>

@@ -25,6 +25,7 @@ button, input, select, textarea { font: inherit; }
   text-wrap: balance;
 }
 .marketing-shell p { text-wrap: pretty; }
+.marketing-shell button.whitespace-nowrap { white-space: nowrap; }
 .marketing-shell a:active,
 .marketing-shell button:active { opacity: 0.88; }
 

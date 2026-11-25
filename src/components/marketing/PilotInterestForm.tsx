@@ -41,6 +41,9 @@ export function PilotInterestForm() {
     }
   };
 
+  const isSubmitting = state === 'submitting';
+  const submitLabel = isSubmitting ? 'Submitting…' : 'Request Access';
+
   if (state === 'success') {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -84,7 +87,7 @@ export function PilotInterestForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="researcher@university.edu"
+            placeholder="you@institution.edu"
             className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
@@ -103,7 +106,7 @@ export function PilotInterestForm() {
             required
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
-            placeholder="Wilson Lab, MIT"
+            placeholder="e.g. Department of Chemistry or Core Facility"
             className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
@@ -117,7 +120,7 @@ export function PilotInterestForm() {
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            placeholder="PI, Postdoc, or Lab Manager"
+            placeholder="Principal Investigator, Postdoc, or Engineer"
             className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
@@ -133,7 +136,7 @@ export function PilotInterestForm() {
           name="useCase"
           value={useCase}
           onChange={(e) => setUseCase(e.target.value)}
-          placeholder="qPCR workflows, reagent lot tracking, and balance telemetry"
+          placeholder="Instrument serial streams with linked reagent lots"
           rows={3}
           className="w-full p-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
         />
@@ -149,20 +152,12 @@ export function PilotInterestForm() {
 
       <button
         type="submit"
-        disabled={state === 'submitting'}
+        disabled={isSubmitting}
         className="w-full h-11 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:opacity-95 px-6 rounded-md text-sm font-semibold transition-opacity disabled:opacity-55 disabled:cursor-not-allowed whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
       >
-        {state === 'submitting' ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Submitting…
-          </>
-        ) : (
-          <>
-            Request Access
-            <ArrowRight className="w-4 h-4" />
-          </>
-        )}
+        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+        <span>{submitLabel}</span>
+        {isSubmitting ? null : <ArrowRight className="w-4 h-4" />}
       </button>
 
       <p className="text-xs text-muted-foreground text-center">

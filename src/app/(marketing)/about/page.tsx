@@ -36,7 +36,7 @@ export default function AboutPage() {
             Built by researchers. Free for researchers.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-            Inquestra is an open, local-first Electronic Lab Notebook replacing scattered spreadsheets and proprietary software.
+            An open, local-first electronic lab notebook replacing scattered files and spreadsheets.
           </p>
         </div>
       </section>

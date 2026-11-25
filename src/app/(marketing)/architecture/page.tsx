@@ -17,7 +17,7 @@ export default function ArchitecturePage() {
             Engineered for high-frequency telemetry and immutable storage.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            Off-main-thread Web Workers keep 60 fps waveform rendering smooth while IndexedDB and PostgreSQL preserve records offline.
+            Dedicated Web Workers stream 60 fps waveforms into offline IndexedDB and PostgreSQL.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link

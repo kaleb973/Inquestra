@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Check, X, Shield, Zap, Database, Cpu, FileText, Lock } from 'lucide-react';
+import { ArrowRight, Check, X, Shield, Zap, Database, Cpu } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Best Benchling Alternative for Research Labs | Inquestra',
@@ -95,7 +95,7 @@ export default function BenchlingAlternativePage() {
             The Modern Alternative to Benchling
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed mb-8">
-            Built for academic labs, chemistry groups, and multi-disciplinary hardware teams without enterprise pricing.
+            Built for academic and R&amp;D groups running multi-disciplinary science without enterprise pricing.
           </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Link
@@ -106,7 +106,7 @@ export default function BenchlingAlternativePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/register"
+              href="/app/signup"
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Create Free Academic Workspace
@@ -123,49 +123,49 @@ export default function BenchlingAlternativePage() {
               Why Research Teams Are Switching from Benchling
             </h2>
             <p className="text-muted-foreground text-base max-w-2xl">
-              Traditional ELNs force you into proprietary silos. Inquestra delivers speed, multi-disciplinary science, and genuine data sovereignty.
+              Single-discipline ELNs force multi-disciplinary groups into disconnected tools. Inquestra brings wet chemistry, biology, and bench instruments into one local workspace.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Database className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Truly Multi-Disciplinary</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Multi-Disciplinary by Default</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Benchling is 95% geared toward DNA sequences and CRISPR plasmids. Inquestra gives equal, first-class status to
-                <strong> wet chemistry</strong> (reagent stoichiometry & CAS lookups), <strong>materials science</strong>, and physical engineering alongside standard molecular biology protocols.
+                Benchling focuses primarily on molecular sequences and CRISPR registries. Inquestra treats
+                <strong> wet chemistry</strong> (reagent stoichiometry & CAS lookups), <strong>materials testing</strong>, and molecular biology protocols as first-class primitives.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Cpu className="w-5 h-5" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Native Hardware DAQ Streaming</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Stop taking photos of balance screens or manually pasting CSVs. Inquestra integrates directly with microcontrollers and lab instrumentation via WebSerial, streaming real-time sensor data straight into your notebook notes.
+                Stop photographing balance screens or manually pasting CSV exports. Inquestra connects directly to microcontrollers and serial sensors over W3C Web Serial.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Zap className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">High-Velocity Bench Execution</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Fast Bench Execution</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                No lagging 30-second page reloads. Inquestra provides a keyboard-driven canvas editor (Notion/Linear-speed) equipped with interactive step completion checkboxes, protocol countdown timers, and deviation logging for glove-friendly use.
+                Skip heavy page reloads. Inquestra pairs a keyboard-driven block editor with step countdown timers, inline math blocks, and deviation notes.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card/50 hover:border-primary/40 transition-colors">
+            <div className="p-6 rounded-lg border border-border bg-card">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <Shield className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Immutable 21 CFR Part 11 Provenance</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Tamper-Evident Provenance</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Every observation is sealed with an automated cryptographic SHA-256 hash. When you export to PDF or archive trials, Inquestra embeds an official visual Audit Certificate and witness signoff compliant with GLP and FDA regulations.
+                Every sealed trial stores a canonical SHA-256 checksum alongside dual author and PI signatures, exportable as verifiable PDF and JSON bundles.
               </p>
             </div>
           </div>
@@ -175,16 +175,16 @@ export default function BenchlingAlternativePage() {
       {/* ── Side-by-Side Comparison Matrix ─────────────────────────────────── */}
       <section className="py-20 border-b border-border bg-muted/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="mb-12">
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
               Feature-by-Feature Comparison
             </h2>
-            <p className="text-muted-foreground text-sm max-w-xl mx-auto">
-              How Inquestra stacks up directly against Benchling for academic labs and biotech research.
+            <p className="text-muted-foreground text-sm max-w-xl">
+              How Inquestra compares directly against Benchling for university groups and R&amp;D labs.
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-border bg-background">
+          <div className="overflow-x-auto rounded-lg border border-border bg-background">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -197,62 +197,62 @@ export default function BenchlingAlternativePage() {
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Academic Pricing</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Free (Full Capabilities)
+                    <Check className="w-4 h-4 text-phosphor" /> Free (Full Capabilities)
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Free Tier (Feature Limited)</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Supported Disciplines</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Bio, Chemistry, Materials, DAQ
+                    <Check className="w-4 h-4 text-phosphor" /> Bio, Chemistry, Materials, DAQ
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Molecular Biology primarily</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Hardware DAQ Streaming</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Native WebSerial (Direct USB)
+                    <Check className="w-4 h-4 text-phosphor" /> Native WebSerial (Direct USB)
                   </td>
                   <td className="py-4 px-6 text-muted-foreground flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500" /> None (Manual file upload only)
+                    <X className="w-4 h-4 text-critical" /> None (Manual file upload only)
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-4 px-6 font-medium text-foreground">Chemical Inventory & Stoichiometry</td>
+                  <td className="py-4 px-6 font-medium text-foreground">Chemical Inventory &amp; Stoichiometry</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> In-editor reagent nodes + CAS
+                    <Check className="w-4 h-4 text-phosphor" /> In-editor reagent nodes + CAS
                   </td>
                   <td className="py-4 px-6 text-muted-foreground flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500" /> Limited / Biology registry only
+                    <X className="w-4 h-4 text-critical" /> Limited / Biology registry only
                   </td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Self-Hosting / Data Sovereignty</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Connect your own PostgreSQL
+                    <Check className="w-4 h-4 text-phosphor" /> Connect your own PostgreSQL
                   </td>
                   <td className="py-4 px-6 text-muted-foreground flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500" /> Proprietary cloud only
+                    <X className="w-4 h-4 text-critical" /> Proprietary cloud only
                   </td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Cryptographic Trial Sealing</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Automated SHA-256 snapshots
+                    <Check className="w-4 h-4 text-phosphor" /> Automated SHA-256 snapshots
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Paid enterprise add-on</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Bench Protocol Execution Mode</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Step checklists + live timers
+                    <Check className="w-4 h-4 text-phosphor" /> Step checklists + live timers
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Standard text editor view</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">Export Formats</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-500" /> Universal JSON, Markdown, PDF
+                    <Check className="w-4 h-4 text-phosphor" /> Universal JSON, Markdown, PDF
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">PDF, proprietary formats</td>
                 </tr>
@@ -262,40 +262,46 @@ export default function BenchlingAlternativePage() {
         </div>
       </section>
 
-      {/* ── Step-by-Step Migration Guide ────────────────────────────────────── */}
+      {/* ── Migration Steps (Hairline Divided Ledger) ───────────────────────── */}
       <section className="py-20 border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center sm:text-left mb-12">
+          <div className="mb-10">
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
-              How to Migrate from Benchling to Inquestra
+              Moving Protocols from Benchling
             </h2>
             <p className="text-muted-foreground text-sm max-w-xl">
-              Switching your lab takes under 15 minutes with zero data loss.
+              Bring existing lab notes into Inquestra without losing historical format structure.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl border border-border bg-card">
-              <span className="text-xs font-mono font-bold text-primary px-2.5 py-1 rounded bg-primary/10">STEP 1</span>
-              <h3 className="text-lg font-bold text-foreground mt-4 mb-2">Export Your Benchling Protocols</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Export your existing protocol text and notes from Benchling as standard PDF or Markdown documents.
+          <div className="divide-y divide-border border-y border-border">
+            <div className="py-6 grid sm:grid-cols-12 gap-4 items-baseline">
+              <div className="sm:col-span-4">
+                <span className="font-mono text-xs text-primary">01</span>
+                <h3 className="text-base font-semibold text-foreground mt-1">Export Benchling entries</h3>
+              </div>
+              <p className="sm:col-span-8 text-sm text-muted-foreground leading-relaxed">
+                Download your existing protocol templates and notes from Benchling as standard PDF or Markdown documents.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card">
-              <span className="text-xs font-mono font-bold text-primary px-2.5 py-1 rounded bg-primary/10">STEP 2</span>
-              <h3 className="text-lg font-bold text-foreground mt-4 mb-2">Create Your Team Workspace</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Sign in to Inquestra and create an organization workspace for your research team or core lab in one click.
+            <div className="py-6 grid sm:grid-cols-12 gap-4 items-baseline">
+              <div className="sm:col-span-4">
+                <span className="font-mono text-xs text-primary">02</span>
+                <h3 className="text-base font-semibold text-foreground mt-1">Open local or team workspace</h3>
+              </div>
+              <p className="sm:col-span-8 text-sm text-muted-foreground leading-relaxed">
+                Start immediately in browser IndexedDB or connect your research group&apos;s PostgreSQL database for shared inventory.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl border border-border bg-card">
-              <span className="text-xs font-mono font-bold text-primary px-2.5 py-1 rounded bg-primary/10">STEP 3</span>
-              <h3 className="text-lg font-bold text-foreground mt-4 mb-2">Execute with Full Provenance</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Convert your protocols into interactive checklists, connect hardware sensors via USB, and enjoy lag-free note-taking.
+            <div className="py-6 grid sm:grid-cols-12 gap-4 items-baseline">
+              <div className="sm:col-span-4">
+                <span className="font-mono text-xs text-primary">03</span>
+                <h3 className="text-base font-semibold text-foreground mt-1">Attach hardware and timers</h3>
+              </div>
+              <p className="sm:col-span-8 text-sm text-muted-foreground leading-relaxed">
+                Convert static steps into interactive timers and stream live sensor telemetry straight from bench USB instruments.
               </p>
             </div>
           </div>
@@ -305,32 +311,32 @@ export default function BenchlingAlternativePage() {
       {/* ── FAQ Section ─────────────────────────────────────────────────────── */}
       <section className="py-20 border-b border-border bg-muted/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-8 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-8">
             Frequently Asked Questions
           </h2>
-          <div className="space-y-6">
-            <div className="p-6 rounded-lg border border-border bg-card">
+          <div className="divide-y divide-border border-y border-border">
+            <div className="py-6">
               <h3 className="text-base font-semibold text-foreground mb-2">
                 Will my data be locked in if I use Inquestra?
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Never. Inquestra is built on open standards. You can export your full raw trials, protocol templates, and chemical lot records as standard JSON, Markdown, and PDF at any time. If you run your own PostgreSQL instance, you retain 100% on-premises database ownership.
+                Never. You can export raw trials, protocol templates, and chemical lot records as standard JSON, Markdown, and CSV at any time, or run your own PostgreSQL instance for complete database ownership.
               </p>
             </div>
-            <div className="p-6 rounded-lg border border-border bg-card">
+            <div className="py-6">
               <h3 className="text-base font-semibold text-foreground mb-2">
-                Can Inquestra be used for FDA, GLP, or 21 CFR Part 11 compliant research?
+                Can Inquestra support regulated data integrity audits?
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Yes. Inquestra features append-only immutable audit logging, cryptographic SHA-256 snapshot hashes of sealed trial states, and dual-signoff electronic signature witnessing (Author + PI Review).
+                Inquestra implements append-only immutable audit logging, cryptographic SHA-256 snapshot digests of sealed trial states, and dual-signoff witnessing for Author and PI review.
               </p>
             </div>
-            <div className="p-6 rounded-lg border border-border bg-card">
+            <div className="py-6">
               <h3 className="text-base font-semibold text-foreground mb-2">
                 Do I need to install any desktop drivers for serial hardware DAQ?
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                No. Inquestra utilizes the browser-native Web Serial API supported in Google Chrome, Microsoft Edge, and Opera. Connect your sensor rig, analytical balance, or microcontroller via USB, click Connect, and stream data directly into your notebook canvas.
+                No. Inquestra uses the browser-native Web Serial API supported in Google Chrome, Microsoft Edge, and Opera to capture USB sensor and balance readings straight into the workspace.
               </p>
             </div>
           </div>
@@ -338,27 +344,29 @@ export default function BenchlingAlternativePage() {
       </section>
 
       {/* ── Bottom CTA ──────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-primary/5 text-center">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-            Ready for a Better Lab Notebook Experience?
-          </h2>
-          <p className="text-base text-muted-foreground mb-8 leading-relaxed">
-            Join hundreds of researchers enjoying fast, multi-disciplinary, and audit-ready experiment tracking.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <section className="py-20 bg-primary/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
+              Try Inquestra directly in your browser.
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Launch a local research notebook without subscriptions or setup tickets.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <Link
-              href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors shadow-md"
+              href="/app"
+              className="inline-flex items-center justify-center gap-2 px-6 h-11 rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-95 transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Get Started for Free
+              Open Research Workspace
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/demo"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-lg border border-border bg-background hover:bg-muted font-medium text-foreground transition-colors"
+              className="inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Launch Live Sandbox Demo
+              Try DAQ Simulator
             </Link>
           </div>
         </div>

@@ -15,6 +15,7 @@ export function ProvenanceInteractiveDemo() {
 
   const currentTemp = isTampered ? '58.401' : originalTemp;
   const currentHash = isTampered ? tamperedHash : originalHash;
+  const toggleLabel = isTampered ? 'Restore Original Record' : 'Simulate 0.001 °C Edit';
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden text-left">
@@ -26,7 +27,7 @@ export function ProvenanceInteractiveDemo() {
             <ShieldCheck className="w-4 h-4 text-phosphor" />
           )}
           <span className="font-semibold text-foreground">
-            {isTampered ? 'Integrity Violation Detected' : 'Experiment Audit Trail and Hash Verification'}
+            {isTampered ? 'Integrity Violation Detected' : 'Trial Audit Trail and Hash Verification'}
           </span>
         </div>
 
@@ -68,16 +69,11 @@ export function ProvenanceInteractiveDemo() {
             )}
           >
             {isTampered ? (
-              <>
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restore Original Record</span>
-              </>
+              <RotateCcw className="w-3.5 h-3.5" />
             ) : (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5" />
-                <span>Simulate 0.001 °C Edit</span>
-              </>
+              <AlertTriangle className="w-3.5 h-3.5" />
             )}
+            <span>{toggleLabel}</span>
           </button>
         </div>
 

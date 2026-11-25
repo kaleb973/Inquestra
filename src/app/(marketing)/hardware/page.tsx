@@ -17,7 +17,7 @@ export default function HardwarePage() {
             Direct silicon-to-browser telemetry. Zero drivers required.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            Stream multi-channel signals from balances, load cells, and microcontrollers via W3C Web Serial with no local software.
+            Stream serial measurements from lab instruments directly into your browser.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -49,7 +49,7 @@ export default function HardwarePage() {
           <div className="p-6 grid lg:grid-cols-12 gap-8 bg-background">
             <div className="lg:col-span-7 space-y-4">
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-muted-foreground">Channel 0: Differential EMG (mV)</span>
+                <span className="text-muted-foreground">Channel 0: Strain Gauge / Differential ADC (mV)</span>
                 <span className="text-foreground font-semibold">1,000 Hz continuous</span>
               </div>
               <div className="h-48 w-full bg-graphite rounded-md relative flex items-end p-3 gap-1 overflow-hidden">
@@ -63,7 +63,7 @@ export default function HardwarePage() {
               </div>
               <div className="flex flex-wrap justify-between items-center gap-2 text-xs font-mono text-muted-foreground">
                 <span>Sweep: 100ms/div</span>
-                <span>Notch 50/60Hz, Bandpass 0.5-500Hz</span>
+                <span>16-bit differential, 0 to 3.1V calibrated</span>
                 <span className="text-phosphor">Drop rate: 0.00%</span>
               </div>
             </div>
@@ -103,26 +103,19 @@ export default function HardwarePage() {
             </p>
           </div>
 
-          <div className="border-y border-border py-8 grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border gap-y-6">
-            <div className="md:pr-8">
-              <p className="text-sm text-muted-foreground font-medium mb-1.5">Transport</p>
-              <p className="text-base font-semibold text-foreground mb-1">Native USB-CDC and UART</p>
+          <div className="border-y border-border py-8 grid md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border gap-y-6">
+            <div className="md:col-span-6 md:pr-8 space-y-1.5">
+              <p className="text-sm text-muted-foreground font-medium">USB-CDC and UART Transport</p>
+              <p className="text-base font-semibold text-foreground">Native serial bus access</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Connects to CP2102, CH340, FTDI FT232R, and USB-OTG controllers without kernel extensions.
+                Pairs directly with CP2102, CH340, FT232R, and USB-OTG boards at 9,600 to 921,600 baud without installing vendor kernel drivers.
               </p>
             </div>
-            <div className="pt-6 md:pt-0 md:px-8">
-              <p className="text-sm text-muted-foreground font-medium mb-1.5">Threading</p>
-              <p className="text-base font-semibold text-foreground mb-1">Worker ring buffering</p>
+            <div className="md:col-span-6 pt-6 md:pt-0 md:pl-8 space-y-1.5">
+              <p className="text-sm text-muted-foreground font-medium">Worker Thread Ring Buffer</p>
+              <p className="text-base font-semibold text-foreground">Off-main-thread acquisition</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Byte parsing runs inside a dedicated Web Worker so 1 kHz sampling never causes UI frame drops.
-              </p>
-            </div>
-            <div className="pt-6 md:pt-0 md:pl-8">
-              <p className="text-sm text-muted-foreground font-medium mb-1.5">Throughput</p>
-              <p className="text-base font-semibold text-foreground mb-1">Up to 921,600 baud</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Supports standard rates from 9,600 to 921,600 baud with RTS/CTS hardware flow control.
+                A dedicated Web Worker decodes incoming byte streams at up to 1 kHz so rich-text protocol editing stays jitter-free.
               </p>
             </div>
           </div>
