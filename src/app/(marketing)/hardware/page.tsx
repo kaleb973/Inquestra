@@ -99,7 +99,7 @@ export default function HardwarePage() {
               Eliminating the fragile workstation bridge.
             </h2>
             <p className="text-base text-muted-foreground mt-3 leading-relaxed">
-              Traditional DAQ setups depend on ad-hoc Python listeners or proprietary drivers writing loose CSV files. Inquestra streams directly via browser Web Serial.
+              Browser Web Serial removes the ad-hoc Python listeners and vendor kernel drivers typically sitting between serial lab instruments and digital records.
             </p>
           </div>
 

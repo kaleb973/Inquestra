@@ -123,7 +123,7 @@ export default function BenchlingAlternativePage() {
               Why Research Teams Are Switching from Benchling
             </h2>
             <p className="text-muted-foreground text-base max-w-2xl">
-              Single-discipline ELNs force multi-disciplinary groups into disconnected tools. Inquestra brings wet chemistry, biology, and bench instruments into one local workspace.
+              Comparison for groups pairing biological assays with wet chemistry, bench instrumentation, or self-hosted storage.
             </p>
           </div>
 
@@ -134,8 +134,7 @@ export default function BenchlingAlternativePage() {
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Multi-Disciplinary by Default</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Benchling focuses primarily on molecular sequences and CRISPR registries. Inquestra treats
-                <strong> wet chemistry</strong> (reagent stoichiometry & CAS lookups), <strong>materials testing</strong>, and molecular biology protocols as first-class primitives.
+                Designed from the start with first-class support for <strong>wet chemistry</strong> (stoichiometry math and CAS/PubChem links), <strong>materials testing</strong> traces, and standard molecular biology protocols under one trial schema.
               </p>
             </div>
 

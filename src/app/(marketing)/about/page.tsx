@@ -33,10 +33,10 @@ export default function AboutPage() {
       <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-tight">
-            Built by researchers. Free for researchers.
+            An open workspace built for laboratory documentation.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-            An open, local-first electronic lab notebook replacing scattered files and spreadsheets.
+            Store lab notebooks, reagent lots, and serial data without per-seat subscriptions.
           </p>
         </div>
       </section>
@@ -45,25 +45,13 @@ export default function AboutPage() {
       <section className="py-16 border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-6">
-            The problem
+            Background and design focus
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
-            Scientific research today involves multiple disconnected tools: a word processor for
-            protocols, a spreadsheet for inventory, a citation manager for references, a molecular
-            drawing program for structures, and a separate data logger for instrument output. When a
-            rotating student joins a lab, onboarding means installing and learning every program, then
-            keeping them in sync manually.
-          </p>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
-            The ELN market exists to solve this problem, but most solutions reproduce it in a
-            different form: they lock you into a single scientific domain, charge per-user licensing
-            fees that academic labs cannot sustain across rotating students, or require institutional
-            IT infrastructure just to get started.
+            Daily lab work often spreads notes across word processors, reagent spreadsheets, citation tools, drawing software, and vendor serial loggers. Onboarding a new rotating student means setting up each piece separately and keeping exports matched by hand.
           </p>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Inquestra is built on the premise that this is unnecessary. A single, well-designed,
-            browser-based workspace can serve a molecular biologist, a materials scientist, and an
-            electrical engineer in the same research group without complex installations or subscriptions.
+            Running the editor, chemical lot registry, literature lookups, and Chromium Web Serial directly inside a browser tab removes per-seat software barriers and keeps trials legible across molecular biology, wet chemistry, materials testing, and electronics benches.
           </p>
         </div>
       </section>
@@ -174,15 +162,10 @@ export default function AboutPage() {
               </a>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Inquestra was created by Kaleb out of first-hand frustration running bench sensor experiments and lab trials:
-              commercial Electronic Lab Notebooks are either gated behind enterprise procurement walls costing tens of thousands
-              of dollars, locked into proprietary cloud silos, or completely disconnected from physical bench instrumentation and hardware.
+              Inquestra started from running sensor acquisitions alongside lab notebooks where hardware logs lived in separate CSV files, inventory lived in spreadsheets, and commercial ELN suites required institutional procurement contracts.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Instead of accepting that student researchers, iGEM teams, and independent labs have to stitch together Google Docs,
-              loose CSV files, and unverified scripts, Inquestra was engineered from the ground up on modern browser standards
-              (W3C Web Serial, PubChem REST integration, and local IndexedDB cryptographic storage). It provides an open, local-first
-              workspace where researchers retain 100% ownership over their data and bench protocols.
+              Building directly on standard browser APIs (W3C Web Serial, IndexedDB, and public PubChem / PubMed endpoints) keeps the workspace fast to open in Chrome or Edge while letting academic groups export standard Markdown, JSON, and CSV archives or sync to self-hosted PostgreSQL.
             </p>
           </div>
         </div>

@@ -133,7 +133,7 @@ export default function LabArchivesAlternativePage() {
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Fast Block Canvas Navigation</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                LabArchives relies on deep folder trees. Inquestra gives you a keyboard-first block canvas with instant local search and slash-command blocks.
+                Navigate directly through a keyboard-driven TipTap workspace with instant local trial filtering and slash-command scientific blocks instead of nested folder pages.
               </p>
             </div>
 
