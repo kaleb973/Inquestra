@@ -30,8 +30,8 @@ export function ScientificWorkspacePreview() {
   };
 
   const tabs: { id: ActiveView; label: string; icon: typeof FlaskConical }[] = [
-    { id: 'canvas', label: 'Research Canvas', icon: FlaskConical },
-    { id: 'inventory', label: 'LIMS & Inventory', icon: Boxes },
+    { id: 'canvas', label: 'Protocol', icon: FlaskConical },
+    { id: 'inventory', label: 'Inventory', icon: Boxes },
     { id: 'literature', label: 'Citations', icon: BookOpen },
     { id: 'telemetry', label: 'Hardware DAQ', icon: Activity },
     { id: 'audit', label: 'Audit & Seals', icon: ShieldCheck },
@@ -39,44 +39,49 @@ export function ScientificWorkspacePreview() {
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden text-left">
-      {/* Workspace Instrument Header */}
-      <div className="px-4 py-2.5 bg-muted/50 border-b border-border flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs font-mono">
+      {/* Workspace Instrument Chrome */}
+      <div className="px-4 py-2.5 bg-muted/50 border-b border-border flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-xs font-mono min-w-0">
           <span className="w-2 h-2 rounded-full bg-phosphor shrink-0" aria-hidden="true" />
-          <span className="text-foreground font-semibold">Molecular_Biotech_Core</span>
+          <span className="text-foreground font-semibold truncate">Molecular_Biotech_Core</span>
           <span className="text-muted-foreground">/</span>
-          <span className="text-muted-foreground">PR-2026-PCR-01</span>
+          <span className="text-muted-foreground shrink-0">PR-2026-PCR-01</span>
         </div>
 
-        <div className="flex items-center gap-1 p-0.5 bg-background rounded-md border border-border overflow-x-auto no-scrollbar" role="tablist" aria-label="Workspace preview modules">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeView === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => setActiveView(tab.id)}
-                className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  isActive
-                    ? 'bg-primary text-primary-foreground font-semibold'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
-                )}
-              >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="hidden xl:flex items-center gap-1.5 text-xs font-mono text-phosphor">
+        <div className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-phosphor shrink-0">
           <CheckCircle2 className="w-3.5 h-3.5" />
           <span>Local IndexedDB synced</span>
         </div>
+      </div>
+
+      {/* Dedicated full-width tab strip (wraps cleanly on narrow viewports with zero clipping) */}
+      <div
+        className="px-3 py-2 bg-muted/25 border-b border-border flex flex-wrap items-center gap-1"
+        role="tablist"
+        aria-label="Workspace preview modules"
+      >
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeView === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActiveView(tab.id)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                isActive
+                  ? 'bg-primary text-primary-foreground font-semibold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+              )}
+            >
+              <Icon className="w-3.5 h-3.5 shrink-0" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Main Workspace Body (flat hairline seams, zero nested card-in-card) */}

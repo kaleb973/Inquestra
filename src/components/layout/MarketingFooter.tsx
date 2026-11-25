@@ -94,11 +94,6 @@ export function MarketingFooter() {
                   Cookie Settings
                 </button>
               </li>
-              <li>
-                <Link href="/app/login" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
-                  Sign in
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
