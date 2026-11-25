@@ -112,6 +112,5 @@ Inquestra/
 ├── LICENSE                   # MIT Open Source License
 ├── package.json              # Dependencies and build scripts
 ├── README.md                 # Project landing page & quickstart
-├── ROADMAP.md                # Feature roadmap & upcoming milestones
 └── SECURITY.md               # Vulnerability reporting & security policy
 ```

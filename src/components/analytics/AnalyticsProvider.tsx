@@ -9,6 +9,7 @@ import Script from 'next/script';
 import posthog from 'posthog-js';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { isAnalyticsPermitted } from '@/lib/analytics/events';
+import { isDeploymentSkewError } from '@/lib/deploymentSkew';
 import type { User } from '@supabase/supabase-js';
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -64,6 +65,34 @@ export function AnalyticsProvider() {
   const identifiedUserId = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!POSTHOG_PROJECT_TOKEN || !POSTHOG_HOST || posthog.__loaded) return;
+
+    posthog.init(POSTHOG_PROJECT_TOKEN, {
+      api_host: POSTHOG_HOST,
+      defaults: '2025-05-24',
+      capture_exceptions: true,
+      debug: process.env.NODE_ENV === 'development',
+      before_send: (event) => {
+        if (event && event.event === '$exception') {
+          const props = (event.properties || {}) as Record<string, unknown>;
+          const errorText = [
+            props.$exception_message,
+            props.$exception_type,
+            typeof props.$exception_values === 'string'
+              ? props.$exception_values
+              : JSON.stringify(props.$exception_values || ''),
+          ].join(' ');
+
+          if (isDeploymentSkewError(errorText)) {
+            return null;
+          }
+        }
+        return event;
+      },
+    });
+  }, []);
+
+  useEffect(() => {
     if (!POSTHOG_CONFIGURED) return;
 
     const identifyUser = (user: User) => {
@@ -108,8 +137,7 @@ export function AnalyticsProvider() {
   }, []);
 
   useEffect(() => {
-    // PostHog is initialized in instrumentation-client.ts. This effect only keeps
-    // the existing consent controls synchronized with the initialized singleton.
+    // Synchronize cookie consent controls with the PostHog and GA4 singletons.
     const handleConsentChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ analytics: boolean }>;
       const analyticsAllowed = customEvent.detail?.analytics;

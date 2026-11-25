@@ -5,7 +5,6 @@
 [![Hardware DAQ](https://img.shields.io/badge/Hardware-Web_Serial_API-f59e0b?style=flat-square)](https://inquestra.org/hardware)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?style=flat-square)](https://www.typescriptlang.org/)
-[![Roadmap](https://img.shields.io/badge/Roadmap-Active-6366f1?style=flat-square)](ROADMAP.md)
 
 **Inquestra** is an open, browser-based Electronic Lab Notebook (ELN) and research workspace spanning **Life Sciences, Chemistry, Biotech, Materials Science, and Engineering**. It unifies structured protocol execution, reagent inventory logging, chemical structure lookup, oligonucleotide analysis, literature citations, immutable SHA-256 provenance, and real-time **Web Serial API** instrument telemetry inside a single zero-install tab.
 
@@ -85,7 +84,6 @@ Open [http://localhost:3000](http://localhost:3000) to browse the documentation 
 
 - [Contributing Guide](CONTRIBUTING.md) — Local development setup, code standards, and PR process.
 - [System Architecture](docs/ARCHITECTURE.md) — Overview of TipTap canvas, Web Serial DAQ, and persistence layers.
-- [Feature Roadmap](ROADMAP.md) — Active milestones and upcoming platform initiatives.
 - [Code of Conduct](CODE_OF_CONDUCT.md) — Contributor Covenant v2.1.
 - [Security Policy](SECURITY.md) — Coordinated vulnerability disclosure guidelines.
 - [License](LICENSE) — MIT License.
