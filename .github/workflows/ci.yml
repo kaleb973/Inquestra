@@ -7,8 +7,7 @@ on:
     branches: [main]
 
 env:
-  # Provide stub env vars so Next.js config and Prisma don't crash during build-time checks.
-  # These are never used to talk to real services in CI — they satisfy module loading only.
+  # Placeholder values so Next.js and Prisma module loading succeed in CI without live services.
   DATABASE_URL: postgresql://ci:ci@localhost:5432/inquestra_ci
   DIRECT_URL: postgresql://ci:ci@localhost:5432/inquestra_ci
   NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
@@ -18,7 +17,6 @@ env:
   RESEND_API_KEY: placeholder_resend_key
 
 jobs:
-  # ─── Type check ────────────────────────────────────────────────────────────
   type-check:
     name: TypeScript Type Check
     runs-on: ubuntu-latest
@@ -42,7 +40,6 @@ jobs:
       - name: Run TypeScript type check
         run: npm run type-check
 
-  # ─── Lint ──────────────────────────────────────────────────────────────────
   lint:
     name: ESLint
     runs-on: ubuntu-latest
@@ -66,11 +63,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-  # ─── Build ─────────────────────────────────────────────────────────────────
   build:
     name: Next.js Build
     runs-on: ubuntu-latest
-    # Build depends on type-check and lint passing first
     needs: [type-check, lint]
 
     steps:
@@ -87,7 +82,6 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma client
-        # Skip db push — no real DB in CI. Generate client types only.
         run: npx prisma generate
 
       - name: Restore Next.js build cache
@@ -101,9 +95,6 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - name: Build Next.js application
-        # Override the package.json build script to skip db push in CI.
-        # Retry once if a transient external network error (like Google Fonts) occurs.
-        run: npx next build || (echo "Retrying build due to transient external network failure (e.g. Google Fonts)..." && sleep 3 && npx next build)
+        run: npx next build || (echo "Retrying build after transient network error..." && sleep 3 && npx next build)
         env:
-          # Skip DB migrations in CI — Prisma generate is sufficient for type safety
           SKIP_DB_PUSH: true
