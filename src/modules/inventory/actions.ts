@@ -80,6 +80,9 @@ export async function createInventoryItem(data: {
   userId?: string;
 }) {
   const dbUser = await getAuthenticatedUser();
+  if (dbUser.role === "VIEWER") {
+    throw new Error("Permission denied: viewers cannot create inventory items.");
+  }
   const validated = CreateInventorySchema.parse(data);
 
   const cleanName = DOMPurify.sanitize(validated.name.trim());
@@ -137,6 +140,9 @@ export async function deductInventory(data: {
   organizationId?: string;
 }) {
   const dbUser = await getAuthenticatedUser();
+  if (dbUser.role === "VIEWER") {
+    throw new Error("Permission denied: viewers cannot deduct lab inventory.");
+  }
   const validated = DeductInventorySchema.parse(data);
 
   const item = await prisma.inventoryItem.findFirst({
@@ -146,51 +152,79 @@ export async function deductInventory(data: {
     },
   });
   if (!item) throw new Error("Item not found or access denied.");
-  if (item.quantity < validated.amount) throw new Error("Insufficient quantity in stock.");
 
-  // Verify trial ownership if not local
-  if (validated.trialId && validated.trialId !== "local") {
+  // Verify trial ownership & immutability if not local
+  const isCloudTrial = Boolean(validated.trialId && validated.trialId !== "local");
+  if (isCloudTrial) {
     const trial = await prisma.trial.findFirst({
       where: {
         id: validated.trialId,
         project: { organizationId: dbUser.organizationId },
       },
+      select: { id: true, status: true, checksum: true },
     });
     if (!trial) {
       throw new Error("Target trial not found in this organization.");
     }
+    if (trial.status === "COMPLETED" || trial.checksum !== null) {
+      throw new Error("Immutable Record: Cannot deduct inventory onto a completed or sealed trial.");
+    }
   }
 
-  const newQuantity = item.quantity - validated.amount;
+  const updated = await prisma.$transaction(async (tx) => {
+    const decremented = await tx.inventoryItem.updateMany({
+      where: {
+        id: item.id,
+        organizationId: dbUser.organizationId,
+        quantity: { gte: validated.amount },
+      },
+      data: { quantity: { decrement: validated.amount } },
+    });
+    if (decremented.count === 0) {
+      throw new Error("Insufficient quantity in stock.");
+    }
 
-  const [updated] = await prisma.$transaction([
-    prisma.inventoryItem.update({
+    const freshItem = await tx.inventoryItem.findUniqueOrThrow({
       where: { id: item.id },
-      data: { quantity: newQuantity },
-    }),
-    ...(validated.trialId && validated.trialId !== "local"
-      ? [
-          prisma.trialInventory.create({
-            data: {
-              trialId: validated.trialId,
-              inventoryItemId: item.id,
-              quantityUsed: validated.amount,
-              unit: item.unit,
-            },
-          }),
-        ]
-      : []),
-    prisma.auditLog.create({
+    });
+
+    if (isCloudTrial) {
+      await tx.trialInventory.upsert({
+        where: {
+          trialId_inventoryItemId: {
+            trialId: validated.trialId,
+            inventoryItemId: item.id,
+          },
+        },
+        create: {
+          trialId: validated.trialId,
+          inventoryItemId: item.id,
+          quantityUsed: validated.amount,
+          unit: item.unit,
+        },
+        update: {
+          quantityUsed: { increment: validated.amount },
+        },
+      });
+    }
+
+    await tx.auditLog.create({
       data: {
         action: "INVENTORY_DEDUCTED",
         entityType: "InventoryItem",
         entityId: item.id,
-        details: { amount: validated.amount, trial: validated.trialId, remaining: newQuantity },
+        details: {
+          amount: validated.amount,
+          trial: validated.trialId,
+          remaining: freshItem.quantity,
+        },
         userId: dbUser.id,
         organizationId: dbUser.organizationId,
       },
-    }),
-  ]);
+    });
+
+    return freshItem;
+  });
 
   revalidatePath("/app/admin");
   return updated;

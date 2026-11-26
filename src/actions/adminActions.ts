@@ -2,7 +2,22 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import type { Role, Prisma } from '@prisma/client';
+import type { Role, Prisma, InventoryType } from '@prisma/client';
+import { z } from 'zod';
+import DOMPurify from 'isomorphic-dompurify';
+
+const InventoryTypeSchema = z.enum([
+  'CHEMICAL',
+  'BIOLOGICAL',
+  'REAGENT',
+  'PLASMID',
+  'CELL_LINE',
+  'CONSUMABLE',
+]);
+const EquipmentStatusSchema = z.enum(['OPERATIONAL', 'MAINTENANCE', 'BROKEN']);
+const MemberRoleSchema = z.enum(['PI', 'ADMIN', 'RESEARCHER', 'VIEWER']);
+const StorageTypeSchema = z.enum(['FREEZER', 'RACK', 'BOX', 'SHELF', 'ROOM']);
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function logAuditAction(
   userId: string,
@@ -59,19 +74,26 @@ async function getAuthenticatedDbUser() {
   return { error: null, user, dbUser };
 }
 
-import DOMPurify from 'isomorphic-dompurify';
-
 export async function addInventoryItem(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
-  const name = DOMPurify.sanitize(formData.get('name') as string);
-  const type = formData.get('type') as any || "CHEMICAL";
-  const lotNumber = DOMPurify.sanitize(formData.get('lotNumber') as string || '');
-  const barcode = DOMPurify.sanitize(formData.get('barcode') as string || '');
+  const name = DOMPurify.sanitize((formData.get('name') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  if (!name) return { success: false, error: 'Item name is required.' };
+
+  const parsedType = InventoryTypeSchema.safeParse((formData.get('type') as string) || 'CHEMICAL');
+  if (!parsedType.success) {
+    return { success: false, error: 'Invalid inventory type.' };
+  }
+  const type: InventoryType = parsedType.data;
+
+  const lotNumber = DOMPurify.sanitize((formData.get('lotNumber') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  const barcode = DOMPurify.sanitize((formData.get('barcode') as string) || '', { ALLOWED_TAGS: [] }).trim();
   const quantity = parseFloat(formData.get('quantity') as string);
-  const unit = DOMPurify.sanitize(formData.get('unit') as string);
-  const thresholdValue = parseFloat(formData.get('thresholdValue') as string || '0');
+  const unit = DOMPurify.sanitize((formData.get('unit') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  if (!unit) return { success: false, error: 'Unit is required.' };
+
+  const thresholdValue = parseFloat((formData.get('thresholdValue') as string) || '0');
 
   if (isNaN(quantity) || !Number.isFinite(quantity) || quantity < 0) {
     return { success: false, error: 'Quantity must be a non-negative finite number.' };
@@ -79,13 +101,30 @@ export async function addInventoryItem(formData: FormData) {
   if (isNaN(thresholdValue) || !Number.isFinite(thresholdValue) || thresholdValue < 0) {
     return { success: false, error: 'Threshold value must be a non-negative finite number.' };
   }
-  
-  const expDateStr = formData.get('expirationDate') as string;
+
+  const expDateStr = (formData.get('expirationDate') as string | null)?.trim() || '';
   const expirationDate = expDateStr ? new Date(expDateStr) : null;
-  
-  const locationId = formData.get('locationId') as string || null;
+  if (expirationDate && isNaN(expirationDate.getTime())) {
+    return { success: false, error: 'Invalid expiration date.' };
+  }
+
+  const rawLocationId = (formData.get('locationId') as string | null)?.trim() || '';
+  const locationId = rawLocationId || null;
 
   try {
+    if (locationId) {
+      if (!UUID_REGEX.test(locationId)) {
+        return { success: false, error: 'Invalid storage location identifier.' };
+      }
+      const loc = await prisma.storageLocation.findFirst({
+        where: { id: locationId, organizationId: dbUser.organizationId },
+        select: { id: true },
+      });
+      if (!loc) {
+        return { success: false, error: 'Selected storage location was not found in your organization.' };
+      }
+    }
+
     await prisma.inventoryItem.create({
       data: {
         name,
@@ -103,8 +142,9 @@ export async function addInventoryItem(formData: FormData) {
     await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_ADDED', `Added ${quantity} ${unit} of ${name}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.addInventoryItem]', err);
+    return { success: false, error: 'Failed to add inventory item.' };
   }
 }
 
@@ -112,12 +152,33 @@ export async function addStorageLocation(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
-  const name = DOMPurify.sanitize(formData.get('name') as string);
-  const type = DOMPurify.sanitize(formData.get('type') as string);
-  const barcode = DOMPurify.sanitize(formData.get('barcode') as string || '');
-  const parentId = formData.get('parentId') as string || null;
+  const name = DOMPurify.sanitize((formData.get('name') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  if (!name) return { success: false, error: 'Location name is required.' };
+
+  const parsedType = StorageTypeSchema.safeParse(((formData.get('type') as string) || 'FREEZER').trim());
+  if (!parsedType.success) {
+    return { success: false, error: 'Invalid storage location type.' };
+  }
+  const type = parsedType.data;
+
+  const barcode = DOMPurify.sanitize((formData.get('barcode') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  const rawParentId = (formData.get('parentId') as string | null)?.trim() || '';
+  const parentId = rawParentId || null;
 
   try {
+    if (parentId) {
+      if (!UUID_REGEX.test(parentId)) {
+        return { success: false, error: 'Invalid parent location identifier.' };
+      }
+      const parentLoc = await prisma.storageLocation.findFirst({
+        where: { id: parentId, organizationId: dbUser.organizationId },
+        select: { id: true },
+      });
+      if (!parentLoc) {
+        return { success: false, error: 'Parent storage location not found in your organization.' };
+      }
+    }
+
     await prisma.storageLocation.create({
       data: {
         name,
@@ -130,8 +191,9 @@ export async function addStorageLocation(formData: FormData) {
     await logAuditAction(dbUser.id, dbUser.organizationId, 'LOCATION_ADDED', `Added storage location ${name}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.addStorageLocation]', err);
+    return { success: false, error: 'Failed to add storage location.' };
   }
 }
 
@@ -213,8 +275,9 @@ export async function updateInventoryStock(id: string, newQuantity: number) {
     await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_UPDATED', `Updated ${item.name} stock to ${newQuantity}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.updateInventoryStock]', err);
+    return { success: false, error: 'Failed to update stock quantity.' };
   }
 }
 
@@ -222,7 +285,7 @@ export async function updateInventoryBarcode(id: string, newBarcode: string) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
-  const sanitized = DOMPurify.sanitize(newBarcode).trim();
+  const sanitized = DOMPurify.sanitize(newBarcode, { ALLOWED_TAGS: [] }).trim();
 
   try {
     const item = await prisma.inventoryItem.findUnique({ where: { id } });
@@ -239,8 +302,9 @@ export async function updateInventoryBarcode(id: string, newBarcode: string) {
     await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_BARCODE_UPDATED', `Updated barcode for ${item.name} to ${sanitized || 'None'}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.updateInventoryBarcode]', err);
+    return { success: false, error: 'Failed to update inventory barcode.' };
   }
 }
 
@@ -257,8 +321,9 @@ export async function deleteInventoryItem(id: string) {
     await logAuditAction(dbUser.id, dbUser.organizationId, 'INVENTORY_DELETED', `Deleted ${item.name}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.deleteInventoryItem]', err);
+    return { success: false, error: 'Failed to delete inventory item.' };
   }
 }
 
@@ -266,12 +331,22 @@ export async function addEquipment(formData: FormData) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
-  const name = DOMPurify.sanitize(formData.get('name') as string);
-  const serialNumber = DOMPurify.sanitize(formData.get('serialNumber') as string || '');
-  const barcode = DOMPurify.sanitize(formData.get('barcode') as string || '');
+  const name = DOMPurify.sanitize((formData.get('name') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  if (!name) return { success: false, error: 'Equipment name is required.' };
+
+  const serialNumber = DOMPurify.sanitize((formData.get('serialNumber') as string) || '', { ALLOWED_TAGS: [] }).trim();
+  const barcode = DOMPurify.sanitize((formData.get('barcode') as string) || '', { ALLOWED_TAGS: [] }).trim();
   const lastCalibrated = new Date(formData.get('lastCalibrated') as string);
+  if (isNaN(lastCalibrated.getTime())) {
+    return { success: false, error: 'Invalid calibration date.' };
+  }
+
   const calibrationFreq = parseInt(formData.get('calibrationFreq') as string, 10);
-  const status = DOMPurify.sanitize(formData.get('status') as string);
+  const parsedStatus = EquipmentStatusSchema.safeParse(((formData.get('status') as string) || 'OPERATIONAL').trim());
+  if (!parsedStatus.success) {
+    return { success: false, error: 'Invalid equipment status.' };
+  }
+  const status = parsedStatus.data;
 
   if (isNaN(calibrationFreq) || calibrationFreq < 1 || calibrationFreq > 3650) {
     return { success: false, error: 'Calibration frequency must be an integer between 1 and 3650 days.' };
@@ -292,14 +367,20 @@ export async function addEquipment(formData: FormData) {
     await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_ADDED', `Added equipment ${name}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.addEquipment]', err);
+    return { success: false, error: 'Failed to register equipment.' };
   }
 }
 
 export async function updateEquipmentStatus(id: string, status: string, calibratedNow: boolean = false) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
+
+  const parsedStatus = EquipmentStatusSchema.safeParse(status);
+  if (!parsedStatus.success) {
+    return { success: false, error: 'Invalid equipment status.' };
+  }
 
   try {
     const item = await prisma.equipment.findUnique({ where: { id } });
@@ -308,16 +389,17 @@ export async function updateEquipmentStatus(id: string, status: string, calibrat
     await prisma.equipment.update({
       where: { id },
       data: {
-        status,
+        status: parsedStatus.data,
         ...(calibratedNow ? { lastCalibrated: new Date() } : {}),
       },
     });
-    
+
     await logAuditAction(dbUser.id, dbUser.organizationId, 'EQUIPMENT_UPDATED', `Updated ${item.name}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.updateEquipmentStatus]', err);
+    return { success: false, error: 'Failed to update equipment status.' };
   }
 }
 
@@ -325,16 +407,21 @@ export async function updateStrictMode(enabled: boolean) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
+  if (typeof enabled !== 'boolean') {
+    return { success: false, error: 'Invalid strict mode flag.' };
+  }
+
   try {
     await prisma.organization.update({
       where: { id: dbUser.organizationId },
-      data: { strictMode: enabled }
+      data: { strictMode: enabled },
     });
     await logAuditAction(dbUser.id, dbUser.organizationId, 'STRICT_MODE', `Strict mode ${enabled}`);
     revalidatePath('/app/admin');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    console.error('[adminActions.updateStrictMode]', err);
+    return { success: false, error: 'Failed to update strict compliance mode.' };
   }
 }
 
@@ -532,6 +619,12 @@ export async function updateUserRole(userId: string, newRole: Role) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
 
+  const parsedRole = MemberRoleSchema.safeParse(newRole);
+  if (!parsedRole.success) {
+    return { success: false, error: 'Invalid role requested.' };
+  }
+  const validatedRole = parsedRole.data;
+
   try {
     const targetUser = await prisma.user.findUnique({ where: { id: userId } });
     if (!targetUser || targetUser.organizationId !== dbUser.organizationId) {
@@ -540,7 +633,7 @@ export async function updateUserRole(userId: string, newRole: Role) {
 
     // Role Hierarchy Security Rule:
     // Only a PI can elevate another user to PI, or demote an existing PI.
-    if ((newRole === 'PI' || targetUser.role === 'PI') && dbUser.role !== 'PI') {
+    if ((validatedRole === 'PI' || targetUser.role === 'PI') && dbUser.role !== 'PI') {
       return {
         success: false,
         error: 'Principal Investigator role actions require an active PI credentials sign-off.',
@@ -548,7 +641,7 @@ export async function updateUserRole(userId: string, newRole: Role) {
     }
 
     // Self-demotion guard
-    if (targetUser.id === dbUser.id && (targetUser.role === 'PI' || targetUser.role === 'ADMIN') && newRole !== targetUser.role) {
+    if (targetUser.id === dbUser.id && (targetUser.role === 'PI' || targetUser.role === 'ADMIN') && validatedRole !== targetUser.role) {
       const remainingAdmins = await prisma.user.count({
         where: {
           organizationId: dbUser.organizationId,
@@ -565,14 +658,14 @@ export async function updateUserRole(userId: string, newRole: Role) {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { role: newRole },
+      data: { role: validatedRole },
     });
 
     await logAuditAction(
       dbUser.id,
       dbUser.organizationId,
       'ROLE_UPDATED',
-      `Elevated/adjusted role for ${targetUser.email} from ${targetUser.role} to ${newRole}`,
+      `Elevated/adjusted role for ${targetUser.email} from ${targetUser.role} to ${validatedRole}`,
       'User',
       userId
     );
@@ -580,8 +673,8 @@ export async function updateUserRole(userId: string, newRole: Role) {
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to update role.';
-    return { success: false, error: message };
+    console.error('[adminActions.updateUserRole]', err);
+    return { success: false, error: 'Failed to update role.' };
   }
 }
 
@@ -661,28 +754,57 @@ export async function fetchPendingAuthorizationRequests(): Promise<{
   if (error || !dbUser) return { success: false, requests: [], error };
 
   try {
-    const logs = await prisma.auditLog.findMany({
-      where: {
-        organizationId: dbUser.organizationId,
-        action: 'AUTHORIZATION_REQUEST',
-        entityType: 'PermissionRequest',
-      },
-      include: {
-        user: { select: { email: true, role: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
+    const [requestLogs, resolutionLogs] = await Promise.all([
+      prisma.auditLog.findMany({
+        where: {
+          organizationId: dbUser.organizationId,
+          action: 'AUTHORIZATION_REQUEST',
+          entityType: 'PermissionRequest',
+        },
+        include: {
+          user: { select: { email: true, role: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      }),
+      prisma.auditLog.findMany({
+        where: {
+          organizationId: dbUser.organizationId,
+          action: 'AUTHORIZATION_RESOLVED',
+          entityType: 'PermissionRequest',
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      }),
+    ]);
+
+    const resolutionMap = new Map<
+      string,
+      { status: 'APPROVED' | 'REJECTED'; resolvedBy?: string; resolvedAt?: string; resolutionNote?: string }
+    >();
+    for (const rLog of resolutionLogs) {
+      if (resolutionMap.has(rLog.entityId)) continue;
+      const d = (rLog.details as Record<string, unknown>) || {};
+      const decision = d.status === 'APPROVED' || d.decision === 'APPROVED' ? 'APPROVED' : 'REJECTED';
+      resolutionMap.set(rLog.entityId, {
+        status: decision,
+        resolvedBy: typeof d.resolvedBy === 'string' ? d.resolvedBy : undefined,
+        resolvedAt: typeof d.resolvedAt === 'string' ? d.resolvedAt : rLog.createdAt.toISOString(),
+        resolutionNote: typeof d.resolutionNote === 'string' ? d.resolutionNote : undefined,
+      });
+    }
 
     const requests: AuthorizationRequest[] = [];
 
-    for (const log of logs) {
+    for (const log of requestLogs) {
       if (!log.details || typeof log.details !== 'object') continue;
       const d = log.details as Record<string, unknown>;
+      const reqId = (d.requestId as string) || log.entityId;
+      const resolved = resolutionMap.get(reqId);
 
       const req: AuthorizationRequest = {
         id: log.id,
-        requestId: (d.requestId as string) || log.entityId,
+        requestId: reqId,
         requesterId: (d.requesterId as string) || log.userId,
         requesterEmail: (d.requesterEmail as string) || log.user?.email || 'Unknown User',
         requesterRole: (d.requesterRole as Role) || log.user?.role || 'VIEWER',
@@ -690,10 +812,10 @@ export async function fetchPendingAuthorizationRequests(): Promise<{
         requestedRole: (d.requestedRole as Role) || null,
         justification: (d.justification as string) || '',
         targetEntity: (d.targetEntity as string) || null,
-        status: (d.status as AuthorizationRequest['status']) || 'PENDING',
-        resolvedBy: d.resolvedBy as string | undefined,
-        resolvedAt: d.resolvedAt as string | undefined,
-        resolutionNote: d.resolutionNote as string | undefined,
+        status: resolved?.status ?? ((d.status as AuthorizationRequest['status']) || 'PENDING'),
+        resolvedBy: resolved?.resolvedBy ?? (d.resolvedBy as string | undefined),
+        resolvedAt: resolved?.resolvedAt ?? (d.resolvedAt as string | undefined),
+        resolutionNote: resolved?.resolutionNote ?? (d.resolutionNote as string | undefined),
         createdAt: log.createdAt.toISOString(),
       };
 
@@ -702,8 +824,8 @@ export async function fetchPendingAuthorizationRequests(): Promise<{
 
     return { success: true, requests };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to fetch authorizations.';
-    return { success: false, requests: [], error: message };
+    console.error('[adminActions.fetchPendingAuthorizationRequests]', err);
+    return { success: false, requests: [], error: 'Failed to fetch authorizations.' };
   }
 }
 
@@ -714,6 +836,10 @@ export async function resolveAuthorizationRequest(
 ) {
   const { dbUser, error } = await verifyAdminAccess();
   if (error || !dbUser) return { success: false, error };
+
+  if (decision !== 'APPROVED' && decision !== 'REJECTED') {
+    return { success: false, error: 'Invalid decision.' };
+  }
 
   try {
     const log = await prisma.auditLog.findFirst({
@@ -728,10 +854,25 @@ export async function resolveAuthorizationRequest(
       return { success: false, error: 'Authorization request not found.' };
     }
 
+    // Append-only ledger check: verify this request has not already been resolved
+    const alreadyResolved = await prisma.auditLog.findFirst({
+      where: {
+        organizationId: dbUser.organizationId,
+        action: 'AUTHORIZATION_RESOLVED',
+        entityType: 'PermissionRequest',
+        entityId: requestId,
+      },
+    });
     const currentDetails = (log.details as Record<string, unknown>) || {};
+    if (alreadyResolved || (currentDetails.status && currentDetails.status !== 'PENDING')) {
+      return { success: false, error: 'This authorization request has already been resolved.' };
+    }
+
     const requesterId = currentDetails.requesterId as string;
     const requestType = currentDetails.requestType as string;
-    const requestedRole = currentDetails.requestedRole as Role | null;
+    const rawRequestedRole = currentDetails.requestedRole;
+    const parsedRequestedRole = rawRequestedRole ? MemberRoleSchema.safeParse(rawRequestedRole) : null;
+    const requestedRole = parsedRequestedRole?.success ? parsedRequestedRole.data : null;
 
     // Hierarchy check: Only PIs can approve elevation to PI
     if (decision === 'APPROVED' && requestType === 'ROLE_ELEVATION' && requestedRole === 'PI' && dbUser.role !== 'PI') {
@@ -741,53 +882,74 @@ export async function resolveAuthorizationRequest(
       };
     }
 
-    // Update log status
-    const updatedDetails: Prisma.JsonObject = {
-      ...currentDetails,
-      status: decision,
-      resolvedBy: dbUser.email,
-      resolvedAt: new Date().toISOString(),
-      resolutionNote: resolutionNote ? DOMPurify.sanitize(resolutionNote.trim()) : null,
-    };
+    const cleanResolutionNote = resolutionNote
+      ? DOMPurify.sanitize(resolutionNote.trim(), { ALLOWED_TAGS: [] }).slice(0, 1000)
+      : null;
+    const resolvedAt = new Date().toISOString();
 
-    await prisma.auditLog.update({
-      where: { id: log.id },
-      data: {
-        details: updatedDetails,
-      },
-    });
-
-    // If approved and request was ROLE_ELEVATION, execute the promotion
-    if (decision === 'APPROVED' && requestType === 'ROLE_ELEVATION' && requestedRole && requesterId) {
-      await prisma.user.update({
-        where: { id: requesterId },
-        data: { role: requestedRole },
+    await prisma.$transaction(async (tx) => {
+      // Double-check inside transaction against concurrent resolution
+      const concurrentResolution = await tx.auditLog.findFirst({
+        where: {
+          organizationId: dbUser.organizationId,
+          action: 'AUTHORIZATION_RESOLVED',
+          entityType: 'PermissionRequest',
+          entityId: requestId,
+        },
       });
+      if (concurrentResolution) {
+        throw new Error('Authorization request was already resolved.');
+      }
 
-      await logAuditAction(
-        dbUser.id,
-        dbUser.organizationId,
-        'ROLE_ELEVATED_BY_APPROVAL',
-        `Approved elevation for user ${requesterId} to ${requestedRole}`,
-        'User',
-        requesterId
-      );
-    }
+      if (decision === 'APPROVED' && requestType === 'ROLE_ELEVATION' && requestedRole && requesterId) {
+        const updatedUser = await tx.user.updateMany({
+          where: { id: requesterId, organizationId: dbUser.organizationId },
+          data: { role: requestedRole },
+        });
+        if (updatedUser.count === 0) {
+          throw new Error('Requester no longer belongs to this organization.');
+        }
 
-    await logAuditAction(
-      dbUser.id,
-      dbUser.organizationId,
-      'AUTHORIZATION_RESOLVED',
-      `Decision [${decision}] on request ${requestId} by ${dbUser.email}`,
-      'PermissionRequest',
-      requestId
-    );
+        await tx.auditLog.create({
+          data: {
+            userId: dbUser.id,
+            organizationId: dbUser.organizationId,
+            action: 'ROLE_ELEVATED_BY_APPROVAL',
+            entityType: 'User',
+            entityId: requesterId,
+            details: {
+              message: `Approved elevation for user ${requesterId} to ${requestedRole}`,
+            },
+          },
+        });
+      }
+
+      // Append-only resolution event (never mutates prior AuditLog rows)
+      await tx.auditLog.create({
+        data: {
+          userId: dbUser.id,
+          organizationId: dbUser.organizationId,
+          action: 'AUTHORIZATION_RESOLVED',
+          entityType: 'PermissionRequest',
+          entityId: requestId,
+          details: {
+            message: `Decision [${decision}] on request ${requestId} by ${dbUser.email}`,
+            requestId,
+            decision,
+            status: decision,
+            resolvedBy: dbUser.email,
+            resolvedAt,
+            resolutionNote: cleanResolutionNote,
+          },
+        },
+      });
+    });
 
     revalidatePath('/app/admin');
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to resolve request.';
-    return { success: false, error: message };
+    console.error('[adminActions.resolveAuthorizationRequest]', err);
+    return { success: false, error: 'Failed to resolve request.' };
   }
 }
 

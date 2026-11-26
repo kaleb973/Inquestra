@@ -78,6 +78,9 @@ export async function getProtocol(protocolId: string) {
  */
 export async function createProtocol(input: { name: string; description?: string }) {
   const dbUser = await getAuthenticatedUser();
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot create protocol templates.');
+  }
 
   const validated = ProtocolCreateSchema.parse(input);
 
@@ -117,6 +120,9 @@ export async function updateProtocolContent(
   name: string
 ) {
   const dbUser = await getAuthenticatedUser();
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot modify protocol templates.');
+  }
 
   const protocol = await prisma.protocolTemplate.findFirst({
     where: { id: protocolId, organizationId: dbUser.organizationId },
@@ -124,12 +130,14 @@ export async function updateProtocolContent(
   if (!protocol) throw new Error('Protocol not found.');
 
   const validName = z.string().min(1).max(200).parse(name);
-  const contentValue = JSON.parse(JSON.stringify(content)) as Prisma.InputJsonValue;
+  const { sanitizeTipTapAST } = await import('@/lib/security/trialImportSanitizer');
+  const sanitizedContent = sanitizeTipTapAST(content) ?? { type: 'doc', content: [] };
+  const contentValue = sanitizedContent as Prisma.InputJsonValue;
 
   const updated = await prisma.protocolTemplate.update({
     where: { id: protocolId },
     data: {
-      name: DOMPurify.sanitize(validName),
+      name: DOMPurify.sanitize(validName, { ALLOWED_TAGS: [] }),
       content: contentValue,
       version: { increment: 1 },
     },
@@ -220,6 +228,9 @@ export async function deleteProtocol(protocolId: string) {
  */
 export async function adoptStandardProtocol(slug: string) {
   const dbUser = await getAuthenticatedUser();
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot adopt protocol templates.');
+  }
   const standard = STANDARD_PROTOCOLS.find((p) => p.slug === slug);
   if (!standard) throw new Error(`Standard protocol '${slug}' not found.`);
 
@@ -273,6 +284,9 @@ export async function createTrialFromProtocol(input: {
   trialTitle?: string;
 }) {
   const dbUser = await getAuthenticatedUser();
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot launch trials from protocols.');
+  }
 
   // Find or create active project
   let project = await prisma.project.findFirst({

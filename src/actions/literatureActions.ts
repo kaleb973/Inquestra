@@ -12,17 +12,52 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 function sanitizeSafeUrl(rawUrl?: string | null): string | null {
   if (!rawUrl || typeof rawUrl !== 'string') return null;
-  const trimmed = rawUrl.trim();
+  const cleaned = rawUrl.replace(/[\u0000-\u001F\u007F]/g, '').trim();
   try {
-    const parsed = new URL(trimmed);
+    const parsed = new URL(cleaned);
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-      return trimmed;
+      return cleaned;
     }
   } catch {
     return null;
   }
   return null;
 }
+
+interface EuropePmcFullTextUrl {
+  documentStyle?: string;
+  url?: string;
+}
+
+interface EuropePmcResultRow {
+  id?: string;
+  source?: string;
+  title?: string;
+  abstractText?: string;
+  authorString?: string;
+  journalTitle?: string;
+  bookOrReportDetails?: { publisher?: string };
+  pubYear?: string | number;
+  doi?: string;
+  pmid?: string;
+  pmcid?: string;
+  citedByCount?: number;
+  isOpenAccess?: string;
+  fullTextUrlList?: {
+    fullTextUrl?: EuropePmcFullTextUrl[] | EuropePmcFullTextUrl;
+  };
+}
+
+interface EuropePmcSearchResponse {
+  hitCount?: number;
+  resultList?: {
+    result?: EuropePmcResultRow[];
+  };
+}
+
+export type TrialPaperRecord = Awaited<
+  ReturnType<typeof prisma.trialPaper.findMany<{ include: { paper: true } }>>
+>[number];
 
 export interface LiteratureItem {
   id: string; // DOI, PMID, or generated
@@ -62,7 +97,9 @@ export interface PaperPayload {
   tags?: string[];
 }
 
-// ─── In-Memory Acceleration Caches ──────────────────────────────────────────
+// ─── Bounded Tenant-Scoped Acceleration Caches ─────────────────────────────────
+const MAX_CACHE_ENTRIES = 500;
+
 interface SearchCacheEntry {
   data: { success: boolean; results: LiteratureItem[]; total: number };
   expiresAt: number;
@@ -70,14 +107,39 @@ interface SearchCacheEntry {
 const searchCache = new Map<string, SearchCacheEntry>();
 
 interface TrialPapersCacheEntry {
-  data: any[];
+  data: TrialPaperRecord[];
   expiresAt: number;
 }
 const trialPapersCache = new Map<string, TrialPapersCacheEntry>();
 
-function invalidateTrialPapersCache(trialId?: string) {
-  if (trialId) {
-    trialPapersCache.delete(trialId);
+function setBoundedCache<T extends { expiresAt: number }>(
+  cache: Map<string, T>,
+  key: string,
+  entry: T
+) {
+  const now = Date.now();
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    for (const [k, v] of cache.entries()) {
+      if (v.expiresAt <= now) cache.delete(k);
+    }
+  }
+  while (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (!oldest) break;
+    cache.delete(oldest);
+  }
+  cache.set(key, entry);
+}
+
+function invalidateTrialPapersCache(organizationId?: string, trialId?: string) {
+  if (organizationId && trialId) {
+    trialPapersCache.delete(`${organizationId}:${trialId}`);
+  } else if (trialId) {
+    for (const key of trialPapersCache.keys()) {
+      if (key.endsWith(`:${trialId}`)) {
+        trialPapersCache.delete(key);
+      }
+    }
   } else {
     trialPapersCache.clear();
   }
@@ -99,63 +161,58 @@ export async function searchExternalLiterature(
       return { success: true, results: [], total: 0 };
     }
 
-    const page = typeof pageOrOptions === 'number' ? pageOrOptions : (pageOrOptions.page || 1);
-    const size = typeof pageOrOptions === 'object' && pageOrOptions.pageSize ? pageOrOptions.pageSize : pageSize;
+    const page = Math.max(1, Math.min(100, typeof pageOrOptions === 'number' ? pageOrOptions : (pageOrOptions.page || 1)));
+    const size = Math.max(1, Math.min(50, typeof pageOrOptions === 'object' && pageOrOptions.pageSize ? pageOrOptions.pageSize : pageSize));
     const targetTrialId = typeof pageOrOptions === 'object' && pageOrOptions.trialId ? pageOrOptions.trialId : trialId;
 
-    // 1. Fast Cache Check
-    const cacheKey = `${cleanQuery.toLowerCase()}:${page}:${size}:${targetTrialId || ''}`;
+    // Resolve organization identity BEFORE cache lookup so org flags never leak across tenants
+    let orgId: string | null = null;
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const dbUser = await prisma.user.findUnique({
+          where: { authId: user.id },
+          select: { organizationId: true },
+        });
+        orgId = dbUser?.organizationId ?? null;
+      }
+    } catch {
+      orgId = null;
+    }
+
+    const scopedTrialId = orgId && targetTrialId ? targetTrialId : '';
+    const cacheKey = `${orgId ?? 'anon'}:${cleanQuery.toLowerCase()}:${page}:${size}:${scopedTrialId}`;
     const cached = searchCache.get(cacheKey);
     if (cached && Date.now() < cached.expiresAt) {
       return cached.data;
     }
 
-    // 2. Run Europe PMC fetch and Supabase/Prisma organization lookup in PARALLEL
-    const orgPromise = (async () => {
-      try {
-        const supabase = await createSupabaseServerClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null;
-        const dbUser = await prisma.user.findUnique({
-          where: { authId: user.id },
-          select: { organizationId: true },
-        });
-        return dbUser?.organizationId || null;
-      } catch {
-        return null;
-      }
-    })();
+    const endpoint = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(
+      cleanQuery
+    )}&format=json&pageSize=${size}&page=${page}&resultType=core`;
 
-    const fetchPromise = (async () => {
-      const endpoint = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(
-        cleanQuery
-      )}&format=json&pageSize=${size}&page=${page}&resultType=core`;
+    const res = await fetch(endpoint, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'Inquestra-Research-Platform/1.0 (https://inquestra.org)',
+      },
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(9000),
+    });
 
-      const res = await fetch(endpoint, {
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': 'Inquestra-Research-Platform/1.0 (https://inquestra.org)',
-        },
-        next: { revalidate: 3600 },
-        signal: AbortSignal.timeout(9000),
-      });
+    if (!res.ok) {
+      throw new Error(`Europe PMC API returned status ${res.status}`);
+    }
 
-      if (!res.ok) {
-        throw new Error(`Europe PMC API returned status ${res.status}`);
-      }
-
-      return res.json();
-    })();
-
-    const [json, orgId] = await Promise.all([fetchPromise, orgPromise]);
-
+    const json = (await res.json()) as EuropePmcSearchResponse;
     const hitCount = json.hitCount || 0;
-    const rawList = json.resultList?.result || [];
+    const rawList: EuropePmcResultRow[] = json.resultList?.result || [];
 
     // Collect DOIs to check if already saved in org database
     const dois = rawList
-      .map((r: any) => r.doi)
-      .filter((d: any): d is string => typeof d === 'string' && d.length > 0);
+      .map((r) => r.doi)
+      .filter((d): d is string => typeof d === 'string' && d.length > 0);
 
     const savedDoiSet = new Set<string>();
     const citedDoiSet = new Set<string>();
@@ -167,52 +224,56 @@ export async function searchExternalLiterature(
           doi: { in: dois },
         },
         include: {
-          trials: targetTrialId ? { where: { trialId: targetTrialId } } : false,
+          trials: scopedTrialId ? { where: { trialId: scopedTrialId } } : false,
         },
       });
 
       savedPapers.forEach((p) => {
         if (p.doi) savedDoiSet.add(p.doi.toLowerCase());
-        if (targetTrialId && p.trials && p.trials.length > 0 && p.doi) {
+        if (scopedTrialId && p.trials && p.trials.length > 0 && p.doi) {
           citedDoiSet.add(p.doi.toLowerCase());
         }
       });
     }
 
-    const results: LiteratureItem[] = rawList.map((r: any) => {
+    const results: LiteratureItem[] = rawList.map((r) => {
       const rawTitle = (r.title || 'Untitled Article').replace(/<[^>]+>/g, '');
       const rawAbstract = (r.abstractText || '').replace(/<[^>]+>/g, '');
       const doi = r.doi || null;
       const pmid = r.pmid || null;
       const pmcid = r.pmcid || null;
 
-      // Extract open access direct PDF link if available
+      // Extract open access direct PDF link if available and validate safe scheme
       let pdfUrl: string | null = null;
       if (r.fullTextUrlList?.fullTextUrl) {
         const urls = r.fullTextUrlList.fullTextUrl;
         const pdfEntry = Array.isArray(urls)
-          ? urls.find((u: any) => u.documentStyle === 'pdf' || u.url?.endsWith('.pdf'))
-          : urls.documentStyle === 'pdf' ? urls : null;
-        if (pdfEntry?.url) pdfUrl = pdfEntry.url;
+          ? urls.find((u) => u.documentStyle === 'pdf' || u.url?.endsWith('.pdf'))
+          : urls.documentStyle === 'pdf'
+          ? urls
+          : null;
+        pdfUrl = sanitizeSafeUrl(pdfEntry?.url);
       }
 
       const externalUrl = doi
-        ? `https://doi.org/${doi}`
+        ? `https://doi.org/${encodeURIComponent(doi)}`
         : pmid
-        ? `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
-        : `https://europepmc.org/article/${r.source || 'MED'}/${r.id}`;
+        ? `https://pubmed.ncbi.nlm.nih.gov/${encodeURIComponent(pmid)}/`
+        : `https://europepmc.org/article/${encodeURIComponent(r.source || 'MED')}/${encodeURIComponent(r.id || '')}`;
+
+      const parsedYear = r.pubYear ? Number.parseInt(String(r.pubYear), 10) : null;
 
       return {
-        id: doi || pmid || r.id,
-        title: DOMPurify.sanitize(rawTitle),
-        authors: DOMPurify.sanitize(r.authorString || 'Unknown Authors'),
-        journal: DOMPurify.sanitize(r.journalTitle || r.bookOrReportDetails?.publisher || 'Peer-Reviewed Journal'),
-        pubYear: r.pubYear ? parseInt(String(r.pubYear), 10) : null,
+        id: doi || pmid || r.id || crypto.randomUUID(),
+        title: DOMPurify.sanitize(rawTitle, { ALLOWED_TAGS: [] }),
+        authors: DOMPurify.sanitize(r.authorString || 'Unknown Authors', { ALLOWED_TAGS: [] }),
+        journal: DOMPurify.sanitize(r.journalTitle || r.bookOrReportDetails?.publisher || 'Peer-Reviewed Journal', { ALLOWED_TAGS: [] }),
+        pubYear: parsedYear !== null && Number.isFinite(parsedYear) ? parsedYear : null,
         doi,
         pmid,
         pmcid,
-        abstractText: rawAbstract ? DOMPurify.sanitize(rawAbstract) : null,
-        url: externalUrl,
+        abstractText: rawAbstract ? DOMPurify.sanitize(rawAbstract, { ALLOWED_TAGS: [] }) : null,
+        url: sanitizeSafeUrl(externalUrl) || 'https://europepmc.org',
         pdfUrl,
         citedByCount: typeof r.citedByCount === 'number' ? r.citedByCount : 0,
         isOpenAccess: r.isOpenAccess === 'Y',
@@ -223,7 +284,7 @@ export async function searchExternalLiterature(
     });
 
     const payload = { success: true, results, total: hitCount };
-    searchCache.set(cacheKey, { data: payload, expiresAt: Date.now() + 15 * 60 * 1000 });
+    setBoundedCache(searchCache, cacheKey, { data: payload, expiresAt: Date.now() + 15 * 60 * 1000 });
     return payload;
   } catch (err) {
     console.error('Europe PMC Search Error:', err);
@@ -231,7 +292,7 @@ export async function searchExternalLiterature(
       success: false,
       results: [],
       total: 0,
-      error: err instanceof Error ? err.message : 'Failed to search scientific literature.',
+      error: 'Failed to search scientific literature.',
     };
   }
 }
@@ -246,6 +307,9 @@ export async function savePaperToLibrary(payload: PaperPayload) {
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User profile not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot modify the lab literature library.');
+  }
 
   const rawAuthors = Array.isArray(payload.authors) ? payload.authors.join(', ') : payload.authors;
   const cleanTitle = DOMPurify.sanitize(payload.title.trim());
@@ -346,11 +410,17 @@ export async function linkPaperToTrial(
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User profile not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot attach citations to trials.');
+  }
 
   const trial = await prisma.trial.findFirst({
     where: { id: trialId, project: { organizationId: dbUser.organizationId } },
   });
   if (!trial) throw new Error('Trial not found');
+  if (trial.status === 'COMPLETED' || trial.checksum !== null) {
+    throw new Error('Immutable Record: Cannot link citations to a cryptographically sealed experiment.');
+  }
 
   // 1. Ensure paper exists in library
   const saved = await savePaperToLibrary(payload);
@@ -395,7 +465,7 @@ export async function linkPaperToTrial(
     },
   });
 
-  invalidateTrialPapersCache(trialId);
+  invalidateTrialPapersCache(dbUser.organizationId, trialId);
   revalidatePath('/app');
   return { success: true, trialPaper };
 }
@@ -410,13 +480,18 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot remove trial citations.');
+  }
 
   if (paperId) {
     const trial = await prisma.trial.findFirst({
       where: { id: trialIdOrId, project: { organizationId: dbUser.organizationId } },
     });
     if (!trial) throw new Error('Trial not found');
-    if (trial.checksum) throw new Error('Cannot remove citations from a sealed experiment.');
+    if (trial.status === 'COMPLETED' || trial.checksum !== null) {
+      throw new Error('Cannot remove citations from a sealed experiment.');
+    }
 
     await prisma.trialPaper.deleteMany({
       where: { trialId: trialIdOrId, paperId },
@@ -432,7 +507,7 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
         details: { paperId },
       },
     });
-    invalidateTrialPapersCache(trialIdOrId);
+    invalidateTrialPapersCache(dbUser.organizationId, trialIdOrId);
   } else {
     // Single trialPaper ID passed
     const existing = await prisma.trialPaper.findFirst({
@@ -440,7 +515,9 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
       include: { trial: true },
     });
     if (!existing) throw new Error('Citation not found');
-    if (existing.trial.checksum) throw new Error('Cannot remove citations from a sealed experiment.');
+    if (existing.trial.status === 'COMPLETED' || existing.trial.checksum !== null) {
+      throw new Error('Cannot remove citations from a sealed experiment.');
+    }
 
     await prisma.trialPaper.delete({
       where: { id: trialIdOrId },
@@ -456,7 +533,7 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
         details: { paperId: existing.paperId },
       },
     });
-    invalidateTrialPapersCache(existing.trialId);
+    invalidateTrialPapersCache(dbUser.organizationId, existing.trialId);
   }
 
   revalidatePath('/app');
@@ -466,12 +543,7 @@ export async function unlinkPaperFromTrial(trialIdOrId: string, paperId?: string
 /**
  * Fetch all papers linked to a specific trial.
  */
-export async function fetchTrialPapers(trialId: string) {
-  const cached = trialPapersCache.get(trialId);
-  if (cached && Date.now() < cached.expiresAt) {
-    return cached.data;
-  }
-
+export async function fetchTrialPapers(trialId: string): Promise<TrialPaperRecord[]> {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
@@ -482,6 +554,12 @@ export async function fetchTrialPapers(trialId: string) {
   });
   if (!dbUser) return [];
 
+  const cacheKey = `${dbUser.organizationId}:${trialId}`;
+  const cached = trialPapersCache.get(cacheKey);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.data;
+  }
+
   const papers = await prisma.trialPaper.findMany({
     where: {
       trialId,
@@ -491,7 +569,7 @@ export async function fetchTrialPapers(trialId: string) {
     orderBy: { citationIndex: 'asc' },
   });
 
-  trialPapersCache.set(trialId, { data: papers, expiresAt: Date.now() + 60_000 });
+  setBoundedCache(trialPapersCache, cacheKey, { data: papers, expiresAt: Date.now() + 60_000 });
   return papers;
 }
 
@@ -543,6 +621,9 @@ export async function deletePaperFromLibrary(paperId: string) {
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot delete library papers.');
+  }
 
   const paper = await prisma.researchPaper.findFirst({
     where: { id: paperId, organizationId: dbUser.organizationId },
@@ -572,6 +653,7 @@ export async function deletePaperFromLibrary(paperId: string) {
     },
   });
 
+  invalidateTrialPapersCache(dbUser.organizationId);
   revalidatePath('/app/literature');
   return { success: true };
 }
@@ -586,6 +668,9 @@ export async function updatePaperTags(paperId: string, tags: string[]) {
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot modify paper tags.');
+  }
 
   const paper = await prisma.researchPaper.findFirst({
     where: { id: paperId, organizationId: dbUser.organizationId },

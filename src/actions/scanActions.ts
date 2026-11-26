@@ -4,8 +4,10 @@
 // Resolves physical QR codes and barcode strings across Inventory, Storage, and Equipment.
 // Formats safe public dossiers for mobile camera scans and deep-links for logged-in members.
 
+import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export type ScanResult =
   | {
@@ -88,8 +90,23 @@ function extractLocationPath(loc: NestedLocation | null | undefined): string[] {
 
 export async function resolveScanCode(rawCode: string): Promise<ScanResult> {
   const code = rawCode.trim();
-  if (!code) {
-    return { found: false, code: '', error: 'No barcode or identifier provided.' };
+  if (!code || code.length > 128) {
+    return { found: false, code: code.slice(0, 128), error: 'No valid barcode or identifier provided.' };
+  }
+
+  try {
+    const reqHeaders = await headers();
+    const clientIp = getClientIp(reqHeaders);
+    const rate = checkRateLimit(`scan:${clientIp}`, 60, 60_000);
+    if (!rate.success) {
+      return {
+        found: false,
+        code,
+        error: `Rate limit exceeded. Try again in ${rate.retryAfterSeconds ?? 60} seconds.`,
+      };
+    }
+  } catch {
+    // Non-request context fallback
   }
 
   // Check optional user session for member permissions

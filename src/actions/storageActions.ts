@@ -25,7 +25,7 @@ const r2 = new S3Client({
 async function verifyTrialAccess(authId: string, trialId: string) {
   const dbUser = await prisma.user.findUnique({
     where: { authId },
-    select: { id: true, organizationId: true },
+    select: { id: true, organizationId: true, role: true },
   });
   if (!dbUser) throw new Error('User record not found');
 
@@ -36,7 +36,7 @@ async function verifyTrialAccess(authId: string, trialId: string) {
         organizationId: dbUser.organizationId,
       },
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, checksum: true },
   });
   if (!trial) throw new Error('Trial not found or access denied');
 
@@ -45,17 +45,20 @@ async function verifyTrialAccess(authId: string, trialId: string) {
 
 /**
  * Returns a 1-hour presigned PUT URL for the browser to upload directly to R2.
- * Enforces tenant verification, file extension whitelist, and attachment disposition.
+ * Enforces tenant verification, role check, immutability, file extension whitelist, and attachment disposition.
  */
 export async function getTelemetryUploadUrl(trialId: string, filename: string, fileSize?: number) {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
 
-  // Tenant isolation & trial status check
-  const { trial } = await verifyTrialAccess(user.id, trialId);
-  if (trial.status === 'COMPLETED') {
-    throw new Error('Cannot upload telemetry to a completed trial.');
+  // Tenant isolation, role guard & trial immutability check
+  const { dbUser, trial } = await verifyTrialAccess(user.id, trialId);
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot upload telemetry files.');
+  }
+  if (trial.status === 'COMPLETED' || trial.checksum !== null) {
+    throw new Error('Immutable Record: Cannot upload telemetry to a completed or sealed trial.');
   }
 
   // Security: Check file size (max 50MB)
@@ -121,24 +124,44 @@ export async function recordTelemetryStream(
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthorized');
 
-  // Verify tenant ownership
-  await verifyTrialAccess(user.id, trialId);
+  // Verify tenant ownership, role, and sealed-trial immutability
+  const { dbUser, trial } = await verifyTrialAccess(user.id, trialId);
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot attach telemetry records.');
+  }
+  if (trial.status === 'COMPLETED' || trial.checksum !== null) {
+    throw new Error('Immutable Record: Cannot attach telemetry streams to a completed or sealed trial.');
+  }
 
-  // Prevent linking foreign or arbitrary object keys
-  if (!fileKey.startsWith(`trials/${trialId}/`)) {
-    throw new Error('Invalid file key for this trial.');
+  // Prevent linking foreign, path-traversal, or arbitrary object keys
+  const escapedTrialId = trialId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const strictKeyRegex = new RegExp(`^trials/${escapedTrialId}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(csv|txt|json)$`, 'i');
+  if (!strictKeyRegex.test(fileKey)) {
+    throw new Error('Invalid file key format for this trial.');
   }
 
   const fileUrl = `https://pub-${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.dev/${fileKey}`;
 
-  const stream = await prisma.telemetryStream.create({
-    data: {
-      trialId,
-      fileUrl,
-      rowCount,
-      sensorType: cleanSensorType,
-    },
-  });
+  const [stream] = await prisma.$transaction([
+    prisma.telemetryStream.create({
+      data: {
+        trialId,
+        fileUrl,
+        rowCount,
+        sensorType: cleanSensorType,
+      },
+    }),
+    prisma.auditLog.create({
+      data: {
+        userId: dbUser.id,
+        organizationId: dbUser.organizationId,
+        action: 'TELEMETRY_STREAM_RECORDED',
+        entityType: 'Trial',
+        entityId: trialId,
+        details: { fileKey, rowCount, sensorType: cleanSensorType },
+      },
+    }),
+  ]);
 
   return { success: true, streamId: stream.id };
 }

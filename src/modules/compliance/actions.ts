@@ -32,6 +32,14 @@ export async function signAndSealTrial(data: {
     throw new Error("User record not found.");
   }
 
+  if (dbUser.role === "VIEWER") {
+    throw new Error("Permission denied: viewers cannot sign or seal experimental records.");
+  }
+
+  if (data.role === "PI_APPROVAL" && dbUser.role !== "PI" && dbUser.role !== "ADMIN") {
+    throw new Error("Permission denied: only a Lab PI or Admin can execute PI_APPROVAL signatures.");
+  }
+
   // Tenant-isolated trial verification
   const trial = await prisma.trial.findFirst({
     where: {
@@ -45,7 +53,7 @@ export async function signAndSealTrial(data: {
     throw new Error("Trial not found or access denied.");
   }
 
-  const cleanMeaning = DOMPurify.sanitize(data.meaning.trim());
+  const cleanMeaning = DOMPurify.sanitize(data.meaning.trim(), { ALLOWED_TAGS: [] });
   if (!cleanMeaning) {
     throw new Error("Signature meaning/justification is required.");
   }
@@ -54,55 +62,76 @@ export async function signAndSealTrial(data: {
   const activeUserId = dbUser.id;
   const activeOrgId = dbUser.organizationId;
 
+  const existingSignature = await prisma.signature.findFirst({
+    where: {
+      trialId: trial.id,
+      userId: activeUserId,
+      role: data.role,
+    },
+  });
+  if (existingSignature) {
+    throw new Error(`You have already recorded a ${data.role} signature on this trial.`);
+  }
+
   if (trial.status === "COMPLETED" && trial.checksum) {
     // If it's already sealed, add witness or approval signature
-    await prisma.signature.create({
-      data: {
-        trialId: trial.id,
-        userId: activeUserId,
-        role: data.role,
-        meaning: cleanMeaning,
-      },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        action: "SIGNATURE_ADDED",
-        entityType: "Trial",
-        entityId: trial.id,
-        details: { role: data.role, meaning: cleanMeaning },
-        userId: activeUserId,
-        organizationId: activeOrgId,
-      },
-    });
+    await prisma.$transaction([
+      prisma.signature.create({
+        data: {
+          trialId: trial.id,
+          userId: activeUserId,
+          role: data.role,
+          meaning: cleanMeaning,
+        },
+      }),
+      prisma.auditLog.create({
+        data: {
+          action: "SIGNATURE_ADDED",
+          entityType: "Trial",
+          entityId: trial.id,
+          details: { role: data.role, meaning: cleanMeaning },
+          userId: activeUserId,
+          organizationId: activeOrgId,
+        },
+      }),
+    ]);
 
     revalidatePath("/app/admin");
     return { success: true, message: "Witness signature applied." };
   }
 
-  // Primary author sealing
+  // Primary author sealing — atomic update guards against concurrent double-seal
   const timestamp = new Date().toISOString();
   const checksum = generateTrialHash(trial.content, trial.metadata, timestamp);
 
-  await prisma.$transaction([
-    prisma.trial.update({
-      where: { id: trial.id },
+  await prisma.$transaction(async (tx) => {
+    const sealed = await tx.trial.updateMany({
+      where: {
+        id: trial.id,
+        checksum: null,
+      },
       data: {
         status: "COMPLETED",
         checksum,
         sealedAt: timestamp,
         sealedBy: activeUserId,
       },
-    }),
-    prisma.signature.create({
+    });
+
+    if (sealed.count === 0) {
+      throw new Error("Trial was concurrently sealed by another request.");
+    }
+
+    await tx.signature.create({
       data: {
         trialId: trial.id,
         userId: activeUserId,
         role: data.role,
         meaning: cleanMeaning,
       },
-    }),
-    prisma.auditLog.create({
+    });
+
+    await tx.auditLog.create({
       data: {
         action: "TRIAL_SEALED",
         entityType: "Trial",
@@ -111,8 +140,8 @@ export async function signAndSealTrial(data: {
         userId: activeUserId,
         organizationId: activeOrgId,
       },
-    }),
-  ]);
+    });
+  });
 
   revalidatePath("/app/admin");
   return { success: true, checksum };
@@ -124,19 +153,16 @@ export async function verifyTrialSeal(trialId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let orgFilter: { project?: { organizationId: string } } = {};
-  if (user) {
-    const dbUser = await prisma.user.findUnique({
-      where: { authId: user.id },
-      select: { organizationId: true },
-    });
-    if (dbUser) {
-      orgFilter = { project: { organizationId: dbUser.organizationId } };
-    }
-  }
+  if (!user) return false;
+
+  const dbUser = await prisma.user.findUnique({
+    where: { authId: user.id },
+    select: { organizationId: true },
+  });
+  if (!dbUser) return false;
 
   const trial = await prisma.trial.findFirst({
-    where: { id: trialId, ...orgFilter },
+    where: { id: trialId, project: { organizationId: dbUser.organizationId } },
     include: { metadata: true },
   });
 

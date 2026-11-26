@@ -15,9 +15,11 @@ function getAppUrl(): string {
 import { formatAuthError } from '@/lib/utils';
 import { checkRateLimit } from '@/lib/rateLimit';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function signUp(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const email = ((formData.get('email') as string | null) ?? '').trim().toLowerCase();
+  const password = (formData.get('password') as string | null) ?? '';
   const fullName = (formData.get('fullName') as string | null)?.trim() ?? '';
   const labType = (formData.get('labType') as string | null)?.trim() ?? '';
   const termsAccepted = formData.get('termsAccepted');
@@ -47,8 +49,8 @@ export async function signUp(formData: FormData) {
 
     return { success: 'Check your email to confirm your account.' };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return { error: 'Server configuration error: ' + msg };
+    console.error('[authActions.signUp] Unexpected error:', err);
+    return { error: 'Unable to complete registration right now. Please try again.' };
   }
 }
 
@@ -56,7 +58,7 @@ export async function signUp(formData: FormData) {
 export async function provisionUserRecord(user: {
   id: string;
   email?: string;
-  user_metadata?: { full_name?: string; lab_type?: string; [key: string]: any };
+  user_metadata?: { full_name?: string; lab_type?: string; [key: string]: unknown };
 }): Promise<void> {
   const dbUser = await prisma.user.findUnique({
     where: { authId: user.id },
@@ -98,8 +100,8 @@ export type SignInResult =
   | { error: string };
 
 export async function signIn(formData: FormData): Promise<SignInResult> {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const email = ((formData.get('email') as string | null) ?? '').trim().toLowerCase();
+  const password = (formData.get('password') as string | null) ?? '';
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -125,8 +127,8 @@ export async function signIn(formData: FormData): Promise<SignInResult> {
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return { error: 'Server configuration error: ' + msg };
+    console.error('[authActions.signIn] Unexpected error:', err);
+    return { error: 'Authentication service is temporarily unavailable. Please try again.' };
   }
 }
 
@@ -136,13 +138,18 @@ export async function verifyMfaLogin(
   factorId: string,
   code: string
 ): Promise<VerifyMfaResult> {
+  if (!UUID_REGEX.test(factorId.trim())) {
+    return { error: 'Invalid MFA factor identifier.' };
+  }
+  const cleanFactorId = factorId.trim();
+
   const cleanCode = code.trim();
   if (!/^\d{6}$/.test(cleanCode)) {
     return { error: 'Verification code must be 6 digits.' };
   }
 
   // Rate-limit: max 5 attempts per 5 minutes per MFA factor to prevent brute-force guessing
-  const rateLimitResult = checkRateLimit(`mfa:${factorId}`, 5, 5 * 60 * 1000);
+  const rateLimitResult = checkRateLimit(`mfa:${cleanFactorId}`, 5, 5 * 60 * 1000);
   if (!rateLimitResult.success) {
     return {
       error: `Too many failed MFA attempts. Please wait ${rateLimitResult.retryAfterSeconds || 60} seconds before retrying.`,
@@ -151,17 +158,33 @@ export async function verifyMfaLogin(
 
   try {
     const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: sessionError,
+    } = await supabase.auth.getUser();
+    if (sessionError || !user) {
+      return { error: 'Active session expired. Please sign in again.' };
+    }
+
+    // Verify caller owns this verified factor
+    const { data: factorsData } = await supabase.auth.mfa.listFactors();
+    const ownedFactor = factorsData?.totp?.find(
+      (f) => f.id === cleanFactorId && f.status === 'verified'
+    );
+    if (!ownedFactor) {
+      return { error: 'MFA factor not found or not verified for this account.' };
+    }
 
     // Create a challenge then verify in one action to keep it atomic
     const { data: challengeData, error: challengeError } =
-      await supabase.auth.mfa.challenge({ factorId });
+      await supabase.auth.mfa.challenge({ factorId: cleanFactorId });
 
     if (challengeError || !challengeData) {
-      return { error: challengeError?.message ?? 'Challenge creation failed.' };
+      return { error: 'Unable to initiate authenticator challenge. Please retry.' };
     }
 
     const { error: verifyError } = await supabase.auth.mfa.verify({
-      factorId,
+      factorId: cleanFactorId,
       challengeId: challengeData.id,
       code: cleanCode,
     });
@@ -173,8 +196,8 @@ export async function verifyMfaLogin(
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return { error: 'Verification error: ' + msg };
+    console.error('[authActions.verifyMfaLogin] Unexpected error:', err);
+    return { error: 'Unable to verify authenticator code right now.' };
   }
 }
 

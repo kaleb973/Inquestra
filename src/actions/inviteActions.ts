@@ -4,6 +4,7 @@
 // New members join with a designated role scoped to the organization.
 
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { generateInviteToken, verifyInviteToken } from '@/lib/inviteToken';
@@ -11,12 +12,22 @@ import { formatAuthError } from '@/lib/utils';
 import type { Role } from '@prisma/client';
 import DOMPurify from 'isomorphic-dompurify';
 
+const InviteRoleSchema = z.enum(['PI', 'ADMIN', 'RESEARCHER', 'VIEWER']);
+const InviteEmailSchema = z.string().trim().toLowerCase().email().max(255);
+const InvitePasswordSchema = z.string().min(8, 'Password must be at least 8 characters.').max(128, 'Password is too long.');
+
 // ─── Generate an invite link ─────────────────────────────────────────────────
 
 export async function createInviteLink(
   role: Role,
   expiresInHours: number
 ): Promise<{ success: true; url: string } | { success: false; error: string }> {
+  const parsedRole = InviteRoleSchema.safeParse(role);
+  if (!parsedRole.success) {
+    return { success: false, error: 'Invalid role specified for invite.' };
+  }
+  const validatedRole = parsedRole.data;
+
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'You must be signed in.' };
@@ -28,7 +39,7 @@ export async function createInviteLink(
   }
 
   // PIs can invite any role; Admins cannot invite another PI.
-  if (role === 'PI' && dbUser.role !== 'PI') {
+  if (validatedRole === 'PI' && dbUser.role !== 'PI') {
     return { success: false, error: 'Only a Lab PI can invite another PI.' };
   }
 
@@ -36,7 +47,7 @@ export async function createInviteLink(
     return { success: false, error: 'Invite duration must be an integer between 1 and 168 hours (7 days).' };
   }
 
-  const token = await generateInviteToken(dbUser.organizationId, role, expiresInHours);
+  const token = await generateInviteToken(dbUser.organizationId, validatedRole, expiresInHours);
 
   await prisma.auditLog.create({
     data: {
@@ -46,7 +57,7 @@ export async function createInviteLink(
       entityType: 'Invite',
       entityId: 'invite',
       details: {
-        message: `Invite link created for role ${role}, valid for ${expiresInHours}h.`,
+        message: `Invite link created for role ${validatedRole}, valid for ${expiresInHours}h.`,
       },
     },
   });
@@ -96,15 +107,28 @@ export async function acceptInvite(
     };
   }
 
-  const cleanEmail = DOMPurify.sanitize(email.trim().toLowerCase());
+  const parsedEmail = InviteEmailSchema.safeParse(DOMPurify.sanitize(email, { ALLOWED_TAGS: [] }));
+  if (!parsedEmail.success) {
+    return { success: false, error: 'Please provide a valid institutional email address.' };
+  }
+  const cleanEmail = parsedEmail.data;
+
+  const parsedPassword = InvitePasswordSchema.safeParse(password);
+  if (!parsedPassword.success) {
+    return { success: false, error: parsedPassword.error.issues[0]?.message ?? 'Invalid password.' };
+  }
 
   let orgId: string;
   let role: Role;
   let jti: string;
   try {
     const payload = await verifyInviteToken(token);
+    const parsedPayloadRole = InviteRoleSchema.safeParse(payload.role);
+    if (!parsedPayloadRole.success) {
+      return { success: false, error: 'Invite token carries an invalid role.' };
+    }
     orgId = payload.orgId;
-    role = payload.role;
+    role = parsedPayloadRole.data;
     jti = payload.jti;
   } catch {
     return { success: false, error: 'This invite link has expired or is invalid.' };
@@ -128,12 +152,13 @@ export async function acceptInvite(
   if (existing) return { success: false, error: 'An account with this email already exists.' };
 
   const supabase = await createSupabaseServerClient();
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 
   const { data, error } = await supabase.auth.signUp({
     email: cleanEmail,
-    password,
+    password: parsedPassword.data,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/app/callback`,
+      emailRedirectTo: `${baseUrl}/app/callback`,
     },
   });
 
@@ -141,28 +166,41 @@ export async function acceptInvite(
     return { success: false, error: formatAuthError(error?.message ?? 'Sign-up failed.') };
   }
 
-  // Create Prisma user record immediately with the designated org and role
-  await prisma.user.create({
-    data: {
-      authId: data.user.id,
-      email: cleanEmail,
-      role,
-      organizationId: orgId,
-    },
-  });
+  const supabaseAuthId = data.user.id;
 
-  await prisma.auditLog.create({
-    data: {
-      userId: data.user.id,
-      organizationId: orgId,
-      action: 'MEMBER_JOINED_VIA_INVITE',
-      entityType: 'User',
-      entityId: jti || data.user.id,
-      details: {
-        message: `${cleanEmail} joined as ${role} via invite link.`,
-        jti,
+  // Create Prisma user and immutable audit entry atomically, referencing createdUser.id as FK
+  await prisma.$transaction(async (tx) => {
+    if (jti) {
+      const redeemedInFlight = await tx.auditLog.findFirst({
+        where: { action: 'MEMBER_JOINED_VIA_INVITE', entityId: jti },
+      });
+      if (redeemedInFlight) {
+        throw new Error('This invite link has already been used.');
+      }
+    }
+
+    const createdUser = await tx.user.create({
+      data: {
+        authId: supabaseAuthId,
+        email: cleanEmail,
+        role,
+        organizationId: orgId,
       },
-    },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        userId: createdUser.id,
+        organizationId: orgId,
+        action: 'MEMBER_JOINED_VIA_INVITE',
+        entityType: 'User',
+        entityId: jti || createdUser.id,
+        details: {
+          message: `${cleanEmail} joined as ${role} via invite link.`,
+          jti,
+        },
+      },
+    });
   });
 
   revalidatePath('/app/admin');

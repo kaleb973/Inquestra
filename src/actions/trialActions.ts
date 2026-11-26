@@ -15,20 +15,21 @@ import {
   logTrialStatusChanged,
 } from '@/lib/posthog-logs';
 import type { ProjectWithLead } from '@/actions/projectActions';
+import { sanitizeTipTapAST } from '@/lib/security/trialImportSanitizer';
 
 // ─── Validation schemas ────────────────────────────────────────────────────────
 
 import DOMPurify from 'isomorphic-dompurify';
 
 const MetadataSchema = z.object({
-  key: z.string().min(1).max(100).transform(val => DOMPurify.sanitize(val)),
-  value: z.string().min(1).max(500).transform(val => DOMPurify.sanitize(val)),
+  key: z.string().min(1).max(100).transform(val => DOMPurify.sanitize(val, { ALLOWED_TAGS: [] })),
+  value: z.string().min(1).max(500).transform(val => DOMPurify.sanitize(val, { ALLOWED_TAGS: [] })),
 });
 
 const TrialPayloadSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(255).transform(val => DOMPurify.sanitize(val)),
+  title: z.string().min(1, 'Title is required').max(255).transform(val => DOMPurify.sanitize(val, { ALLOWED_TAGS: [] })),
   content: z.record(z.string(), z.unknown()), // TipTap ProseMirror JSON
-  status: z.enum(['DRAFT', 'ACTIVE', 'COMPLETED', 'FAILED']),
+  status: z.enum(['DRAFT', 'ACTIVE', 'FAILED']),
   projectId: z.string().uuid(),
   metadata: z.array(MetadataSchema).optional().default([]),
 });
@@ -53,6 +54,9 @@ export async function createTrial(payload: TrialPayload) {
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User profile not found in database.');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot create trials.');
+  }
 
   const project = await prisma.project.findFirst({
     where: {
@@ -64,9 +68,8 @@ export async function createTrial(payload: TrialPayload) {
     throw new Error('Project not found or access denied.');
   }
 
-  const contentValue = (typeof validated.content === 'object' && validated.content !== null)
-    ? (JSON.parse(JSON.stringify(validated.content)) as Prisma.InputJsonValue)
-    : ({} as Prisma.InputJsonValue);
+  const sanitizedContent = sanitizeTipTapAST(validated.content) ?? { type: 'doc', content: [] };
+  const contentValue = sanitizedContent as Prisma.InputJsonValue;
 
   const trial = await prisma.trial.create({
     data: {
@@ -81,7 +84,7 @@ export async function createTrial(payload: TrialPayload) {
     },
   });
 
-  revalidatePath(`/projects/${validated.projectId}`);
+  revalidatePath('/app');
   return { success: true, trialId: trial.id };
 }
 
@@ -139,8 +142,17 @@ export async function saveTrial(input: SaveTrialInput): Promise<SaveTrialResult>
     if (!dbUser) {
       return { success: false, error: 'User profile not found.' };
     }
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot edit trials.' };
+    }
 
     const validated = SaveTrialSchema.parse(input);
+    if (validated.status === 'COMPLETED') {
+      return {
+        success: false,
+        error: 'Trials can only reach COMPLETED status via cryptographic sealing.',
+      };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: {
@@ -162,10 +174,8 @@ export async function saveTrial(input: SaveTrialInput): Promise<SaveTrialResult>
       };
     }
 
-    const contentValue =
-      typeof validated.content === 'object' && validated.content !== null
-        ? (JSON.parse(JSON.stringify(validated.content)) as Prisma.InputJsonValue)
-        : ({} as Prisma.InputJsonValue);
+    const sanitizedContent = sanitizeTipTapAST(validated.content) ?? { type: 'doc', content: [] };
+    const contentValue = sanitizedContent as Prisma.InputJsonValue;
 
     const savedTimestamp = new Date();
 
@@ -221,13 +231,13 @@ export async function saveTrial(input: SaveTrialInput): Promise<SaveTrialResult>
       }
     });
 
-    revalidatePath(`/projects/${trial.projectId}`);
+    revalidatePath('/app');
     return { success: true, savedAt: savedTimestamp.toISOString() };
   } catch (err) {
     console.error('saveTrial error:', err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Database save failed.',
+      error: 'Database save failed.',
     };
   }
 }
@@ -292,6 +302,9 @@ export async function restoreTrialRevision(revisionId: string) {
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot restore trial revisions.');
+  }
 
   const revision = await prisma.trialRevision.findUnique({
     where: { id: revisionId },
@@ -350,6 +363,9 @@ export async function signTrial(
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot sign experimental records.');
+  }
 
   const trial = await prisma.trial.findFirst({
     where: { id: trialId, project: { organizationId: dbUser.organizationId } },
@@ -370,7 +386,10 @@ export async function signTrial(
   });
   if (existing) throw new Error(`You have already signed this trial as ${role}.`);
 
-  const cleanMeaning = DOMPurify.sanitize(meaning.trim());
+  const cleanMeaning = DOMPurify.sanitize(meaning.trim(), { ALLOWED_TAGS: [] });
+  if (!cleanMeaning) {
+    throw new Error('Signature meaning or justification is required.');
+  }
 
   const signature = await prisma.signature.create({
     data: {
@@ -581,6 +600,9 @@ export async function createNewTrial(
 
   const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
   if (!dbUser) throw new Error('User not found');
+  if (dbUser.role === 'VIEWER') {
+    throw new Error('Permission denied: viewers cannot create trials.');
+  }
 
   let targetProjectId = projectId && projectId !== 'ALL' ? projectId : null;
 
@@ -621,12 +643,13 @@ export async function createNewTrial(
   }
 
   const cleanTitle = template?.title?.trim()
-    ? DOMPurify.sanitize(template.title.trim()).slice(0, 255) || 'Untitled Experiment'
+    ? DOMPurify.sanitize(template.title.trim(), { ALLOWED_TAGS: [] }).slice(0, 255) || 'Untitled Experiment'
     : 'Untitled Experiment';
 
-  const initialContent = template?.content
-    ? (JSON.parse(JSON.stringify(template.content)) as Prisma.InputJsonValue)
-    : ({ type: 'doc', content: [] } as Prisma.InputJsonValue);
+  const sanitizedTemplateContent = template?.content
+    ? sanitizeTipTapAST(template.content) ?? { type: 'doc', content: [] }
+    : { type: 'doc', content: [] };
+  const initialContent = sanitizedTemplateContent as Prisma.InputJsonValue;
 
   const trial = await prisma.trial.create({
     data: {
@@ -673,6 +696,9 @@ export async function sealTrial(trialId: string): Promise<SealTrialResult> {
     if (!dbUser) {
       return { success: false, error: 'User profile not found in database.' };
     }
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot seal experiments.' };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: { id: trialId, project: { organizationId: dbUser.organizationId } },
@@ -696,26 +722,47 @@ export async function sealTrial(trialId: string): Promise<SealTrialResult> {
     const timestamp = new Date().toISOString();
     const checksum = generateTrialHash(trial.content, trial.metadata, timestamp);
 
-    await prisma.trial.update({
-      where: { id: trialId },
-      data: {
-        status: 'COMPLETED',
-        checksum,
-        sealedAt: new Date(timestamp),
-        sealedBy: dbUser.id
+    const atomicSeal = await prisma.$transaction(async (tx) => {
+      const updated = await tx.trial.updateMany({
+        where: { id: trialId, checksum: null },
+        data: {
+          status: 'COMPLETED',
+          checksum,
+          sealedAt: new Date(timestamp),
+          sealedBy: dbUser.id,
+        },
+      });
+
+      if (updated.count === 0) {
+        const existingSealed = await tx.trial.findUnique({
+          where: { id: trialId },
+          select: { checksum: true, sealedAt: true },
+        });
+        return { alreadySealed: true as const, existingSealed };
       }
+
+      await tx.auditLog.create({
+        data: {
+          userId: dbUser.id,
+          organizationId: dbUser.organizationId,
+          action: 'TRIAL_SEALED',
+          entityType: 'Trial',
+          entityId: trialId,
+          details: { message: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}` },
+        },
+      });
+
+      return { alreadySealed: false as const };
     });
 
-    await prisma.auditLog.create({
-      data: {
-        userId: dbUser.id,
-        organizationId: dbUser.organizationId,
-        action: 'TRIAL_SEALED',
-        entityType: 'Trial',
-        entityId: trialId,
-        details: { message: `Sealed Trial ${trial.title} with SHA-256 Checksum: ${checksum}` }
-      }
-    });
+    if (atomicSeal.alreadySealed) {
+      return {
+        success: true,
+        checksum: atomicSeal.existingSealed?.checksum ?? undefined,
+        sealedAt: atomicSeal.existingSealed?.sealedAt?.toISOString() || timestamp,
+        alreadySealed: true,
+      };
+    }
 
     try {
       logTrialSealed();
@@ -764,6 +811,9 @@ export async function updateTrialStatus(
     if (!dbUser) {
       return { success: false, error: 'User profile not found.' };
     }
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot change trial status.' };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: { id: trialId, project: { organizationId: dbUser.organizationId } },
@@ -771,12 +821,19 @@ export async function updateTrialStatus(
     if (!trial) {
       return { success: false, error: 'Trial not found or access denied.' };
     }
-    if (trial.checksum) {
+    if (trial.checksum || trial.status === 'COMPLETED') {
       return { success: false, error: 'Cannot change status of a sealed trial.' };
     }
 
+    if (newStatus === 'COMPLETED') {
+      return {
+        success: false,
+        error: 'Trials can only reach COMPLETED status via cryptographic sealing.',
+      };
+    }
+
     const validStatus = z
-      .enum(['DRAFT', 'ACTIVE', 'IN_REVIEW', 'COMPLETED', 'FAILED'])
+      .enum(['DRAFT', 'ACTIVE', 'IN_REVIEW', 'FAILED'])
       .parse(newStatus);
 
     const updated = await prisma.trial.update({
@@ -837,14 +894,19 @@ export async function renameTrial(
 
     const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
     if (!dbUser) return { success: false, error: 'User not found.' };
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot rename trials.' };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: { id: trialId, project: { organizationId: dbUser.organizationId } },
     });
     if (!trial) return { success: false, error: 'Trial not found.' };
-    if (trial.checksum) return { success: false, error: 'Cannot rename a sealed experiment.' };
+    if (trial.checksum || trial.status === 'COMPLETED') {
+      return { success: false, error: 'Cannot rename a sealed experiment.' };
+    }
 
-    const cleanTitle = DOMPurify.sanitize(newTitle.trim()) || 'Untitled Experiment';
+    const cleanTitle = DOMPurify.sanitize(newTitle.trim(), { ALLOWED_TAGS: [] }).slice(0, 255) || 'Untitled Experiment';
 
     const updated = await prisma.trial.update({
       where: { id: trialId },
@@ -894,6 +956,9 @@ export async function duplicateTrial(
 
     const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
     if (!dbUser) return { success: false, error: 'User not found.' };
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot duplicate trials.' };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: { id: trialId, project: { organizationId: dbUser.organizationId } },
@@ -958,28 +1023,39 @@ export async function deleteTrial(trialId: string): Promise<{ success: boolean; 
 
     const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
     if (!dbUser) return { success: false, error: 'User not found.' };
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot delete trials.' };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: { id: trialId, project: { organizationId: dbUser.organizationId } },
     });
     if (!trial) return { success: false, error: 'Trial not found' };
 
-    if (trial.checksum) {
+    if (trial.checksum || trial.status === 'COMPLETED') {
       return {
         success: false,
         error: 'Data Integrity Violation: Sealed experiments are cryptographically locked and cannot be deleted.',
       };
     }
 
-    await prisma.$transaction([
-      prisma.metadataEntry.deleteMany({ where: { trialId } }),
-      prisma.trialRevision.deleteMany({ where: { trialId } }),
-      prisma.trialInventory.deleteMany({ where: { trialId } }),
-      prisma.trialEquipment.deleteMany({ where: { trialId } }),
-      prisma.signature.deleteMany({ where: { trialId } }),
-      prisma.telemetryStream.deleteMany({ where: { trialId } }),
-      prisma.trial.delete({ where: { id: trialId } }),
-      prisma.auditLog.create({
+    await prisma.$transaction(async (tx) => {
+      // Atomic unsealed verification inside transaction before deletion
+      const lockCheck = await tx.trial.findFirst({
+        where: { id: trialId, checksum: null, status: { not: 'COMPLETED' } },
+        select: { id: true },
+      });
+      if (!lockCheck) {
+        throw new Error('Data Integrity Violation: Trial was sealed concurrently and cannot be deleted.');
+      }
+      await tx.metadataEntry.deleteMany({ where: { trialId } });
+      await tx.trialRevision.deleteMany({ where: { trialId } });
+      await tx.trialInventory.deleteMany({ where: { trialId } });
+      await tx.trialEquipment.deleteMany({ where: { trialId } });
+      await tx.signature.deleteMany({ where: { trialId } });
+      await tx.telemetryStream.deleteMany({ where: { trialId } });
+      await tx.trial.deleteMany({ where: { id: trialId, checksum: null } });
+      await tx.auditLog.create({
         data: {
           userId: dbUser.id,
           organizationId: dbUser.organizationId,
@@ -991,8 +1067,8 @@ export async function deleteTrial(trialId: string): Promise<{ success: boolean; 
             deletedTitle: trial.title,
           },
         },
-      }),
-    ]);
+      });
+    });
 
     return { success: true };
   } catch (err: unknown) {
@@ -1018,14 +1094,19 @@ export async function setTrialCategory(
 
     const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
     if (!dbUser) return { success: false, error: 'User not found.' };
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot update trial metadata.' };
+    }
 
     const trial = await prisma.trial.findFirst({
       where: { id: trialId, project: { organizationId: dbUser.organizationId } },
     });
     if (!trial) return { success: false, error: 'Trial not found' };
-    if (trial.checksum) return { success: false, error: 'Cannot modify metadata on a sealed experiment.' };
+    if (trial.checksum || trial.status === 'COMPLETED') {
+      return { success: false, error: 'Cannot modify metadata on a sealed experiment.' };
+    }
 
-    const cleanCategory = DOMPurify.sanitize(category.trim());
+    const cleanCategory = DOMPurify.sanitize(category.trim(), { ALLOWED_TAGS: [] }).slice(0, 100);
 
     await prisma.$transaction(async (tx) => {
       await tx.metadataEntry.deleteMany({

@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { saveTrial } from '@/actions/trialActions';
+import { sanitizeTipTapAST } from '@/lib/security/trialImportSanitizer';
 import DOMPurify from 'isomorphic-dompurify';
 
 interface SyncPayload {
@@ -53,6 +54,17 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
       });
     }
 
+    if (dbUser.role === 'VIEWER') {
+      return { success: false, error: 'Permission denied: viewers cannot sync or create cloud trials.' };
+    }
+
+    if (payload.status === 'COMPLETED') {
+      return {
+        success: false,
+        error: 'Trials can only reach COMPLETED status through cryptographic sealing.',
+      };
+    }
+
     let cloudProjectId = payload.cloudProjectId;
 
     // Verify tenant boundary for existing project or auto-provision default project
@@ -81,18 +93,21 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
       }
     }
 
-    const cleanTitle = DOMPurify.sanitize(payload.title?.trim() || 'Untitled Trial').slice(0, 255);
+    const cleanTitle = DOMPurify.sanitize(payload.title?.trim() || 'Untitled Trial', { ALLOWED_TAGS: [] }).slice(0, 255);
 
-    const contentValue = (typeof payload.content === 'object' && payload.content !== null)
-      ? (JSON.parse(JSON.stringify(payload.content)) as Prisma.InputJsonValue)
-      : ({} as Prisma.InputJsonValue);
+    const sanitizedAst =
+      typeof payload.content === 'object' && payload.content !== null
+        ? sanitizeTipTapAST(payload.content)
+        : null;
+    const cleanDoc = sanitizedAst ?? { type: 'doc', content: [] };
+    const contentValue = cleanDoc as Prisma.InputJsonValue;
 
     // Create or update
     if (payload.cloudTrialId) {
       const saveResult = await saveTrial({
         trialId: payload.cloudTrialId,
         title: cleanTitle,
-        content: payload.content,
+        content: cleanDoc,
         status: payload.status,
         metadata: payload.metadata,
         createRevision: true,
@@ -103,7 +118,7 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
         return { success: false, error: saveResult.error };
       }
 
-      revalidatePath(`/projects/${cloudProjectId}`);
+      revalidatePath('/app');
       return { success: true, cloudTrialId: payload.cloudTrialId, cloudProjectId };
     } else {
       const trial = await prisma.trial.create({
@@ -117,8 +132,8 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
             create: (payload.metadata || [])
               .filter((m) => m.key.trim().length > 0 && m.value.trim().length > 0)
               .map((m) => ({
-                key: DOMPurify.sanitize(m.key.trim()).slice(0, 100),
-                value: DOMPurify.sanitize(m.value.trim()).slice(0, 500),
+                key: DOMPurify.sanitize(m.key.trim(), { ALLOWED_TAGS: [] }).slice(0, 100),
+                value: DOMPurify.sanitize(m.value.trim(), { ALLOWED_TAGS: [] }).slice(0, 500),
               })),
           },
         },
@@ -128,21 +143,21 @@ export async function syncTrialToCloud(payload: SyncPayload): Promise<SyncResult
       await prisma.trialRevision.create({
         data: {
           trialId: trial.id,
-          title: payload.title,
+          title: cleanTitle,
           content: contentValue,
           savedById: dbUser.id,
           note: 'Initial cloud sync',
         },
       });
 
-      revalidatePath(`/projects/${cloudProjectId}`);
+      revalidatePath('/app');
       return { success: true, cloudTrialId: trial.id, cloudProjectId };
     }
   } catch (err) {
     console.error('syncTrialToCloud error:', err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Database sync failed.',
+      error: 'Database sync failed.',
     };
   }
 }
