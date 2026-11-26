@@ -26,6 +26,10 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+function stripControlChars(str: string): string {
+  return str.replace(/[\r\n\t\u0000-\u001F\u007F]/g, ' ').trim();
+}
+
 export async function POST(req: NextRequest) {
   // 1. Centralized Rate Limiting (5 requests per 60 minutes per IP in prod, 100 in dev)
   const isDev = process.env.NODE_ENV === 'development';
@@ -75,13 +79,15 @@ export async function POST(req: NextRequest) {
 
   const data = parsed.data;
 
-  // Sanitize string fields against XSS and template injection
+  // Sanitize string fields against XSS, template injection, and SMTP header injection
+  const cleanName = stripControlChars(DOMPurify.sanitize(data.name, { ALLOWED_TAGS: [] }));
+  const cleanInstitution = stripControlChars(DOMPurify.sanitize(data.institution, { ALLOWED_TAGS: [] }));
   const sanitized = {
-    name: DOMPurify.sanitize(data.name),
-    email: data.email.toLowerCase().trim(),
-    institution: DOMPurify.sanitize(data.institution),
-    role: data.role ? DOMPurify.sanitize(data.role) : null,
-    useCase: data.useCase ? DOMPurify.sanitize(data.useCase) : null,
+    name: cleanName || 'Researcher',
+    email: stripControlChars(data.email).toLowerCase(),
+    institution: cleanInstitution || 'Laboratory',
+    role: data.role ? stripControlChars(DOMPurify.sanitize(data.role, { ALLOWED_TAGS: [] })) : null,
+    useCase: data.useCase ? DOMPurify.sanitize(data.useCase, { ALLOWED_TAGS: [] }).trim() : null,
   };
 
   // Send via Resend if configured, with strict 5-second timeout deadline
@@ -98,22 +104,21 @@ export async function POST(req: NextRequest) {
     'inquestrasupport@gmail.com';
   const notifyEmail = rawNotify.trim().replace(/^["']|["']$/g, '');
 
-  let emailDispatchStatus = 'unconfigured';
-  let emailDispatchError: string | null = null;
-
   if (resendApiKey && !resendApiKey.startsWith('placeholder')) {
     const escName = escapeHtml(sanitized.name);
     const escEmail = escapeHtml(sanitized.email);
     const escInst = escapeHtml(sanitized.institution);
     const escRole = sanitized.role ? escapeHtml(sanitized.role) : null;
     const escUseCase = sanitized.useCase ? escapeHtml(sanitized.useCase) : null;
+    const safeSubjectInst = sanitized.institution.slice(0, 80);
+    const safeSubjectName = sanitized.name.slice(0, 60);
 
     // 1. Internal notification to Inquestra team
     const adminNotificationPayload = {
       from: 'Inquestra Pilot <support@inquestra.org>',
       to: [notifyEmail],
       reply_to: sanitized.email,
-      subject: `New Pilot Interest: ${escInst} / ${escName}`,
+      subject: `New Pilot Interest: ${safeSubjectInst} / ${safeSubjectName}`,
       html: `
         <h2>New Pilot Lab Interest</h2>
         <table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;line-height:1.6">
@@ -133,7 +138,7 @@ export async function POST(req: NextRequest) {
       from: 'Inquestra Pilot Program <support@inquestra.org>',
       to: [sanitized.email],
       reply_to: 'support@inquestra.org',
-      subject: `Inquestra Pilot Lab Access: Application Received (${escInst})`,
+      subject: `Inquestra Pilot Lab Access: Application Received (${safeSubjectInst})`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#18181b;line-height:1.6">
           <div style="border-bottom:1px solid #e4e4e7;padding-bottom:16px;margin-bottom:20px">
@@ -206,27 +211,19 @@ export async function POST(req: NextRequest) {
       }
 
       if (errors.length > 0) {
-        emailDispatchStatus = 'partial_or_failed';
-        emailDispatchError = errors.join(' | ');
-        console.error('[pilot-interest] Dispatch errors:', emailDispatchError);
-      } else {
-        emailDispatchStatus = 'sent';
+        console.error('[pilot-interest] Dispatch errors:', errors.join(' | '));
       }
     } catch (err) {
-      emailDispatchStatus = 'exception';
-      emailDispatchError = String(err);
       console.error('[pilot-interest] Unexpected dispatch error:', err);
     }
   } else {
-    emailDispatchStatus = 'missing_resend_api_key';
-    console.log('[pilot-interest] RESEND_API_KEY missing or placeholder');
+    console.error('[pilot-interest] Email service is not configured.');
   }
 
+  // Never leak provider errors or env configuration status to unauthenticated clients
   return NextResponse.json(
     {
       success: true,
-      dispatchStatus: emailDispatchStatus,
-      dispatchError: emailDispatchError,
     },
     { headers: rateLimitHeaders }
   );

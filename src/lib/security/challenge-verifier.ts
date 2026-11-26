@@ -8,29 +8,84 @@ export interface ChallengeVerificationResult {
 }
 
 /**
- * Fast synchronous proof-of-work validator.
+ * Cryptographic proof-of-work validator (Edge + Node Web Crypto compatible).
  * Token format: "pow:<timestamp>:<nonce>:<hash>"
- * Target: sha256(timestamp + ":" + nonce) has difficulty (e.g. 4 leading hex zeros "0000")
+ * Target: sha256(timestamp + ":" + nonce) has difficulty ("000" prefix in lowercase hex)
+ * and has not been replayed within the validity window.
  */
-function verifyProofOfWork(token: string): boolean {
+const POW_MAX_AGE_MS = 300_000;
+const POW_MAX_FUTURE_SKEW_MS = 30_000;
+const MAX_USED_POW_ENTRIES = 10_000;
+const usedPowTokens = new Map<string, number>();
+
+function pruneUsedPowTokens(now: number) {
+  for (const [tokenHash, expiresAt] of usedPowTokens.entries()) {
+    if (expiresAt <= now) {
+      usedPowTokens.delete(tokenHash);
+    }
+  }
+  while (usedPowTokens.size >= MAX_USED_POW_ENTRIES) {
+    const oldestKey = usedPowTokens.keys().next().value;
+    if (!oldestKey) break;
+    usedPowTokens.delete(oldestKey);
+  }
+}
+
+function constantTimeEqualHex(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+async function computeSha256Hex(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function verifyProofOfWork(token: string): Promise<boolean> {
   try {
     const parts = token.split(':');
     if (parts.length !== 4 || parts[0] !== 'pow') return false;
 
-    const timestamp = parseInt(parts[1], 10);
+    const timestampStr = parts[1];
     const nonce = parts[2];
-    const claimedHash = parts[3];
+    const claimedHash = parts[3].toLowerCase();
 
-    // Must be fresh (< 5 minutes old) and not in the future
-    const now = Date.now();
-    if (isNaN(timestamp) || now - timestamp > 300_000 || timestamp > now + 30_000) {
+    if (!/^\d{10,16}$/.test(timestampStr) || !/^\d{1,10}$/.test(nonce)) {
+      return false;
+    }
+    if (!/^[0-9a-f]{64}$/.test(claimedHash)) {
       return false;
     }
 
-    // Must have at least 3 leading zeros in hex
+    const timestamp = Number.parseInt(timestampStr, 10);
+    const now = Date.now();
+    if (!Number.isFinite(timestamp) || now - timestamp > POW_MAX_AGE_MS || timestamp > now + POW_MAX_FUTURE_SKEW_MS) {
+      return false;
+    }
+
     if (!claimedHash.startsWith('000')) {
       return false;
     }
+
+    const actualHash = await computeSha256Hex(`${timestampStr}:${nonce}`);
+    if (!constantTimeEqualHex(actualHash, claimedHash) || !actualHash.startsWith('000')) {
+      return false;
+    }
+
+    pruneUsedPowTokens(now);
+    const replayKey = `${timestampStr}:${nonce}:${actualHash}`;
+    const existingExpiry = usedPowTokens.get(replayKey);
+    if (existingExpiry && existingExpiry > now) {
+      return false;
+    }
+    usedPowTokens.set(replayKey, timestamp + POW_MAX_AGE_MS);
 
     return true;
   } catch {
@@ -51,7 +106,7 @@ export async function verifyChallengeToken(
 
   const trimmedToken = token.trim();
 
-  // 1. Dev / Test bypass for automated tests
+  // 1. Dev / Test bypass for automated tests (never enabled in production)
   if (
     process.env.NODE_ENV !== 'production' &&
     (trimmedToken === 'test-valid-challenge-token' || trimmedToken.startsWith('mock-challenge-'))
@@ -61,8 +116,12 @@ export async function verifyChallengeToken(
 
   // 2. Client Proof-of-Work check
   if (trimmedToken.startsWith('pow:')) {
-    const isValidPoW = verifyProofOfWork(trimmedToken);
-    return { valid: isValidPoW, type: 'pow' };
+    const isValidPoW = await verifyProofOfWork(trimmedToken);
+    return {
+      valid: isValidPoW,
+      type: 'pow',
+      error: isValidPoW ? undefined : 'Invalid or expired proof-of-work challenge',
+    };
   }
 
   // 3. Cloudflare Turnstile Verification

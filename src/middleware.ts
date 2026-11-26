@@ -20,7 +20,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const CSP_HEADER = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com",
+  `script-src 'self' ${isDev ? "'unsafe-eval' " : ''}'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' blob: data: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
@@ -81,6 +81,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. Rate Limiting Protection
+  const isAppRoute = pathname === '/app' || pathname.startsWith('/app/');
+  const isScanRoute = pathname === '/scan' || pathname.startsWith('/scan/');
   let rateLimitResult: RateLimitResult = { success: true, limit: 180, remaining: 180, reset: 0 };
 
   if (pathname.startsWith('/app/login') || pathname.startsWith('/app/signup')) {
@@ -89,7 +91,7 @@ export async function middleware(request: NextRequest) {
   } else if (pathname.startsWith('/api')) {
     // API endpoints: 120 requests per minute
     rateLimitResult = checkRateLimit(`api:${clientIp}`, 120, 60_000);
-  } else if (pathname.startsWith('/app')) {
+  } else if (isAppRoute) {
     // General workspace navigation: 300 requests per minute
     rateLimitResult = checkRateLimit(`app:${clientIp}`, 300, 60_000);
   }
@@ -116,78 +118,98 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  // Only refresh Supabase session cookies on workspace, auth, and barcode scan routes
+  // so public marketing pages avoid unnecessary auth lookups.
+  if (isAppRoute || isScanRoute) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            response = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
+      }
+    );
+
+    // Refresh session — required for Server Components to read auth state
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Subpath routing (everything under /app is the workspace)
+    // /app operates in Local Notebook mode for unauthenticated researchers.
+    // Only administrative and billing management routes require authentication.
+    const isAppProtectedRoute =
+      pathname.startsWith('/app/admin') ||
+      pathname.startsWith('/app/billing');
+
+    const isAppAuthRoute =
+      pathname.startsWith('/app/login') || pathname.startsWith('/app/signup');
+
+    if (isAppProtectedRoute && !user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/app/login';
+      loginUrl.searchParams.set('redirectTo', pathname);
+      return NextResponse.redirect(loginUrl);
     }
-  );
 
-  // Refresh session — required for Server Components to read auth state
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    // Enforce step-up MFA (AAL2) when the authenticated user has verified TOTP factors enrolled
+    let mfaPending = false;
+    if (user && (isAppProtectedRoute || isAppAuthRoute)) {
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      mfaPending =
+        aalData?.nextLevel === 'aal2' && aalData?.currentLevel !== 'aal2';
 
-  // Subpath routing (everything under /app is the workspace)
-  // /app operates in Local Notebook mode for unauthenticated researchers (ADR-0001).
-  // Only administrative and billing management routes require authentication.
-  const isAppProtectedRoute =
-    pathname.startsWith('/app/admin') ||
-    pathname.startsWith('/app/billing');
+      if (isAppProtectedRoute && mfaPending) {
+        const mfaUrl = request.nextUrl.clone();
+        mfaUrl.pathname = '/app/login';
+        mfaUrl.searchParams.set('mfa', 'required');
+        mfaUrl.searchParams.set('redirectTo', pathname);
+        return NextResponse.redirect(mfaUrl);
+      }
+    }
 
-  const isAppAuthRoute =
-    pathname.startsWith('/app/login') || pathname.startsWith('/app/signup');
-
-  if (isAppProtectedRoute && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/app/login';
-    loginUrl.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  if (isAppAuthRoute && user) {
-    const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = '/app';
-    return NextResponse.redirect(homeUrl);
+    if (isAppAuthRoute && user && !mfaPending) {
+      const homeUrl = request.nextUrl.clone();
+      homeUrl.pathname = '/app';
+      return NextResponse.redirect(homeUrl);
+    }
   }
 
   // 3. Attach CORS Origin for API requests
   if (pathname.startsWith('/api')) {
     const origin = request.headers.get('origin');
     if (origin && ALLOWED_ORIGINS.has(origin)) {
-      supabaseResponse.headers.set('Access-Control-Allow-Origin', origin);
-      supabaseResponse.headers.set('Access-Control-Allow-Credentials', 'true');
+      response.headers.set('Access-Control-Allow-Origin', origin);
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
     }
-    supabaseResponse.headers.set(
+    response.headers.set(
       'Access-Control-Allow-Methods',
       'GET, POST, PUT, DELETE, OPTIONS, PATCH'
     );
-    supabaseResponse.headers.set(
+    response.headers.set(
       'Access-Control-Allow-Headers',
       'Content-Type, Authorization, stripe-signature, X-Requested-With'
     );
   }
 
   // 4. Attach Enterprise Security Headers (Defense in Depth)
-  applySecurityHeaders(supabaseResponse.headers);
+  applySecurityHeaders(response.headers);
 
-  return supabaseResponse;
+  return response;
 }
 
 export const config = {

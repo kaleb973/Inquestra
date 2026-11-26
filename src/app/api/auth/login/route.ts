@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   try {
     if (contentType.includes('application/json')) {
       const json: LoginRequestBody = await req.json();
-      email = typeof json.email === 'string' ? json.email.trim() : '';
+      email = typeof json.email === 'string' ? json.email.trim().toLowerCase() : '';
       password = typeof json.password === 'string' ? json.password : '';
       if (!challengeToken && typeof json.challengeToken === 'string') {
         challengeToken = json.challengeToken;
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       contentType.includes('multipart/form-data')
     ) {
       const formData = await req.formData();
-      email = (formData.get('email') as string | null)?.trim() ?? '';
+      email = (formData.get('email') as string | null)?.trim().toLowerCase() ?? '';
       password = (formData.get('password') as string | null) ?? '';
       if (!challengeToken) {
         challengeToken = formData.get('challengeToken') as string | null;
@@ -229,7 +229,7 @@ type AuthCheckResult =
       );
     }
 
-    const message = err instanceof Error ? err.message : 'Internal authentication error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[api/auth/login] Unexpected error:', err);
+    return NextResponse.json({ error: 'Internal authentication error' }, { status: 500 });
   }
 }

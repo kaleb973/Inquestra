@@ -44,7 +44,7 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com" +
+      `script-src 'self' ${isDev ? "'unsafe-eval' " : ''}'unsafe-inline' https://js.stripe.com` +
         (posthogCspSources ? ` ${posthogCspSources.scriptHost}` : ''),
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' blob: data: https:",
@@ -64,6 +64,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {

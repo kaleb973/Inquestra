@@ -16,21 +16,12 @@ export async function GET(req: NextRequest) {
 
   const startTime = Date.now();
 
-  // 1. Liveness Probe (process check)
+  // 1. Liveness Probe (process check — no secrets or env key names exposed)
   if (probeType === 'live') {
-    const resendKeys = Object.keys(process.env).filter(k => k.toLowerCase().includes('resend') || k.toLowerCase().includes('pilot'));
     return NextResponse.json(
       {
         status: 'healthy',
         probe: 'liveness',
-        uptime: process.uptime(),
-        resendConfigured: Boolean(
-          process.env.RESEND_API_KEY ||
-          process.env.Resend_API ||
-          process.env.RESEND_API ||
-          process.env.RESEND_KEY
-        ),
-        detectedMatchingKeys: resendKeys,
         timestamp: new Date().toISOString(),
       },
       {
@@ -61,7 +52,6 @@ export async function GET(req: NextRequest) {
           status: 'connected',
           latencyMs,
         },
-        uptime: process.uptime(),
         timestamp: new Date().toISOString(),
       },
       {
@@ -83,7 +73,6 @@ export async function GET(req: NextRequest) {
         probe: 'readiness',
         database: {
           status: 'disconnected',
-          error: message,
           latencyMs,
         },
         timestamp: new Date().toISOString(),

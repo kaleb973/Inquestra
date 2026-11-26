@@ -12,7 +12,8 @@ import { isAnalyticsPermitted } from '@/lib/analytics/events';
 import { isDeploymentSkewError } from '@/lib/deploymentSkew';
 import type { User } from '@supabase/supabase-js';
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const RAW_GA_ID = process.env.NEXT_PUBLIC_GA_ID?.trim();
+const GA_ID = RAW_GA_ID && /^(G|UA|AW|DC)-[A-Z0-9-]+$/i.test(RAW_GA_ID) ? RAW_GA_ID : null;
 const POSTHOG_PROJECT_TOKEN = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 const POSTHOG_CONFIGURED = Boolean(POSTHOG_PROJECT_TOKEN && POSTHOG_HOST);
@@ -66,13 +67,18 @@ export function AnalyticsProvider() {
 
   useEffect(() => {
     if (!POSTHOG_PROJECT_TOKEN || !POSTHOG_HOST || posthog.__loaded) return;
+    const permitted = isAnalyticsPermitted();
 
     posthog.init(POSTHOG_PROJECT_TOKEN, {
       api_host: POSTHOG_HOST,
       defaults: '2025-05-24',
-      capture_exceptions: true,
+      opt_out_capturing_by_default: !permitted,
+      capture_exceptions: permitted,
       debug: process.env.NODE_ENV === 'development',
       before_send: (event) => {
+        if (!isAnalyticsPermitted()) {
+          return null;
+        }
         if (event && event.event === '$exception') {
           const props = (event.properties || {}) as Record<string, unknown>;
           const errorText = [
@@ -96,6 +102,7 @@ export function AnalyticsProvider() {
     if (!POSTHOG_CONFIGURED) return;
 
     const identifyUser = (user: User) => {
+      if (!isAnalyticsPermitted()) return;
       if (identifiedUserId.current === user.id) return;
 
       if (identifiedUserId.current) {
@@ -172,12 +179,12 @@ export function AnalyticsProvider() {
         <RouteChangeTracker />
       </Suspense>
 
-      {/* Google Analytics 4 Scripts (only rendered if NEXT_PUBLIC_GA_ID is provided) */}
+      {/* Google Analytics 4 Scripts (only rendered if NEXT_PUBLIC_GA_ID is valid & defaults to denied until consented) */}
       {GA_ID && (
         <>
           <Script
             strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
           />
           <Script
             id="google-analytics-init"
@@ -186,8 +193,11 @@ export function AnalyticsProvider() {
               __html: `
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  analytics_storage: '${isAnalyticsPermitted() ? 'granted' : 'denied'}'
+                });
                 gtag('js', new Date());
-                gtag('config', '${GA_ID}', {
+                gtag('config', ${JSON.stringify(GA_ID)}, {
                   send_page_view: false
                 });
               `,

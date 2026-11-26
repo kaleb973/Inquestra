@@ -251,7 +251,7 @@ export async function extractSafeTrialJsonFromZip(file: File): Promise<string> {
       );
     }
 
-    // Estimate uncompressed size to guard against Zip Bombs
+    // Header pre-check against Zip Bombs (must still verify actual decompressed byte length below)
     const rawSize = (entry as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize || 0;
     totalUncompressedSize += rawSize;
     if (totalUncompressedSize > MAX_ZIP_UNCOMPRESSED_BYTES) {
@@ -275,12 +275,38 @@ export async function extractSafeTrialJsonFromZip(file: File): Promise<string> {
     );
   }
 
-  const trialJsonText = await zip.files[trialJsonEntryName].async('text');
+  // Decompress to Uint8Array first and enforce actual decompressed byte quota (defeats forged ZIP headers)
+  const trialJsonBytes = await zip.files[trialJsonEntryName].async('uint8array');
+  if (trialJsonBytes.byteLength > MAX_ZIP_UNCOMPRESSED_BYTES) {
+    throw new Error('Security Alert: Decompressed archive payload exceeds memory quota. Possible Zip Bomb.');
+  }
+
+  const trialJsonText = new TextDecoder('utf-8', { fatal: false }).decode(trialJsonBytes);
   if (!trialJsonText.trim()) {
     throw new Error('The "trial.json" file in the archive is empty.');
   }
 
   return trialJsonText;
+}
+
+/**
+ * Validates href / src URLs safely by stripping ASCII control characters and parsing via URL.
+ */
+function sanitizeHrefOrSrcAttribute(rawValue: string): string {
+  const withoutControlChars = rawValue.replace(/[\u0000-\u0020\u007F]/g, '');
+  if (!withoutControlChars) return '#';
+  if (withoutControlChars.startsWith('#') || withoutControlChars.startsWith('/')) {
+    return withoutControlChars.slice(0, 2048);
+  }
+  try {
+    const parsed = new URL(withoutControlChars);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:') {
+      return parsed.toString().slice(0, 2048);
+    }
+  } catch {
+    return '#';
+  }
+  return '#';
 }
 
 /**
@@ -293,11 +319,7 @@ function sanitizeNodeAttribute(key: string, value: unknown): unknown {
 
   if (typeof value === 'string') {
     if (key === 'href' || key === 'src') {
-      const lower = value.trim().toLowerCase();
-      if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
-        return '#';
-      }
-      return DOMPurify.sanitize(value).slice(0, 2048);
+      return sanitizeHrefOrSrcAttribute(value);
     }
     // Sanitize string attributes and strip prompt injection delimiters
     const cleaned = DOMPurify.sanitize(value, { ALLOWED_TAGS: [] });
@@ -404,6 +426,19 @@ function sanitizeTipTapNode(
 }
 
 /**
+ * Public TipTap document AST sanitizer shared across trial/protocol server actions.
+ */
+export function sanitizeTipTapAST(rawDoc: unknown): Record<string, unknown> | null {
+  if (!rawDoc || typeof rawDoc !== 'object') return null;
+  const sanitized = sanitizeTipTapNode(rawDoc, { nodeCount: 0 });
+  if (!sanitized) return null;
+  if (sanitized.type !== 'doc') {
+    sanitized.type = 'doc';
+  }
+  return sanitized;
+}
+
+/**
  * Main ingestion & sanitization pipeline.
  * Takes raw JSON text and produces a sanitized, controlled Trial Document.
  */
@@ -497,7 +532,7 @@ export function sanitizeAndNormalizeTrialImport(rawJsonString: string): Validate
   cleanMetadata.push({
     id: `provenance-import-tag`,
     key: 'inquestra:import_provenance',
-    value: 'verified_sandbox_import',
+    value: 'verified_local_import',
   });
   cleanMetadata.push({
     id: `provenance-import-date`,

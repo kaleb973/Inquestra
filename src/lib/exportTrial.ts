@@ -29,6 +29,10 @@ export interface ExportPayload {
   signatures?: SignatureExport[];
 }
 
+function escapeMarkdownCell(raw: string): string {
+  return String(raw).replace(/[\r\n]+/g, ' ').replace(/\|/g, '\\|').trim();
+}
+
 export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   const td = new TurndownService({
     headingStyle: 'atx',
@@ -42,15 +46,15 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   // ── 1. Markdown ─────────────────────────────────────────────────────────────
   const frontmatter = [
     '---',
-    `title: "${payload.title}"`,
-    `status: ${payload.status}`,
-    `created: ${payload.createdAt}`,
-    `updated: ${payload.updatedAt}`,
-    ...(payload.checksum ? [`checksum_sha256: "${payload.checksum}"`] : []),
-    ...(payload.sealedAt ? [`sealed_at: "${payload.sealedAt}"`] : []),
+    `title: ${JSON.stringify(payload.title)}`,
+    `status: ${JSON.stringify(payload.status)}`,
+    `created: ${JSON.stringify(payload.createdAt)}`,
+    `updated: ${JSON.stringify(payload.updatedAt)}`,
+    ...(payload.checksum ? [`checksum_sha256: ${JSON.stringify(payload.checksum)}`] : []),
+    ...(payload.sealedAt ? [`sealed_at: ${JSON.stringify(payload.sealedAt)}`] : []),
     '---',
     '',
-    `# ${payload.title}`,
+    `# ${payload.title.replace(/[\r\n]+/g, ' ')}`,
     '',
   ].join('\n');
 
@@ -64,7 +68,7 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
     }
     markdownBody += '| Role | Signer | Date (UTC) | Legal Meaning |\n|---|---|---|---|\n';
     for (const sig of signatures) {
-      markdownBody += `| **${sig.role}** | ${sig.user.email} (${sig.user.role}) | ${new Date(sig.signedAt).toISOString()} | ${sig.meaning} |\n`;
+      markdownBody += `| **${escapeMarkdownCell(sig.role)}** | ${escapeMarkdownCell(sig.user.email)} (${escapeMarkdownCell(sig.user.role)}) | ${new Date(sig.signedAt).toISOString()} | ${escapeMarkdownCell(sig.meaning)} |\n`;
     }
   }
 
@@ -186,7 +190,7 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   a.href = url;
   a.download = `${slug}_${Date.now()}.zip`;
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**
@@ -222,7 +226,7 @@ export function exportTrialAsJson(payload: ExportPayload): void {
   a.href = url;
   a.download = `${slug}_${Date.now()}.json`;
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**
@@ -240,15 +244,15 @@ export function exportTrialAsMarkdown(payload: ExportPayload): void {
 
   const frontmatter = [
     '---',
-    `title: "${payload.title}"`,
-    `status: ${payload.status}`,
-    `created: ${payload.createdAt}`,
-    `updated: ${payload.updatedAt}`,
-    ...(payload.checksum ? [`checksum_sha256: "${payload.checksum}"`] : []),
-    ...(payload.sealedAt ? [`sealed_at: "${payload.sealedAt}"`] : []),
+    `title: ${JSON.stringify(payload.title)}`,
+    `status: ${JSON.stringify(payload.status)}`,
+    `created: ${JSON.stringify(payload.createdAt)}`,
+    `updated: ${JSON.stringify(payload.updatedAt)}`,
+    ...(payload.checksum ? [`checksum_sha256: ${JSON.stringify(payload.checksum)}`] : []),
+    ...(payload.sealedAt ? [`sealed_at: ${JSON.stringify(payload.sealedAt)}`] : []),
     '---',
     '',
-    `# ${payload.title}`,
+    `# ${payload.title.replace(/[\r\n]+/g, ' ')}`,
     '',
   ].join('\n');
 
@@ -262,7 +266,7 @@ export function exportTrialAsMarkdown(payload: ExportPayload): void {
     }
     markdownBody += '| Role | Signer | Date (UTC) | Legal Meaning |\n|---|---|---|---|\n';
     for (const sig of signatures) {
-      markdownBody += `| **${sig.role}** | ${sig.user.email} (${sig.user.role}) | ${new Date(sig.signedAt).toISOString()} | ${sig.meaning} |\n`;
+      markdownBody += `| **${escapeMarkdownCell(sig.role)}** | ${escapeMarkdownCell(sig.user.email)} (${escapeMarkdownCell(sig.user.role)}) | ${new Date(sig.signedAt).toISOString()} | ${escapeMarkdownCell(sig.meaning)} |\n`;
     }
   }
 
@@ -280,5 +284,5 @@ export function exportTrialAsMarkdown(payload: ExportPayload): void {
   a.href = url;
   a.download = `${slug}_${Date.now()}.md`;
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

@@ -3,6 +3,7 @@
 // Evaluates incoming login requests in <0.2ms and assigns deterministic risk scores (0-100).
 
 import type { NextRequest } from 'next/server';
+import { getClientIp } from '@/lib/rateLimit';
 import { verifyDeviceTrustCookie } from './device-trust';
 import { evaluateClientIntegrity } from './tls-fingerprint';
 import { getFailureStats } from './failure-tracker';
@@ -19,19 +20,10 @@ export interface LoginRiskEvaluation {
 }
 
 /**
- * Extracts the real client IP address from request headers.
+ * Extracts the real client IP address using the shared trusted-header validator.
  */
 export function extractClientIp(req: NextRequest): string {
-  const cfIp = req.headers.get('cf-connecting-ip');
-  if (cfIp) return cfIp.trim();
-
-  const realIp = req.headers.get('x-real-ip');
-  if (realIp) return realIp.trim();
-
-  const forwarded = req.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
-
-  return '127.0.0.1';
+  return getClientIp(req.headers);
 }
 
 /**
