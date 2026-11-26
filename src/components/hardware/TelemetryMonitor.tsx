@@ -15,7 +15,6 @@ import {
   Download,
   Cpu,
   Square,
-  Sparkles,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { useWebSerial } from '@/hooks/useWebSerial';
@@ -67,7 +66,7 @@ export function TelemetryMonitor() {
   const { startSimulation, stopSimulation } = useTelemetrySim();
 
   const [selectedBaud, setSelectedBaud] = useState<number>(115200);
-  const [selectedSimMode, setSelectedSimMode] = useState<SimMode>('ecg');
+  const [selectedSimMode, setSelectedSimMode] = useState<SimMode>('thermistor');
   const [isWebSerialSupported, setIsWebSerialSupported] = useState(true);
 
   useEffect(() => {
@@ -178,6 +177,7 @@ export function TelemetryMonitor() {
       {/* Buffer Action Controls */}
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={handleExportCsv}
           disabled={buffer.length === 0}
           className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
@@ -187,6 +187,7 @@ export function TelemetryMonitor() {
           Export CSV
         </button>
         <button
+          type="button"
           onClick={resetTelemetry}
           disabled={buffer.length === 0}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-background hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-600 dark:hover:text-red-400 text-muted-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
@@ -222,6 +223,7 @@ export function TelemetryMonitor() {
               <span className="text-[11px]">{hardwareStatus.baudRate} baud</span>
             </div>
             <button
+              type="button"
               onClick={disconnect}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors"
             >
@@ -234,6 +236,7 @@ export function TelemetryMonitor() {
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground shrink-0 font-mono">Baud</span>
               <select
+                aria-label="Serial baud rate"
                 value={selectedBaud}
                 onChange={(e) => setSelectedBaud(Number(e.target.value))}
                 disabled={hardwareStatus.isConnected}
@@ -247,6 +250,7 @@ export function TelemetryMonitor() {
               </select>
             </div>
             <button
+              type="button"
               onClick={async () => {
                 const res = await checkLabCompliance();
                 if (!res.compliant) {
@@ -299,6 +303,7 @@ export function TelemetryMonitor() {
               <span className="text-[11px]">{hz} Hz</span>
             </div>
             <button
+              type="button"
               onClick={stopSimulation}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors"
             >
@@ -311,16 +316,18 @@ export function TelemetryMonitor() {
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground shrink-0 font-mono">Signal</span>
               <select
+                aria-label="Telemetry simulation signal"
                 value={selectedSimMode}
                 onChange={(e) => setSelectedSimMode(e.target.value as SimMode)}
                 disabled={hardwareStatus.isConnected}
                 className="flex-1 bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary disabled:opacity-40"
               >
-                <option value="ecg">Lead-II ECG (100 Hz, mV)</option>
-                <option value="thermistor">Bioreactor Temp (50 Hz, °C)</option>
+                <option value="thermistor">Thermal Probe (50 Hz, °C)</option>
+                <option value="ecg">Lead-II Biopotential (100 Hz, mV)</option>
               </select>
             </div>
             <button
+              type="button"
               onClick={() => {
                 trackAnalyticsEvent('daq_stream_started', {
                   portType: 'mock',
@@ -332,7 +339,7 @@ export function TelemetryMonitor() {
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-accent border border-border text-foreground transition-colors disabled:opacity-40 shadow-xs"
             >
               <Activity className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-              Start {selectedSimMode === 'ecg' ? 'ECG' : 'Temperature'} Stream
+              Start {selectedSimMode === 'ecg' ? 'Biopotential' : 'Temperature'} Stream
             </button>
           </div>
         )}

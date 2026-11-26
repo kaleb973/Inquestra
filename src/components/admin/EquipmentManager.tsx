@@ -58,41 +58,42 @@ export function EquipmentManager({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Lab Equipment Calibration</h2>
         <button
+          type="button"
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors shadow-sm font-medium"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded transition-colors shadow-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Plus className="w-4 h-4" /> Add Equipment
         </button>
       </div>
 
-      {error && <div className="p-3 bg-critical/10 border border-critical/30 text-critical text-sm rounded">{error}</div>}
+      {error && <div role="alert" className="p-3 bg-critical/10 border border-critical/30 text-critical text-sm rounded">{error}</div>}
 
       {showAdd && (
         <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm grid grid-cols-2 md:grid-cols-6 gap-4 items-end">
           <div className="col-span-2 md:col-span-1">
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Equipment Name</label>
-            <input required name="name" placeholder="e.g. pH Meter" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
+            <label htmlFor="eq-name" className="block text-xs font-medium text-muted-foreground mb-1">Equipment Name</label>
+            <input id="eq-name" required name="name" placeholder="e.g. pH Meter" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Serial Number</label>
-            <input name="serialNumber" placeholder="e.g. SN-98231" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500 font-mono" />
+            <label htmlFor="eq-serial" className="block text-xs font-medium text-muted-foreground mb-1">Serial Number</label>
+            <input id="eq-serial" name="serialNumber" placeholder="e.g. SN-98231" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring font-mono" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Custom Barcode</label>
-            <input name="barcode" placeholder="e.g. EQ-PH-001" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500 font-mono" />
+            <label htmlFor="eq-barcode" className="block text-xs font-medium text-muted-foreground mb-1">Custom Barcode</label>
+            <input id="eq-barcode" name="barcode" placeholder="e.g. EQ-PH-001" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring font-mono" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Last Calibrated</label>
-            <input required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
+            <label htmlFor="eq-last-cal" className="block text-xs font-medium text-muted-foreground mb-1">Last Calibrated</label>
+            <input id="eq-last-cal" required type="date" name="lastCalibrated" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Freq (Days)</label>
-            <input required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-purple-500" />
+            <label htmlFor="eq-freq" className="block text-xs font-medium text-muted-foreground mb-1">Freq (Days)</label>
+            <input id="eq-freq" required type="number" name="calibrationFreq" defaultValue={30} className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring" />
           </div>
           <div className="hidden">
             <input type="hidden" name="status" value="OPERATIONAL" />
           </div>
-          <button disabled={isPending} type="submit" className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 h-[38px]">
+          <button disabled={isPending} type="submit" className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium rounded transition-colors disabled:opacity-50 h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             {isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Save'}
           </button>
         </form>

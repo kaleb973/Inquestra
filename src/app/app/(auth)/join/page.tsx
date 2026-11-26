@@ -25,7 +25,7 @@ const ROLE_META: Record<Role, { label: string; level: string; color: string; dut
   PI: {
     label: 'Principal Investigator',
     level: 'Level 4: Lab Director',
-    color: 'text-foreground bg-muted border-violet-500/30',
+    color: 'text-foreground bg-muted border-primary/40',
     duties: 'Full lab governance, trial sealing, team management, and regulatory oversight.',
   },
   ADMIN: {
@@ -342,11 +342,11 @@ function JoinPageContent() {
               />
               <label htmlFor="termsAcceptedJoin" className="text-xs text-muted-foreground leading-snug cursor-pointer select-none">
                 I certify that I am at least 18 years of age and agree to the{' '}
-                <Link href="/terms" target="_blank" className="text-primary hover:underline underline-offset-2">
+                <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-2">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" target="_blank" className="text-primary hover:underline underline-offset-2">
+                <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-2">
                   Privacy Policy
                 </Link>.
               </label>

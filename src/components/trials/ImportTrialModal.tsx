@@ -225,7 +225,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
 
         onClose();
       } catch (err) {
-        console.warn('Cloud import creation rejected, falling back to local sandbox mount:', err);
+        console.warn('Cloud import creation rejected, falling back to local notebook mount:', err);
         const fallbackLocalDoc: TrialDocument = {
           id: validatedTrial.id,
           title: validatedTrial.title,
@@ -289,6 +289,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             disabled={isProcessing || isSaving}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
@@ -303,11 +304,20 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
           {/* File Dropzone */}
           {!validatedTrial && (
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Browse or drop an Inquestra trial.json or zip export archive"
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
                 dragActive
                   ? 'border-primary bg-primary/5 scale-[0.99]'
@@ -472,7 +482,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
                     >
                       <Laptop className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                       <div>
-                        <div className="text-xs font-medium text-foreground">Local Sandbox Draft</div>
+                        <div className="text-xs font-medium text-foreground">Local Notebook Draft</div>
                         <div className="text-[10px] text-muted-foreground mt-0.5">
                           Mounts instantly in local browser storage
                         </div>

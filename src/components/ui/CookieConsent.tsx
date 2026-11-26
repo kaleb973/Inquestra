@@ -116,6 +116,7 @@ export function CookieConsent() {
             <span>Cookie &amp; Data Privacy</span>
           </div>
           <button
+            type="button"
             onClick={handleEssentialOnly}
             aria-label="Dismiss cookie notice with essential cookies only"
             className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"

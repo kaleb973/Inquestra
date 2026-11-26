@@ -4,7 +4,7 @@
 // Provides lab-wide paper management, Europe PMC discovery, cross-experiment citation tracking,
 // and open-access PDF access with strict legal attribution.
 
-import { useState, useMemo, useTransition } from 'react';
+import { useEffect, useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -71,11 +71,11 @@ const PRESET_TOPICS = [
   'Biosensors',
   'Microfluidics',
   'CRISPR Cas9',
-  'Tissue Engineering',
-  'Optogenetics',
-  'Electrophysiology',
+  'Heterogeneous Catalysis',
+  'Metal-Organic Frameworks',
+  'Polymer Synthesis',
   'Organ-on-Chip',
-  'Biomarkers',
+  'Electrochemistry',
 ];
 
 const isSafeHttpUrl = (url: string | null | undefined): boolean =>
@@ -92,6 +92,15 @@ export function LiteratureLibrary({
 
   // Search Modal state
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isSearchModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsSearchModalOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchModalOpen]);
   const [externalQuery, setExternalQuery] = useState('');
   const [isSearchingExternal, setIsSearchingExternal] = useState(false);
   const [externalResults, setExternalResults] = useState<LiteratureSearchResult[]>([]);
@@ -515,7 +524,7 @@ export function LiteratureLibrary({
                         <a
                           href={`https://doi.org/${paper.doi}`}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="px-2 py-1 text-xs rounded border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors flex items-center gap-1"
                           title="Open DOI resolver"
                         >
@@ -526,7 +535,7 @@ export function LiteratureLibrary({
                         <a
                           href={paper.pdfUrl!}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="px-2 py-1 text-xs font-medium rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors flex items-center gap-1"
                           title="Download Open Access PDF"
                         >
@@ -535,6 +544,7 @@ export function LiteratureLibrary({
                       )}
                       <button
                         type="button"
+                        aria-label={`Remove ${paper.title} from lab library`}
                         onClick={() => handleDeletePaper(paper.id, paper.title)}
                         disabled={isPending}
                         className="p-1 text-muted-foreground hover:text-destructive rounded transition-colors"
@@ -609,8 +619,9 @@ export function LiteratureLibrary({
                         #{t}
                         <button
                           type="button"
+                          aria-label={`Remove tag ${t}`}
                           onClick={() => handleRemoveTag(paper.id, t)}
-                          className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity"
                         >
                           <X className="w-2.5 h-2.5" />
                         </button>
@@ -694,13 +705,21 @@ export function LiteratureLibrary({
 
       {/* Europe PMC Discovery Search Modal */}
       {isSearchModalOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => e.target === e.currentTarget && setIsSearchModalOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="literature-discovery-modal-title"
+            className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden"
+          >
             {/* Modal Header */}
             <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
               <div className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">
+                <h2 id="literature-discovery-modal-title" className="text-sm font-semibold text-foreground">
                   Search &amp; Discover Literature (Europe PMC)
                 </h2>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
@@ -709,6 +728,7 @@ export function LiteratureLibrary({
               </div>
               <button
                 type="button"
+                aria-label="Close literature search modal"
                 onClick={() => setIsSearchModalOpen(false)}
                 className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
               >
@@ -724,7 +744,8 @@ export function LiteratureLibrary({
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Search keywords, disease target, author, or DOI (e.g. 'CRISPR Cas9 base editing')..."
+                    aria-label="Search external scientific literature"
+                    placeholder="Search keywords, target, author, or DOI (e.g. 'CRISPR Cas9 base editing')..."
                     value={externalQuery}
                     onChange={(e) => setExternalQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearchExternal(externalQuery)}
@@ -837,7 +858,7 @@ export function LiteratureLibrary({
                             <a
                               href={`https://doi.org/${paper.doi}`}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="text-primary hover:underline flex items-center gap-0.5 ml-auto"
                             >
                               DOI <ExternalLink className="w-2.5 h-2.5" />
@@ -847,7 +868,7 @@ export function LiteratureLibrary({
                             <a
                               href={paper.pdfUrl!}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5 font-medium"
                             >
                               PDF <FileText className="w-2.5 h-2.5" />

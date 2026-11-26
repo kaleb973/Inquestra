@@ -17,12 +17,12 @@ export function useTelemetrySim() {
   const phaseRef = useRef(0);
   const packetCountRef = useRef(0);
   const lastHzRef = useRef(Date.now());
-  const activeModeRef = useRef<SimMode>('ecg');
+  const activeModeRef = useRef<SimMode>('thermistor');
 
   const appendTelemetry = useNotebookStore((s) => s.appendTelemetry);
   const setHardwareStatus = useNotebookStore((s) => s.setHardwareStatus);
 
-  const startSimulation = useCallback((mode: SimMode = 'ecg') => {
+  const startSimulation = useCallback((mode: SimMode = 'thermistor') => {
     if (intervalRef.current !== null) return;
     activeModeRef.current = mode;
 

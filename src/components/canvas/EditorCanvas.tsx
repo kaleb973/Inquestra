@@ -1299,8 +1299,24 @@ export function EditorCanvas() {
 
   // Listen for citation insert events (e.g. clicked from Literature panel)
   useEffect(() => {
+    interface CitationInsertDetail {
+      paperId?: string;
+      id?: string;
+      title?: string;
+      authors?: string[];
+      journal?: string | null;
+      pubYear?: number | null;
+      doi?: string | null;
+      pmid?: string | null;
+      pmcid?: string | null;
+      url?: string | null;
+      pdfUrl?: string | null;
+      isOpenAccess?: boolean;
+      citationCount?: number;
+      notes?: string;
+    }
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<any>).detail;
+      const detail = (e as CustomEvent<CitationInsertDetail | undefined>).detail;
       if (editorRef.current && detail) {
         editorRef.current
           .chain()

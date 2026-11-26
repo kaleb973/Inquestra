@@ -3,7 +3,7 @@
 // Headless summary preview card inspired by Cassini ELN.
 // Previews experiment parameters, metadata, and provenance without loading the full notebook kernel.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FlaskConical,
   Clock,
@@ -35,6 +35,14 @@ interface TrialPreviewCardProps {
 export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardProps) {
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const status = trial.status as TrialStatus;
   const statusInfo = STATUS_STYLE[status] ?? STATUS_STYLE.DRAFT;
 
@@ -65,7 +73,12 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-full max-w-md bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="trial-preview-title"
+        className="relative w-full max-w-md bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150"
+      >
         {/* Header */}
         <div className="flex items-start justify-between p-4 border-b border-border bg-muted/20">
           <div className="space-y-1.5 pr-4 min-w-0">
@@ -81,11 +94,13 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
                 {formattedDate}
               </span>
             </div>
-            <h3 className="text-base font-semibold text-foreground truncate tracking-tight">
+            <h3 id="trial-preview-title" className="text-base font-semibold text-foreground truncate tracking-tight">
               {trial.title}
             </h3>
           </div>
           <button
+            type="button"
+            aria-label="Close preview dialog"
             onClick={onClose}
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
           >
@@ -150,6 +165,7 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
         {/* Footer Actions */}
         <div className="flex items-center justify-between p-3 border-t border-border bg-muted/20 gap-2">
           <button
+            type="button"
             onClick={handleCopyRef}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border bg-background hover:bg-accent text-foreground transition-colors"
           >
@@ -167,6 +183,7 @@ export function TrialPreviewCard({ trial, onOpen, onClose }: TrialPreviewCardPro
           </button>
 
           <button
+            type="button"
             onClick={() => {
               onClose();
               onOpen();

@@ -729,7 +729,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                                     : [...prev, header]
                                 );
                               }}
-                              className="rounded border-border text-indigo-600 focus:ring-0"
+                              className="rounded border-border text-primary focus:ring-0"
                             />
                             <span className="truncate">{header}</span>
                           </label>
@@ -977,7 +977,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                         <td className="px-4 py-2.5 w-32">
                           <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-indigo-500 rounded-full transition-all"
+                              className="h-full bg-primary rounded-full transition-all"
                               style={{ width: `${barWidth}%` }}
                             />
                           </div>
@@ -1337,7 +1337,7 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
                             : col.type === 'numeric'
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                             : col.type === 'category'
-                            ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+                            ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20'
                             : col.type === 'status'
                             ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                             : 'bg-muted text-muted-foreground border-border'

@@ -36,6 +36,7 @@ export function SerialControlPanel() {
       <div className="flex items-center gap-2">
         <span className="text-[10px] text-muted-foreground shrink-0">Baud</span>
         <select
+          aria-label="Serial baud rate"
           value={selectedBaud}
           onChange={(e) => setSelectedBaud(Number(e.target.value))}
           disabled={isConnected}
@@ -56,7 +57,7 @@ export function SerialControlPanel() {
             isConnected
               ? hardwareStatus.isSimulated
                 ? 'bg-amber-400 animate-pulse'
-                : 'bg-indigo-400 animate-pulse'
+                : 'bg-primary animate-pulse'
               : 'bg-muted-foreground/40'
           }`}
         />
@@ -69,6 +70,7 @@ export function SerialControlPanel() {
 
       {/* Connect / Disconnect */}
       <button
+        type="button"
         onClick={async () => {
           if (isConnected) {
             if (hardwareStatus.isSimulated) {

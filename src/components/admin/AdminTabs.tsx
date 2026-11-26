@@ -80,7 +80,7 @@ interface AdminTabsProps {
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'text-foreground bg-muted border-border',
-  PI: 'text-foreground bg-muted border-violet-500/30',
+  PI: 'text-foreground bg-primary/10 border-primary/35',
   RESEARCHER: 'text-sky-700 dark:text-sky-300 bg-sky-500/10 border-sky-500/30',
   VIEWER: 'text-muted-foreground bg-muted border-border',
 };
@@ -255,6 +255,7 @@ function ProjectsTab({
                     {editingLeadId === project.id ? (
                       <div className="flex items-center gap-1.5">
                         <select
+                          aria-label={`Assign lead for ${project.name}`}
                           value={selectedLeadId}
                           onChange={(e) => setSelectedLeadId(e.target.value)}
                           className="text-xs px-2 py-1 rounded border border-border bg-background text-foreground focus:outline-none focus:border-primary/60"
@@ -267,6 +268,7 @@ function ProjectsTab({
                           ))}
                         </select>
                         <button
+                          type="button"
                           onClick={() => handleLeadChange(project.id)}
                           disabled={isPending}
                           className="text-[10px] px-2 py-1 rounded bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors disabled:opacity-50"
@@ -274,6 +276,7 @@ function ProjectsTab({
                           {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Save'}
                         </button>
                         <button
+                          type="button"
                           onClick={() => { setEditingLeadId(null); setSelectedLeadId(''); }}
                           className="text-[10px] px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground transition-colors"
                         >
@@ -282,11 +285,12 @@ function ProjectsTab({
                       </div>
                     ) : (
                       <button
+                        type="button"
                         onClick={() => {
                           setEditingLeadId(project.id);
                           setSelectedLeadId(project.lead?.id ?? '');
                         }}
-                        className="text-[10px] text-muted-foreground hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors flex items-center gap-1"
+                        className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
                       >
                         <Plus className="w-3 h-3" />
                         {project.lead ? 'Reassign' : 'Assign Lead'}
@@ -469,8 +473,9 @@ export function AdminTabs({
                 <div className="px-5 py-3.5 border-b border-border flex items-center justify-between bg-muted/40">
                   <h2 className="text-sm font-semibold text-foreground">Team Members</h2>
                   <button
+                    type="button"
                     onClick={() => setActiveTab('teams')}
-                    className="text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
                   >
                     Manage →
                   </button>
@@ -506,8 +511,9 @@ export function AdminTabs({
                 <div className="px-5 py-3.5 border-b border-border bg-muted/40 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Projects</h2>
                   <button
+                    type="button"
                     onClick={() => setActiveTab('projects')}
-                    className="text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
                   >
                     Manage →
                   </button>
@@ -545,10 +551,11 @@ export function AdminTabs({
               ].map((item) => (
                 <button
                   key={item.label}
+                  type="button"
                   onClick={() => setActiveTab(item.tab)}
                   className="text-left bg-card border border-border hover:border-border rounded-xl p-4 flex items-start gap-3 transition-colors group shadow-sm"
                 >
-                  <div className="mt-0.5 p-2 rounded-lg bg-muted border border-border/60 group-hover:bg-primary/90/20 transition-colors">
+                  <div className="mt-0.5 p-2 rounded-lg bg-muted border border-border/60 group-hover:bg-primary/20 transition-colors">
                     {item.icon}
                   </div>
                   <div>

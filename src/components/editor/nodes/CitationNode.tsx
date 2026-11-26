@@ -88,7 +88,7 @@ function CitationNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<LiteratureSearchResult[]>([]);
-  const [recentPapers, setRecentPapers] = useState<any[]>([]);
+  const [recentPapers, setRecentPapers] = useState<Awaited<ReturnType<typeof fetchTrialPapers>>>([]);
 
   // Load trial's cited papers if any to provide quick selection
   useEffect(() => {
@@ -341,6 +341,7 @@ function CitationNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
           <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
+              aria-label="Copy APA citation"
               onClick={handleCopyAPA}
               className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors"
               title="Copy APA Citation"
@@ -351,7 +352,8 @@ function CitationNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
               <a
                 href={`https://doi.org/${doi}`}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                aria-label="Open DOI resolver"
                 className="p-1 text-muted-foreground hover:text-primary rounded hover:bg-muted transition-colors"
                 title="Open DOI resolver"
               >
@@ -362,7 +364,8 @@ function CitationNodeView({ node, updateAttributes, deleteNode }: NodeViewProps)
               <a
                 href={pdfUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                aria-label="Open Open-Access Full-Text PDF"
                 className="p-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors"
                 title="Open Open-Access Full-Text PDF"
               >

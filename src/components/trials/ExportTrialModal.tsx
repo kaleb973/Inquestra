@@ -13,7 +13,6 @@ import {
   X,
   Loader2,
   ArrowRight,
-  Sparkles,
   Info,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
@@ -164,6 +163,7 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             disabled={isExporting}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
@@ -213,15 +213,18 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
 
           {/* Format Selection Grid */}
           <div className="space-y-2.5">
-            <label className="text-xs font-semibold text-foreground block">
+            <span id="export-format-label" className="text-xs font-semibold text-foreground block">
               Choose Export Format:
-            </label>
+            </span>
 
-            <div className="grid grid-cols-1 gap-2.5">
+            <div role="radiogroup" aria-labelledby="export-format-label" className="grid grid-cols-1 gap-2.5">
               {/* Option 1: ZIP (Recommended) */}
-              <div
+              <button
+                type="button"
+                role="radio"
+                aria-checked={selectedFormat === 'ZIP'}
                 onClick={() => setSelectedFormat('ZIP')}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`w-full text-left p-3.5 rounded-xl border cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   selectedFormat === 'ZIP'
                     ? 'border-primary bg-primary/10 ring-1 ring-primary'
                     : 'border-border bg-card/30 hover:bg-muted/40'
@@ -237,7 +240,7 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
                         Complete Archive (.ZIP)
                       </span>
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary/20 text-primary flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
+                        <CheckCircle2 className="w-3 h-3" />
                         Recommended
                       </span>
                     </div>
@@ -252,12 +255,15 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
 
               {/* Option 2: JSON */}
-              <div
+              <button
+                type="button"
+                role="radio"
+                aria-checked={selectedFormat === 'JSON'}
                 onClick={() => setSelectedFormat('JSON')}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`w-full text-left p-3.5 rounded-xl border cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   selectedFormat === 'JSON'
                     ? 'border-primary bg-primary/10 ring-1 ring-primary'
                     : 'border-border bg-card/30 hover:bg-muted/40'
@@ -276,12 +282,15 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
 
               {/* Option 3: Markdown */}
-              <div
+              <button
+                type="button"
+                role="radio"
+                aria-checked={selectedFormat === 'MARKDOWN'}
                 onClick={() => setSelectedFormat('MARKDOWN')}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`w-full text-left p-3.5 rounded-xl border cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   selectedFormat === 'MARKDOWN'
                     ? 'border-primary bg-primary/10 ring-1 ring-primary'
                     : 'border-border bg-card/30 hover:bg-muted/40'
@@ -300,12 +309,15 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
 
               {/* Option 4: PDF */}
-              <div
+              <button
+                type="button"
+                role="radio"
+                aria-checked={selectedFormat === 'PDF'}
                 onClick={() => setSelectedFormat('PDF')}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`w-full text-left p-3.5 rounded-xl border cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   selectedFormat === 'PDF'
                     ? 'border-primary bg-primary/10 ring-1 ring-primary'
                     : 'border-border bg-card/30 hover:bg-muted/40'
@@ -324,7 +336,7 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 

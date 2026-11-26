@@ -161,8 +161,10 @@ function StepTimer({
   if (!detectedSeconds && !showPicker) {
     return (
       <button
+        type="button"
+        aria-label="Add countdown bench timer to this step"
         onClick={() => setShowPicker(true)}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-muted-foreground hover:bg-accent transition-all shrink-0"
+        className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
         title="Add countdown bench timer to this step"
       >
         <Timer className="w-3.5 h-3.5" />
@@ -212,6 +214,7 @@ function StepTimer({
     <div className="flex items-center gap-1.5 shrink-0">
       {isDone ? (
         <button
+          type="button"
           onClick={onComplete}
           className="inline-flex items-center gap-1 px-2.5 py-1 min-h-[26px] rounded-xs text-[10px] font-bold bg-phosphor/20 text-phosphor border border-phosphor/40 animate-pulse hover:bg-phosphor/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Timer finished! Click to complete step with timestamp"
@@ -229,15 +232,20 @@ function StepTimer({
           }`}
         >
           <Timer className={`w-3 h-3 ${isRunning ? 'animate-spin' : ''}`} style={{ animationDuration: '3s' }} />
-          <span
+          <button
+            type="button"
+            disabled={isRunning}
             onClick={() => { if (!isRunning) setShowPicker(true); }}
-            className={!isRunning ? 'cursor-pointer hover:underline' : ''}
+            aria-label={`Change timer duration (${formatTime(remaining)})`}
+            className={!isRunning ? 'cursor-pointer hover:underline disabled:cursor-default' : 'cursor-default'}
             title={!isRunning ? 'Click to change or type duration' : undefined}
           >
             {formatTime(remaining)}
-          </span>
+          </button>
 
           <button
+            type="button"
+            aria-label={isRunning ? 'Pause countdown timer' : 'Start countdown timer'}
             onClick={toggleRun}
             className="p-0.5 rounded hover:bg-accent hover:text-foreground transition-colors ml-0.5"
             title={isRunning ? 'Pause timer' : 'Start countdown'}
@@ -247,6 +255,8 @@ function StepTimer({
 
           {isRunning && (
             <button
+              type="button"
+              aria-label="Reset countdown timer"
               onClick={resetTimer}
               className="p-0.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="Reset timer"
@@ -516,6 +526,10 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
 
                 {/* Checkbox */}
                 <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={step.checked}
+                  aria-label={`Toggle protocol step ${idx + 1}${step.text ? `: ${step.text}` : ''}`}
                   onClick={() => toggleStep(step.id)}
                   className={`mt-0.5 shrink-0 transition-colors ${
                     step.checked ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground hover:text-foreground'
@@ -530,6 +544,7 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
 
                 {/* Step text */}
                 <input
+                  aria-label={`Protocol step ${idx + 1} text`}
                   value={step.text}
                   onChange={(e) => editStepText(step.id, e.target.value)}
                   placeholder={`Step ${idx + 1}…`}
@@ -548,10 +563,12 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
                   />
                 )}
 
-                {/* Deviation + delete (shown on hover or when checked) */}
-                <div className={`flex items-center gap-1 shrink-0 ${step.checked ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                {/* Deviation + delete (shown on hover, focus, or when checked) */}
+                <div className={`flex items-center gap-1 shrink-0 ${step.checked ? '' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-within:opacity-100'} transition-opacity`}>
                   {step.checked && (
                     <button
+                      type="button"
+                      aria-label="Log step deviation"
                       onClick={() => {
                         setDeviationDraft(step.deviation ?? '');
                         setShowDeviation(step.id);
@@ -565,6 +582,8 @@ function ProtocolNodeView({ node, updateAttributes, deleteNode, editor, getPos }
                     </button>
                   )}
                   <button
+                    type="button"
+                    aria-label="Remove protocol step"
                     onClick={() => removeStep(step.id)}
                     className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-red-500 transition-colors"
                   >

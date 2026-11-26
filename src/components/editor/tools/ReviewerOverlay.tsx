@@ -6,6 +6,21 @@ import { useState } from 'react';
 import { useNotebookStore } from '@/store/useNotebookStore';
 import { ShieldAlert, CheckCircle, AlertOctagon, X } from 'lucide-react';
 
+interface ProtocolReviewStep {
+  text?: string;
+  timestamp?: string | null;
+  checkedAt?: string | null;
+}
+
+interface ReviewDocNode {
+  type?: string;
+  attrs?: {
+    title?: string;
+    steps?: ProtocolReviewStep[];
+  };
+  content?: ReviewDocNode[];
+}
+
 interface Deviation {
   id: string;
   protocolTitle: string;
@@ -15,7 +30,7 @@ interface Deviation {
 
 export function ReviewerOverlay() {
   const [isOpen, setIsOpen] = useState(false);
-  const content = useNotebookStore((s) => s.activeTrial.content) as any;
+  const content = useNotebookStore((s) => s.activeTrial.content) as ReviewDocNode;
 
   if (!isOpen) {
     return (
@@ -32,19 +47,17 @@ export function ReviewerOverlay() {
 
   // Scan JSON tree for deviations
   const deviations: Deviation[] = [];
-  
-  const scanNode = (node: any) => {
+
+  const scanNode = (node: ReviewDocNode) => {
     if (node?.type === 'protocolBlock') {
       const steps = node.attrs?.steps || [];
       const title = node.attrs?.title || 'Unnamed Protocol';
-      
-      // A protocol deviation is a step that is "completed" (true) but has NO timestamp, 
-      // or a protocol that has a mix of completed and skipped steps without notes.
-      // For this simple version: Any step missing a timestamp is flagged.
-      steps.forEach((step: any, index: number) => {
-        if (!step.timestamp) {
+
+      // Any protocol step missing a completion timestamp is flagged.
+      steps.forEach((step, index) => {
+        if (!step.checkedAt && !step.timestamp) {
           deviations.push({
-            id: `${node.attrs?.title}-${index}`,
+            id: `${title}-${index}`,
             protocolTitle: title,
             stepIndex: index + 1,
             stepText: step.text || 'Empty step',
@@ -52,7 +65,7 @@ export function ReviewerOverlay() {
         }
       });
     }
-    
+
     if (node?.content) {
       node.content.forEach(scanNode);
     }
@@ -63,13 +76,22 @@ export function ReviewerOverlay() {
   }
 
   return (
-    <div className="fixed bottom-4 right-80 mr-4 z-40 bg-muted border border-purple-900 rounded-lg shadow-xl w-80 overflow-hidden flex flex-col max-h-[60vh]">
-      <div className="bg-purple-950/50 p-3 border-b border-purple-900 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-purple-400">
+    <div
+      role="region"
+      aria-label="PI Review Mode deviations"
+      className="fixed bottom-4 right-80 mr-4 z-40 bg-card border border-border rounded-lg shadow-xl w-80 overflow-hidden flex flex-col max-h-[60vh]"
+    >
+      <div className="bg-muted/60 p-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2 text-primary">
           <ShieldAlert className="w-4 h-4" />
           <span className="text-xs font-bold uppercase tracking-wider">PI Review Mode</span>
         </div>
-        <button onClick={() => setIsOpen(false)} className="text-purple-400 hover:text-purple-300">
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          aria-label="Close review overlay"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
           <X className="w-4 h-4" />
         </button>
       </div>

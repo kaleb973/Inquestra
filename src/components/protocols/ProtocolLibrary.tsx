@@ -86,6 +86,14 @@ function NewProtocolModal({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -111,13 +119,20 @@ function NewProtocolModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-protocol-modal-title"
+        className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4"
+      >
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">New Protocol Template</h2>
+            <h2 id="new-protocol-modal-title" className="text-sm font-semibold text-foreground">New Protocol Template</h2>
           </div>
           <button
+            type="button"
+            aria-label="Close new protocol dialog"
             onClick={onClose}
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
@@ -127,10 +142,11 @@ function NewProtocolModal({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">
+            <label htmlFor="new-protocol-name" className="block text-xs font-medium text-foreground mb-1.5">
               Protocol Name <span className="text-red-500">*</span>
             </label>
             <input
+              id="new-protocol-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -141,10 +157,11 @@ function NewProtocolModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">
+            <label htmlFor="new-protocol-desc" className="block text-xs font-medium text-foreground mb-1.5">
               Description <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
             <textarea
+              id="new-protocol-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief scope, equipment, or target analytes for this SOP…"

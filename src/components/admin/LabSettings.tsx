@@ -91,7 +91,7 @@ export function LabSettings({ org }: { org: Organization }) {
             <div className="grid grid-cols-1 md:grid-cols-3 bg-muted/40 font-semibold border-b border-border text-foreground">
               <div className="p-3">Function / Dimension</div>
               <div className="p-3 border-l border-border bg-muted/20">Flexible Mode (Off)</div>
-              <div className="p-3 border-l border-border bg-muted text-indigo-700 dark:text-indigo-200">Strict Compliance Mode (On)</div>
+              <div className="p-3 border-l border-border bg-muted text-primary font-semibold">Strict Compliance Mode (On)</div>
             </div>
 
             {/* Row 1: Inventory Overdraft */}
@@ -194,7 +194,7 @@ export function LabSettings({ org }: { org: Organization }) {
             <span className="text-foreground font-medium block mb-1">Choose Flexible Mode if:</span>
             You are an early-stage research lab, university group, or discovery incubator where moving fast at the bench is prioritized and lab members frequently introduce novel chemicals before logging them in digital inventory.
           </div>
-          <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/30 rounded-lg">
+          <div className="p-3 bg-primary/5 border border-primary/25 rounded-lg">
             <span className="text-foreground font-medium block mb-1">Choose Strict Mode if:</span>
             You are operating in regulated biopharma, translational research, or pre-clinical safety studies where internal SOPs require immutable material verification and zero unverified chemical usage.
           </div>

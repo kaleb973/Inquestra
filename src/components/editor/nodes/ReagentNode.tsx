@@ -15,6 +15,8 @@ import { useNotebookStore } from '@/store/useNotebookStore';
 
 // ─── NodeView component ────────────────────────────────────────────────────────
 
+type InventorySuggestion = Awaited<ReturnType<typeof fetchInventoryForSearch>>[number];
+
 function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const trialId = activeTrial?.id || 'local';
@@ -23,7 +25,7 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
   const [quantity, setQuantity] = useState(node.attrs.initialQuantity || '');
   const [unit, setUnit] = useState(node.attrs.initialUnit || 'mL');
 
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<InventorySuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleSearch = async (query: string) => {
@@ -100,20 +102,22 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
         }`}
       >
         {/* Sleek edge highlight */}
-        <div className="absolute top-0 left-0 w-1 h-full rounded-l-xl bg-gradient-to-b from-purple-500/50 to-transparent" />
+        <div className="absolute top-0 left-0 w-1 h-full rounded-l-xl bg-gradient-to-b from-primary/50 to-transparent" />
         
         {/* Form / Content */}
         <div className="px-5 py-4 pl-6">
           {!isCommitted ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-1">
-                <FlaskConical className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                <FlaskConical className="w-4 h-4 text-primary" />
                 <span className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">
                   Log Reagent Usage
                 </span>
                 <button
+                  type="button"
                   onClick={deleteNode}
-                  className="ml-auto text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                  aria-label="Remove reagent block"
+                  className="ml-auto text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity p-1"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -122,6 +126,7 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
                 <div className="flex-1 relative">
                   <input
                     type="text"
+                    aria-label="Reagent, chemical, or sample name"
                     placeholder="Search reagent, chemical, plasmid..."
                     value={chemical}
                     onChange={(e) => {
@@ -130,62 +135,70 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
                     }}
                     onFocus={() => { if (chemical.length > 0) setShowSuggestions(true); }}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 250)}
-                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all shadow-sm"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
                   />
                   
-                  {/* Autocomplete Dropdown - rendered with high z-index and no parent clipping */}
+                  {/* Autocomplete Dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-lg shadow-2xl z-[99999] max-h-56 overflow-y-auto divide-y divide-border py-1">
+                    <div
+                      role="listbox"
+                      aria-label="Inventory suggestions"
+                      className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-lg shadow-2xl z-[99999] max-h-56 overflow-y-auto divide-y divide-border py-1"
+                    >
                       {suggestions.map((item) => (
-                        <div
+                        <button
                           key={item.id}
+                          type="button"
                           onMouseDown={(e) => {
                             e.preventDefault();
                             setChemical(item.name);
                             setUnit(item.unit);
                             setShowSuggestions(false);
                           }}
-                          className="px-3.5 py-2.5 hover:bg-accent cursor-pointer transition-colors flex justify-between items-center group/item"
+                          className="w-full text-left px-3.5 py-2.5 hover:bg-accent cursor-pointer transition-colors flex justify-between items-center group/item"
                         >
                           <div>
-                            <div className="text-sm font-medium text-foreground group-hover/item:text-purple-600 dark:group-hover/item:text-purple-300 transition-colors">{item.name}</div>
+                            <div className="text-sm font-medium text-foreground group-hover/item:text-primary transition-colors">{item.name}</div>
                             <div className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                              <span className="uppercase tracking-wider font-mono text-[9px] bg-muted border border-border px-1 py-0.2 rounded text-foreground">{item.type}</span>
+                              <span className="uppercase tracking-wider font-mono text-[10px] bg-muted border border-border px-1 py-0.2 rounded text-foreground">{item.type}</span>
                               {item.location && <span>• {item.location.name}</span>}
                               {item.lotNumber && <span className="font-mono text-muted-foreground">• Lot {item.lotNumber}</span>}
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="text-xs font-mono font-semibold text-foreground">{item.quantity} {item.unit}</div>
-                            <div className="text-[9px] text-muted-foreground font-mono">available</div>
+                            <div className="text-[10px] text-muted-foreground font-mono">available</div>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )}
                 </div>
                 <input
                   type="number"
+                  aria-label="Quantity used"
                   placeholder="0.0"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                   min={0}
                   step="any"
-                  className="w-24 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-right shadow-sm"
+                  className="w-24 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all text-right shadow-sm"
                 />
                 <select
+                  aria-label="Unit"
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer shadow-sm"
+                  className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all appearance-none cursor-pointer shadow-sm"
                 >
                   {['mL', 'L', 'µL', 'g', 'mg', 'µg', 'units', 'drops'].map((u) => (
                     <option key={u} value={u}>{u}</option>
                   ))}
                 </select>
                 <button
+                  type="button"
                   onClick={handleDeduct}
                   disabled={feedback.type === 'loading'}
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-xs px-4 py-2 rounded-lg transition-colors disabled:opacity-50 text-sm shadow-sm"
+                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-xs px-4 py-2 rounded-lg transition-colors disabled:opacity-50 text-sm"
                 >
                   {feedback.type === 'loading' ? (
                     'Logging…'
@@ -213,7 +226,7 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
                   <CheckCircle2 className="w-4 h-4 text-foreground" />
                 )}
                 <span className="text-sm font-medium text-muted-foreground">
-                  Used <span className="text-foreground font-semibold">{quantity} {unit}</span> of <span className="text-indigo-600 dark:text-muted-foreground font-semibold">{feedback.chemical}</span>
+                  Used <span className="text-foreground font-semibold">{quantity} {unit}</span> of <span className="text-primary font-semibold">{feedback.chemical}</span>
                 </span>
               </div>
               <div className="h-4 w-px bg-border mx-1" />
@@ -228,8 +241,10 @@ function ReagentNodeView({ node, deleteNode }: NodeViewProps) {
               )}
               {isCommitted && (
                 <button
+                  type="button"
                   onClick={deleteNode}
-                  className="ml-auto text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                  aria-label="Remove reagent log entry"
+                  className="ml-auto text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity p-1"
                 >
                   <X className="w-4 h-4" />
                 </button>

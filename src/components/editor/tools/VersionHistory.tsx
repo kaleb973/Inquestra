@@ -108,7 +108,7 @@ export function VersionHistory({ trialId, isSynced }: VersionHistoryProps) {
                   <div className="min-w-0 flex-1">
                     {/* Version label */}
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                       <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         {idx === 0 ? 'Latest Save' : `v${revisions.length - idx}`}
                       </span>
@@ -137,9 +137,10 @@ export function VersionHistory({ trialId, isSynced }: VersionHistoryProps) {
                   {/* Restore button (not on the latest save — no point) */}
                   {idx > 0 && (
                     <button
+                      type="button"
                       onClick={() => handleRestore(rev)}
                       disabled={isPending && restoringId === rev.id}
-                      className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-border text-foreground bg-muted/50 hover:bg-primary/90/15 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50 shrink-0"
+                      className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-border text-foreground bg-muted/50 hover:bg-primary/15 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-all disabled:opacity-50 shrink-0"
                       title="Restore this version as a new draft"
                     >
                       {restoringId === rev.id ? (

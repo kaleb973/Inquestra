@@ -61,9 +61,9 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
     title: 'Principal Investigator',
     subtitle: 'Lab Director & Legal Sign-off Authority',
     colorClass: 'text-foreground',
-    borderClass: 'border-violet-300 dark:border-violet-500/40',
-    bgClass: 'bg-violet-50 dark:bg-violet-950/20',
-    badgeClass: 'bg-violet-100 dark:bg-violet-950/50 text-violet-800 dark:text-violet-300 border-violet-300 dark:border-violet-800',
+    borderClass: 'border-primary/40',
+    bgClass: 'bg-primary/5',
+    badgeClass: 'bg-primary/10 text-primary border-primary/35',
     authorizedList: [
       'Final cryptographic seal & signature on completed trials',
       'Assign & promote members across all clearance levels',
@@ -89,9 +89,9 @@ const ROLE_DEFINITIONS: Record<Role, RoleConfig> = {
     title: 'Lab Operations Manager',
     subtitle: 'Facility & Inventory Operations Lead',
     colorClass: 'text-foreground',
-    borderClass: 'border-indigo-300 dark:border-border',
-    bgClass: 'bg-indigo-50 dark:bg-indigo-950/20',
-    badgeClass: 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-800 dark:text-muted-foreground border-indigo-300 dark:border-indigo-800',
+    borderClass: 'border-sky-500/35 dark:border-border',
+    bgClass: 'bg-sky-500/5',
+    badgeClass: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30',
     authorizedList: [
       'Manage LIMS inventory, stock replenishment, and lot numbers',
       'Define storage locations (freezers, racks, boxes, well-plates)',
@@ -250,7 +250,12 @@ export function LabClearanceDossier({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="clearance-dossier-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+    >
       <div className="relative w-full max-w-3xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Top Header Banner */}
         <div className={`px-6 py-5 border-b border-border flex items-center justify-between ${config.bgClass}`}>
@@ -267,13 +272,15 @@ export function LabClearanceDossier({
                   LABORATORY CLEARANCE DOSSIER
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-foreground tracking-tight mt-0.5">
+              <h2 id="clearance-dossier-title" className="text-lg font-bold text-foreground tracking-tight mt-0.5">
                 {config.title}
               </h2>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close clearance dossier"
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5" />
@@ -298,7 +305,7 @@ export function LabClearanceDossier({
             </div>
             <div>
               <div className="text-[10px] uppercase font-mono text-muted-foreground">Assigned Squad</div>
-              <div className="text-sm font-semibold text-indigo-600 dark:text-muted-foreground mt-0.5">
+              <div className="text-sm font-semibold text-primary mt-0.5">
                 {user.squadName || 'General Lab Pool (Unassigned)'}
               </div>
             </div>
@@ -321,7 +328,7 @@ export function LabClearanceDossier({
             {/* Progress bar */}
             <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mb-4">
               <div
-                className="h-full bg-indigo-500 transition-all duration-300"
+                className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -332,11 +339,12 @@ export function LabClearanceDossier({
                 return (
                   <button
                     key={item.id}
+                    type="button"
                     onClick={() => toggleCheck(item.id)}
                     className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
                       isChecked
-                        ? 'bg-indigo-50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900/60 text-foreground'
-                        : 'bg-card border-border hover:border-indigo-300 dark:hover:border-neutral-700 text-foreground shadow-sm'
+                        ? 'bg-primary/10 border-primary/30 text-foreground'
+                        : 'bg-card border-border hover:border-primary/40 text-foreground shadow-sm'
                     }`}
                   >
                     <div className="mt-0.5 shrink-0">
@@ -347,7 +355,7 @@ export function LabClearanceDossier({
                       )}
                     </div>
                     <div>
-                      <div className={`text-xs font-medium ${isChecked ? 'text-indigo-700 dark:text-indigo-200 line-through opacity-80' : 'text-foreground'}`}>
+                      <div className={`text-xs font-medium ${isChecked ? 'text-primary line-through opacity-80' : 'text-foreground'}`}>
                         {item.label}
                       </div>
                       <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
@@ -364,7 +372,7 @@ export function LabClearanceDossier({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Authorized */}
             <div className="p-4 rounded-xl bg-muted/20 border border-border">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-muted-foreground uppercase tracking-wider mb-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground uppercase tracking-wider mb-2.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-foreground" />
                 Authorized Operations
               </div>
@@ -396,10 +404,10 @@ export function LabClearanceDossier({
           </div>
 
           {/* Regulatory & Governance Mandate */}
-          <div className="p-4 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/15 border border-indigo-200 dark:border-indigo-900/40 flex items-start gap-3">
-            <Info className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-primary/5 border border-primary/25 flex items-start gap-3">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <div>
-              <div className="text-xs font-semibold text-indigo-800 dark:text-muted-foreground uppercase tracking-wider">
+              <div className="text-xs font-semibold text-foreground uppercase tracking-wider">
                 Data Integrity &amp; GLP Compliance Mandate
               </div>
               <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
@@ -418,6 +426,7 @@ export function LabClearanceDossier({
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setShowEscalationModal(true)}
                 className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-sm"
               >
@@ -432,6 +441,7 @@ export function LabClearanceDossier({
         <div className="px-6 py-4 border-t border-border bg-muted/30 flex justify-between items-center text-xs text-muted-foreground">
           <span>Inquestra Scientific Research Governance</span>
           <button
+            type="button"
             onClick={onClose}
             className="px-4 py-1.5 rounded text-xs font-medium bg-muted hover:bg-accent text-foreground border border-border transition-colors shadow-sm"
           >
@@ -441,16 +451,23 @@ export function LabClearanceDossier({
 
         {/* Embedded Escalation Modal */}
         {showEscalationModal && (
-          <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-100">
+          <div
+            className="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-100"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="escalation-modal-title"
+          >
             <div className="w-full max-w-md bg-card border border-border rounded-xl p-5 shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-foreground" />
-                  <h3 className="text-sm font-semibold text-foreground">Ask Higher-Up: Clearance Elevation</h3>
+                  <h3 id="escalation-modal-title" className="text-sm font-semibold text-foreground">Ask Higher-Up: Clearance Elevation</h3>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowEscalationModal(false)}
                   className="text-muted-foreground hover:text-foreground"
+                  aria-label="Close escalation dialog"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -473,10 +490,11 @@ export function LabClearanceDossier({
                   )}
 
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-1">
+                    <label htmlFor="escalation-role-select" className="block text-xs font-medium text-foreground mb-1">
                       Requested Clearance Level
                     </label>
                     <select
+                      id="escalation-role-select"
                       value={requestedRole}
                       onChange={(e) => setRequestedRole(e.target.value as Role)}
                       className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
@@ -488,10 +506,11 @@ export function LabClearanceDossier({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-1">
+                    <label htmlFor="escalation-justification" className="block text-xs font-medium text-foreground mb-1">
                       Operational Justification / Research Need
                     </label>
                     <textarea
+                      id="escalation-justification"
                       rows={3}
                       value={justification}
                       onChange={(e) => setJustification(e.target.value)}
@@ -511,7 +530,7 @@ export function LabClearanceDossier({
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 disabled:opacity-50 shadow-sm"
+                      className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 flex items-center gap-1.5 disabled:opacity-50 shadow-sm"
                     >
                       {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                       Transmit to PI

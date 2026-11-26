@@ -220,6 +220,7 @@ export function TrialContextMenu({
           {/* Primary Operations */}
           <div className="space-y-0.5">
             <button
+              type="button"
               onClick={() => {
                 if (isSealed) return;
                 setDialogMode('RENAME');
@@ -232,6 +233,7 @@ export function TrialContextMenu({
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 if (isSealed) return;
                 setDialogMode('CATEGORY');
@@ -245,6 +247,7 @@ export function TrialContextMenu({
 
             <div className="relative">
               <button
+                type="button"
                 onClick={() => {
                   if (isSealed) return;
                   setShowStatusSubmenu(!showStatusSubmenu);
@@ -264,6 +267,7 @@ export function TrialContextMenu({
                 <div className="absolute left-full top-0 ml-1 w-32 rounded-lg bg-popover/95 backdrop-blur-sm border border-border shadow-lg p-1 text-xs animate-in fade-in-50 zoom-in-95 duration-75">
                   {STATUS_OPTIONS.map((opt) => (
                     <button
+                      type="button"
                       key={opt.status}
                       onClick={async () => {
                         await onChangeStatus(trial, opt.status);
@@ -284,6 +288,7 @@ export function TrialContextMenu({
             </div>
 
             <button
+              type="button"
               onClick={async () => {
                 setIsSubmitting(true);
                 try {
@@ -306,6 +311,7 @@ export function TrialContextMenu({
           {/* Utility Operations */}
           <div className="space-y-0.5">
             <button
+              type="button"
               onClick={handleCopyId}
               className="w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left hover:bg-accent hover:text-foreground transition-colors"
             >
@@ -318,6 +324,7 @@ export function TrialContextMenu({
 
             {onExport && (
               <button
+                type="button"
                 onClick={() => {
                   onExport(trial);
                   onClose();
@@ -344,6 +351,7 @@ export function TrialContextMenu({
               </div>
             ) : (
               <button
+                type="button"
                 onClick={() => setDialogMode('DELETE')}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-destructive hover:bg-destructive/10 transition-colors"
               >
@@ -357,20 +365,34 @@ export function TrialContextMenu({
 
       {/* Rename Dialog Modal */}
       {dialogMode === 'RENAME' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-xl bg-card border border-border shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => e.target === e.currentTarget && setDialogMode('NONE')}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trial-rename-dialog-title"
+            className="w-full max-w-sm rounded-xl bg-card border border-border shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150"
+          >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <h3 id="trial-rename-dialog-title" className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Edit3 className="w-4 h-4 text-primary" />
                 Rename Experiment
               </h3>
-              <button onClick={() => setDialogMode('NONE')} className="text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                aria-label="Close rename dialog"
+                onClick={() => setDialogMode('NONE')}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <form onSubmit={handleExecuteRename} className="space-y-4">
               <input
                 type="text"
+                aria-label="Experiment title"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
                 placeholder="Experiment title"
@@ -401,20 +423,33 @@ export function TrialContextMenu({
 
       {/* Set Category Modal */}
       {dialogMode === 'CATEGORY' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-xl bg-card border border-border shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => e.target === e.currentTarget && setDialogMode('NONE')}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trial-category-dialog-title"
+            className="w-full max-w-sm rounded-xl bg-card border border-border shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150"
+          >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <h3 id="trial-category-dialog-title" className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Tag className="w-4 h-4 text-primary" />
                 Categorize Experiment
               </h3>
-              <button onClick={() => setDialogMode('NONE')} className="text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                aria-label="Close categorize dialog"
+                onClick={() => setDialogMode('NONE')}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Select a common tag or type a custom one:</label>
+              <label htmlFor="trial-custom-category-input" className="text-xs text-muted-foreground">Select a common tag or type a custom one:</label>
               <div className="flex flex-wrap gap-1.5 pb-2">
                 {COMMON_CATEGORIES.map((cat) => (
                   <button
@@ -431,10 +466,11 @@ export function TrialContextMenu({
 
               <div className="flex items-center gap-2">
                 <input
+                  id="trial-custom-category-input"
                   type="text"
                   value={categoryValue}
                   onChange={(e) => setCategoryValue(e.target.value)}
-                  placeholder="Custom tag (e.g. Electrophysiology)"
+                  placeholder="Custom tag (e.g. Chromatography)"
                   disabled={isSubmitting}
                   className="flex-1 px-3 py-1.5 rounded-lg bg-background border border-border text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
@@ -454,9 +490,17 @@ export function TrialContextMenu({
 
       {/* Delete Confirmation Modal */}
       {dialogMode === 'DELETE' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-xl bg-card border border-destructive/40 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => e.target === e.currentTarget && !isSubmitting && setDialogMode('NONE')}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trial-delete-dialog-title"
+            className="w-full max-w-sm rounded-xl bg-card border border-destructive/40 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150"
+          >
+            <div id="trial-delete-dialog-title" className="flex items-center gap-2 text-destructive font-semibold text-sm">
               <AlertTriangle className="w-4 h-4" />
               <span>Delete Experiment?</span>
             </div>

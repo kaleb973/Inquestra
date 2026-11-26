@@ -216,7 +216,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
           isDone
             ? 'bg-emerald-500/10 border-emerald-500/40'
             : isRunning
-            ? 'bg-card border-primary/40 shadow-md ring-1 ring-indigo-500/20'
+            ? 'bg-card border-primary/40 shadow-md ring-1 ring-primary/20'
             : 'bg-card border-border hover:border-border/80'
         }`}
       >
@@ -228,6 +228,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
               <div className="flex items-center gap-1 flex-1">
                 <input
                   type="text"
+                  aria-label="Timer label"
                   value={labelText}
                   onChange={(e) => setLabelText(e.target.value)}
                   onKeyDown={(e) => {
@@ -237,23 +238,31 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                   autoFocus
                   className="bg-background border border-border rounded px-2 py-0.5 text-xs text-foreground focus:outline-none focus:border-primary w-full"
                 />
-                <button onClick={saveLabel} className="p-1 hover:text-foreground text-muted-foreground">
+                <button
+                  type="button"
+                  aria-label="Save timer label"
+                  onClick={saveLabel}
+                  className="p-1 hover:text-foreground text-muted-foreground"
+                >
                   <Check className="w-3.5 h-3.5 text-emerald-500" />
                 </button>
               </div>
             ) : (
-              <span
+              <button
+                type="button"
                 onClick={() => setEditingLabel(true)}
-                className="text-xs font-semibold text-foreground truncate cursor-pointer hover:underline flex items-center gap-1"
+                className="text-xs font-semibold text-foreground truncate cursor-pointer hover:underline flex items-center gap-1 text-left"
                 title="Click to rename timer"
               >
-                {label}
-                <Edit2 className="w-2.5 h-2.5 opacity-40 hover:opacity-100" />
-              </span>
+                <span>{label}</span>
+                <Edit2 className="w-2.5 h-2.5 opacity-40 hover:opacity-100 shrink-0" />
+              </button>
             )}
           </div>
 
           <button
+            type="button"
+            aria-label="Delete timer"
             onClick={deleteNode}
             className="text-muted-foreground hover:text-red-500 p-1 rounded hover:bg-muted transition-colors shrink-0"
             title="Delete timer"
@@ -268,6 +277,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
             <div className="flex items-center gap-2">
               <input
                 type="text"
+                aria-label="Timer duration"
                 value={timeInput}
                 onChange={(e) => setTimeInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -280,21 +290,24 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                 className="font-mono text-3xl font-bold tracking-tight text-foreground bg-background border-2 border-primary rounded-lg px-2 py-0.5 w-40 focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <button
+                type="button"
                 onClick={handleSaveTimeInput}
-                className="px-2.5 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-xs text-xs font-semibold transition-colors shadow-xs"
+                className="px-2.5 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-xs text-xs transition-colors"
               >
                 Set
               </button>
             </div>
           ) : (
-            <div
+            <button
+              type="button"
+              disabled={isRunning}
               onClick={() => {
                 if (!isRunning) {
                   setTimeInput(formatTime(remaining));
                   setEditingTime(true);
                 }
               }}
-              className={`font-mono text-3xl font-bold tracking-tight text-foreground select-none rounded-lg px-1.5 py-0.5 transition-all flex items-baseline gap-2 ${
+              className={`font-mono text-3xl font-bold tracking-tight text-foreground select-none rounded-lg px-1.5 py-0.5 transition-all flex items-baseline gap-2 disabled:cursor-default ${
                 !isRunning
                   ? 'cursor-pointer hover:bg-muted/80 hover:ring-1 hover:ring-border'
                   : ''
@@ -308,11 +321,12 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
                   click to type
                 </span>
               )}
-            </div>
+            </button>
           )}
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleToggle}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-xs ${
                 isDone
@@ -341,6 +355,8 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
             </button>
 
             <button
+              type="button"
+              aria-label="Reset timer"
               onClick={handleReset}
               className="p-1.5 rounded-lg border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title="Reset"
@@ -349,6 +365,8 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
             </button>
 
             <button
+              type="button"
+              aria-label={isMuted ? 'Unmute alarm audio' : 'Mute alarm audio'}
               onClick={() => setIsMuted(!isMuted)}
               className={`p-1.5 rounded-lg border transition-colors ${
                 isMuted
@@ -375,6 +393,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
               { label: '1h', secs: 3600 },
             ].map((preset) => (
               <button
+                type="button"
                 key={preset.secs}
                 onClick={() => handleSetPreset(preset.secs)}
                 className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${
@@ -392,6 +411,7 @@ function TimerNodeView({ node, updateAttributes, deleteNode }: NodeViewProps) {
           <div className="flex items-center gap-1">
             <input
               type="text"
+              aria-label="Custom timer duration (e.g. 12m)"
               placeholder="Custom (e.g. 12m)"
               disabled={isRunning}
               onKeyDown={(e) => {

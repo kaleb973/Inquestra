@@ -157,11 +157,11 @@ export default function SignUpPage() {
                 />
                 <label htmlFor="termsAccepted" className="text-xs text-muted-foreground leading-snug cursor-pointer select-none">
                   I certify that I am at least 18 years of age and agree to the{' '}
-                  <Link href="/terms" target="_blank" className="text-primary hover:underline underline-offset-2">
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-2">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" target="_blank" className="text-primary hover:underline underline-offset-2">
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-2">
                     Privacy Policy
                   </Link>.
                 </label>

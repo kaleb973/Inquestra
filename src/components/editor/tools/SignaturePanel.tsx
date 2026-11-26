@@ -45,8 +45,8 @@ const SIG_META: Record<Sig['role'], { label: string; color: string; badge: strin
   },
   PI_APPROVAL: {
     label: 'PI Approved',
-    color: 'border-violet-500/30 bg-violet-500/5',
-    badge: 'text-foreground bg-muted border-violet-500/30',
+    color: 'border-primary/35 bg-primary/5',
+    badge: 'text-foreground bg-primary/10 border-primary/35',
   },
 };
 
@@ -189,10 +189,11 @@ export function SignaturePanel({
                 Signing as: <span className="font-bold">{SIG_META[signingRole].label}</span>
               </p>
               <div>
-                <label className="text-[10px] text-muted-foreground block mb-1">
+                <label htmlFor="signature-meaning-input" className="text-[10px] text-muted-foreground block mb-1">
                   Signature meaning (edit or use default)
                 </label>
                 <textarea
+                  id="signature-meaning-input"
                   value={meaning || DEFAULT_MEANINGS[signingRole]}
                   onChange={(e) => setMeaning(e.target.value)}
                   rows={3}
@@ -201,14 +202,16 @@ export function SignaturePanel({
               </div>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => handleSign(signingRole)}
                   disabled={isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-xs transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 shadow-xs transition-colors disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PenLine className="w-3.5 h-3.5" />}
                   Confirm Signature
                 </button>
                 <button
+                  type="button"
                   onClick={() => { setSigningRole(null); setMeaning(''); setError(null); }}
                   className="px-3 py-1.5 rounded-lg text-xs border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 >
@@ -224,6 +227,7 @@ export function SignaturePanel({
               {/* Author */}
               {!alreadySigned('AUTHOR') && (
                 <button
+                  type="button"
                   onClick={() => { setSigningRole('AUTHOR'); setMeaning(''); }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/5 hover:bg-sky-500/15 transition-colors"
                 >
@@ -235,8 +239,9 @@ export function SignaturePanel({
               {/* Witness (PI/Admin only) */}
               {canApprove && !alreadySigned('WITNESS') && (
                 <button
+                  type="button"
                   onClick={() => { setSigningRole('WITNESS'); setMeaning(''); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-foreground bg-muted/50 hover:bg-primary/90/15 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-foreground bg-muted/50 hover:bg-primary/15 transition-colors"
                 >
                   <PenLine className="w-3.5 h-3.5" />
                   Sign as Witness
@@ -246,8 +251,9 @@ export function SignaturePanel({
               {/* PI Approval (PI/Admin only) */}
               {canApprove && !alreadySigned('PI_APPROVAL') && (
                 <button
+                  type="button"
                   onClick={() => { setSigningRole('PI_APPROVAL'); setMeaning(''); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-violet-500/40 text-foreground bg-violet-500/5 hover:bg-violet-500/15 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-primary/40 text-foreground bg-primary/10 hover:bg-primary/20 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   PI Approval
@@ -257,6 +263,7 @@ export function SignaturePanel({
               {/* Seal trial — only shows after PI has approved */}
               {hasPIApproval && onRequestSeal && (
                 <button
+                  type="button"
                   onClick={onRequestSeal}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-amber-500/40 text-amber-700 dark:text-amber-300 bg-amber-500/5 hover:bg-amber-500/15 transition-colors ml-auto"
                 >

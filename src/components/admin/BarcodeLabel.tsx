@@ -46,23 +46,24 @@ function buildQrPayload(item: BarcodeLabelItem): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
 export function BarcodeLabel({
- item, onClose }: BarcodeLabelProps) {
+  item,
+  onClose,
+}: BarcodeLabelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const payload = buildQrPayload(item);
   const displayCode = item.barcode ?? item.id.toUpperCase().slice(0, 12);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -88,47 +89,59 @@ export function BarcodeLabel({
 
     const canvas = canvasRef.current;
     const dataUrl = canvas ? canvas.toDataURL('image/png') : '';
+    const doc = printWindow.document;
+    doc.title = `Label: ${item.name || ''}`;
 
-    const safeName = escapeHtml(item.name || '');
-    const safeSubtitle = item.subtitle ? escapeHtml(item.subtitle) : '';
-    const safeCode = escapeHtml(displayCode || '');
-    const safeType = escapeHtml(item.type || '');
+    const style = doc.createElement('style');
+    style.textContent = `
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: 'Courier New', monospace; padding: 16px; }
+      .label { border: 1px solid #000; padding: 12px; width: 280px; text-align: center; }
+      .label img { width: 160px; height: 160px; display: block; margin: 0 auto 8px; }
+      .name { font-size: 13px; font-weight: bold; margin-bottom: 2px; word-break: break-word; }
+      .subtitle { font-size: 10px; color: #555; margin-bottom: 6px; }
+      .code { font-size: 10px; letter-spacing: 0.05em; color: #333; }
+      .badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-top: 4px; }
+      @media print { body { padding: 0; } }
+    `;
+    doc.head.appendChild(style);
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Label: ${safeName}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Courier New', monospace; padding: 16px; }
-            .label {
-              border: 1px solid #000;
-              padding: 12px;
-              width: 280px;
-              text-align: center;
-            }
-            .label img { width: 160px; height: 160px; display: block; margin: 0 auto 8px; }
-            .name { font-size: 13px; font-weight: bold; margin-bottom: 2px; word-break: break-word; }
-            .subtitle { font-size: 10px; color: #555; margin-bottom: 6px; }
-            .code { font-size: 9px; letter-spacing: 0.05em; color: #333; }
-            .badge { font-size: 8px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-top: 4px; }
-            @media print { body { padding: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="label">
-            <img src="${dataUrl}" alt="QR Code" />
-            <div class="name">${safeName}</div>
-            ${safeSubtitle ? `<div class="subtitle">${safeSubtitle}</div>` : ''}
-            <div class="code">${safeCode}</div>
-            <div class="badge">Inquestra LIMS · ${safeType}</div>
-          </div>
-          <script>window.onload = () => { window.print(); window.close(); }<\/script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    const container = doc.createElement('div');
+    container.className = 'label';
+
+    const img = doc.createElement('img');
+    img.src = dataUrl;
+    img.alt = 'QR Code';
+    container.appendChild(img);
+
+    const nameEl = doc.createElement('div');
+    nameEl.className = 'name';
+    nameEl.textContent = item.name || '';
+    container.appendChild(nameEl);
+
+    if (item.subtitle) {
+      const subEl = doc.createElement('div');
+      subEl.className = 'subtitle';
+      subEl.textContent = item.subtitle;
+      container.appendChild(subEl);
+    }
+
+    const codeEl = doc.createElement('div');
+    codeEl.className = 'code';
+    codeEl.textContent = displayCode;
+    container.appendChild(codeEl);
+
+    const badgeEl = doc.createElement('div');
+    badgeEl.className = 'badge';
+    badgeEl.textContent = `Inquestra LIMS · ${item.type}`;
+    container.appendChild(badgeEl);
+
+    doc.body.appendChild(container);
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 100);
   };
 
   const handleDownload = () => {
@@ -142,15 +155,20 @@ export function BarcodeLabel({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="barcode-label-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-xs mx-4">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30 rounded-t-2xl">
-          <span className="text-sm font-semibold text-foreground">QR Label</span>
+          <span id="barcode-label-title" className="text-sm font-semibold text-foreground">QR Label</span>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close QR label dialog"
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
             <X className="w-4 h-4" />
@@ -183,13 +201,14 @@ export function BarcodeLabel({
               <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
             )}
             <p className="text-[10px] font-mono text-muted-foreground mt-1">{displayCode}</p>
-            <p className="text-[9px] uppercase tracking-widest text-muted-foreground/60 mt-1 font-mono">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/80 mt-1 font-mono">
               Inquestra LIMS · {item.type}
             </p>
             <div className="mt-2">
               <Link
                 href={`/scan?code=${encodeURIComponent(item.barcode || item.id)}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"
               >
                 Test Resolver Link
@@ -202,6 +221,7 @@ export function BarcodeLabel({
         {/* Actions */}
         <div className="px-5 pb-5 flex gap-2">
           <button
+            type="button"
             onClick={handleDownload}
             disabled={!isReady}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors disabled:opacity-40"
@@ -210,6 +230,7 @@ export function BarcodeLabel({
             Download PNG
           </button>
           <button
+            type="button"
             onClick={handlePrint}
             disabled={!isReady}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded bg-foreground text-background text-xs font-semibold hover:bg-foreground/90 transition-colors disabled:opacity-40"

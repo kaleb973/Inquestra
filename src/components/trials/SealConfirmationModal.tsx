@@ -31,10 +31,20 @@ export function SealConfirmationModal({
     setMounted(true);
   }, []);
 
-  // Reset input when modal closes
-  if (!isOpen && confirmText !== '') {
-    setConfirmText('');
-  }
+  // Reset input when modal closes and allow Escape to dismiss when idle
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmText('');
+      return;
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSealing) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isSealing, onClose]);
 
   if (!isOpen || !mounted) return null;
 
@@ -45,16 +55,23 @@ export function SealConfirmationModal({
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-150"
       onClick={(e) => e.target === e.currentTarget && !isSealing && onClose()}
     >
-      <div className="relative w-full max-w-md my-auto bg-card border border-destructive/40 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 shrink-0">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="seal-confirmation-title"
+        className="relative w-full max-w-md my-auto bg-card border border-destructive/40 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 shrink-0"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-destructive/10">
-          <div className="flex items-center gap-2.5 text-destructive font-semibold text-sm">
+          <div id="seal-confirmation-title" className="flex items-center gap-2.5 text-destructive font-semibold text-sm">
             <Shield className="w-4 h-4" />
             <span>Seal Experiment Permanently</span>
           </div>
           <button
+            type="button"
             onClick={onClose}
             disabled={isSealing}
+            aria-label="Close seal confirmation dialog"
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4" />
@@ -86,10 +103,11 @@ export function SealConfirmationModal({
           </div>
 
           <div className="space-y-2 pt-2 border-t border-border">
-            <label className="block text-muted-foreground text-xs">
+            <label htmlFor="seal-confirm-input" className="block text-muted-foreground text-xs">
               To confirm, type <span className="font-mono font-bold text-foreground">SEAL</span> in capital letters below:
             </label>
             <input
+              id="seal-confirm-input"
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}

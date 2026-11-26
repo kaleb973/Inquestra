@@ -1,9 +1,7 @@
 import { mergeAttributes, Node } from '@tiptap/core';
-import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
+import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
 import { Microscope, ExternalLink } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { useNotebookStore } from '@/store/useNotebookStore';
-import Link from 'next/link';
 
 export const EquipmentExtension = Node.create({
   name: 'equipmentBlock',
@@ -30,22 +28,23 @@ export const EquipmentExtension = Node.create({
   },
 });
 
-function EquipmentNode(props: any) {
-  const { node, updateAttributes } = props;
+function EquipmentNode(props: NodeViewProps) {
+  const { node } = props;
   const setRightDrawerMode = useNotebookStore((s) => s.setRightDrawerMode);
 
   return (
     <NodeViewWrapper className="my-4">
-      <div 
-        className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted border border-border rounded-md text-foreground text-sm cursor-pointer hover:bg-primary/90/20 transition-colors shadow-sm"
+      <button
+        type="button"
+        className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted border border-border rounded-md text-foreground text-sm cursor-pointer hover:bg-primary/20 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={() => setRightDrawerMode('INVENTORY')}
       >
         <Microscope className="w-4 h-4 text-foreground" />
         <span className="font-medium">
-          {node.attrs.equipmentName ? `Equipment: ${node.attrs.equipmentName}` : 'Link Equipment...'}
+          {node.attrs.equipmentName ? `Equipment: ${String(node.attrs.equipmentName)}` : 'Link Equipment...'}
         </span>
         <ExternalLink className="w-3 h-3 opacity-60 ml-1" />
-      </div>
+      </button>
     </NodeViewWrapper>
   );
 }

@@ -20,7 +20,6 @@ import {
   ChevronRight,
   ShieldAlert,
   Clock,
-  Sparkles,
   Award,
 } from 'lucide-react';
 import type { Team, User, Role } from '@prisma/client';
@@ -54,7 +53,7 @@ interface TeamManagerProps {
 }
 
 const ROLE_BADGES: Record<Role, { label: string; badgeClass: string; level: number }> = {
-  PI: { label: 'Principal Investigator', badgeClass: 'bg-muted text-foreground border-violet-500/30', level: 4 },
+  PI: { label: 'Principal Investigator', badgeClass: 'bg-primary/10 text-foreground border-primary/35', level: 4 },
   ADMIN: { label: 'Lab Operations Manager', badgeClass: 'bg-muted text-foreground border-border', level: 3 },
   RESEARCHER: { label: 'Bench Researcher', badgeClass: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30', level: 2 },
   VIEWER: { label: 'Audit Observer', badgeClass: 'bg-muted text-muted-foreground border-border', level: 1 },
@@ -215,7 +214,12 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
-          <button onClick={() => setErrorMsg(null)} className="hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => setErrorMsg(null)}
+            aria-label="Dismiss error banner"
+            className="hover:text-foreground"
+          >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -227,7 +231,12 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             <Check className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => setSuccessMsg(null)}
+            aria-label="Dismiss confirmation banner"
+            className="hover:text-foreground"
+          >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -237,6 +246,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
       <div className="bg-muted/60 border border-border rounded-xl p-1.5 flex flex-wrap items-center justify-between gap-2 shadow-sm">
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => setActiveSubTab('squads')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               activeSubTab === 'squads'
@@ -306,7 +316,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                         {t.description || 'No mission statement provided.'}
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-50 dark:bg-indigo-950/40 border border-emerald-500/30 dark:border-emerald-500/30 text-foreground shrink-0">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 border border-emerald-500/30 text-foreground shrink-0">
                       {t.members.length} {t.members.length === 1 ? 'Scientist' : 'Scientists'}
                     </span>
                   </div>
@@ -317,7 +327,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                       {t.members.map((m) => (
                         <div
                           key={m.id}
-                          className="w-7 h-7 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[9px] font-mono font-bold text-white shadow"
+                          className="w-7 h-7 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[10px] font-mono font-bold text-primary-foreground shadow"
                           title={`${m.email} (${m.role})`}
                         >
                           {m.email.substring(0, 2).toUpperCase()}
@@ -329,8 +339,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => setEditingSquad(t)}
-                      className="text-xs font-medium text-foreground hover:text-foreground transition-colors"
+                      className="text-xs font-medium text-foreground hover:text-primary transition-colors"
                     >
                       Manage Squad →
                     </button>
@@ -344,11 +355,12 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <Users className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <h3 className="text-sm font-medium text-foreground">No Research Squads Created</h3>
                 <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                  Organize your laboratory into dedicated squads (e.g. Tissue Engineering Core, Electrophysiology) to streamline trial tracking.
+                  Organize your laboratory into dedicated groups (e.g. Synthesis Core, Spectroscopy, Assay Team) to streamline trial tracking.
                 </p>
                 <button
+                  type="button"
                   onClick={() => setShowCreateSquadModal(true)}
-                  className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors shadow-sm"
+                  className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Create First Squad
@@ -368,6 +380,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
+                aria-label="Search personnel by email"
                 placeholder="Search personnel by email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -378,6 +391,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               <span className="text-xs text-muted-foreground">Filter Role:</span>
               <select
+                aria-label="Filter personnel by role"
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="px-2.5 py-1.5 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
@@ -391,8 +405,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
               {(currentUser?.role === 'PI' || currentUser?.role === 'ADMIN') && (
                 <button
+                  type="button"
                   onClick={() => setShowInviteModal(true)}
-                  className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium transition-colors shadow-sm"
+                  className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors shadow-sm"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   Invite Researcher
@@ -421,7 +436,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                     <tr key={u.id} className="hover:bg-muted/40 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-neutral-800 border border-indigo-200 dark:border-neutral-700 flex items-center justify-center font-mono text-xs font-bold text-foreground">
+                          <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center font-mono text-xs font-bold text-foreground">
                             {u.email.substring(0, 2).toUpperCase()}
                           </div>
                           <div>
@@ -440,6 +455,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                           </span>
                           {/* Role Selector */}
                           <select
+                            aria-label={`Change clearance role for ${u.email}`}
                             value={u.role}
                             disabled={isPending || (!isPI && (u.role === 'PI'))}
                             onChange={(e) => handleRoleChange(u.id, e.target.value as Role)}
@@ -458,6 +474,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
                       <td className="py-3 px-4">
                         <select
+                          aria-label={`Assign squad for ${u.email}`}
                           value={u.teamId || 'UNASSIGNED'}
                           disabled={isPending}
                           onChange={(e) => handleAssignUserSquad(u.id, e.target.value)}
@@ -540,7 +557,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <div
                   key={req.id}
                   className={`p-5 transition-colors ${
-                    isPendingReq ? 'bg-indigo-50/50 dark:bg-indigo-950/10 hover:bg-indigo-50 dark:hover:bg-indigo-950/20' : 'hover:bg-muted/30'
+                    isPendingReq ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/30'
                   }`}
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -551,7 +568,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                             isPendingReq
                               ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                               : req.status === 'APPROVED'
-                              ? 'bg-indigo-50 dark:bg-indigo-950/50 text-foreground border-emerald-500/30 dark:border-emerald-500/30'
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                               : 'bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-800'
                           }`}
                         >
@@ -563,7 +580,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                         </span>
 
                         {req.requestedRole && (
-                          <span className="text-xs text-indigo-600 dark:text-muted-foreground font-mono">
+                          <span className="text-xs text-primary font-mono">
                             → Target: {req.requestedRole}
                           </span>
                         )}
@@ -646,22 +663,24 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
             <form onSubmit={handleCreateSquad} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Squad Name</label>
+                <label htmlFor="create-squad-name" className="block text-xs font-medium text-foreground mb-1">Squad Name</label>
                 <input
+                  id="create-squad-name"
                   type="text"
                   name="name"
                   required
-                  placeholder="e.g. Electrophysiology Core"
+                  placeholder="e.g. Synthesis & Characterization Core"
                   className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Mission / Focus Area</label>
+                <label htmlFor="create-squad-desc" className="block text-xs font-medium text-foreground mb-1">Mission / Focus Area</label>
                 <textarea
+                  id="create-squad-desc"
                   name="description"
                   rows={3}
-                  placeholder="e.g. High-throughput neural impedance sensing and microfluidic patch clamping."
+                  placeholder="e.g. Automated analytical spectrometry, catalyst screening, and microfluidic assays."
                   className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
@@ -677,7 +696,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 flex items-center gap-1.5 shadow-sm"
                 >
                   {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Create Squad
@@ -690,16 +709,26 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
       {/* ── MANAGE SQUAD MODAL (MEMBER CHECKLIST + EDIT) ───────────── */}
       {editingSquad && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="manage-squad-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
           <div className="w-full max-w-xl bg-card border border-border rounded-xl p-6 shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-sm font-semibold text-foreground">Manage Squad: {editingSquad.name}</h3>
+                <h3 id="manage-squad-title" className="text-sm font-semibold text-foreground">Manage Squad: {editingSquad.name}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Update squad metadata and toggle scientist roster assignments.
                 </p>
               </div>
-              <button onClick={() => setEditingSquad(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={() => setEditingSquad(null)}
+                aria-label="Close manage squad modal"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -707,8 +736,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
             {/* Squad Details Form */}
             <form onSubmit={handleUpdateSquadMetadata} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Squad Name</label>
+                <label htmlFor="edit-squad-name" className="block text-xs font-medium text-foreground mb-1">Squad Name</label>
                 <input
+                  id="edit-squad-name"
                   type="text"
                   name="name"
                   defaultValue={editingSquad.name}
@@ -718,8 +748,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Mission Statement</label>
+                <label htmlFor="edit-squad-desc" className="block text-xs font-medium text-foreground mb-1">Mission Statement</label>
                 <textarea
+                  id="edit-squad-desc"
                   name="description"
                   rows={2}
                   defaultValue={editingSquad.description || ''}
@@ -747,16 +778,17 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 {orgUsers.map((u) => {
                   const isMember = u.teamId === editingSquad.id;
                   return (
-                    <div
+                    <button
                       key={u.id}
+                      type="button"
                       onClick={() => handleToggleMemberSquad(u.id, u.teamId)}
-                      className="p-3 flex items-center justify-between hover:bg-muted/50 cursor-pointer transition-colors"
+                      className="w-full text-left p-3 flex items-center justify-between hover:bg-muted/50 cursor-pointer transition-colors"
                     >
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${
                             isMember
-                              ? 'bg-primary border-primary text-white'
+                              ? 'bg-primary border-primary text-primary-foreground'
                               : 'border-border bg-background'
                           }`}
                         >
@@ -777,7 +809,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                           'Unassigned'
                         )}
                       </span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -809,15 +841,22 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
 
       {/* ── MANUAL ESCALATION SUBMISSION MODAL ──────────────────────── */}
       {showManualEscalateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="manual-escalate-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
           <div className="w-full max-w-md bg-card border border-border rounded-xl p-5 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">Ask Higher-Up: Escalation</h3>
+                <h3 id="manual-escalate-title" className="text-sm font-semibold text-foreground">Ask Higher-Up: Escalation</h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowManualEscalateModal(false)}
+                aria-label="Close escalation dialog"
                 className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
@@ -828,14 +867,15 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const reqType = formData.get('requestType') as any;
-                const reqRole = formData.get('requestedRole') as any;
-                const just = formData.get('justification') as string;
+                const reqType = formData.get('requestType') as AuthorizationRequest['requestType'];
+                const rawReqRole = formData.get('requestedRole');
+                const reqRole = typeof rawReqRole === 'string' && rawReqRole ? (rawReqRole as Role) : null;
+                const just = (formData.get('justification') as string) || '';
 
                 startTransition(async () => {
                   const res = await submitAuthorizationRequest({
                     requestType: reqType,
-                    requestedRole: reqRole ? (reqRole as Role) : null,
+                    requestedRole: reqRole,
                     justification: just,
                   });
                   if (!res.success) {
@@ -851,8 +891,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               className="space-y-3"
             >
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Request Type</label>
+                <label htmlFor="escalate-type" className="block text-xs font-medium text-foreground mb-1">Request Type</label>
                 <select
+                  id="escalate-type"
                   name="requestType"
                   className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                 >
@@ -864,8 +905,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Target Role (If applicable)</label>
+                <label htmlFor="escalate-role" className="block text-xs font-medium text-foreground mb-1">Target Role (If applicable)</label>
                 <select
+                  id="escalate-role"
                   name="requestedRole"
                   className="w-full px-3 py-2 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary shadow-sm"
                 >
@@ -876,8 +918,9 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Justification</label>
+                <label htmlFor="escalate-just" className="block text-xs font-medium text-foreground mb-1">Justification</label>
                 <textarea
+                  id="escalate-just"
                   name="justification"
                   required
                   rows={3}
@@ -897,7 +940,7 @@ export function TeamManager({ teams, orgUsers, currentUser, organizationName }: 
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 font-medium flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-1.5 rounded text-xs font-medium bg-foreground text-background hover:bg-foreground/90 flex items-center gap-1.5 shadow-sm"
                 >
                   {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Submit Escalation
@@ -960,14 +1003,24 @@ function InviteModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="invite-member-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
       <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div className="flex items-center gap-2">
             <UserPlus className="w-4 h-4 text-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Invite Lab Member</h3>
+            <h3 id="invite-member-title" className="text-sm font-semibold text-foreground">Invite Lab Member</h3>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close invite modal"
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>

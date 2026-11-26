@@ -28,18 +28,20 @@ import {
 } from '@/actions/literatureActions';
 
 const QUICK_TAGS = [
-  'Biosensors',
+  'Catalysis',
   'Microfluidics',
   'CRISPR Cas9',
-  'Tissue Engineering',
-  'Optogenetics',
-  'Electrophysiology',
+  'Polymers',
+  'Photochemistry',
+  'Biosensors',
   'Organ-on-Chip',
-  'Biomarkers',
+  'Electrochemistry',
 ];
 
+type TrialPaperList = Awaited<ReturnType<typeof fetchTrialPapers>>;
+
 // In-memory client cache to make switching between drawer tabs instantaneous
-const trialPapersClientCache = new Map<string, any[]>();
+const trialPapersClientCache = new Map<string, TrialPaperList>();
 
 const isSafeHttpUrl = (url: string | null | undefined): boolean =>
   typeof url === 'string' && /^https?:\/\//i.test(url.trim());
@@ -55,7 +57,7 @@ export function LiteraturePanel() {
   const [searchResults, setSearchResults] = useState<LiteratureSearchResult[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const [trialPapers, setTrialPapers] = useState<any[]>(() => {
+  const [trialPapers, setTrialPapers] = useState<TrialPaperList>(() => {
     return cloudTrialId && trialPapersClientCache.has(cloudTrialId)
       ? trialPapersClientCache.get(cloudTrialId)!
       : [];
@@ -357,7 +359,7 @@ export function LiteraturePanel() {
                             <a
                               href={`https://doi.org/${paper.doi}`}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="text-primary hover:underline flex items-center gap-0.5"
                             >
                               DOI <ExternalLink className="w-2.5 h-2.5" />
@@ -367,7 +369,7 @@ export function LiteraturePanel() {
                             <a
                               href={paper.pdfUrl!}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5 font-medium"
                             >
                               PDF <FileText className="w-2.5 h-2.5" />
@@ -550,7 +552,7 @@ export function LiteraturePanel() {
                             <a
                               href={paper.pdfUrl!}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
                               className="p-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors"
                               title="Download Open Access PDF"
                             >

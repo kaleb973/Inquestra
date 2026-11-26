@@ -123,6 +123,14 @@ function NewProjectModal({
     fetchLabMembersForLeadSelector().then(setMembers).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -163,14 +171,21 @@ function NewProjectModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-project-modal-title"
+        className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
             <FolderOpen className="w-4 h-4 text-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">New Research Project</h2>
+            <h2 id="new-project-modal-title" className="text-sm font-semibold text-foreground">New Research Project</h2>
           </div>
           <button
+            type="button"
+            aria-label="Close new project dialog"
             onClick={onClose}
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
@@ -181,39 +196,42 @@ function NewProjectModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">
+            <label htmlFor="new-project-name" className="block text-xs font-medium text-foreground mb-1.5">
               Project Name <span className="text-red-500">*</span>
             </label>
             <input
+              id="new-project-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Cardiac Biomarker Study"
+              placeholder="e.g. Catalytic Polymer Screen"
               className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">
+            <label htmlFor="new-project-code" className="block text-xs font-medium text-foreground mb-1.5">
               Protocol / Grant Code{' '}
               <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
             <input
+              id="new-project-code"
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="e.g. PRJ-CARD-02"
+              placeholder="e.g. PRJ-CAT-02"
               className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground font-mono focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">
+            <label htmlFor="new-project-desc" className="block text-xs font-medium text-foreground mb-1.5">
               Description{' '}
               <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
             <textarea
+              id="new-project-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief research scope or objectives…"
@@ -223,11 +241,12 @@ function NewProjectModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">
+            <label htmlFor="new-project-lead" className="block text-xs font-medium text-foreground mb-1.5">
               Project Lead / PI{' '}
               <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
             <select
+              id="new-project-lead"
               value={leadId}
               onChange={(e) => setLeadId(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-colors"
@@ -1405,13 +1424,15 @@ export function LeftSidebar() {
                       </span>
                     )}
 
-                    {/* Cassini-Style Headless Preview Inspector */}
+                    {/* Headless Preview Inspector */}
                     <button
+                      type="button"
+                      aria-label={`Preview experiment ${t.title}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setPreviewTrial(t);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
+                      className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
                       title="Preview experiment parameters & metadata"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -1419,8 +1440,10 @@ export function LeftSidebar() {
 
                     {/* Specialized Actions Context Menu Trigger */}
                     <button
+                      type="button"
+                      aria-label={`Open actions menu for ${t.title}`}
                       onClick={(e) => handleOpenMenuFromButton(e, t)}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
+                      className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all shrink-0"
                       title="Experiment menu (Right-click)"
                     >
                       <MoreVertical className="w-3.5 h-3.5" />
@@ -1435,6 +1458,7 @@ export function LeftSidebar() {
               <div className="px-2 py-4 text-center">
                 <p className="text-xs text-muted-foreground mb-2">No experiments match filter.</p>
                 <button
+                  type="button"
                   onClick={() => {
                     setSearchQuery('');
                     setStatusFilter('ALL');

@@ -4,7 +4,7 @@
 // a clean, graceful recovery interface without dropping the user into a blank white error screen.
 
 import { useEffect } from 'react';
-import { AlertTriangle, RotateCcw, Home, Sparkles } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Home, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isDeploymentSkewError } from '@/lib/deploymentSkew';
 
@@ -35,7 +35,7 @@ export default function GlobalError({
               : 'bg-amber-500/10 border border-amber-500/20 text-amber-500'
           } flex items-center justify-center mx-auto shadow-inner`}
         >
-          {isSkew ? <Sparkles className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
+          {isSkew ? <RefreshCw className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
         </div>
 
         <div className="space-y-2">

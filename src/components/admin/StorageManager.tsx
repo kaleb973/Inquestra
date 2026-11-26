@@ -55,6 +55,7 @@ export function StorageManager({
           <p className="text-xs text-muted-foreground mt-1">Manage physical storage hierarchy (Freezers, Racks, Boxes)</p>
         </div>
         <button
+          type="button"
           onClick={() => setShowAdd(!showAdd)}
           className="flex items-center gap-2 px-3 py-1.5 text-sm bg-muted hover:bg-accent text-foreground border border-border rounded-lg transition-colors font-medium shadow-sm"
         >
@@ -62,25 +63,25 @@ export function StorageManager({
         </button>
       </div>
 
-      {error && <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
+      {error && <div role="alert" className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
 
       {showAdd && (
         <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Location Name</label>
-            <input required name="name" placeholder="e.g. -80°C Freezer A" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+            <label htmlFor="loc-name" className="block text-xs font-medium text-muted-foreground mb-1">Location Name</label>
+            <input id="loc-name" required name="name" placeholder="e.g. -80°C Freezer A" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
           </div>
           <div className="w-44">
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
-            <select name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
+            <label htmlFor="loc-type" className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
+            <select id="loc-type" name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
               <option value="FREEZER">Freezer / Fridge</option>
               <option value="RACK">Rack / Shelf</option>
               <option value="BOX">Box / Plate</option>
             </select>
           </div>
           <div className="w-48">
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Parent Location (Optional)</label>
-            <select name="parentId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
+            <label htmlFor="loc-parent" className="block text-xs font-medium text-muted-foreground mb-1">Parent Location (Optional)</label>
+            <select id="loc-parent" name="parentId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
               <option value="">None (Top Level)</option>
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>{loc.name} ({loc.type})</option>
@@ -88,8 +89,8 @@ export function StorageManager({
             </select>
           </div>
           <div className="w-48">
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Custom Barcode (Optional)</label>
-            <input name="barcode" placeholder="e.g. RACK-A-01" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary font-mono" />
+            <label htmlFor="loc-barcode" className="block text-xs font-medium text-muted-foreground mb-1">Custom Barcode (Optional)</label>
+            <input id="loc-barcode" name="barcode" placeholder="e.g. RACK-A-01" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary font-mono" />
           </div>
           <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm rounded transition-colors disabled:opacity-50 shadow-sm h-[38px]">
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
@@ -162,6 +163,7 @@ function LocationNode({
           )}
         </div>
         <button
+          type="button"
           onClick={() =>
             onSelectLabel({
               id: location.id,
@@ -172,6 +174,7 @@ function LocationNode({
             })
           }
           title="Print Location QR label"
+          aria-label={`Print QR label for ${location.name}`}
           className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         >
           <QrCode className="w-3.5 h-3.5" />
@@ -182,7 +185,7 @@ function LocationNode({
         <div className="mb-3 space-y-1">
           {location.items.map((item) => (
             <div key={item.id} className="text-xs text-foreground flex items-center gap-2 pl-2">
-              <div className="w-1 h-1 rounded-full bg-indigo-500" />
+              <div className="w-1 h-1 rounded-full bg-primary" />
               {item.name}
             </div>
           ))}

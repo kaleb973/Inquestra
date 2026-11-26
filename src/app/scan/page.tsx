@@ -56,6 +56,7 @@ export default async function ScanPage({ searchParams }: ScanPageProps) {
           <input
             type="text"
             name="code"
+            aria-label="Scan barcode or enter identifier"
             defaultValue={code || ''}
             placeholder="Scan barcode or enter ID (e.g. INQ-LOT-4821)..."
             autoFocus={!code}
@@ -77,7 +78,7 @@ export default async function ScanPage({ searchParams }: ScanPageProps) {
               <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-md bg-muted border border-border text-foreground">
                 {result.kind === 'inventory' && (
                   <>
-                    <FlaskConical className="w-3.5 h-3.5 text-violet-500" />
+                    <FlaskConical className="w-3.5 h-3.5 text-primary" />
                     {result.type}
                   </>
                 )}

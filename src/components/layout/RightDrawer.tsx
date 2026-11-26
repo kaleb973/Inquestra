@@ -45,8 +45,8 @@ export function RightDrawer() {
   
   // Inventory state
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [linkedItems, setLinkedItems] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Awaited<ReturnType<typeof fetchInventoryForSearch>>>([]);
+  const [linkedItems, setLinkedItems] = useState<Awaited<ReturnType<typeof getTrialInventory>>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingLinked, setIsLoadingLinked] = useState(false);
 
@@ -459,8 +459,10 @@ export function RightDrawer() {
                     </div>
                     {!isSealed && (
                       <button
+                        type="button"
+                        aria-label={`Remove metadata ${entry.key}`}
                         onClick={() => handleRemoveTag(entry.id)}
-                        className="mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1"
+                        className="mt-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -473,7 +475,7 @@ export function RightDrawer() {
                   <div className="space-y-1">
                     <span className="text-[10px] text-muted-foreground block font-medium">Quick Categories:</span>
                     <div className="flex flex-wrap gap-1">
-                      {['DAQ Run', 'Biomarker Assay', 'Protocol Execution', 'Calibration', 'Quality Control'].map((cat) => (
+                      {['DAQ Run', 'Synthesis Run', 'Protocol Execution', 'Calibration', 'Quality Control'].map((cat) => (
                         <button
                           key={cat}
                           type="button"

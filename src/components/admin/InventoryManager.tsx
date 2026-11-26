@@ -71,25 +71,26 @@ export function InventoryManager({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Reagents & Specimens</h2>
         <button
+          type="button"
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-foreground text-background hover:bg-foreground/90 font-medium rounded transition-colors shadow-sm font-medium"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-foreground text-background hover:bg-foreground/90 font-medium rounded transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" /> Add Item
         </button>
       </div>
 
-      {error && <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
+      {error && <div role="alert" className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded">{error}</div>}
 
       {showAdd && (
         <form onSubmit={handleAdd} className="bg-card border border-border p-5 rounded-xl shadow-sm flex flex-col gap-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Name</label>
-              <input required name="name" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <label htmlFor="inv-name" className="block text-xs font-medium text-muted-foreground mb-1">Name</label>
+              <input id="inv-name" required name="name" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
-              <select required name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
+              <label htmlFor="inv-type" className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
+              <select id="inv-type" required name="type" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
                 <option value="REAGENT">Reagent</option>
                 <option value="CHEMICAL">Chemical</option>
                 <option value="BIOLOGICAL">Biological</option>
@@ -99,31 +100,31 @@ export function InventoryManager({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Lot Number</label>
-              <input name="lotNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <label htmlFor="inv-lot" className="block text-xs font-medium text-muted-foreground mb-1">Lot Number</label>
+              <input id="inv-lot" name="lotNumber" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Quantity</label>
-              <input required type="number" step="any" name="quantity" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <label htmlFor="inv-qty" className="block text-xs font-medium text-muted-foreground mb-1">Quantity</label>
+              <input id="inv-qty" required type="number" step="any" name="quantity" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Unit</label>
-              <input required name="unit" placeholder="mL, g..." className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <label htmlFor="inv-unit" className="block text-xs font-medium text-muted-foreground mb-1">Unit</label>
+              <input id="inv-unit" required name="unit" placeholder="mL, g..." className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Low Stock Alert</label>
-              <input type="number" step="any" name="thresholdValue" defaultValue="0" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <label htmlFor="inv-threshold" className="block text-xs font-medium text-muted-foreground mb-1">Low Stock Alert</label>
+              <input id="inv-threshold" type="number" step="any" name="thresholdValue" defaultValue="0" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Expiry Date</label>
-              <input type="date" name="expirationDate" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
+              <label htmlFor="inv-exp" className="block text-xs font-medium text-muted-foreground mb-1">Expiry Date</label>
+              <input id="inv-exp" type="date" name="expirationDate" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Location</label>
-              <select name="locationId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
+              <label htmlFor="inv-location" className="block text-xs font-medium text-muted-foreground mb-1">Location</label>
+              <select id="inv-location" name="locationId" className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary">
                 <option value="">Unassigned</option>
                 {locations.map((loc) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
@@ -134,10 +135,11 @@ export function InventoryManager({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-muted-foreground mb-1">
+              <label htmlFor="inv-barcode" className="block text-xs font-medium text-muted-foreground mb-1">
                 Custom / Vendor Barcode (Scan or Type)
               </label>
               <input
+                id="inv-barcode"
                 name="barcode"
                 placeholder="Scan manufacturer barcode with gun or enter SKU (e.g. SIGMA-A4503, 012345678905)..."
                 className="w-full bg-background border border-border rounded px-3 py-2 text-xs text-foreground font-mono focus:outline-none focus:border-primary placeholder:text-muted-foreground/60"
@@ -151,7 +153,7 @@ export function InventoryManager({
           </div>
 
           <div className="flex justify-end pt-2 border-t border-border mt-2">
-            <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm font-medium rounded transition-colors disabled:opacity-50 shadow-sm">
+            <button disabled={isPending} type="submit" className="px-4 py-2 bg-foreground text-background hover:bg-foreground/90 font-medium text-sm rounded transition-colors disabled:opacity-50 shadow-sm">
               {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Item'}
             </button>
           </div>
@@ -209,9 +211,10 @@ export function InventoryManager({
                 </td>
                 <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{item.lotNumber || '—'}</td>
                 <td className="px-5 py-3 font-mono flex items-center">
-                  <input 
+                  <input
                     type="number"
                     step="any"
+                    aria-label={`Quantity for ${item.name}`}
                     defaultValue={item.quantity}
                     onBlur={(e) => { if (e.target.value !== String(item.quantity)) handleUpdate(item.id, e.target.value) }}
                     className="w-16 bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none text-foreground mr-1 px-1 py-0.5 rounded-none"
@@ -233,6 +236,7 @@ export function InventoryManager({
                 <td className="px-5 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
                     <button
+                      type="button"
                       onClick={() => setSelectedLabel({
                         id: item.id,
                         name: item.name,
@@ -241,11 +245,19 @@ export function InventoryManager({
                         type: 'inventory',
                       })}
                       title="Print QR label"
+                      aria-label={`Print QR label for ${item.name}`}
                       className="text-muted-foreground hover:text-foreground transition-colors p-1"
                     >
                       <QrCode className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(item.id)} disabled={isPending} className="text-muted-foreground hover:text-red-500 transition-colors p-1">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                      disabled={isPending}
+                      aria-label={`Delete ${item.name}`}
+                      title={`Delete ${item.name}`}
+                      className="text-muted-foreground hover:text-red-500 transition-colors p-1"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

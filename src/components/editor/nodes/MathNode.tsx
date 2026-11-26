@@ -1,6 +1,6 @@
 'use client';
 import { mergeAttributes, Node } from '@tiptap/core';
-import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
+import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
 import { useState } from 'react';
 import Latex from 'react-latex-next';
 import { Sigma, Trash2, Copy, Check } from 'lucide-react';
@@ -40,12 +40,13 @@ export const MathExtension = Node.create({
   },
 });
 
-function MathNode(props: any) {
+function MathNode(props: NodeViewProps) {
   const { node, updateAttributes, deleteNode } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const latex = node.attrs.latex;
+  const latex = typeof node.attrs.latex === 'string' ? node.attrs.latex : '';
+  const caption = typeof node.attrs.caption === 'string' ? node.attrs.caption : '';
 
   const handleCopyLatex = () => {
     navigator.clipboard.writeText(latex).then(() => {
@@ -72,14 +73,16 @@ function MathNode(props: any) {
             <button
               type="button"
               onClick={handleCopyLatex}
+              aria-label="Copy LaTeX source"
               title="Copy LaTeX source"
-              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-primary/90/10 transition-colors"
+              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
             <button
               type="button"
               onClick={() => deleteNode()}
+              aria-label="Remove equation block"
               title="Remove equation block"
               className="p-1 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
             >
@@ -89,19 +92,21 @@ function MathNode(props: any) {
         </div>
 
         {/* Rendered Math — click to edit */}
-        <div
-          className="p-6 flex flex-col items-center justify-center cursor-pointer min-h-[100px] bg-background text-foreground text-lg"
+        <button
+          type="button"
+          aria-label="Edit LaTeX equation"
+          className="w-full p-6 flex flex-col items-center justify-center cursor-pointer min-h-[100px] bg-background text-foreground text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           onClick={() => setIsEditing(true)}
         >
           <Latex>{`$$${latex}$$`}</Latex>
 
-          {node.attrs.caption && !isEditing && (
-            <p className="text-xs text-muted-foreground mt-4 text-center">{node.attrs.caption}</p>
+          {caption && !isEditing && (
+            <p className="text-xs text-muted-foreground mt-4 text-center">{caption}</p>
           )}
           {!latex && !isEditing && (
             <span className="text-muted-foreground text-sm italic">Click to edit equation</span>
           )}
-        </div>
+        </button>
 
         {/* Editor */}
         {isEditing && (
@@ -114,7 +119,7 @@ function MathNode(props: any) {
                   key={p.label}
                   type="button"
                   onClick={() => updateAttributes({ latex: p.latex, caption: p.caption })}
-                  className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/70 bg-background hover:bg-primary/90/10 hover:border-border hover:text-indigo-600 dark:hover:text-muted-foreground transition-colors"
+                  className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/70 bg-background hover:bg-primary/10 hover:border-border hover:text-primary transition-colors"
                 >
                   {p.label}
                 </button>
@@ -126,6 +131,7 @@ function MathNode(props: any) {
                 <Sigma className="w-3.5 h-3.5" /> KaTeX Equation
               </div>
               <button
+                type="button"
                 onClick={() => setIsEditing(false)}
                 className="text-xs bg-primary text-primary-foreground hover:bg-primary/90 px-2 py-1 rounded shadow-sm font-medium"
               >
@@ -135,6 +141,7 @@ function MathNode(props: any) {
 
             <textarea
               autoFocus
+              aria-label="LaTeX formula source"
               value={latex}
               onChange={(e) => updateAttributes({ latex: e.target.value })}
               placeholder={`Enter LaTeX e.g. \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}`}
@@ -143,7 +150,8 @@ function MathNode(props: any) {
 
             <input
               type="text"
-              value={node.attrs.caption}
+              aria-label="Equation caption"
+              value={caption}
               onChange={(e) => updateAttributes({ caption: e.target.value })}
               placeholder="Caption (optional)"
               className="bg-background border border-border rounded p-1.5 text-xs text-foreground focus:outline-none focus:border-primary w-full"

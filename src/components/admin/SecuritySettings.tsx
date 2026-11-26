@@ -404,10 +404,11 @@ export function SecuritySettings() {
             </p>
 
             <div>
-              <label className="block text-xs font-medium text-foreground mb-1.5">
+              <label htmlFor="mfa-totp-otp" className="block text-xs font-medium text-foreground mb-1.5">
                 Authenticator Code
               </label>
               <input
+                id="mfa-totp-otp"
                 ref={otpInputRef}
                 type="text"
                 inputMode="numeric"
@@ -432,15 +433,17 @@ export function SecuritySettings() {
 
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => { setMfaState('enrolling'); setOtpError(null); setOtp(''); }}
                 className="px-3 py-2 rounded-lg text-sm border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 ← Back
               </button>
               <button
+                type="button"
                 onClick={handleVerify}
                 disabled={isPending || otp.length !== 6}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
                 {isPending ? 'Verifying…' : 'Activate 2FA'}
@@ -580,9 +583,11 @@ export function SecuritySettings() {
                     </span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => handleDeletePasskey(pk.id)}
                     className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                     title="Remove Passkey"
+                    aria-label="Remove Passkey"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -592,9 +597,10 @@ export function SecuritySettings() {
           )}
 
           <button
+            type="button"
             onClick={handleRegisterPasskey}
             disabled={isPasskeysLoading || isRegisteringPasskey}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isRegisteringPasskey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
             {isRegisteringPasskey ? 'Registering…' : 'Register New Passkey'}
