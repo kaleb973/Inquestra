@@ -7,7 +7,8 @@
     "build": "prisma generate && prisma db push --accept-data-loss && next build",
     "start": "next start -H 0.0.0.0",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1127.0",
@@ -44,6 +45,7 @@
     "cn": "^0.2.6",
     "framer-motion": "^13.2.0",
     "isomorphic-dompurify": "^4.2.0",
+    "jose": "^6.0.0",
     "jszip": "^3.10.1",
     "katex": "^0.18.7",
     "lucide-react": "^1.41.0",
