@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: 'Best Benchling Alternative for Research Labs | Inquestra',
   description:
     'Looking for a modern alternative to Benchling? Compare Inquestra vs Benchling for academic labs, wet chemistry, materials science, and biotech startups. Free, local-first, with native hardware DAQ.',
+  alternates: {
+    canonical: '/compare/benchling-alternative',
+  },
   keywords: [
     'benchling alternative',
     'free benchling alternative',

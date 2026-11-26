@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: 'Cryptographic Provenance and Audit Verification',
   description:
     'Tamper-evident record hashing, SHA-256 trial checksums, and immutable audit logs for experimental science.',
+  alternates: {
+    canonical: '/provenance',
+  },
 };
 
 export default function ProvenancePage() {

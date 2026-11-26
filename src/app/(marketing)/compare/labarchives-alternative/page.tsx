@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: 'Best LabArchives Alternative for Universities & Research Labs | Inquestra',
   description:
     'Frustrated with LabArchives clunky UI and per-seat fees? Inquestra provides a modern, fast electronic lab notebook with instant search, interactive protocols, chemical inventory, and native hardware DAQ.',
+  alternates: {
+    canonical: '/compare/labarchives-alternative',
+  },
   keywords: [
     'labarchives alternative',
     'free labarchives alternative',

@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: 'System Architecture and Telemetry Pipeline',
   description:
     'Technical architecture of Inquestra: 4-tier telemetry pipeline, off-main-thread Web Workers, Zustand reactive state, and offline-first PostgreSQL sync.',
+  alternates: {
+    canonical: '/architecture',
+  },
 };
 
 export default function ArchitecturePage() {

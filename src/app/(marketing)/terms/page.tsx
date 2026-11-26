@@ -5,6 +5,9 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description: 'Terms of service and acceptable use policies for the Inquestra research platform.',
+  alternates: {
+    canonical: '/terms',
+  },
 };
 
 export default function TermsOfServicePage() {

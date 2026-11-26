@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   },
   description:
     'Compare Inquestra, Benchling, LabArchives, and SciNote. Pricing, supported disciplines, learning curve, and DAQ compared side by side for academic labs.',
+  alternates: {
+    canonical: '/compare',
+  },
 };
 
 export default function ComparePage() {

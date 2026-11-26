@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   },
   description:
     'Answers to common questions about Inquestra: offline usage, hardware data capture, local storage, sequence tools, and data export.',
+  alternates: {
+    canonical: '/faq',
+  },
 };
 
 interface FaqItem {

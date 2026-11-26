@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   },
   description:
     'About Inquestra: a free electronic lab notebook (ELN) for life sciences, chemistry, and engineering, built by researchers for reproducible lab documentation.',
+  alternates: {
+    canonical: '/about',
+  },
 };
 
 export default function AboutPage() {

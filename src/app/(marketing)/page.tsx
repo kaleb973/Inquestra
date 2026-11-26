@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   },
   description:
     'An open electronic lab notebook that stores protocol notes, reagent lots, and serial instrument data directly on your machine.',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
     description:
