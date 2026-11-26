@@ -1,14 +1,23 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Check, X, Shield, Zap, Cpu, FileSpreadsheet } from 'lucide-react';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  ENTITY_IDS,
+  SITE_URL,
+  buildBreadcrumbSchema,
+  buildFounderPerson,
+  buildGraphSchema,
+  buildOrganizationSchema,
+  buildPageMetadata,
+  buildSoftwareApplicationSchema,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Best LabArchives Alternative for Universities & Research Labs | Inquestra',
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Best LabArchives Alternative for Universities & Research Labs',
   description:
     'Frustrated with LabArchives clunky UI and per-seat fees? Inquestra provides a modern, fast electronic lab notebook with instant search, interactive protocols, chemical inventory, and native hardware DAQ.',
-  alternates: {
-    canonical: '/compare/labarchives-alternative',
-  },
+  path: '/compare/labarchives-alternative',
   keywords: [
     'labarchives alternative',
     'free labarchives alternative',
@@ -17,78 +26,60 @@ export const metadata: Metadata = {
     'academic lab notebook',
     'inquestra vs labarchives',
   ],
-  openGraph: {
-    title: 'Inquestra vs LabArchives: The Modern Academic ELN',
-    description:
-      'Replace legacy folder trees with a high-velocity research canvas. Instant search, chemical lot tracking, and tamper-proof 21 CFR Part 11 audit trails.',
-    url: 'https://inquestra.org/compare/labarchives-alternative',
-    siteName: 'Inquestra',
-    type: 'website',
+});
+
+const LABARCHIVES_FAQS = [
+  {
+    question: 'Why do academic researchers look for LabArchives alternatives?',
+    answer:
+      'LabArchives relies on an older folder-tree hierarchy, charges per-seat or institutional fees, and lacks real-time serial hardware instrument DAQ and interactive protocol execution timers.',
   },
-};
+  {
+    question: 'Can Inquestra satisfy university institutional compliance and IP patent requirements?',
+    answer:
+      'Yes. Inquestra features append-only audit logging, SHA-256 cryptographic trial snapshots, and dual-signoff witness review workflows that support 21 CFR Part 11 and university tech-transfer provenance workflows.',
+  },
+  {
+    question: 'How easy is it to switch from LabArchives to Inquestra?',
+    answer:
+      'You can export your existing LabArchives pages as PDF or Markdown and immediately start logging trials in Inquestra with zero setup fees.',
+  },
+] as const;
 
 export default function LabArchivesAlternativePage() {
-  const comparisonJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    name: 'Inquestra vs LabArchives: Best LabArchives Alternative',
-    description:
-      'Side-by-side comparison between Inquestra and LabArchives for academic research groups and university wet labs.',
-    url: 'https://inquestra.org/compare/labarchives-alternative',
-    mainEntity: {
-      '@type': 'SoftwareApplication',
-      name: 'Inquestra',
-      applicationCategory: 'ScientificResearchSoftware',
-      operatingSystem: 'All Modern Web Browsers',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
+  const structuredData = buildGraphSchema([
+    buildOrganizationSchema(),
+    buildFounderPerson(),
+    buildSoftwareApplicationSchema(),
+    {
+      '@type': 'WebPage',
+      name: 'Inquestra vs LabArchives: Best LabArchives Alternative',
+      description:
+        'Side-by-side comparison between Inquestra and LabArchives for academic research groups and university wet labs.',
+      url: `${SITE_URL}/compare/labarchives-alternative`,
+      mainEntity: { '@id': ENTITY_IDS.software },
     },
-  };
-
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
+    {
+      '@type': 'FAQPage',
+      mainEntity: LABARCHIVES_FAQS.map((item) => ({
         '@type': 'Question',
-        name: 'Why do academic researchers look for LabArchives alternatives?',
+        name: item.question,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'LabArchives relies on an antiquated folder-tree hierarchy from the mid-2000s, has sluggish search, charges steep per-seat fees, and completely lacks real-time hardware instrument DAQ or interactive protocol execution timers.',
+          text: item.answer,
         },
-      },
-      {
-        '@type': 'Question',
-        name: 'Can Inquestra satisfy university institutional compliance and IP patent requirements?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Yes. Inquestra features append-only audit logging, SHA-256 cryptographic trial snapshots, and dual-signoff witness review workflows that meet 21 CFR Part 11 and university tech-transfer patent provenance standards.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'How easy is it to switch from LabArchives to Inquestra?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'You can export your existing LabArchives pages as PDF or Markdown and immediately start logging trials in Inquestra with zero setup fees.',
-        },
-      },
-    ],
-  };
+      })),
+    },
+    buildBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Compare ELNs', path: '/compare' },
+      { name: 'LabArchives Alternative', path: '/compare/labarchives-alternative' },
+    ]),
+  ]);
 
   return (
     <div className="font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(comparisonJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ── Hero Section ──────────────────────────────────────────────────────── */}
       <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
@@ -245,6 +236,27 @@ export default function LabArchivesAlternativePage() {
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ Section ─────────────────────────────────────────────────────── */}
+      <section className="py-20 border-b border-border bg-muted/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-8">
+            Frequently Asked Questions
+          </h2>
+          <div className="divide-y divide-border border-y border-border">
+            {LABARCHIVES_FAQS.map((item) => (
+              <div key={item.question} className="py-6">
+                <h3 className="text-base font-semibold text-foreground mb-2">
+                  {item.question}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {item.answer}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -1,14 +1,23 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Check, X, Shield, Zap, Database, Cpu } from 'lucide-react';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  ENTITY_IDS,
+  SITE_URL,
+  buildBreadcrumbSchema,
+  buildFounderPerson,
+  buildGraphSchema,
+  buildOrganizationSchema,
+  buildPageMetadata,
+  buildSoftwareApplicationSchema,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Best Benchling Alternative for Research Labs | Inquestra',
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Best Benchling Alternative for Research Labs',
   description:
     'Looking for a modern alternative to Benchling? Compare Inquestra vs Benchling for academic labs, wet chemistry, materials science, and biotech startups. Free, local-first, with native hardware DAQ.',
-  alternates: {
-    canonical: '/compare/benchling-alternative',
-  },
+  path: '/compare/benchling-alternative',
   keywords: [
     'benchling alternative',
     'free benchling alternative',
@@ -18,78 +27,60 @@ export const metadata: Metadata = {
     'chemistry eln',
     'inquestra vs benchling',
   ],
-  openGraph: {
-    title: 'Inquestra vs Benchling: The Modern ELN Alternative',
-    description:
-      'Break free from enterprise paywalls and single-discipline silos. Inquestra provides a fast, multi-disciplinary electronic lab notebook with native DAQ, chemical inventory, and immutable audit logs.',
-    url: 'https://inquestra.org/compare/benchling-alternative',
-    siteName: 'Inquestra',
-    type: 'website',
-  },
-};
+});
 
 export default function BenchlingAlternativePage() {
-  const comparisonJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    name: 'Inquestra vs Benchling: Best Benchling Alternative for Research Labs',
-    description:
-      'Detailed feature and pricing comparison between Inquestra and Benchling for academic, biotech, and chemical research groups.',
-    url: 'https://inquestra.org/compare/benchling-alternative',
-    mainEntity: {
-      '@type': 'SoftwareApplication',
-      name: 'Inquestra',
-      applicationCategory: 'ScientificResearchSoftware',
-      operatingSystem: 'All Modern Web Browsers',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
+  const structuredData = buildGraphSchema([
+    buildOrganizationSchema(),
+    buildFounderPerson(),
+    buildSoftwareApplicationSchema(),
+    {
+      '@type': 'WebPage',
+      name: 'Inquestra vs Benchling: Best Benchling Alternative for Research Labs',
+      description:
+        'Detailed feature and pricing comparison between Inquestra and Benchling for academic, biotech, and chemical research groups.',
+      url: `${SITE_URL}/compare/benchling-alternative`,
+      mainEntity: { '@id': ENTITY_IDS.software },
     },
-  };
-
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'Why are labs looking for Benchling alternatives?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Benchling has pivoted heavily toward large enterprise biopharma contracts, making it expensive and restrictive for academic labs and seed-stage startups. Additionally, Benchling is focused almost exclusively on molecular biology and lacks first-class support for wet chemistry, materials science, and direct hardware DAQ instruments.',
+    {
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Why are labs looking for Benchling alternatives?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Benchling has pivoted heavily toward large enterprise biopharma contracts, making it expensive and restrictive for academic labs and seed-stage startups. Additionally, Benchling is focused almost exclusively on molecular biology and lacks first-class support for wet chemistry, materials science, and direct hardware DAQ instruments.',
+          },
         },
-      },
-      {
-        '@type': 'Question',
-        name: 'Is Inquestra completely free for academic researchers?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Yes. Inquestra provides free, full-featured access for university labs, postdocs, graduate students, and individual researchers. Labs can also connect their own PostgreSQL database for total self-hosted data ownership.',
+        {
+          '@type': 'Question',
+          name: 'Is Inquestra completely free for academic researchers?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. Inquestra provides free, full-featured access for university labs, postdocs, graduate students, and individual researchers. Labs can also connect their own PostgreSQL database for total self-hosted data ownership.',
+          },
         },
-      },
-      {
-        '@type': 'Question',
-        name: 'How does Inquestra handle data portability and export compared to Benchling?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Unlike proprietary walled gardens, Inquestra supports one-click exports to universal standard JSON, PDF, and Markdown with embedded SHA-256 cryptographic hashes for 21 CFR Part 11 compliant audit integrity.',
+        {
+          '@type': 'Question',
+          name: 'How does Inquestra handle data portability and export compared to Benchling?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Unlike proprietary walled gardens, Inquestra supports one-click exports to universal standard JSON, PDF, and Markdown with embedded SHA-256 cryptographic hashes for 21 CFR Part 11 compliant audit integrity.',
+          },
         },
-      },
-    ],
-  };
+      ],
+    },
+    buildBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Compare ELNs', path: '/compare' },
+      { name: 'Benchling Alternative', path: '/compare/benchling-alternative' },
+    ]),
+  ]);
 
   return (
     <div className="font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(comparisonJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ── Hero Section ──────────────────────────────────────────────────────── */}
       <section className="pt-14 sm:pt-20 pb-16 border-b border-border">

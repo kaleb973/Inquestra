@@ -1,17 +1,20 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Clock, Cpu, ShieldCheck } from 'lucide-react';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  buildBreadcrumbSchema,
+  buildGraphSchema,
+  buildPageMetadata,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: {
-    absolute: 'Frequently Asked Questions: Inquestra Free Electronic Lab Notebook',
-  },
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Frequently Asked Questions: Inquestra Free Electronic Lab Notebook',
   description:
     'Answers to common questions about Inquestra: offline usage, hardware data capture, local storage, sequence tools, and data export.',
-  alternates: {
-    canonical: '/faq',
-  },
-};
+  path: '/faq',
+  absoluteTitle: true,
+});
 
 interface FaqItem {
   id: string;
@@ -80,25 +83,27 @@ const FAQ_ITEMS: readonly FaqItem[] = [
 ];
 
 export default function FaqPage() {
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: FAQ_ITEMS.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  };
+  const structuredData = buildGraphSchema([
+    {
+      '@type': 'FAQPage',
+      mainEntity: FAQ_ITEMS.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    },
+    buildBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'FAQ', path: '/faq' },
+    ]),
+  ]);
 
   return (
     <div className="font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="pt-14 sm:pt-20 pb-16 border-b border-border">

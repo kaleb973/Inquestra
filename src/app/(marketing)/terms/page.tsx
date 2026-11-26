@@ -1,14 +1,12 @@
 import Link from 'next/link';
-import { Shield } from 'lucide-react';
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'Terms of Service',
   description: 'Terms of service and acceptable use policies for the Inquestra research platform.',
-  alternates: {
-    canonical: '/terms',
-  },
-};
+  path: '/terms',
+});
 
 export default function TermsOfServicePage() {
   return (

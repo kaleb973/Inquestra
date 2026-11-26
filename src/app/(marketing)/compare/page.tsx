@@ -1,89 +1,85 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  SITE_URL,
+  buildBreadcrumbSchema,
+  buildFounderPerson,
+  buildGraphSchema,
+  buildOrganizationSchema,
+  buildPageMetadata,
+  buildSoftwareApplicationSchema,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: {
-    absolute: 'Inquestra vs Benchling vs LabArchives: ELN Comparison',
-  },
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Inquestra vs Benchling vs LabArchives: ELN Comparison',
   description:
     'Compare Inquestra, Benchling, LabArchives, and SciNote. Pricing, supported disciplines, learning curve, and DAQ compared side by side for academic labs.',
-  alternates: {
-    canonical: '/compare',
-  },
-};
+  path: '/compare',
+  absoluteTitle: true,
+});
 
 export default function ComparePage() {
-  const softwareJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Inquestra',
-    operatingSystem: 'Web Browser (Google Chrome, Microsoft Edge, Chromium)',
-    applicationCategory: 'ScientificResearchSoftware',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
+  const structuredData = buildGraphSchema([
+    buildOrganizationSchema(),
+    buildFounderPerson(),
+    buildSoftwareApplicationSchema({
+      url: SITE_URL,
+      description:
+        'Comparison of electronic lab notebook features, pricing, local data ownership, and hardware integration across leading research platforms.',
+      datePublished: '2026-11-01',
+      dateModified: '2026-11-26',
+    }),
+    {
+      '@type': 'ItemList',
+      name: 'Electronic Lab Notebook (ELN) Comparison: Inquestra, Benchling, LabArchives, SciNote',
+      description:
+        'Side-by-side comparison of the leading electronic lab notebooks for academic and research use.',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Inquestra',
+          url: SITE_URL,
+          description:
+            'Local-first electronic lab notebook with native serial DAQ, chemical lot tracking, and in-browser execution for academic labs.',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Benchling',
+          url: 'https://benchling.com',
+          description:
+            'ELN and molecular biology platform focused on genetics, CRISPR, plasmid mapping, and biotech. Free academic tier available. Strong in life sciences, limited in physical sciences and engineering.',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: 'LabArchives',
+          url: 'https://labarchives.com',
+          description:
+            'General-purpose ELN for all scientific disciplines. Commonly licensed by universities. Per-user pricing; no hardware DAQ integration.',
+        },
+        {
+          '@type': 'ListItem',
+          position: 4,
+          name: 'SciNote',
+          url: 'https://scinote.net',
+          description:
+            'Open-source ELN for life sciences and medical research. Free tier with storage limits. Strong inventory and sample management; no hardware DAQ.',
+        },
+      ],
     },
-    description:
-      'Comparison of electronic lab notebook features, pricing, local data ownership, and hardware integration across leading research platforms.',
-    url: 'https://inquestra.org',
-    datePublished: '2026-11-01',
-    dateModified: '2026-11-09',
-  };
-
-  const itemListJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Electronic Lab Notebook (ELN) Comparison: Inquestra, Benchling, LabArchives, SciNote',
-    description:
-      'Side-by-side comparison of the leading electronic lab notebooks for academic and research use.',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Inquestra',
-        url: 'https://inquestra.org',
-        description:
-          'Local-first electronic lab notebook with native serial DAQ, chemical lot tracking, and in-browser execution for academic labs.',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Benchling',
-        url: 'https://benchling.com',
-        description:
-          'ELN and molecular biology platform focused on genetics, CRISPR, plasmid mapping, and biotech. Free academic tier available. Strong in life sciences, limited in physical sciences and engineering.',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: 'LabArchives',
-        url: 'https://labarchives.com',
-        description:
-          'General-purpose ELN for all scientific disciplines. Commonly licensed by universities. Per-user pricing; no hardware DAQ integration.',
-      },
-      {
-        '@type': 'ListItem',
-        position: 4,
-        name: 'SciNote',
-        url: 'https://scinote.net',
-        description:
-          'Open-source ELN for life sciences and medical research. Free tier with storage limits. Strong inventory and sample management; no hardware DAQ.',
-      },
-    ],
-  };
+    buildBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Compare ELNs', path: '/compare' },
+    ]),
+  ]);
 
   return (
     <div className="font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────────── */}
       <section className="pt-14 sm:pt-20 pb-16 border-b border-border">

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
+import { GITHUB_REPO_URL } from '@/lib/seo';
 
 export function MarketingFooter() {
   const handleOpenCookieSettings = () => {
@@ -26,7 +27,7 @@ export function MarketingFooter() {
               <Link href="/compare" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">Compare ELNs</Link>
               <Link href="/faq" className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">FAQ</Link>
               <a
-                href="https://github.com/kaleb973/Inquestra"
+                href={GITHUB_REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
@@ -99,8 +100,16 @@ export function MarketingFooter() {
         </div>
 
         <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Inquestra. Open research infrastructure.</p>
-          <span>Free for academic and independent laboratories.</span>
+          <p>&copy; {new Date().getFullYear()} Inquestra. MIT-licensed open research infrastructure.</p>
+          <span>
+            Free for academic and independent laboratories ·{' '}
+            <Link
+              href="/about"
+              className="hover:text-foreground underline-offset-4 hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            >
+              Maintained by Kaleb
+            </Link>
+          </span>
         </div>
       </div>
     </footer>

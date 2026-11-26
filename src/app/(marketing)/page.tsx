@@ -3,102 +3,38 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { PilotInterestForm } from '@/components/marketing/PilotInterestForm';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  GITHUB_REPO_URL,
+  buildFounderPerson,
+  buildGraphSchema,
+  buildOrganizationSchema,
+  buildPageMetadata,
+  buildSoftwareApplicationSchema,
+  buildSoftwareSourceCodeSchema,
+  buildWebSiteSchema,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: {
-    absolute: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
-  },
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
   description:
     'An open electronic lab notebook that stores protocol notes, reagent lots, and serial instrument data directly on your machine.',
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    title: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
-    description:
-      'An open electronic lab notebook that stores protocol notes, reagent lots, and serial instrument data directly on your machine.',
-  },
-  twitter: {
-    title: 'Inquestra: Local-First Electronic Lab Notebook (ELN)',
-    description:
-      'An open electronic lab notebook that stores protocol notes, reagent lots, and serial instrument data directly on your machine.',
-  },
-};
+  path: '/',
+  absoluteTitle: true,
+});
 
 export default function MarketingPage() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Inquestra',
-    operatingSystem: 'Web Browser (Google Chrome, Microsoft Edge, Chromium)',
-    applicationCategory: 'ScientificResearchSoftware',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    description:
-      'Browser-based research notebook pairing protocol documentation with chemical storage and serial instrument capture on your local machine.',
-  };
+  const structuredData = buildGraphSchema([
+    buildOrganizationSchema(),
+    buildFounderPerson(),
+    buildWebSiteSchema(),
+    buildSoftwareApplicationSchema(),
+    buildSoftwareSourceCodeSchema(),
+  ]);
 
   return (
     <div className="font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: 'What is Inquestra?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Inquestra is a browser-based notebook for experimental laboratory work. Researchers run step-by-step protocols alongside chemical aliquot logs and real-time serial instrument capture on their local machine.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Is Inquestra free for academic labs and students?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes. Inquestra is free to use without subscriptions. All notes and instrument telemetry remain stored on your machine.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Does Inquestra support molecular biology research?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes. It includes built-in primitives for PCR protocols, primer analysis, 2D SMILES rendering via PubChem, and inline DOI lookups through PubMed and Europe PMC.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'How does Inquestra handle data ownership?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Inquestra stores your unpublished trials and telemetry locally in your browser using IndexedDB. You can export complete records as Markdown notes and CSV files at any time.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Is Inquestra easy to learn for students and new researchers?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes. Inquestra is designed for fast bench onboarding. The notebook editor uses familiar document conventions with slash commands, runs in standard modern web browsers without installing drivers, and includes one-click export protection for shared lab computers.',
-                },
-              },
-            ],
-          }),
-        }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ── 1. Hero & Real Product Screen ──────────────────────────────────────── */}
       <section className="pt-12 sm:pt-16 pb-16 sm:pb-20 border-b border-border">
@@ -133,6 +69,32 @@ export default function MarketingPage() {
                 Explore Live Demo
               </Link>
             </div>
+
+            <p className="text-xs text-muted-foreground pt-1">
+              MIT-licensed open source on{' '}
+              <a
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-foreground underline underline-offset-4 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                github.com/kaleb973/Inquestra
+              </a>
+              {' · '}
+              <Link
+                href="/about"
+                className="underline underline-offset-4 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                Maintainer &amp; project info
+              </Link>
+              {' · '}
+              <Link
+                href="/faq"
+                className="underline underline-offset-4 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                FAQ
+              </Link>
+            </p>
           </div>
 
           <figure className="mt-10 sm:mt-12 rounded-lg border border-border bg-card overflow-hidden">

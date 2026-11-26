@@ -83,6 +83,8 @@ export async function middleware(request: NextRequest) {
   // 2. Rate Limiting Protection
   const isAppRoute = pathname === '/app' || pathname.startsWith('/app/');
   const isScanRoute = pathname === '/scan' || pathname.startsWith('/scan/');
+  const isApiRoute = pathname.startsWith('/api');
+  const isNoIndexRoute = isAppRoute || isScanRoute || isApiRoute;
   let rateLimitResult: RateLimitResult = { success: true, limit: 180, remaining: 180, reset: 0 };
 
   if (pathname.startsWith('/app/login') || pathname.startsWith('/app/signup')) {
@@ -208,6 +210,9 @@ export async function middleware(request: NextRequest) {
 
   // 4. Attach Enterprise Security Headers (Defense in Depth)
   applySecurityHeaders(response.headers);
+  if (isNoIndexRoute) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
 
   return response;
 }

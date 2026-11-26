@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Shield, Check, Copy, ExternalLink, Headphones } from 'lucide-react';
+import { GITHUB_REPO_URL } from '@/lib/seo';
 
 /**
  * Interactive contact channels and one-click email copy actions.
@@ -148,12 +149,21 @@ export function ContactChannels() {
         </div>
 
         {/* Response Note */}
-        <div className="mt-10 p-6 rounded-lg bg-card border border-border text-center">
-          <p className="text-xs font-medium text-foreground mb-1">
-            Response time
+        <div className="mt-10 p-6 rounded-lg bg-card border border-border text-center space-y-2">
+          <p className="text-xs font-medium text-foreground">
+            Response time &amp; open-source repository
           </p>
           <p className="text-xs text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Messages go directly to the builder. You can expect a response within one business day.
+            Messages go directly to Kaleb (founder and lead maintainer). You can expect a response within one business day, or open public bug reports and feature discussions on{' '}
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-primary hover:underline"
+            >
+              github.com/kaleb973/Inquestra
+            </a>
+            .
           </p>
         </div>
       </main>

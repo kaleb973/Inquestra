@@ -1,0 +1,26 @@
+# Inquestra
+
+> Local-first, MIT-licensed Electronic Lab Notebook (ELN) with native Chromium W3C Web Serial hardware capture, chemical inventory LIMS, and deterministic SHA-256 provenance.
+
+- Official Website: https://inquestra.org
+- Source Code Repository: https://github.com/kaleb973/Inquestra
+- Founder & Lead Maintainer: Kaleb (https://github.com/kaleb973)
+- Contact & Support: https://inquestra.org/contact (support@inquestra.org)
+
+## Key Public Pages
+
+- [Home](https://inquestra.org/): Overview of the local-first ELN, Web Serial DAQ, and SHA-256 record sealing.
+- [About](https://inquestra.org/about): Project background, maintainer information (Kaleb / github.com/kaleb973), open-source details, and how to support development.
+- [Compare ELNs](https://inquestra.org/compare): Side-by-side comparison of Inquestra, Benchling, LabArchives, and SciNote.
+- [Benchling Alternative](https://inquestra.org/compare/benchling-alternative): Multi-disciplinary ELN and self-hosted PostgreSQL comparison.
+- [LabArchives Alternative](https://inquestra.org/compare/labarchives-alternative): Block-canvas workspace and hardware DAQ comparison.
+- [Hardware DAQ](https://inquestra.org/hardware): W3C Web Serial benchmarks (ESP32-S3, Teensy 4.1, Arduino, nRF52840, RP2040) and supported transducers.
+- [System Architecture](https://inquestra.org/architecture): Off-main-thread Web Workers, browser IndexedDB persistence, and optional PostgreSQL sync via Prisma.
+- [Cryptographic Provenance](https://inquestra.org/provenance): Deterministic SHA-256 trial sealing, append-only audit logs, and ZIP/Markdown/CSV exports.
+- [Interactive Demo](https://inquestra.org/demo): In-browser simulated serial DAQ and SHA-256 sealing walkthrough.
+- [FAQ](https://inquestra.org/faq): Answers on zero-signup local mode, academic access, serial hardware, sequences, chemistry tools, and data export.
+- [Contact](https://inquestra.org/contact): Support and legal/privacy contact channels (`support@inquestra.org`, `legal@inquestra.org`).
+
+## Excluded Application Routes
+
+- `/app/*`, `/scan`, and `/api/*` are interactive workspace/API endpoints marked `noindex, nofollow` and disallowed in `robots.txt`.

@@ -1,14 +1,12 @@
 import Link from 'next/link';
-import { Lock } from 'lucide-react';
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'Privacy Policy',
   description: 'Data privacy, security, and research data confidentiality policies for the Inquestra platform.',
-  alternates: {
-    canonical: '/privacy',
-  },
-};
+  path: '/privacy',
+});
 
 export default function PrivacyPolicyPage() {
   return (

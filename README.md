@@ -1,13 +1,15 @@
 # Inquestra
 
-Browser-based Electronic Lab Notebook (ELN) and research workspace for life sciences, chemistry, biotech, materials science, and engineering.
+**Website:** [inquestra.org](https://inquestra.org) · **Source:** [github.com/kaleb973/Inquestra](https://github.com/kaleb973/Inquestra) · **License:** [MIT](LICENSE)
+
+Open-source, local-first Electronic Lab Notebook (ELN) and bench data acquisition workspace for life sciences, chemistry, biotech, materials science, and engineering.
 
 ## Features
 
-- **Local-first workspace:** Runs in browser `localStorage` without requiring an account ([inquestra.org/app](https://inquestra.org/app)).
-- **Web Serial hardware DAQ:** Streams live serial telemetry directly from benchtop instruments, microcontrollers, balances, and probes via `navigator.serial` ([inquestra.org/demo](https://inquestra.org/demo)).
-- **Scientific editor blocks:** TipTap block canvas with protocol checklists, step timers, KaTeX equations, PubChem chemical structure resolution, DNA/RNA sequence ($T_m$, GC%) calculators, and PubMed / Europe PMC citations.
-- **Provenance & inventory:** Optional PostgreSQL persistence via Prisma ORM with SHA-256 record sealing, append-only audit logs, reagent lot tracking, and 2D/QR label scanning.
+- **Local-first workspace:** Persists drafts in browser IndexedDB and `localStorage` without requiring an account ([inquestra.org/app](https://inquestra.org/app)).
+- **Web Serial hardware DAQ:** Streams live serial telemetry directly from benchtop instruments, balances, probes, and microcontrollers via `navigator.serial` ([Hardware Specs](https://inquestra.org/hardware) · [Live Simulator](https://inquestra.org/demo)).
+- **Scientific editor blocks:** TipTap block canvas with protocol checklists, step timers, KaTeX equations, PubChem 2D chemical structure resolution, DNA/RNA/protein sequence ($T_m$, GC%) calculators, and PubMed / Europe PMC citations.
+- **Provenance & inventory:** Optional self-hosted PostgreSQL persistence via Prisma ORM with SHA-256 record sealing, append-only audit logs, reagent lot tracking, and 2D/QR label scanning ([Provenance](https://inquestra.org/provenance) · [Architecture](https://inquestra.org/architecture)).
 
 ## Stack
 
@@ -24,14 +26,23 @@ npm install
 npm run dev
 ```
 
-- Site: [http://localhost:3000](http://localhost:3000)
+- Marketing Site: [http://localhost:3000](http://localhost:3000)
 - Workspace: [http://localhost:3000/app](http://localhost:3000/app)
 - DAQ Simulator: [http://localhost:3000/demo](http://localhost:3000/demo)
 
 The local-first workspace runs without environment configuration. Optional PostgreSQL, Supabase, Stripe, Resend, and analytics credentials can be placed in `.env.local` for cloud sync.
 
-## Documentation & Policies
+## Project Links & Comparisons
 
+- [About Inquestra & Maintainer](https://inquestra.org/about)
+- [ELN Comparison (Benchling, LabArchives, SciNote)](https://inquestra.org/compare)
+- [Frequently Asked Questions](https://inquestra.org/faq)
 - [System Architecture](docs/ARCHITECTURE.md)
 - [Security Policy](SECURITY.md)
-- [MIT License](LICENSE)
+
+## Maintainer & Support
+
+Inquestra is built and maintained by **Kaleb** ([github.com/kaleb973](https://github.com/kaleb973)).
+
+- **Bug reports & feature requests:** Open an issue at [github.com/kaleb973/Inquestra/issues](https://github.com/kaleb973/Inquestra/issues).
+- **Lab onboarding, custom serial firmware profiles, or sponsorship inquiries:** Submit the [Pilot Lab Access form](https://inquestra.org/#pilot), visit [inquestra.org/contact](https://inquestra.org/contact), or email `support@inquestra.org`.

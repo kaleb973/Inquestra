@@ -1,19 +1,31 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  buildBreadcrumbSchema,
+  buildGraphSchema,
+  buildPageMetadata,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'System Architecture and Telemetry Pipeline',
   description:
     'Technical architecture of Inquestra: 4-tier telemetry pipeline, off-main-thread Web Workers, Zustand reactive state, and offline-first PostgreSQL sync.',
-  alternates: {
-    canonical: '/architecture',
-  },
-};
+  path: '/architecture',
+});
 
 export default function ArchitecturePage() {
+  const structuredData = buildGraphSchema([
+    buildBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'System Architecture', path: '/architecture' },
+    ]),
+  ]);
+
   return (
     <div className="pt-14 sm:pt-20 pb-24">
+      <JsonLd data={structuredData} />
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
         <div className="max-w-3xl">
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-[1.1]">

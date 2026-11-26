@@ -1,36 +1,40 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  GITHUB_PROFILE_URL,
+  GITHUB_REPO_URL,
+  buildBreadcrumbSchema,
+  buildFounderPerson,
+  buildGraphSchema,
+  buildOrganizationSchema,
+  buildPageMetadata,
+  buildSoftwareSourceCodeSchema,
+} from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: {
-    absolute: 'About Inquestra: Free ELN Built for Researchers',
-  },
+export const metadata: Metadata = buildPageMetadata({
+  title: 'About Inquestra: Free ELN Built for Researchers',
   description:
     'About Inquestra: a free electronic lab notebook (ELN) for life sciences, chemistry, and engineering, built by researchers for reproducible lab documentation.',
-  alternates: {
-    canonical: '/about',
-  },
-};
+  path: '/about',
+  absoluteTitle: true,
+});
 
 export default function AboutPage() {
-  const organizationJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Inquestra',
-    url: 'https://inquestra.org',
-    description:
-      'Inquestra builds open research tools for scientists, centering on a browser-based Electronic Lab Notebook that runs locally on your machine.',
-    foundingDate: '2024',
-    sameAs: ['https://github.com/kaleb973/Inquestra'],
-  };
+  const structuredData = buildGraphSchema([
+    buildOrganizationSchema(),
+    buildFounderPerson(),
+    buildSoftwareSourceCodeSchema(),
+    buildBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'About', path: '/about' },
+    ]),
+  ]);
 
   return (
     <div className="font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="pt-14 sm:pt-20 pb-16 border-b border-border">
@@ -155,9 +159,9 @@ export default function AboutPage() {
                 <p className="text-xs font-mono text-muted-foreground">Founder and Lead Builder, Inquestra</p>
               </div>
               <a
-                href="https://github.com/kaleb973"
+                href={GITHUB_PROFILE_URL}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer me"
                 className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
               >
                 github.com/kaleb973
@@ -181,14 +185,20 @@ export default function AboutPage() {
             Open development
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
-            Inquestra is developed openly on GitHub. The source code is inspectable, issues are
-            tracked publicly, and contributions from the research community are welcome. Scientific
-            software should be auditable, particularly software involved in data provenance and
-            audit trails.
+            Inquestra is developed openly on GitHub under the MIT License at{' '}
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+            >
+              github.com/kaleb973/Inquestra
+            </a>
+            . The source code is inspectable, issues are tracked publicly, and contributions from the research community are welcome. Scientific software should be auditable, particularly software involved in data provenance and audit trails.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a
-              href="https://github.com/kaleb973/Inquestra"
+              href={GITHUB_REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-3 rounded text-sm font-medium border border-border text-foreground hover:bg-muted/40 transition-colors"
@@ -203,6 +213,32 @@ export default function AboutPage() {
               Contact the team
               <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+
+          <div className="mt-8 p-6 rounded-xl border border-border bg-card space-y-2">
+            <h3 className="text-base font-semibold text-foreground">
+              Supporting &amp; sponsoring development
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              The core local-first workspace stays free for academic and independent researchers. If your lab wants to sponsor ongoing development, fund custom serial instrument firmware profiles, or arrange self-hosted PostgreSQL deployment assistance, open a thread on{' '}
+              <a
+                href={`${GITHUB_REPO_URL}/issues`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                GitHub Issues
+              </a>{' '}
+              or reach out directly via the{' '}
+              <Link href="/#pilot" className="text-primary hover:underline font-medium">
+                Pilot Lab Access form
+              </Link>{' '}
+              or{' '}
+              <Link href="/contact" className="text-primary hover:underline font-medium">
+                Contact page
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </section>

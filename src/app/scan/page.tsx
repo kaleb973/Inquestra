@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { resolveScanCode } from '@/actions/scanActions';
 import { Logo } from '@/components/ui/Logo';
@@ -20,9 +21,13 @@ interface ScanPageProps {
   searchParams: Promise<{ code?: string }>;
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Specimen and Location Resolver',
   description: 'Instant mobile barcode and QR code lookup for lab specimens, freezer storage, and instruments.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function ScanPage({ searchParams }: ScanPageProps) {

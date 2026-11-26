@@ -1,85 +1,86 @@
 import type { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/seo';
+
+const CORE_LAST_MODIFIED = new Date('2026-11-26T00:00:00Z');
+const LEGAL_LAST_MODIFIED = new Date('2026-09-30T00:00:00Z');
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://inquestra.org';
-  const lastModified = new Date();
-
   return [
     {
-      url: `${baseUrl}`,
-      lastModified,
+      url: SITE_URL,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/compare`,
-      lastModified,
+      url: `${SITE_URL}/compare`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/compare/benchling-alternative`,
-      lastModified,
+      url: `${SITE_URL}/compare/benchling-alternative`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/compare/labarchives-alternative`,
-      lastModified,
+      url: `${SITE_URL}/compare/labarchives-alternative`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/faq`,
-      lastModified,
+      url: `${SITE_URL}/faq`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/about`,
-      lastModified,
+      url: `${SITE_URL}/about`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/hardware`,
-      lastModified,
+      url: `${SITE_URL}/hardware`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/provenance`,
-      lastModified,
+      url: `${SITE_URL}/provenance`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/architecture`,
-      lastModified,
+      url: `${SITE_URL}/architecture`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/demo`,
-      lastModified,
+      url: `${SITE_URL}/demo`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified,
+      url: `${SITE_URL}/contact`,
+      lastModified: CORE_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/terms`,
-      lastModified,
+      url: `${SITE_URL}/terms`,
+      lastModified: LEGAL_LAST_MODIFIED,
       changeFrequency: 'yearly',
       priority: 0.5,
     },
     {
-      url: `${baseUrl}/privacy`,
-      lastModified,
+      url: `${SITE_URL}/privacy`,
+      lastModified: LEGAL_LAST_MODIFIED,
       changeFrequency: 'yearly',
       priority: 0.5,
     },

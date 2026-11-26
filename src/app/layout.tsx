@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
 import { DeploymentSkewWatcher } from '@/components/providers/DeploymentSkewWatcher';
+import { DEFAULT_OG_IMAGE, GITHUB_PROFILE_URL, SITE_URL } from '@/lib/seo';
 
 const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -36,21 +37,27 @@ export const metadata: Metadata = {
   },
   description:
     'A local-first electronic lab notebook with built-in serial instrument capture. Your experimental data never leaves your browser.',
-  metadataBase: new URL('https://inquestra.org'),
+  applicationName: 'Inquestra',
+  authors: [{ name: 'Kaleb', url: GITHUB_PROFILE_URL }],
+  creator: 'Kaleb',
+  publisher: 'Inquestra',
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://inquestra.org',
+    url: SITE_URL,
     siteName: 'Inquestra',
     title: 'Inquestra: Open Electronic Lab Notebook',
     description:
       'A local-first electronic lab notebook with built-in serial instrument capture. Your experimental data never leaves your browser.',
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Inquestra: Open Electronic Lab Notebook',
     description:
       'A local-first electronic lab notebook with built-in serial instrument capture. Your experimental data never leaves your browser.',
+    images: [DEFAULT_OG_IMAGE.url],
   },
   icons: {
     icon: [

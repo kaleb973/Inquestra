@@ -1,6 +1,14 @@
 {
   "name": "inquestra",
   "version": "0.1.0",
+  "description": "Local-first Electronic Lab Notebook (ELN) with W3C Web Serial hardware acquisition and SHA-256 provenance.",
+  "homepage": "https://inquestra.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaleb973/Inquestra.git"
+  },
+  "author": "Kaleb (https://github.com/kaleb973)",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

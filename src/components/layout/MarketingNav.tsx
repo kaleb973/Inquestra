@@ -16,8 +16,10 @@ import {
   ChevronDown,
   Sun,
   Moon,
+  ArrowUpRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GITHUB_REPO_URL } from '@/lib/seo';
 
 const PLATFORM_ITEMS = [
   {
@@ -191,6 +193,15 @@ export function MarketingNav() {
                   </Link>
                 );
               })}
+              <a
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 py-1.5 text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span>GitHub</span>
+                <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </a>
             </div>
           </div>
 
@@ -303,6 +314,16 @@ export function MarketingNav() {
             >
               Contact
             </Link>
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span>GitHub</span>
+              <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </a>
           </div>
 
           <div className="pt-3 border-t border-border flex flex-col gap-2">
