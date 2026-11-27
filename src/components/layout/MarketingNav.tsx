@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GITHUB_REPO_URL } from '@/lib/seo';
+import { IS_CLOUD_WORKSPACE_ENABLED } from '@/lib/features';
 
 const PLATFORM_ITEMS = [
   {
@@ -42,7 +43,7 @@ const PLATFORM_ITEMS = [
   },
   {
     label: 'System Architecture',
-    description: 'Off-main-thread Web Workers and PostgreSQL persistence',
+    description: 'Local browser persistence, Web Serial DAQ, and optional PostgreSQL',
     href: '/architecture',
     icon: Layers,
   },
@@ -215,12 +216,14 @@ export function MarketingNav() {
             >
               {mounted && isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <Link
-              href="/app/login"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Sign in
-            </Link>
+            {IS_CLOUD_WORKSPACE_ENABLED && (
+              <Link
+                href="/app/login"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Sign in
+              </Link>
+            )}
             <Link
               href="/app"
               className="text-sm font-semibold bg-primary text-primary-foreground hover:opacity-95 px-4 py-2 rounded-md transition-opacity whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
@@ -327,13 +330,15 @@ export function MarketingNav() {
           </div>
 
           <div className="pt-3 border-t border-border flex flex-col gap-2">
-            <Link
-              href="/app/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-center text-sm font-medium py-2.5 rounded-md border border-border text-foreground hover:bg-muted/40 transition-colors whitespace-nowrap"
-            >
-              Sign in to lab account
-            </Link>
+            {IS_CLOUD_WORKSPACE_ENABLED && (
+              <Link
+                href="/app/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-center text-sm font-medium py-2.5 rounded-md border border-border text-foreground hover:bg-muted/40 transition-colors whitespace-nowrap"
+              >
+                Sign in to lab account
+              </Link>
+            )}
             <Link
               href="/app"
               onClick={() => setMobileMenuOpen(false)}

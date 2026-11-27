@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useNotebookStore } from '@/store/useNotebookStore';
+import { IS_CLOUD_WORKSPACE_ENABLED } from '@/lib/features';
 import {
   fetchWorkspaceBootstrap,
   fetchAllTrials,
@@ -1479,33 +1480,35 @@ export function LeftSidebar() {
             )}
           </div>
 
-          {/* Lab & Settings link */}
-          <div className="mt-8 border-t border-border/60 pt-4 space-y-1">
-            <Link
-              href="/app/literature"
-              prefetch={true}
-              className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
-            >
-              <Quote className="w-3.5 h-3.5 shrink-0" />
-              Literature &amp; Citations
-            </Link>
-            <Link
-              href="/app/protocols"
-              prefetch={true}
-              className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
-            >
-              <BookOpen className="w-3.5 h-3.5 shrink-0" />
-              Protocol Library
-            </Link>
-            <Link
-              href="/app/admin"
-              prefetch={true}
-              className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
-            >
-              <Settings2 className="w-3.5 h-3.5 shrink-0" />
-              Lab &amp; Settings
-            </Link>
-          </div>
+          {/* Lab & Settings links (hidden in guest local-only mode unless cloud workspace is enabled) */}
+          {(IS_CLOUD_WORKSPACE_ENABLED || !isGuest) && (
+            <div className="mt-8 border-t border-border/60 pt-4 space-y-1">
+              <Link
+                href="/app/literature"
+                prefetch={true}
+                className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
+              >
+                <Quote className="w-3.5 h-3.5 shrink-0" />
+                Literature &amp; Citations
+              </Link>
+              <Link
+                href="/app/protocols"
+                prefetch={true}
+                className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
+              >
+                <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                Protocol Library
+              </Link>
+              <Link
+                href="/app/admin"
+                prefetch={true}
+                className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 tracking-tight"
+              >
+                <Settings2 className="w-3.5 h-3.5 shrink-0" />
+                Lab &amp; Settings
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* ── Telemetry & DAQ Drawer Trigger ───────────────────────────── */}

@@ -31,7 +31,8 @@ import { SealConfirmationModal } from '@/components/trials/SealConfirmationModal
 import { ImportTrialModal } from '@/components/trials/ImportTrialModal';
 import { ExportTrialModal } from '@/components/trials/ExportTrialModal';
 import { Logo } from '@/components/ui/Logo';
-import { useNotebookStore } from '@/store/useNotebookStore';
+import { useNotebookStore, STORAGE_QUOTA_ERROR, getSessionTelemetry } from '@/store/useNotebookStore';
+import { IS_CLOUD_WORKSPACE_ENABLED } from '@/lib/features';
 import { syncTrialToCloud } from '@/actions/syncActions';
 import { exportTrialAsZip, type SignatureExport } from '@/lib/exportTrial';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -338,6 +339,7 @@ export function Header() {
         html: resolvedHtml,
         checksum: currentTrial.checksum,
         signatures,
+        telemetry: getSessionTelemetry(),
       });
     } finally {
       setIsExporting(false);
@@ -350,7 +352,9 @@ export function Header() {
   const handleOpenSealModal = () => {
     if (!user) {
       setSealError(
-        'Permanent cryptographic trial sealing and dual-signature manifests require an authenticated account. Please sign in to sync and seal, or use Export to download a portable JSON/ZIP archive.'
+        IS_CLOUD_WORKSPACE_ENABLED
+          ? 'Permanent cryptographic trial sealing and dual-signature manifests require an authenticated account. Please sign in to sync and seal, or use Export to download a portable JSON/ZIP archive.'
+          : 'Database-backed trial sealing requires a self-hosted PostgreSQL workspace. Use Export to download a portable ZIP, Markdown, or JSON archive from your Local Notebook.'
       );
       setShowSealModal(true);
       return;
@@ -568,6 +572,16 @@ export function Header() {
               <RotateCw className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">Update deployed (Reload)</span>
             </button>
+          ) : saveError === STORAGE_QUOTA_ERROR ? (
+            <button
+              type="button"
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-1.5 text-xs text-critical hover:underline font-mono cursor-pointer"
+              title={STORAGE_QUOTA_ERROR}
+            >
+              <AlertCircle className="w-3.5 h-3.5 text-critical shrink-0" />
+              <span className="hidden sm:inline">Storage full · Export backup</span>
+            </button>
           ) : (
             <span
               className="flex items-center gap-1.5 text-xs text-critical font-mono"
@@ -595,21 +609,23 @@ export function Header() {
           </span>
         )}
 
-        {/* Back up to Cloud (Guests) or Save / Snapshot button (Logged in users) */}
+        {/* Back up to Cloud (Guests, when cloud enabled) or Save / Snapshot button (Logged in users) */}
         {!user ? (
-          <Link
-            href="/app/signup?redirectTo=/app"
-            onClick={() =>
-              trackAnalyticsEvent('cloud_backup_intent', {
-                triggerSource: 'header_backup_button',
-              })
-            }
-            title="Create an account to back up notes and sync across devices"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors"
-          >
-            <Cloud className="w-3.5 h-3.5" />
-            <span>Back up to Cloud</span>
-          </Link>
+          IS_CLOUD_WORKSPACE_ENABLED ? (
+            <Link
+              href="/app/signup?redirectTo=/app"
+              onClick={() =>
+                trackAnalyticsEvent('cloud_backup_intent', {
+                  triggerSource: 'header_backup_button',
+                })
+              }
+              title="Create an account to back up notes and sync across devices"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors"
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span>Back up to Cloud</span>
+            </Link>
+          ) : null
         ) : (
           <button
             onClick={handleSaveSnapshot}
@@ -749,6 +765,7 @@ export function Header() {
                 type="button"
                 onClick={() => {
                   setShowMoreMenu(false);
+                  trackAnalyticsEvent('export_triggered', { format: 'pdf' });
                   window.print();
                 }}
                 className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-accent text-left transition-colors"
@@ -875,7 +892,7 @@ export function Header() {
               )}
             </button>
           </div>
-        ) : (
+        ) : IS_CLOUD_WORKSPACE_ENABLED ? (
           <Link
             href="/app/login"
             onClick={() =>
@@ -888,7 +905,7 @@ export function Header() {
             <LogIn className="w-3.5 h-3.5" />
             Sign In
           </Link>
-        )}
+        ) : null}
       </div>
 
       <SealConfirmationModal

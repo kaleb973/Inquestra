@@ -3,7 +3,7 @@
 // Unified Client Analytics Provider: Google Analytics 4 (GA4) + PostHog
 // Compliant with Next.js App Router (Suspense-wrapped route listener) and GDPR Cookie Consent.
 
-import { useEffect, Suspense, useRef } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import posthog from 'posthog-js';
@@ -18,13 +18,48 @@ const POSTHOG_PROJECT_TOKEN = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 const POSTHOG_CONFIGURED = Boolean(POSTHOG_PROJECT_TOKEN && POSTHOG_HOST);
 
-function RouteChangeTracker() {
+function ensurePostHogInitialized(): boolean {
+  if (!POSTHOG_PROJECT_TOKEN || !POSTHOG_HOST) return false;
+  if (posthog.__loaded) return true;
+
+  posthog.init(POSTHOG_PROJECT_TOKEN, {
+    api_host: POSTHOG_HOST,
+    defaults: '2025-05-24',
+    opt_out_capturing_by_default: true,
+    person_profiles: 'identified_only',
+    capture_exceptions: true,
+    debug: process.env.NODE_ENV === 'development',
+    before_send: (event) => {
+      if (!isAnalyticsPermitted()) {
+        return null;
+      }
+      if (event && event.event === '$exception') {
+        const props = (event.properties || {}) as Record<string, unknown>;
+        const errorText = [
+          props.$exception_message,
+          props.$exception_type,
+          typeof props.$exception_values === 'string'
+            ? props.$exception_values
+            : JSON.stringify(props.$exception_values || ''),
+        ].join(' ');
+
+        if (isDeploymentSkewError(errorText)) {
+          return null;
+        }
+      }
+      return event;
+    },
+  });
+  return true;
+}
+
+function RouteChangeTracker({ analyticsAllowed }: { analyticsAllowed: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const previousUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!pathname) return;
+    if (!pathname || !analyticsAllowed || !isAnalyticsPermitted()) return;
     const searchString = searchParams?.toString();
     const currentUrl = searchString ? `${pathname}?${searchString}` : pathname;
 
@@ -32,11 +67,10 @@ function RouteChangeTracker() {
     if (previousUrlRef.current === currentUrl) return;
     previousUrlRef.current = currentUrl;
 
-    if (!isAnalyticsPermitted()) return;
-
     // 1. PostHog Pageview
-    if (POSTHOG_CONFIGURED && typeof posthog.capture === 'function') {
+    if (POSTHOG_CONFIGURED && ensurePostHogInitialized() && typeof posthog.capture === 'function') {
       try {
+        posthog.opt_in_capturing();
         posthog.capture('$pageview', {
           $current_url: window.location.href,
           path: pathname,
@@ -57,52 +91,28 @@ function RouteChangeTracker() {
         // Silently ignore if blocked
       }
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, analyticsAllowed]);
 
   return null;
 }
 
 export function AnalyticsProvider() {
   const identifiedUserId = useRef<string | null>(null);
+  const [analyticsAllowed, setAnalyticsAllowed] = useState(false);
 
   useEffect(() => {
-    if (!POSTHOG_PROJECT_TOKEN || !POSTHOG_HOST || posthog.__loaded) return;
-    const permitted = isAnalyticsPermitted();
-
-    posthog.init(POSTHOG_PROJECT_TOKEN, {
-      api_host: POSTHOG_HOST,
-      defaults: '2025-05-24',
-      opt_out_capturing_by_default: !permitted,
-      capture_exceptions: permitted,
-      debug: process.env.NODE_ENV === 'development',
-      before_send: (event) => {
-        if (!isAnalyticsPermitted()) {
-          return null;
-        }
-        if (event && event.event === '$exception') {
-          const props = (event.properties || {}) as Record<string, unknown>;
-          const errorText = [
-            props.$exception_message,
-            props.$exception_type,
-            typeof props.$exception_values === 'string'
-              ? props.$exception_values
-              : JSON.stringify(props.$exception_values || ''),
-          ].join(' ');
-
-          if (isDeploymentSkewError(errorText)) {
-            return null;
-          }
-        }
-        return event;
-      },
-    });
+    const initialAllowed = isAnalyticsPermitted();
+    setAnalyticsAllowed(initialAllowed);
+    if (initialAllowed && ensurePostHogInitialized()) {
+      posthog.opt_in_capturing();
+    }
   }, []);
 
   useEffect(() => {
     if (!POSTHOG_CONFIGURED) return;
 
     const identifyUser = (user: User) => {
-      if (!isAnalyticsPermitted()) return;
+      if (!isAnalyticsPermitted() || !ensurePostHogInitialized()) return;
       if (identifiedUserId.current === user.id) return;
 
       if (identifiedUserId.current) {
@@ -132,6 +142,7 @@ export function AnalyticsProvider() {
       } else if (event === 'SIGNED_OUT') {
         if (
           identifiedUserId.current &&
+          posthog.__loaded &&
           posthog.get_distinct_id() === identifiedUserId.current
         ) {
           posthog.reset();
@@ -141,24 +152,29 @@ export function AnalyticsProvider() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [analyticsAllowed]);
 
   useEffect(() => {
     // Synchronize cookie consent controls with the PostHog and GA4 singletons.
     const handleConsentChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ analytics: boolean }>;
-      const analyticsAllowed = customEvent.detail?.analytics;
+      const permitted = Boolean(customEvent.detail?.analytics);
+      setAnalyticsAllowed(permitted);
 
-      if (analyticsAllowed) {
+      if (permitted) {
         try {
-          if (POSTHOG_CONFIGURED) posthog.opt_in_capturing();
+          if (POSTHOG_CONFIGURED && ensurePostHogInitialized()) {
+            posthog.opt_in_capturing();
+          }
           window.gtag?.('consent', 'update', {
             analytics_storage: 'granted',
           });
         } catch {}
       } else {
         try {
-          if (POSTHOG_CONFIGURED) posthog.opt_out_capturing();
+          if (POSTHOG_CONFIGURED && posthog.__loaded) {
+            posthog.opt_out_capturing();
+          }
           window.gtag?.('consent', 'update', {
             analytics_storage: 'denied',
           });
@@ -176,11 +192,11 @@ export function AnalyticsProvider() {
     <>
       {/* Route-change pageview watcher wrapped in Suspense per Next.js App Router rules */}
       <Suspense fallback={null}>
-        <RouteChangeTracker />
+        <RouteChangeTracker analyticsAllowed={analyticsAllowed} />
       </Suspense>
 
-      {/* Google Analytics 4 Scripts (only rendered if NEXT_PUBLIC_GA_ID is valid & defaults to denied until consented) */}
-      {GA_ID && (
+      {/* Google Analytics 4 Scripts (only rendered if NEXT_PUBLIC_GA_ID is valid & explicitly consented) */}
+      {GA_ID && analyticsAllowed && (
         <>
           <Script
             strategy="afterInteractive"
@@ -194,7 +210,7 @@ export function AnalyticsProvider() {
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('consent', 'default', {
-                  analytics_storage: '${isAnalyticsPermitted() ? 'granted' : 'denied'}'
+                  analytics_storage: 'granted'
                 });
                 gtag('js', new Date());
                 gtag('config', ${JSON.stringify(GA_ID)}, {

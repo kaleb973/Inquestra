@@ -19,8 +19,8 @@ test.describe('Experiment Sealing & Provenance Controls', () => {
     const sealDialog = page.getByRole('dialog');
     await expect(sealDialog).toBeVisible();
     await expect(sealDialog).toContainText('Seal Experiment Permanently');
-    // Unauthenticated Local Notebook users are informed server-side cryptographic sealing requires an account
-    await expect(sealDialog).toContainText('require an authenticated account');
+    // Unauthenticated Local Notebook users are informed server-side sealing requires self-hosted PostgreSQL (or an account when cloud mode is enabled)
+    await expect(sealDialog).toContainText(/requires a self-hosted PostgreSQL workspace|require an authenticated account/);
 
     const confirmBtn = sealDialog.getByRole('button', { name: 'Seal Experiment' });
     const confirmInput = sealDialog.locator('#seal-confirm-input');

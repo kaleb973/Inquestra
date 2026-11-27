@@ -104,7 +104,7 @@ export default function BillingPage() {
               <h3 className="text-sm font-semibold text-foreground">Local-first data ownership</h3>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Your research data stays in your browser (IndexedDB). You don&apos;t need an account to use the notebook, and you can export your entire experimental history at any time.
+              Your research data stays in your browser (<code className="font-mono">localStorage</code>). You don&apos;t need an account to use the notebook, and you can export your entire experimental history as ZIP, JSON, or Markdown at any time.
             </p>
           </div>
 

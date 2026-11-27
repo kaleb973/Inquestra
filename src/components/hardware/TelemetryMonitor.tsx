@@ -16,11 +16,12 @@ import {
   Cpu,
   Square,
 } from 'lucide-react';
-import { useNotebookStore } from '@/store/useNotebookStore';
+import { getSessionTelemetry, useNotebookStore } from '@/store/useNotebookStore';
 import { useWebSerial } from '@/hooks/useWebSerial';
 import { useTelemetrySim, SimMode } from '@/hooks/useTelemetrySim';
 import { formatSafeCsvCell } from '@/lib/csvParser';
 import { checkLabCompliance } from '@/actions/adminActions';
+import { IS_CLOUD_WORKSPACE_ENABLED } from '@/lib/features';
 import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 const BAUD_RATES = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600] as const;
@@ -104,13 +105,22 @@ export function TelemetryMonitor() {
   }, [buffer]);
 
   const handleExportCsv = () => {
-    if (buffer.length === 0) return;
-    const t0 = buffer[0]?.timestamp ?? Date.now();
-    const header = 'time_s,value,unit,timestamp_iso';
-    const rows = buffer.map((p) => {
+    const sessionSamples = getSessionTelemetry();
+    const samples = sessionSamples.length > 0 ? sessionSamples : buffer;
+    if (samples.length === 0) return;
+
+    const t0 = samples[0]?.timestamp ?? Date.now();
+    const header = 'time_s,value,unit,sensor_id,timestamp_iso';
+    const rows = samples.map((p) => {
       const elapsedSec = ((p.timestamp - t0) / 1000).toFixed(3);
       const iso = new Date(p.timestamp).toISOString();
-      return `${formatSafeCsvCell(elapsedSec)},${formatSafeCsvCell(p.value)},${formatSafeCsvCell(p.unit ?? '')},${formatSafeCsvCell(iso)}`;
+      return [
+        formatSafeCsvCell(elapsedSec),
+        formatSafeCsvCell(p.value),
+        formatSafeCsvCell(p.unit ?? ''),
+        formatSafeCsvCell(p.sensorId ?? ''),
+        formatSafeCsvCell(iso),
+      ].join(',');
     });
     const csv = [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -119,7 +129,8 @@ export function TelemetryMonitor() {
     a.href = url;
     a.download = `inquestra_telemetry_${Date.now()}.csv`;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    trackAnalyticsEvent('export_triggered', { format: 'csv' });
   };
 
   return (
@@ -142,7 +153,7 @@ export function TelemetryMonitor() {
 
       {/* Primary Stats Grid */}
       <div className="grid grid-cols-2 gap-2">
-        <StatCard label="Buffer" value={stats.bufferCount} unit="pts" Icon={Database} />
+        <StatCard label="Captured" value={stats.totalCount || stats.bufferCount} unit="pts" Icon={Database} />
         <StatCard label="Rate" value={hz} unit="Hz" Icon={Gauge} accent={hz > 0} />
         <StatCard label="Current" value={fmtNum(stats.current)} Icon={Activity} accent={stats.current !== null} />
         <StatCard label="Range" value={rangeStr} Icon={TrendingUp} />
@@ -197,6 +208,9 @@ export function TelemetryMonitor() {
           Clear
         </button>
       </div>
+      <p className="text-[11px] text-muted-foreground leading-snug">
+        Session capture stays in browser memory until exported as CSV or ZIP.
+      </p>
 
       {/* Hardware Connection Card */}
       <div className="bg-card border border-border/80 rounded-xl p-3.5 space-y-3">
@@ -252,10 +266,12 @@ export function TelemetryMonitor() {
             <button
               type="button"
               onClick={async () => {
-                const res = await checkLabCompliance();
-                if (!res.compliant) {
-                  alert(res.reason);
-                  return;
+                if (IS_CLOUD_WORKSPACE_ENABLED) {
+                  const res = await checkLabCompliance();
+                  if (!res.compliant) {
+                    alert(res.reason);
+                    return;
+                  }
                 }
                 trackAnalyticsEvent('daq_stream_started', {
                   portType: 'serial',

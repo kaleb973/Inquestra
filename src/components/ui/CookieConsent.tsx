@@ -17,8 +17,8 @@ export function CookieConsent() {
   const [showDetails, setShowDetails] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
     essential: true,
-    analytics: true,
-    telemetry: true,
+    analytics: false,
+    telemetry: false,
   });
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export function CookieConsent() {
         </div>
 
         <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed">
-          Inquestra uses strictly necessary cookies for session authorization, tamper-evident audit logging, and optional anonymous telemetry to optimize real-time DAQ throughput. Under GDPR and CCPA, you may customize your preferences below. Learn more in our{' '}
+          Inquestra keeps research records in local browser storage and uses only strictly necessary cookies unless you opt into optional usage analytics below. See our{' '}
           <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
             Privacy Policy
           </Link>
@@ -143,7 +143,7 @@ export function CookieConsent() {
                   Strictly Necessary
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  Session authentication, cryptographic verification, and CSRF protection. Always active.
+                  Optional self-hosted authentication, CSRF protection, and saving this preference choice. Always active.
                 </p>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
@@ -154,9 +154,9 @@ export function CookieConsent() {
             {/* Performance / Analytics */}
             <div className="flex items-center justify-between p-2 rounded-lg bg-muted/20 border border-border/40">
               <div className="pr-2">
-                <p className="font-semibold text-foreground">Anonymous Analytics</p>
+                <p className="font-semibold text-foreground">Optional Usage Analytics (PostHog / GA4)</p>
                 <p className="text-[11px] text-muted-foreground">
-                  Aggregated page usage and performance diagnostics to improve portal responsiveness.
+                  Off by default. Enables PostHog and Google Analytics pageview diagnostics only if you opt in.
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -164,28 +164,11 @@ export function CookieConsent() {
                   type="checkbox"
                   checked={preferences.analytics}
                   onChange={(e) =>
-                    setPreferences((prev) => ({ ...prev, analytics: e.target.checked }))
-                  }
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-              </label>
-            </div>
-
-            {/* Hardware Telemetry Diagnostics */}
-            <div className="flex items-center justify-between p-2 rounded-lg bg-muted/20 border border-border/40">
-              <div className="pr-2">
-                <p className="font-semibold text-foreground">Hardware Buffer Telemetry</p>
-                <p className="text-[11px] text-muted-foreground">
-                  Anonymous Web Serial frame latency and jitter metrics to optimize ESP32 stream drivers.
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                <input
-                  type="checkbox"
-                  checked={preferences.telemetry}
-                  onChange={(e) =>
-                    setPreferences((prev) => ({ ...prev, telemetry: e.target.checked }))
+                    setPreferences((prev) => ({
+                      ...prev,
+                      analytics: e.target.checked,
+                      telemetry: e.target.checked,
+                    }))
                   }
                   className="sr-only peer"
                 />

@@ -10,6 +10,7 @@ import { LeftSidebar } from '@/components/layout/LeftSidebar';
 import { RightDrawer } from '@/components/layout/RightDrawer';
 import { EditorCanvas } from '@/components/canvas/EditorCanvas';
 import { useNotebookStore } from '@/store/useNotebookStore';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 export default function WorkspacePage() {
   const isLeftSidebarOpen = useNotebookStore((s) => s.isLeftSidebarOpen);
@@ -23,6 +24,7 @@ export default function WorkspacePage() {
   // Wait for client mount + Zustand persist hydration to prevent SSR mismatch and preserve guest drafts
   useEffect(() => {
     setMounted(true);
+    trackAnalyticsEvent('workspace_entered', { path: '/app' });
     if (!useNotebookStore.getState()._hasHydrated) {
       Promise.resolve(useNotebookStore.persist?.rehydrate()).finally(() => {
         useNotebookStore.getState().setHasHydrated(true);

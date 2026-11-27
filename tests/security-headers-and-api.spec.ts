@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { sanitizeTipTapAST } from '../src/lib/security/trialImportSanitizer';
+import { createSerialStreamContext, parseSerialLine } from '../src/lib/serialParser';
 
 test.describe('Security Headers, CSP & Payload Sanitization', () => {
   test('middleware enforces enterprise security headers and omits X-Powered-By', async ({ request }) => {
@@ -76,5 +77,43 @@ test.describe('Security Headers, CSP & Payload Sanitization', () => {
     expect(serialized).not.toContain('xssMark');
     expect(serialized).not.toContain('evil.example');
     expect(serialized).toContain('Safe reagent label');
+  });
+
+  test('parseSerialLine extracts measurements from FirmwareShowcase CSV, headers, JSON, and scalars', () => {
+    const withHeader = createSerialStreamContext();
+    expect(parseSerialLine('# inquestra:format=csv,channels=time_ms,value,unit=mV', withHeader)).toBeNull();
+    expect(parseSerialLine('10240,1650', withHeader)).toEqual({
+      value: 1650,
+      unit: 'mV',
+      sensorId: 'value',
+    });
+
+    const midStream = createSerialStreamContext();
+    expect(parseSerialLine('12500,1423', midStream)).toEqual({ value: 1423 });
+    expect(parseSerialLine('temp:25.4', midStream)).toEqual({ value: 25.4, sensorId: 'temp' });
+    expect(parseSerialLine('{"mv":312.5,"unit":"mV"}', midStream)).toEqual({
+      value: 312.5,
+      unit: 'mV',
+      sensorId: 'mv',
+    });
+    expect(parseSerialLine('42.1', midStream)).toEqual({ value: 42.1 });
+  });
+
+  test('/api/metrics accepts zero-PII aggregate counters, rejects invalid payloads, and blocks GA4 pre-consent', async ({ request, page }) => {
+    const validRes = await request.post('/api/metrics', {
+      headers: { 'Content-Type': 'application/json' },
+      data: { event: 'export_triggered', format: 'csv' },
+    });
+    expect(validRes.status()).toBe(200);
+    expect(await validRes.json()).toEqual({ ok: true });
+
+    const invalidRes = await request.post('/api/metrics', {
+      headers: { 'Content-Type': 'application/json' },
+      data: { event: 'arbitrary_event', format: 'exe' },
+    });
+    expect(invalidRes.status()).toBe(422);
+
+    await page.goto('/app');
+    await expect(page.locator('script[src*="googletagmanager"]')).toHaveCount(0);
   });
 });

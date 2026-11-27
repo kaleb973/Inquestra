@@ -53,7 +53,7 @@ import {
   RotateCw,
 } from 'lucide-react';
 
-import { useNotebookStore } from '@/store/useNotebookStore';
+import { useNotebookStore, STORAGE_QUOTA_ERROR } from '@/store/useNotebookStore';
 import { isDeploymentSkewError, notifyDeploymentSkew } from '@/lib/deploymentSkew';
 import { InteractiveChartExtension } from '@/components/editor/nodes/InteractiveChartNode';
 import { ReagentExtension } from '@/components/editor/nodes/ReagentNode';
@@ -1526,6 +1526,16 @@ export function EditorCanvas() {
                     >
                       <RotateCw className="w-3 h-3" />
                       Update deployed · Click to reload
+                    </button>
+                  ) : saveError === STORAGE_QUOTA_ERROR ? (
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('inquestra:trigger-export'))}
+                      className="text-red-500 hover:text-red-400 flex items-center gap-1.5 font-medium transition-colors cursor-pointer"
+                      title={saveError}
+                    >
+                      <AlertCircle className="w-3 h-3" />
+                      Storage limit reached · Export backup
                     </button>
                   ) : (
                     <button

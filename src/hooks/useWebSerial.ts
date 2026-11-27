@@ -5,6 +5,14 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useNotebookStore } from '@/store/useNotebookStore';
+import {
+  createSerialStreamContext,
+  parseSerialLine,
+  type SerialStreamContext,
+} from '@/lib/serialParser';
+import type { TelemetrySample } from '@/types/inquestra';
+
+export { parseSerialLine };
 
 export function useWebSerial() {
   const portRef = useRef<SerialPort | null>(null);
@@ -84,6 +92,7 @@ export function useWebSerial() {
         });
 
         const decoder = new TextDecoder();
+        const streamCtx: SerialStreamContext = createSerialStreamContext();
         let packetCount = 0;
         let lastHzTick = Date.now();
         let byteTotal = 0;
@@ -101,14 +110,17 @@ export function useWebSerial() {
             const lines = lineBuffer.split('\n');
             lineBuffer = lines.pop() ?? '';
 
+            const chunkSamples: TelemetrySample[] = [];
+            const batchTimestamp = Date.now();
             for (const raw of lines) {
-              const trimmed = raw.trim();
-              if (!trimmed) continue;
-              const num = parseFloat(trimmed);
-              if (!isNaN(num)) {
-                appendTelemetry({ timestamp: Date.now(), value: num });
+              const sample = parseSerialLine(raw, streamCtx);
+              if (sample) {
+                chunkSamples.push({ timestamp: batchTimestamp, ...sample });
                 packetCount++;
               }
+            }
+            if (chunkSamples.length > 0) {
+              appendTelemetry(chunkSamples);
             }
 
             // Update Hz counter once per second
@@ -117,6 +129,14 @@ export function useWebSerial() {
               setHardwareStatus({ packetsPerSec: packetCount, totalBytes: byteTotal });
               packetCount = 0;
               lastHzTick = now;
+            }
+          }
+
+          const remaining = (lineBuffer + decoder.decode()).trim();
+          if (remaining) {
+            const finalSample = parseSerialLine(remaining, streamCtx);
+            if (finalSample) {
+              appendTelemetry({ timestamp: Date.now(), ...finalSample });
             }
           }
         } catch (readErr) {

@@ -23,6 +23,7 @@ import {
   type SecurityAuditReport,
 } from '@/lib/security/trialImportSanitizer';
 import { useNotebookStore } from '@/store/useNotebookStore';
+import { IS_CLOUD_WORKSPACE_ENABLED } from '@/lib/features';
 import { createNewTrial } from '@/actions/trialActions';
 import type { TrialDocument, TrialSummaryItem } from '@/types/inquestra';
 
@@ -42,7 +43,7 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
   const [validatedTrial, setValidatedTrial] = useState<ValidatedTrialImport | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [targetDestination, setTargetDestination] = useState<'LOCAL' | 'CLOUD'>(
-    isGuest ? 'LOCAL' : 'CLOUD'
+    !IS_CLOUD_WORKSPACE_ENABLED || isGuest ? 'LOCAL' : 'CLOUD'
   );
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
@@ -446,8 +447,8 @@ export function ImportTrialModal({ open, onClose, isGuest = false }: ImportTrial
                 </div>
               </div>
 
-              {/* Destination Selector (if authenticated) */}
-              {!isGuest && cachedProjects.length > 0 && (
+              {/* Destination Selector (if authenticated and cloud enabled) */}
+              {IS_CLOUD_WORKSPACE_ENABLED && !isGuest && cachedProjects.length > 0 && (
                 <div className="p-4 rounded-xl border border-border bg-card/40 space-y-3">
                   <label className="text-xs font-semibold text-foreground block">
                     Choose Destination Workspace:

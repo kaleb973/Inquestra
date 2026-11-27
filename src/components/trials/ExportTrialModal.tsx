@@ -15,7 +15,7 @@ import {
   ArrowRight,
   Info,
 } from 'lucide-react';
-import { useNotebookStore } from '@/store/useNotebookStore';
+import { getSessionTelemetry, useNotebookStore } from '@/store/useNotebookStore';
 import {
   exportTrialAsZip,
   exportTrialAsJson,
@@ -23,6 +23,7 @@ import {
   type SignatureExport,
 } from '@/lib/exportTrial';
 import { fetchTrialSignatures } from '@/actions/trialActions';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 interface ExportTrialModalProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
 
   const activeTrial = useNotebookStore((s) => s.activeTrial);
   const cloudTrialId = useNotebookStore((s) => s.cloudTrialId);
+  const telemetryTotalCount = useNotebookStore((s) => s.telemetryStats.totalCount);
 
   useEffect(() => {
     setMounted(true);
@@ -63,6 +65,7 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
 
   const handleExecuteExport = async () => {
     if (selectedFormat === 'PDF') {
+      trackAnalyticsEvent('export_triggered', { format: 'pdf' });
       onClose();
       // Wait for modal backdrop to unmount before triggering print dialog
       setTimeout(() => {
@@ -104,6 +107,7 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
         }
       }
 
+      const telemetry = getSessionTelemetry();
       const payload = {
         title: activeTrial.title || 'Untitled Experiment',
         content: activeTrial.content,
@@ -115,14 +119,18 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
         checksum: activeTrial.checksum,
         sealedAt: activeTrial.sealedAt,
         signatures,
+        telemetry,
       };
 
       if (selectedFormat === 'ZIP') {
         await exportTrialAsZip(payload);
+        trackAnalyticsEvent('export_triggered', { format: 'zip' });
       } else if (selectedFormat === 'JSON') {
         exportTrialAsJson(payload);
+        trackAnalyticsEvent('export_triggered', { format: 'json' });
       } else if (selectedFormat === 'MARKDOWN') {
         exportTrialAsMarkdown(payload);
+        trackAnalyticsEvent('export_triggered', { format: 'markdown' });
       }
 
       onClose();
@@ -198,6 +206,12 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
             </p>
             <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground pt-1 border-t border-border/50">
               <span>{metadataCount} metadata parameter{metadataCount !== 1 ? 's' : ''}</span>
+              {telemetryTotalCount > 0 && (
+                <>
+                  <span>•</span>
+                  <span>{telemetryTotalCount.toLocaleString()} telemetry sample{telemetryTotalCount !== 1 ? 's' : ''}</span>
+                </>
+              )}
               <span>•</span>
               <span>{cloudTrialId ? 'Cloud synced' : 'Local notebook draft'}</span>
               {isSealed && activeTrial.checksum && (
@@ -251,6 +265,9 @@ export function ExportTrialModal({ open, onClose, onOpenImport }: ExportTrialMod
                       <span className="px-2 py-0.5 rounded bg-background border border-border">trial.md</span>
                       <span className="px-2 py-0.5 rounded bg-background border border-border">trial.json</span>
                       <span className="px-2 py-0.5 rounded bg-background border border-border">metadata.csv</span>
+                      {telemetryTotalCount > 0 && (
+                        <span className="px-2 py-0.5 rounded bg-background border border-border">telemetry.csv</span>
+                      )}
                       <span className="px-2 py-0.5 rounded bg-background border border-border">AUDIT_CERTIFICATE.md</span>
                     </div>
                   </div>

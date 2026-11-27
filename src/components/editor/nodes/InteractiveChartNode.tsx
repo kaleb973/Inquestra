@@ -45,6 +45,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { useNotebookStore } from '@/store/useNotebookStore';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 import type { TelemetrySample } from '@/types/inquestra';
 import {
   formatSafeCsvCell,
@@ -392,7 +393,8 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
       a.href = url;
       a.download = `live_telemetry_${Date.now()}.csv`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      trackAnalyticsEvent('export_triggered', { format: 'csv' });
       return;
     }
 
@@ -407,7 +409,8 @@ function ChartNodeView({ deleteNode, node, updateAttributes, editor }: NodeViewP
     a.href = url;
     a.download = `dataset_${csvAttr.filename}`;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    trackAnalyticsEvent('export_triggered', { format: 'csv' });
   }, [csvAttr, paused, frozenData, displayData, filteredRows]);
 
   const handleInsertNativeTable = useCallback(() => {

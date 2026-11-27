@@ -7,6 +7,7 @@
 import JSZip from 'jszip';
 import TurndownService from 'turndown';
 import { formatSafeCsvCell } from '@/lib/csvParser';
+import type { TelemetrySample } from '@/types/inquestra';
 
 export interface SignatureExport {
   role: 'AUTHOR' | 'WITNESS' | 'PI_APPROVAL';
@@ -27,6 +28,27 @@ export interface ExportPayload {
   checksum?: string | null;
   sealedAt?: string | null;
   signatures?: SignatureExport[];
+  telemetry?: TelemetrySample[];
+}
+
+/**
+ * Formats session telemetry samples into a formula-injection-safe CSV string.
+ */
+export function buildTelemetryCsv(samples: TelemetrySample[]): string {
+  const t0 = samples[0]?.timestamp ?? Date.now();
+  const header = 'time_s,value,unit,sensor_id,timestamp_iso';
+  const rows = samples.map((p) => {
+    const elapsedSec = ((p.timestamp - t0) / 1000).toFixed(3);
+    const iso = new Date(p.timestamp).toISOString();
+    return [
+      formatSafeCsvCell(elapsedSec),
+      formatSafeCsvCell(p.value),
+      formatSafeCsvCell(p.unit ?? ''),
+      formatSafeCsvCell(p.sensorId ?? ''),
+      formatSafeCsvCell(iso),
+    ].join(',');
+  });
+  return [header, ...rows].join('\n');
 }
 
 function escapeMarkdownCell(raw: string): string {
@@ -141,6 +163,8 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   const auditCert = certLines.join('\n');
 
   // ── 5. README ───────────────────────────────────────────────────────────────
+  const telemetry = payload.telemetry ?? [];
+  const hasTelemetry = telemetry.length > 0;
   const readme = [
     `# ${payload.title}: Inquestra Export`,
     '',
@@ -155,6 +179,7 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
     '| `trial.md` | Research notes in Markdown with signature log |',
     '| `trial.json` | Full TipTap document JSON + signatures for re-import |',
     '| `metadata.csv` | Structured key-value metadata & cryptographic hash |',
+    ...(hasTelemetry ? ['| `telemetry.csv` | Full-session serial/simulated telemetry stream |'] : []),
     '| `AUDIT_CERTIFICATE.md` | Formal electronic signature audit certificate |',
     '',
     '## Re-import',
@@ -181,6 +206,9 @@ export async function exportTrialAsZip(payload: ExportPayload): Promise<void> {
   folder.file('trial.md', markdown);
   folder.file('trial.json', jsonExport);
   folder.file('metadata.csv', metadataCsv);
+  if (hasTelemetry) {
+    folder.file('telemetry.csv', buildTelemetryCsv(telemetry));
+  }
   folder.file('AUDIT_CERTIFICATE.md', auditCert);
   folder.file('README.md', readme);
 

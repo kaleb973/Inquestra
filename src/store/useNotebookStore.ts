@@ -3,7 +3,7 @@
 // Uses atomic subscriptions so TipTap canvas never re-renders on telemetry appends.
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
 import type {
   TelemetrySample,
   HardwareStatus,
@@ -17,6 +17,72 @@ import type {
 import type { ProjectWithLead } from '@/actions/projectActions';
 
 const BUFFER_MAX = 500;
+const SESSION_ARCHIVE_MAX = 250_000;
+const SESSION_ARCHIVE_TRIM_TARGET = 200_000;
+
+export const STORAGE_QUOTA_ERROR =
+  'Browser storage limit reached (~5 MB). Export your active trial as ZIP or JSON now to prevent data loss.';
+
+let sessionTelemetryArchive: TelemetrySample[] = [];
+let lastStorageWriteFailed = false;
+
+/**
+ * Returns a snapshot of all telemetry samples captured during the current session,
+ * independent of the 500-point reactive chart buffer.
+ */
+export function getSessionTelemetry(): TelemetrySample[] {
+  return [...sessionTelemetryArchive];
+}
+
+const safeLocalStorage: StateStorage = {
+  getItem: (name) => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return window.localStorage.getItem(name);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name, value) => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(name, value);
+      if (lastStorageWriteFailed) {
+        lastStorageWriteFailed = false;
+        queueMicrotask(() => {
+          const state = useNotebookStore.getState();
+          if (state.saveStatus === 'ERROR' && state.saveError === STORAGE_QUOTA_ERROR) {
+            useNotebookStore.setState({ saveStatus: 'SAVED', saveError: null });
+          }
+        });
+      }
+    } catch (err: unknown) {
+      lastStorageWriteFailed = true;
+      const isQuotaError =
+        err instanceof DOMException &&
+        (err.name === 'QuotaExceededError' ||
+          err.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+          err.code === 22);
+      const message = isQuotaError
+        ? STORAGE_QUOTA_ERROR
+        : 'Failed to save draft to browser storage. Export a backup copy now.';
+      queueMicrotask(() => {
+        const state = useNotebookStore.getState();
+        if (state.saveStatus !== 'ERROR' || state.saveError !== message) {
+          useNotebookStore.setState({ saveStatus: 'ERROR', saveError: message });
+        }
+      });
+    }
+  },
+  removeItem: (name) => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.removeItem(name);
+    } catch {
+      /* no-op */
+    }
+  },
+};
 
 export const STARTER_PCR_CONTENT: Record<string, unknown> = {
   type: 'doc',
@@ -139,6 +205,7 @@ const DEFAULT_HARDWARE: HardwareStatus = {
 
 const DEFAULT_STATS: TelemetryStats = {
   bufferCount: 0,
+  totalCount: 0,
   current: null,
   min: null,
   max: null,
@@ -352,6 +419,12 @@ export const useNotebookStore = create<NotebookStore>()(
       appendTelemetry: (point) =>
         set((state) => {
           const incoming = Array.isArray(point) ? point : [point];
+          if (incoming.length > 0) {
+            sessionTelemetryArchive.push(...incoming);
+            if (sessionTelemetryArchive.length > SESSION_ARCHIVE_MAX) {
+              sessionTelemetryArchive = sessionTelemetryArchive.slice(-SESSION_ARCHIVE_TRIM_TARGET);
+            }
+          }
           const next = [...state.telemetryBuffer, ...incoming].slice(-BUFFER_MAX);
           const values = next.map((p) => p.value);
           const last = values[values.length - 1];
@@ -359,6 +432,7 @@ export const useNotebookStore = create<NotebookStore>()(
             telemetryBuffer: next,
             telemetryStats: {
               bufferCount: next.length,
+              totalCount: sessionTelemetryArchive.length,
               current: last ?? null,
               min: values.length > 0 ? Math.min(...values) : null,
               max: values.length > 0 ? Math.max(...values) : null,
@@ -459,12 +533,14 @@ export const useNotebookStore = create<NotebookStore>()(
           };
         }),
 
-      resetTelemetry: () =>
-        set({ telemetryBuffer: [], telemetryStats: DEFAULT_STATS }),
+      resetTelemetry: () => {
+        sessionTelemetryArchive = [];
+        set({ telemetryBuffer: [], telemetryStats: DEFAULT_STATS });
+      },
     }),
     {
       name: 'inquestra-notebook-v1',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeLocalStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

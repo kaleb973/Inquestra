@@ -62,6 +62,7 @@ export interface TrialSummaryItem {
  */
 export interface TelemetryStats {
   bufferCount: number;
+  totalCount: number;
   current: number | null;
   min: number | null;
   max: number | null;

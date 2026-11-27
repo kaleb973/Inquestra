@@ -67,6 +67,24 @@ export function logTrialStatusChanged(status: string): void {
   }
 }
 
+export function logProductMetric(
+  event: string,
+  attributes?: Record<string, string>
+): void {
+  try {
+    posthogLogger?.emit({
+      body: `Product event: ${event}`,
+      severityNumber: SeverityNumber.INFO,
+      attributes: {
+        operation: event,
+        ...(attributes ?? {}),
+      },
+    });
+  } catch (err) {
+    console.warn('[PostHog] logProductMetric error (non-fatal):', err);
+  }
+}
+
 export async function flushPostHogLogs(): Promise<void> {
   try {
     await posthogLoggerProvider?.forceFlush();

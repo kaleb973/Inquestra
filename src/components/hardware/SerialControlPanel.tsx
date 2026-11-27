@@ -8,6 +8,8 @@ import { useNotebookStore } from '@/store/useNotebookStore';
 import { useWebSerial } from '@/hooks/useWebSerial';
 import { useTelemetrySim } from '@/hooks/useTelemetrySim';
 import { checkLabCompliance } from '@/actions/adminActions';
+import { IS_CLOUD_WORKSPACE_ENABLED } from '@/lib/features';
+import { trackAnalyticsEvent } from '@/lib/analytics/events';
 
 const BAUD_RATES = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600] as const;
 
@@ -79,11 +81,17 @@ export function SerialControlPanel() {
               await disconnect();
             }
           } else {
-            const res = await checkLabCompliance();
-            if (!res.compliant) {
-              alert(res.reason);
-              return;
+            if (IS_CLOUD_WORKSPACE_ENABLED) {
+              const res = await checkLabCompliance();
+              if (!res.compliant) {
+                alert(res.reason);
+                return;
+              }
             }
+            trackAnalyticsEvent('daq_stream_started', {
+              portType: 'serial',
+              baudRate: selectedBaud,
+            });
             await connect(selectedBaud);
             useNotebookStore.getState().setRightDrawerMode('TELEMETRY');
           }
