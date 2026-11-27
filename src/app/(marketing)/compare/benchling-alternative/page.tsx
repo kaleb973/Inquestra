@@ -66,7 +66,7 @@ export default function BenchlingAlternativePage() {
           name: 'How does Inquestra handle data portability and export compared to Benchling?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Unlike proprietary walled gardens, Inquestra supports one-click exports to universal standard JSON, PDF, and Markdown with embedded SHA-256 cryptographic hashes for 21 CFR Part 11 compliant audit integrity.',
+            text: 'Unlike proprietary walled gardens, Inquestra supports one-click exports to universal standard JSON, PDF, and Markdown with SHA-256 checksum manifests for verifiable audit integrity and provenance.',
           },
         },
       ],
@@ -100,10 +100,10 @@ export default function BenchlingAlternativePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/app/signup"
+              href="/app"
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Create Free Academic Workspace
+              Open Local Academic Workspace
             </Link>
           </div>
         </div>
@@ -284,7 +284,7 @@ export default function BenchlingAlternativePage() {
                 <h3 className="text-base font-semibold text-foreground mt-1">Open local or team workspace</h3>
               </div>
               <p className="sm:col-span-8 text-sm text-muted-foreground leading-relaxed">
-                Start immediately in browser IndexedDB or connect your research group&apos;s PostgreSQL database for shared inventory.
+                Start immediately in browser localStorage with portable ZIP/CSV exports or connect your research group&apos;s self-hosted PostgreSQL database for shared inventory.
               </p>
             </div>
 

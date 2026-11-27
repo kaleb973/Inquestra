@@ -11,7 +11,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: 'Hardware DAQ and Telemetry Ingestion',
   description:
-    'Browser Web Serial telemetry ingestion for ESP32, Arduino, and lab sensors. Zero driver installation, 1 kHz sampling, and sub-millisecond latency.',
+    'Browser W3C Web Serial telemetry ingestion for ESP32, Arduino, spectrometers, balances, and lab sensors. Zero custom middleware required in Chromium browsers.',
   path: '/hardware',
 });
 
@@ -64,8 +64,8 @@ export default function HardwarePage() {
           <div className="p-6 grid lg:grid-cols-12 gap-8 bg-background">
             <div className="lg:col-span-7 space-y-4">
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-muted-foreground">Channel 0: Strain Gauge / Differential ADC (mV)</span>
-                <span className="text-foreground font-semibold">1,000 Hz continuous</span>
+                <span className="text-muted-foreground">Channel 0: Bench Sensor / Balance / ADC Stream</span>
+                <span className="text-foreground font-semibold">115,200 baud · Web Serial</span>
               </div>
               <div className="h-48 w-full bg-graphite rounded-md relative flex items-end p-3 gap-1 overflow-hidden">
                 {[42, 45, 48, 52, 88, 14, 46, 50, 48, 51, 52, 92, 18, 47, 51, 49, 53, 95, 12, 44, 50, 48, 52, 89, 16, 48, 52, 50, 47, 53, 91, 19, 46, 50, 48].map((val, idx) => (
@@ -77,9 +77,9 @@ export default function HardwarePage() {
                 ))}
               </div>
               <div className="flex flex-wrap justify-between items-center gap-2 text-xs font-mono text-muted-foreground">
-                <span>Sweep: 100ms/div</span>
-                <span>16-bit differential, 0 to 3.1V calibrated</span>
-                <span className="text-phosphor">Drop rate: 0.00%</span>
+                <span>Window: 500 samples</span>
+                <span>Line-delimited numeric / CSV parser</span>
+                <span className="text-phosphor">Full session CSV export</span>
               </div>
             </div>
 
@@ -93,14 +93,14 @@ export default function HardwarePage() {
                 </div>
                 <div className="p-3 rounded bg-graphite-elevated text-xs space-y-1 text-graphite-muted">
                   <div>USB Vendor ID: 0x303A (Espressif)</div>
-                  <div>Device: ESP32-S3 USB OTG</div>
-                  <div>Ring Buffer: 65,536 samples</div>
-                  <div className="text-phosphor">Transport: Off-main-thread Web Worker</div>
+                  <div>Device: ESP32-S3 USB Serial</div>
+                  <div>Live Sparkline Window: 500 samples</div>
+                  <div className="text-phosphor">Transport: Chromium W3C Web Serial API</div>
                 </div>
               </div>
               <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs mt-4">
-                <span className="text-graphite-muted">Kernel Latency</span>
-                <span className="text-graphite-ink font-semibold">&lt; 0.42 ms</span>
+                <span className="text-graphite-muted">Session Export</span>
+                <span className="text-graphite-ink font-semibold">Full Run CSV / ZIP</span>
               </div>
             </div>
           </div>
@@ -127,10 +127,10 @@ export default function HardwarePage() {
               </p>
             </div>
             <div className="md:col-span-6 pt-6 md:pt-0 md:pl-8 space-y-1.5">
-              <p className="text-sm text-muted-foreground font-medium">Worker Thread Ring Buffer</p>
-              <p className="text-base font-semibold text-foreground">Off-main-thread acquisition</p>
+              <p className="text-sm text-muted-foreground font-medium">Bounded Sparkline + Full Archive</p>
+              <p className="text-base font-semibold text-foreground">Continuous session capture</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                A dedicated Web Worker decodes incoming byte streams at up to 1 kHz so rich-text protocol editing stays jitter-free.
+                Live SVG sparklines stay bounded at 500 recent samples while every recorded point in your session exports cleanly to CSV and ZIP.
               </p>
             </div>
           </div>
@@ -141,10 +141,10 @@ export default function HardwarePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
             <h2 className="text-3xl font-semibold text-foreground tracking-tight">
-              Validated silicon targets and benchmarks.
+              Compatible serial targets and frame formats.
             </h2>
             <p className="text-base text-muted-foreground mt-2 leading-relaxed">
-              Every microcontroller firmware profile is benchmarked for packet stability and clock drift.
+              Any microcontroller or bench instrument streaming UTF-8 lines (numeric values, key-value pairs, or simple JSON) over USB serial works via Chromium Web Serial.
             </p>
           </div>
 
@@ -152,48 +152,48 @@ export default function HardwarePage() {
             <table className="w-full text-left text-sm">
               <thead className="border-b border-border text-foreground">
                 <tr>
-                  <th className="py-3.5 pr-4 font-semibold">Silicon Platform</th>
-                  <th className="py-3.5 px-4 font-semibold">Clock and Core</th>
-                  <th className="py-3.5 px-4 font-semibold">Max Tested Baud</th>
-                  <th className="py-3.5 px-4 font-semibold">Max Sample Rate</th>
-                  <th className="py-3.5 pl-4 font-semibold">Recommended Application</th>
+                  <th className="py-3.5 pr-4 font-semibold">Hardware Target</th>
+                  <th className="py-3.5 px-4 font-semibold">Controller / Bridge</th>
+                  <th className="py-3.5 px-4 font-semibold">Common Baud Rates</th>
+                  <th className="py-3.5 px-4 font-semibold">Recommended Stream Format</th>
+                  <th className="py-3.5 pl-4 font-semibold">Example Applications</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-muted-foreground">
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Espressif ESP32-S3</td>
-                  <td className="py-3.5 px-4">240 MHz Dual-Core Xtensa LX7</td>
-                  <td className="py-3.5 px-4 font-mono">921,600 baud</td>
-                  <td className="py-3.5 px-4 font-mono">1,000 Hz / 8 ch</td>
-                  <td className="py-3.5 pl-4">High-speed sensor arrays, multi-channel bench DAQ</td>
+                  <td className="py-3.5 px-4">USB OTG / UART bridge</td>
+                  <td className="py-3.5 px-4 font-mono">115,200 – 921,600</td>
+                  <td className="py-3.5 px-4 font-mono">Line-delimited CSV / JSON</td>
+                  <td className="py-3.5 pl-4">Multi-sensor benches, reaction monitoring, load cells</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="py-3.5 pr-4 font-medium text-foreground font-mono">PJRC Teensy 4.1</td>
-                  <td className="py-3.5 px-4">600 MHz ARM Cortex-M7</td>
-                  <td className="py-3.5 px-4 font-mono">480 Mbps USB HS</td>
-                  <td className="py-3.5 px-4 font-mono">2,500 Hz / 16 ch</td>
-                  <td className="py-3.5 pl-4">Spectroscopy, high-rate transducer arrays</td>
+                  <td className="py-3.5 px-4">ARM Cortex-M7 USB CDC</td>
+                  <td className="py-3.5 px-4 font-mono">115,200+ USB CDC</td>
+                  <td className="py-3.5 px-4 font-mono">ASCII scalar / paired values</td>
+                  <td className="py-3.5 pl-4">Photodiodes, benchtop characterization rigs</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Arduino Uno R4 / Mega</td>
-                  <td className="py-3.5 px-4">48 MHz Renesas RA4M1 / 16 MHz AVR</td>
-                  <td className="py-3.5 px-4 font-mono">115,200 baud</td>
-                  <td className="py-3.5 px-4 font-mono">250 Hz / 4 ch</td>
-                  <td className="py-3.5 pl-4">Teaching benches, prototyping stations</td>
+                  <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Arduino Uno / R4 / Mega</td>
+                  <td className="py-3.5 px-4">USB-to-Serial UART</td>
+                  <td className="py-3.5 px-4 font-mono">9,600 – 115,200</td>
+                  <td className="py-3.5 px-4 font-mono">Serial.println(val)</td>
+                  <td className="py-3.5 pl-4">Teaching labs, pH/temp probes, prototyping stations</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Nordic nRF52840</td>
-                  <td className="py-3.5 px-4">64 MHz ARM Cortex-M4F</td>
-                  <td className="py-3.5 px-4 font-mono">460,800 baud</td>
-                  <td className="py-3.5 px-4 font-mono">500 Hz / 6 ch</td>
-                  <td className="py-3.5 pl-4">Field measurements, portable sensor logging</td>
+                  <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Nordic nRF52840 / RP2040</td>
+                  <td className="py-3.5 px-4">Native USB CDC</td>
+                  <td className="py-3.5 px-4 font-mono">115,200</td>
+                  <td className="py-3.5 px-4 font-mono">UTF-8 numeric frames</td>
+                  <td className="py-3.5 pl-4">Field measurements, microfluidic pump controllers</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Raspberry Pi RP2040</td>
-                  <td className="py-3.5 px-4">133 MHz Dual-Core Cortex-M0+</td>
-                  <td className="py-3.5 px-4 font-mono">921,600 baud</td>
-                  <td className="py-3.5 px-4 font-mono">1,000 Hz / 4 ch</td>
-                  <td className="py-3.5 pl-4">Microfluidic pressure feedback, syringe pumps</td>
+                  <td className="py-3.5 pr-4 font-medium text-foreground font-mono">Bench Instruments (RS-232)</td>
+                  <td className="py-3.5 px-4">FTDI / CP210x USB adapter</td>
+                  <td className="py-3.5 px-4 font-mono">9,600 – 38,400</td>
+                  <td className="py-3.5 px-4 font-mono">Plain numeric ASCII lines</td>
+                  <td className="py-3.5 pl-4">Analytical balances, pH meters, syringe pumps</td>
                 </tr>
               </tbody>
             </table>

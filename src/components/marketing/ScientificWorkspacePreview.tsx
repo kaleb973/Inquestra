@@ -50,7 +50,7 @@ export function ScientificWorkspacePreview() {
 
         <div className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-phosphor shrink-0">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Local IndexedDB synced</span>
+          <span>Saved locally in browser</span>
         </div>
       </div>
 

@@ -166,9 +166,9 @@ export function buildSoftwareApplicationSchema(
       overrides.description ??
       'Browser-based research notebook pairing protocol documentation with chemical storage and serial instrument capture on your local machine.',
     featureList: [
-      'Offline-first TipTap protocol editor persisted in browser IndexedDB',
-      'W3C Web Serial USB hardware data acquisition up to 921,600 baud',
-      'Reagent and sample inventory LIMS with lot tracking and DataMatrix/QR labels',
+      'Local-first TipTap protocol editor persisted in browser localStorage with full ZIP/Markdown/JSON export',
+      'W3C Web Serial USB hardware data acquisition with 500-sample live preview and full-session CSV export',
+      'Reagent and sample inventory LIMS with lot tracking and QR code labels',
       '2D SMILES chemical structure rendering via PubChem resolution',
       'DNA, RNA, and protein sequence statistics with FASTA export',
       'Inline PubMed, Europe PMC, and arXiv DOI literature citations',

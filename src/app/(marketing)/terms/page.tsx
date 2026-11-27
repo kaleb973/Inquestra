@@ -19,7 +19,7 @@ export default function TermsOfServicePage() {
             Terms of Service
           </h1>
           <p className="text-muted-foreground text-xs font-mono">
-            Last Updated: September 30, 2026 · Effective Date: October 1, 2026
+            Last Updated: November 26, 2026 · Effective Date: November 26, 2026
           </p>
         </div>
 
@@ -108,8 +108,8 @@ export default function TermsOfServicePage() {
               written notification to our Designated Copyright Agent containing the required statutory elements:
             </p>
             <div className="p-4 bg-card border border-border rounded-lg space-y-1.5 text-xs font-mono text-muted-foreground">
-              <p className="font-semibold text-foreground text-sm font-sans mb-1">Designated DMCA Copyright Notices:</p>
-              <p>Inquestra: Legal &amp; Compliance Team</p>
+              <p className="font-semibold text-foreground text-sm font-sans mb-1">DMCA &amp; Legal Notices:</p>
+              <p>Inquestra Open-Source Project Maintainer</p>
               <p>Email: <span className="text-foreground font-semibold select-all">legal@inquestra.org</span></p>
               <p className="pt-1 font-sans">
                 <Link href="/contact" className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
@@ -123,10 +123,18 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-base font-semibold text-foreground mb-3">6. Scientific Disclaimer &amp; Limitation of Liability</h2>
             <p className="mb-3">
-              INQUESTRA IS A RESEARCH AND DATA ACQUISITION NOTEBOOK SYSTEM. THE SOFTWARE IS PROVIDED ON AN &quot;AS IS&quot;
-              AND &quot;AS AVAILABLE&quot; BASIS WITHOUT WARRANTIES OF ANY KIND. INQUESTRA DOES NOT PROVIDE MEDICAL DIAGNOSES,
-              DRUG PRESCRIPTIONS, OR DIRECT CLINICAL TREATMENT DECISIONS. RESEARCHERS AND INSTITUTIONS BEAR SOLE RESPONSIBILITY
-              FOR SCIENTIFIC METHODOLOGY, LAB SAFETY, AND REGULATORY SUBMISSIONS.
+              INQUESTRA IS A RESEARCH AND DATA ACQUISITION NOTEBOOK SYSTEM PROVIDED UNDER THE MIT LICENSE FOR SOURCE CODE
+              AND ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED.
+              INQUESTRA DOES NOT PROVIDE MEDICAL DIAGNOSES, DRUG PRESCRIPTIONS, OR CLINICAL TREATMENT DECISIONS. RESEARCHERS
+              AND INSTITUTIONS BEAR SOLE RESPONSIBILITY FOR SCIENTIFIC METHODOLOGY, HARDWARE WIRING/ELECTRICAL SAFETY, LAB SAFETY,
+              DATA BACKUPS, AND REGULATORY SUBMISSIONS.
+            </p>
+            <p>
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL INQUESTRA OR ITS MAINTAINERS OR CONTRIBUTORS BE
+              LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR ANY LOSS OF RESEARCH
+              DATA, SAMPLES, HARDWARE, PROFITS, OR REVENUE, ARISING FROM USE OF THIS SITE OR SOFTWARE. TO THE MAXIMUM EXTENT PERMITTED
+              BY LAW, TOTAL AGGREGATE LIABILITY FOR ALL CLAIMS SHALL NOT EXCEED THE GREATER OF ZERO DOLLARS ($0.00 USD) OR THE AMOUNTS
+              ACTUALLY PAID BY YOU TO INQUESTRA IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.
             </p>
           </section>
 
@@ -135,8 +143,8 @@ export default function TermsOfServicePage() {
             <h2 className="text-base font-semibold text-foreground mb-3">7. Modifications &amp; Inquiries</h2>
             <p>
               We reserve the right to revise these Terms as regulatory standards and platform capabilities evolve. Continued use
-              of the platform after an update signifies your acceptance. For legal questions or institutional master services
-              agreements (MSAs), please visit our <Link href="/contact" className="text-primary hover:underline">Contact Page</Link> or
+              of the platform after an update signifies your acceptance. For legal questions, licensing inquiries, or project
+              notices, please visit our <Link href="/contact" className="text-primary hover:underline">Contact Page</Link> or
               email <span className="text-foreground select-all font-mono font-medium">legal@inquestra.org</span>.
             </p>
           </section>

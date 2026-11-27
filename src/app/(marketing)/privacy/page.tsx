@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="text-muted-foreground text-xs font-mono">
-            Last Updated: September 30, 2026 · Effective Date: October 1, 2026
+            Last Updated: November 26, 2026 · Effective Date: November 26, 2026
           </p>
         </div>
 
@@ -46,8 +46,9 @@ export default function PrivacyPolicyPage() {
                 software</strong> (such as Hotjar, FullStory, LogRocket, or mouse-tracking heatmaps).
               </p>
               <p className="text-xs text-muted-foreground">
-                Your research notes, experimental formulas, reagent ratios, and raw serial hardware packet telemetry are never
-                streamed to consumer analytics services or unvetted advertising brokers.
+                Your research notes, experimental formulas, reagent ratios, and raw serial hardware packet telemetry remain local
+                in Local Notebook mode and are never streamed to advertising brokers. Optional usage analytics load only when you
+                explicitly opt in, alongside cookie-less, zero-PII aggregate workspace/export event counts.
               </p>
             </div>
           </section>
@@ -65,19 +66,30 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 4 */}
           <section>
-            <h2 className="text-base font-semibold text-foreground mb-3">4. Information We Collect</h2>
+            <h2 className="text-base font-semibold text-foreground mb-3">4. Local Notebook Storage vs. Optional Self-Hosted Deployments</h2>
             <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
               <li>
-                <strong className="text-foreground">Account Credentials &amp; Profiles:</strong> When you register, we collect your name,
-                institutional work email address, lab type, hashed passwords, and WebAuthn/FIDO2 passkey credentials.
+                <strong className="text-foreground">Local Notebook Mode (Default):</strong> When you use the browser workspace at{' '}
+                <code className="text-foreground">/app</code> without signing into a self-hosted instance, your experimental notes,
+                protocol edits, and Web Serial telemetry stay on your device inside browser{' '}
+                <code className="text-foreground">localStorage</code> and in-memory export buffers. Nothing is uploaded to an
+                Inquestra server.
               </li>
               <li>
-                <strong className="text-foreground">Laboratory Data &amp; Telemetry:</strong> Experimental notebooks, TipTap documents,
-                FAIR metadata tags, sensor sample streams (e.g., ESP32/Arduino data via Web Serial), inventory lots, and equipment calibration dates.
+                <strong className="text-foreground">Optional Analytics (Strict Opt-In) &amp; Aggregate Counters:</strong> Third-party
+                page diagnostics via PostHog and Google Analytics 4 are disabled by default and load only if you explicitly accept
+                optional analytics in Cookie Preferences. Separate cookie-less, zero-PII aggregate event counters (<code className="text-foreground">/api/metrics</code>)
+                count core workspace and export actions without storing IP addresses, cookies, or personal identifiers.
               </li>
               <li>
-                <strong className="text-foreground">Audit Trail &amp; Signature Logs:</strong> To maintain immutable data provenance and tamper-evident audit logs, we record
-                timestamped events (user ID, action type, IP address, and cryptographic signatures).
+                <strong className="text-foreground">External Scientific APIs &amp; Inquiry Forwarding:</strong> If you run chemical structure or
+                citation lookups inside the editor, your browser queries public scientific endpoints (PubChem and Europe PMC). If you
+                submit the inquiry form, your submitted details are forwarded via Resend solely so the maintainer can respond.
+              </li>
+              <li>
+                <strong className="text-foreground">Self-Hosted PostgreSQL Deployments:</strong> When an institution or lab self-hosts
+                the MIT codebase with PostgreSQL and authentication enabled, account records, synced trials, and audit trail timestamps
+                are stored and governed solely by that deployment&apos;s operator.
               </li>
             </ul>
           </section>
@@ -113,10 +125,10 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-foreground mb-3">7. Data Security &amp; Encryption Standards</h2>
             <p>
-              All communication between your browser and our servers is secured using modern Transport Layer Security (TLS 1.3).
-              Stored databases and uploaded telemetry binary archives are encrypted at rest using AES-256. Experimental trials sealed
-              in the workspace are cryptographically bound using deterministic SHA-256 checksums to ensure tamper-evident
-              integrity.
+              Traffic between your browser and <code className="text-foreground">inquestra.org</code> is protected in transit over HTTPS/TLS.
+              In default Local Notebook mode, notebook state remains inside your local browser storage and RAM export buffers. Where an
+              institution deploys the optional self-hosted PostgreSQL and object-storage stack, database-level encryption at rest, access
+              controls, and SHA-256 record sealing depend on that operator&apos;s deployment configuration.
             </p>
           </section>
 
@@ -135,9 +147,9 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 9 */}
           <section>
-            <h2 className="text-base font-semibold text-foreground mb-3">9. Privacy Inquiries &amp; Data Protection Office</h2>
+            <h2 className="text-base font-semibold text-foreground mb-3">9. Privacy &amp; Maintainer Contact</h2>
             <div className="p-4 bg-card border border-border rounded-lg space-y-1.5 text-xs font-mono text-muted-foreground">
-              <p className="font-semibold text-foreground text-sm font-sans mb-1">Inquestra: Data Protection &amp; Compliance</p>
+              <p className="font-semibold text-foreground text-sm font-sans mb-1">Inquestra Open-Source Project Maintainer</p>
               <p>Legal &amp; Privacy: <span className="text-foreground font-semibold select-all">legal@inquestra.org</span></p>
               <p>Platform Support: <span className="text-foreground font-semibold select-all">support@inquestra.org</span></p>
               <p className="pt-1 font-sans">

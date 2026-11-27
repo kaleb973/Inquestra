@@ -14,8 +14,8 @@
 - [Compare ELNs](https://inquestra.org/compare): Side-by-side comparison of Inquestra, Benchling, LabArchives, and SciNote.
 - [Benchling Alternative](https://inquestra.org/compare/benchling-alternative): Multi-disciplinary ELN and self-hosted PostgreSQL comparison.
 - [LabArchives Alternative](https://inquestra.org/compare/labarchives-alternative): Block-canvas workspace and hardware DAQ comparison.
-- [Hardware DAQ](https://inquestra.org/hardware): W3C Web Serial benchmarks (ESP32-S3, Teensy 4.1, Arduino, nRF52840, RP2040) and supported transducers.
-- [System Architecture](https://inquestra.org/architecture): Off-main-thread Web Workers, browser IndexedDB persistence, and optional PostgreSQL sync via Prisma.
+- [Hardware DAQ](https://inquestra.org/hardware): W3C Web Serial stream formats for ESP32-S3, Teensy 4.1, Arduino, nRF52840, RP2040, and USB/RS-232 benchtop instruments.
+- [System Architecture](https://inquestra.org/architecture): Browser localStorage persistence, W3C Web Serial 500-sample preview buffering with full CSV/ZIP export, and optional self-hosted PostgreSQL sync via Prisma.
 - [Cryptographic Provenance](https://inquestra.org/provenance): Deterministic SHA-256 trial sealing, append-only audit logs, and ZIP/Markdown/CSV exports.
 - [Interactive Demo](https://inquestra.org/demo): In-browser simulated serial DAQ and SHA-256 sealing walkthrough.
 - [FAQ](https://inquestra.org/faq): Answers on zero-signup local mode, academic access, serial hardware, sequences, chemistry tools, and data export.

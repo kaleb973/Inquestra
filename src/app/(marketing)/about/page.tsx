@@ -172,7 +172,7 @@ export default function AboutPage() {
               Inquestra started from running sensor acquisitions alongside lab notebooks where hardware logs lived in separate CSV files, inventory lived in spreadsheets, and commercial ELN suites required institutional procurement contracts.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Building directly on standard browser APIs (W3C Web Serial, IndexedDB, and public PubChem / PubMed endpoints) keeps the workspace fast to open in Chrome or Edge while letting academic groups export standard Markdown, JSON, and CSV archives or sync to self-hosted PostgreSQL.
+              Building directly on standard browser APIs (W3C Web Serial, browser localStorage, and public PubChem / PubMed endpoints) keeps the workspace fast to open in Chrome or Edge while letting academic groups export standard Markdown, JSON, and CSV archives or sync to self-hosted PostgreSQL.
             </p>
           </div>
         </div>
@@ -231,7 +231,7 @@ export default function AboutPage() {
               </a>{' '}
               or reach out directly via the{' '}
               <Link href="/#pilot" className="text-primary hover:underline font-medium">
-                Pilot Lab Access form
+                hardware and setup inquiry form
               </Link>{' '}
               or{' '}
               <Link href="/contact" className="text-primary hover:underline font-medium">

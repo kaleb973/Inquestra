@@ -12,7 +12,7 @@ graph TD
         UI["Next.js App Router UI<br/>(Tailwind)"]
         Canvas["TipTap Block Canvas<br/>(Custom NodeViews)"]
         Zustand["Zustand Store<br/>(State & Telemetry Buffer)"]
-        Storage["Browser Storage<br/>(IndexedDB / localStorage)"]
+        Storage["Browser Storage<br/>(localStorage)"]
         WebSerial["Web Serial API<br/>(navigator.serial)"]
         ProvEngine["SHA-256 Provenance<br/>(Hash & Sealing)"]
 
@@ -53,10 +53,10 @@ Built on TipTap (`@tiptap/react`) with custom React NodeViews in `src/components
 
 ### Web Serial DAQ (`src/hooks/useWebSerial.ts`)
 - Connects directly in Chromium browsers via `navigator.serial` over USB-CDC without external drivers or local Python daemons.
-- Parses line-delimited serial packets into a bounded buffer in Zustand (`src/store/useNotebookStore.ts`).
+- Parses line-delimited serial packets into a 500-sample live preview buffer and an in-memory session archive in Zustand (`src/store/useNotebookStore.ts`) for full-run CSV/ZIP exports.
 
 ### Local-First & Cloud Persistence
-- Unauthenticated sessions persist locally in `localStorage` and IndexedDB with sanitized JSON/Markdown/PDF/ZIP export.
+- Unauthenticated sessions persist locally in `localStorage` (with `QuotaExceededError` export guardrails) and export sanitized JSON, Markdown, CSV, PDF, and ZIP archives.
 - Authenticated cloud persistence runs through Next.js Server Actions (`src/actions/`), Prisma ORM (`prisma/schema.prisma`), Supabase Auth, and PostgreSQL Row-Level Security (`prisma/rls.sql`).
 
 ### Record Sealing (`src/lib/provenance.ts`)

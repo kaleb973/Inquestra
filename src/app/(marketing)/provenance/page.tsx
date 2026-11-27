@@ -80,10 +80,10 @@ export default function ProvenancePage() {
                 </div>
                 <div className="flex items-start justify-between py-3">
                   <div>
-                    <div className="text-foreground font-semibold">Principal Investigator Counter-Sign</div>
-                    <div className="text-muted-foreground">Lab Lead [Verified ECDSA signature]</div>
+                    <div className="text-foreground font-semibold">Principal Investigator Review</div>
+                    <div className="text-muted-foreground">Lab Lead [SHA-256 record lock · self-hosted]</div>
                   </div>
-                  <span className="text-phosphor">Co-signed</span>
+                  <span className="text-phosphor">Sealed</span>
                 </div>
                 <div className="py-3 text-muted-foreground space-y-1.5">
                   <div>Deterministic Digest (SHA-256):</div>
@@ -141,9 +141,9 @@ export default function ProvenancePage() {
           <div className="border-y border-border py-8 grid sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border gap-y-6">
             <div className="sm:pr-6">
               <p className="text-xs font-mono text-muted-foreground mb-2">Step 01</p>
-              <p className="text-base font-semibold text-foreground mb-1">Sensor ingestion buffer</p>
+              <p className="text-base font-semibold text-foreground mb-1">Serial capture &amp; export</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Raw serial byte arrays and microsecond timestamps freeze in the Web Worker ring.
+                Incoming Web Serial readings timestamp on arrival and export cleanly to CSV alongside trial records.
               </p>
             </div>
             <div className="pt-4 sm:pt-0 sm:px-6">
@@ -195,27 +195,27 @@ export default function ProvenancePage() {
               <tbody className="divide-y divide-border text-muted-foreground">
                 <tr className="hover:bg-muted/20 transition-colors">
                   <td className="py-3.5 pr-4 font-mono text-foreground font-medium">21 CFR § 11.10 (a)</td>
-                  <td className="py-3.5 px-4 font-medium text-foreground">Validation of Closed Systems</td>
-                  <td className="py-3.5 px-4">Deterministic state machine validation and automated end-to-end integration suites</td>
-                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Controls Active</td>
+                  <td className="py-3.5 px-4 font-medium text-foreground">System Validation Support</td>
+                  <td className="py-3.5 px-4">TypeScript/Zod validation and automated Playwright suites (IQ/OQ/PQ must be executed by operating lab)</td>
+                  <td className="py-3.5 pl-4 font-mono text-xs text-muted-foreground">Lab SOP Required</td>
                 </tr>
                 <tr className="hover:bg-muted/20 transition-colors">
                   <td className="py-3.5 pr-4 font-mono text-foreground font-medium">21 CFR § 11.10 (e)</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Time-Stamped Audit Trails</td>
-                  <td className="py-3.5 px-4">Computer-generated, append-only PostgreSQL ledger logging actor, UTC timestamp, and hash</td>
-                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Controls Active</td>
+                  <td className="py-3.5 px-4">Append-only PostgreSQL audit ledger recording actor, UTC timestamp, and record hash</td>
+                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Self-Hosted Mode</td>
                 </tr>
                 <tr className="hover:bg-muted/20 transition-colors">
                   <td className="py-3.5 pr-4 font-mono text-foreground font-medium">21 CFR § 11.50</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Signature Manifestations</td>
                   <td className="py-3.5 px-4">Records printed name, UTC timestamp, and signing reason (Author, Reviewer, PI)</td>
-                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Controls Active</td>
+                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Self-Hosted Mode</td>
                 </tr>
                 <tr className="hover:bg-muted/20 transition-colors">
                   <td className="py-3.5 pr-4 font-mono text-foreground font-medium">21 CFR § 11.70</td>
                   <td className="py-3.5 px-4 font-medium text-foreground">Signature Linking</td>
-                  <td className="py-3.5 px-4">Cryptographic signature is hashed directly into the trial record block</td>
-                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Controls Active</td>
+                  <td className="py-3.5 px-4">Cryptographic signature record hashed alongside the sealed trial payload</td>
+                  <td className="py-3.5 pl-4 font-mono text-xs text-phosphor">Self-Hosted Mode</td>
                 </tr>
                 <tr className="hover:bg-muted/20 transition-colors">
                   <td className="py-3.5 pr-4 font-mono text-foreground font-medium">NIH FAIR</td>
@@ -249,15 +249,15 @@ export default function ProvenancePage() {
             </div>
 
             <div className="bg-graphite text-graphite-ink border border-border rounded-lg p-6 font-mono text-xs space-y-3">
-              <div className="text-graphite-muted">$ unzip trial_PR-2026-PCR-01_sealed.zip</div>
-              <div>$ sha256sum -c checksums.sha256</div>
+              <div className="text-graphite-muted">$ unzip -l thermal-cycling-run-01.zip</div>
+              <div>Archive contents (SHA-256 checksum recorded in manifest):</div>
               <div className="p-3 rounded bg-graphite-elevated space-y-1 text-xs">
-                <div className="text-phosphor">temperature_cycle_log.csv: OK</div>
-                <div className="text-phosphor">protocol_observations.md: OK</div>
-                <div className="text-phosphor">lims_reagent_manifest.json: OK</div>
-                <div className="text-phosphor">audit_trail_ledger.json: OK</div>
+                <div className="text-phosphor">trial.md (YAML frontmatter + Markdown)</div>
+                <div className="text-phosphor">trial.json (TipTap AST + provenance)</div>
+                <div className="text-phosphor">metadata.csv + telemetry.csv</div>
+                <div className="text-phosphor">AUDIT_CERTIFICATE.md</div>
               </div>
-              <div className="text-graphite-ink">Verification Result: 100% Cryptographic Match</div>
+              <div className="text-graphite-ink">Portable, human-readable open formats</div>
             </div>
           </div>
         </div>

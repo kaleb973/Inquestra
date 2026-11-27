@@ -100,7 +100,7 @@ export default function MarketingPage() {
           <figure className="mt-10 sm:mt-12 rounded-lg border border-border bg-card overflow-hidden">
             <Image
               src="/screens/workspace-light.png"
-              alt="Inquestra desktop workspace showing local IndexedDB storage, trial protocol steps, inline countdown timers, and navigation sidebar in light theme"
+              alt="Inquestra desktop workspace showing browser localStorage persistence, trial protocol steps, inline countdown timers, and navigation sidebar in light theme"
               width={2880}
               height={1800}
               priority
@@ -109,7 +109,7 @@ export default function MarketingPage() {
             />
             <Image
               src="/screens/workspace-dark.png"
-              alt="Inquestra desktop workspace showing local IndexedDB storage, trial protocol steps, inline countdown timers, and navigation sidebar in dark theme"
+              alt="Inquestra desktop workspace showing browser localStorage persistence, trial protocol steps, inline countdown timers, and navigation sidebar in dark theme"
               width={2880}
               height={1800}
               priority
@@ -129,7 +129,7 @@ export default function MarketingPage() {
                 Structured trial records inside one canvas.
               </h2>
               <p className="text-base text-muted-foreground leading-relaxed">
-                Every trial runs inside an offline-first TipTap editor stored locally in IndexedDB. Opening the workspace requires no account or installation, letting researchers start documenting protocols, inventory deductions, and mathematical formulas immediately.
+                Every trial runs inside an offline-first TipTap editor stored locally in browser <code className="font-mono text-xs bg-muted px-1 py-0.5 rounded">localStorage</code>. Opening the workspace requires no account or installation, letting researchers start documenting protocols, mathematical formulas, and experimental observations immediately.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Scientific blocks (incubation timers, SMILES structure depictions, DNA sequence statistics, and reagent links) insert inline via slash commands and export cleanly to Markdown, JSON, and CSV.
@@ -154,7 +154,7 @@ export default function MarketingPage() {
                   <tr className="hover:bg-muted/30 transition-colors">
                     <td className="py-4 pr-6 font-medium text-foreground align-top">Reagent Inventory</td>
                     <td className="py-4 px-4 text-muted-foreground leading-relaxed">
-                      Stock volume tracking linked to trial protocols with manufacturer lot numbers, storage locations, and QR/DataMatrix labels.
+                      Inline reagent logging linked to trial notes, plus QR label generation and PostgreSQL inventory tables for self-hosted deployments.
                     </td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
@@ -194,7 +194,7 @@ export default function MarketingPage() {
                 W3C Web Serial connects balances, RTD temperature probes, load cells, potentiostats, and microcontrollers (ESP32-S3, Teensy 4.1, Arduino) straight to your active trial without vendor kernel drivers or standalone Python listeners.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Incoming serial lines run inside an off-main-thread Web Worker ring buffer up to 921,600 baud, rendering continuous sweeps in real time while rich-text editing remains responsive. Captured traces export alongside trial notes as plain CSV.
+                Incoming newline-delimited serial lines render inside a 500-sample rolling sparkline preview while preserving the full session stream for one-click CSV and ZIP export.
               </p>
 
               <dl className="grid grid-cols-2 gap-6 pt-4 border-t border-border text-xs">
@@ -204,7 +204,7 @@ export default function MarketingPage() {
                 </div>
                 <div>
                   <dt className="text-muted-foreground font-medium">Browser runtime</dt>
-                  <dd className="font-mono text-foreground font-medium mt-1">Chrome, Edge, Chromium (Web Worker)</dd>
+                  <dd className="font-mono text-foreground font-medium mt-1">Chrome, Edge, Chromium (W3C Web Serial)</dd>
                 </div>
               </dl>
 
@@ -258,10 +258,10 @@ export default function MarketingPage() {
                 Local storage by default, optional PostgreSQL sync.
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Unpublished experiments save continuously inside browser IndexedDB so bench work continues across basement labs or air-gapped rooms with zero network dependency.
+                Unpublished experiments save continuously inside browser <code className="font-mono text-xs bg-muted px-1 py-0.5 rounded">localStorage</code> (~5 MB quota with full-backup export alerts) so bench work continues across basement labs or air-gapped rooms with zero network dependency.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Research teams can connect their own self-hosted PostgreSQL database via Prisma ORM for shared inventories, role-based project oversight, and append-only revision diffs with no per-seat licensing.
+                Research teams wanting multi-user sync can deploy the MIT-licensed Next.js and Prisma stack against their own self-hosted PostgreSQL database—no SaaS account required.
               </p>
               <div className="pt-2">
                 <Link
@@ -298,25 +298,25 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* ── 5. Pilot Lab Onboarding (5/7 Split) ───────────────────────────────── */}
+      {/* ── 5. Self-Hosting & Custom Instrument Inquiries (5/7 Split) ───────── */}
       <section className="py-20 sm:py-24 bg-muted/20" id="pilot">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-5 space-y-4 text-left">
               <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-                Set up Inquestra with your lab group.
+                Custom hardware parsers or self-hosted setups.
               </h2>
               <p className="text-base text-muted-foreground leading-relaxed">
-                Core local workspace tools stay free in your browser. Reach out if your research team needs custom serial instrument firmware profiles or assistance deploying self-hosted PostgreSQL.
+                The Local Notebook works immediately in your browser for free under the MIT license. Hosted multi-tenant cloud sync is not currently offered; teams can self-host PostgreSQL from GitHub or reach out about scoped serial parser work.
               </p>
               <dl className="pt-4 border-t border-border space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Onboarding response</dt>
-                  <dd className="font-mono text-foreground">Within 2 business days</dd>
+                  <dt className="text-muted-foreground">Local browser workspace</dt>
+                  <dd className="font-mono text-phosphor">$0 (MIT open source)</dd>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Academic access</dt>
-                  <dd className="font-mono text-phosphor">$0 (open infrastructure)</dd>
+                  <dt className="text-muted-foreground">Deployment model</dt>
+                  <dd className="font-mono text-foreground">Client-local or self-hosted</dd>
                 </div>
               </dl>
             </div>
@@ -324,10 +324,10 @@ export default function MarketingPage() {
             <div className="lg:col-span-7 bg-card border border-border rounded-lg p-6 sm:p-8">
               <div className="mb-6 pb-4 border-b border-border text-left">
                 <h3 className="text-lg font-semibold text-foreground">
-                  Request Pilot Lab Access
+                  Send a Hardware or Lab Setup Inquiry
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Share your lab setup and any serial hardware you want to connect.
+                  Share your instrument serial format, lab workflow, or feedback on the open-source workspace.
                 </p>
               </div>
               <PilotInterestForm />

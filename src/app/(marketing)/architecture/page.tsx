@@ -11,7 +11,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: 'System Architecture and Telemetry Pipeline',
   description:
-    'Technical architecture of Inquestra: 4-tier telemetry pipeline, off-main-thread Web Workers, Zustand reactive state, and offline-first PostgreSQL sync.',
+    'Technical architecture of Inquestra: W3C Web Serial ingestion, Zustand reactive state with 500-sample preview buffering, session CSV archiving, and local-first storage.',
   path: '/architecture',
 });
 
@@ -29,10 +29,10 @@ export default function ArchitecturePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
         <div className="max-w-3xl">
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground mb-5 leading-[1.1]">
-            Engineered for high-frequency telemetry and immutable storage.
+            Built for direct Web Serial telemetry and local-first research records.
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-            Dedicated Web Workers stream 60 fps waveforms into offline IndexedDB and PostgreSQL.
+            W3C Web Serial streams live numeric frames into a 500-sample preview buffer while preserving full session data for CSV/ZIP export alongside localStorage notebooks.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -71,11 +71,11 @@ export default function ArchitecturePage() {
 
             <div className="pt-4 sm:pt-0 sm:px-5 space-y-2">
               <span className="text-xs font-mono text-muted-foreground">Tier 02</span>
-              <h3 className="font-semibold text-base text-foreground">Worker ring buffer</h3>
+              <h3 className="font-semibold text-base text-foreground">Bounded preview &amp; session archive</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Web Serial streams bytes into a dedicated Web Worker with fixed circular buffers to eliminate GC pauses.
+                Web Serial parses incoming UTF-8 serial lines into a 500-sample rolling sparkline while keeping the full session archive in memory for CSV export.
               </p>
-              <p className="font-mono text-xs text-phosphor pt-1">Latency: &lt; 0.5 ms</p>
+              <p className="font-mono text-xs text-phosphor pt-1">Live Window: 500 pts · CSV Full Session</p>
             </div>
 
             <div className="pt-4 lg:pt-0 sm:pr-5 lg:px-5 space-y-2">
@@ -89,11 +89,11 @@ export default function ArchitecturePage() {
 
             <div className="pt-4 lg:pt-0 sm:pl-5 space-y-2">
               <span className="text-xs font-mono text-muted-foreground">Tier 04</span>
-              <h3 className="font-semibold text-base text-foreground">Immutable persistence</h3>
+              <h3 className="font-semibold text-base text-foreground">Local persistence &amp; ZIP export</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Browser IndexedDB preserves offline work; finalized trials sync to PostgreSQL with SHA-256 seals.
+                Browser localStorage persists local trials automatically, with portable ZIP exports including SHA-256 checksums or optional self-hosted PostgreSQL sync.
               </p>
-              <p className="font-mono text-xs text-primary pt-1">Integrity: SHA-256 Verified</p>
+              <p className="font-mono text-xs text-primary pt-1">Integrity: SHA-256 Checksummed</p>
             </div>
           </div>
         </div>
@@ -104,28 +104,28 @@ export default function ArchitecturePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-semibold text-foreground tracking-tight">
-                Why off-main-thread Web Workers matter for bench DAQ.
+                Bounded UI rendering with full-session CSV capture.
               </h2>
               <p className="text-base text-muted-foreground mt-4 leading-relaxed">
-                At 1 kHz across multiple differential channels, parsing serial data on the main JavaScript thread causes input stutter while editing protocol documents.
+                Rendering thousands of telemetry points directly inside DOM charts slows down rich-text protocol editing during active benchtop runs.
               </p>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                Inquestra isolates the Web Serial reader inside a dedicated Web Worker writing floats into a circular ring buffer while Canvas paints only the latest sweep.
+                Inquestra parses W3C Web Serial numeric streams into a capped 500-sample live SVG sparkline while retaining the full run in a non-persisted session archive for CSV and ZIP export.
               </p>
             </div>
 
             <div className="bg-graphite text-graphite-ink border border-border rounded-lg p-6 font-mono text-xs space-y-3">
               <div className="text-graphite-ink">
-                <span className="text-sky-400">const</span> worker = <span className="text-sky-400">new</span> Worker(&apos;/workers/telemetryWorker.js&apos;);
+                <span className="text-sky-400">const</span> port = <span className="text-sky-400">await</span> navigator.serial.requestPort();
               </div>
               <div className="text-graphite-ink">
-                worker.postMessage(&#123; type: &apos;START_STREAM&apos;, baudRate: 115200 &#125;);
+                <span className="text-sky-400">await</span> port.open(&#123; baudRate: 115200 &#125;);
               </div>
               <div className="p-3 rounded bg-graphite-elevated text-xs space-y-1.5 text-graphite-muted">
-                <div className="text-graphite-ink font-semibold">Worker Thread Heap: Isolated</div>
-                <div>Memory Allocation: 32 MB SharedArrayBuffer</div>
-                <div>Main Thread CPU Load: &lt; 3.2%</div>
-                <div className="text-phosphor">FPS: Solid 60.0 fps under 1,000 Hz input</div>
+                <div className="text-graphite-ink font-semibold">Telemetry Pipeline: Active Stream</div>
+                <div>Live Sparkline Buffer: Capped at 500 samples</div>
+                <div>Session Archive: Retained for full CSV export</div>
+                <div className="text-phosphor">Protocol Timers: Dedicated Web Worker thread</div>
               </div>
             </div>
           </div>
@@ -155,14 +155,14 @@ export default function ArchitecturePage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   <tr className="hover:bg-muted/20 transition-colors">
-                    <td className="py-4 pr-4 font-medium text-foreground align-top">Local IndexedDB Caching</td>
-                    <td className="py-4 px-4 text-muted-foreground leading-relaxed align-top">Browser IndexedDB persists packets and protocol edits continuously</td>
+                    <td className="py-4 pr-4 font-medium text-foreground align-top">Local Browser Persistence</td>
+                    <td className="py-4 px-4 text-muted-foreground leading-relaxed align-top">Browser localStorage persists local trials, protocols, and quota-safe exports continuously</td>
                     <td className="py-4 pl-4 font-mono text-xs text-muted-foreground align-top">None required</td>
                   </tr>
                   <tr className="hover:bg-muted/20 transition-colors">
-                    <td className="py-4 pr-4 font-medium text-foreground align-top">Automatic Reconnection Sync</td>
-                    <td className="py-4 px-4 text-muted-foreground leading-relaxed align-top">PostgreSQL via Prisma syncs validated buffers upon reconnect</td>
-                    <td className="py-4 pl-4 font-mono text-xs text-muted-foreground align-top">Automatic sync</td>
+                    <td className="py-4 pr-4 font-medium text-foreground align-top">Self-Hosted PostgreSQL Sync</td>
+                    <td className="py-4 px-4 text-muted-foreground leading-relaxed align-top">Optional self-hosted PostgreSQL via Prisma stores synced team notebooks and checksummed trials</td>
+                    <td className="py-4 pl-4 font-mono text-xs text-muted-foreground align-top">Optional self-host</td>
                   </tr>
                   <tr className="hover:bg-muted/20 transition-colors">
                     <td className="py-4 pr-4 font-medium text-foreground align-top">Air-Gapped Standalone</td>

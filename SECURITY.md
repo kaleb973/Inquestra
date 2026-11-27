@@ -9,11 +9,11 @@ Report vulnerabilities privately via:
 - **Email:** `support@inquestra.org` with the subject `[SECURITY DISCLOSURE]`
 - **GitHub:** Private Vulnerability Reporting under the repository's **Security** tab (when enabled)
 
-Please include a description of the issue, reproduction steps or a minimal proof of concept, and any relevant logs. Disclosures are acknowledged within 48 hours.
+Please include a description of the issue, reproduction steps or a minimal proof of concept, and any relevant logs. Disclosures are reviewed asynchronously by the project maintainer on a best-effort basis with no guaranteed response SLA.
 
 ## Security Model
 
-- **Local-first storage:** Guest sessions keep notebook state in browser storage (`localStorage` / IndexedDB) with no cloud transmission unless sync is explicitly used.
+- **Local-first storage:** Guest sessions keep notebook state in browser storage (`localStorage`) with no cloud transmission unless self-hosted sync is configured.
 - **Record sealing:** Sealed trials compute a SHA-256 digest over trial content and metadata, backed by append-only audit logs.
 - **Browser hardware isolation:** Instrument streaming relies on the browser's W3C Web Serial permission prompt (`navigator.serial.requestPort()`).
 - **Row-Level Security:** Multi-tenant PostgreSQL tables enforce organization boundaries via RLS policies in `prisma/rls.sql`.

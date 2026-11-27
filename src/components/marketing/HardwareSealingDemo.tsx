@@ -215,7 +215,7 @@ export function HardwareSealingDemo() {
               Driverless Chromium Web Serial
             </h3>
             <p className="text-sm leading-relaxed">
-              Modern Chromium browsers expose bench serial ports without USB kernel extensions while Web Worker ring buffers keep continuous analog frames smooth.
+              Modern Chromium browsers expose bench serial ports without USB kernel extensions, streaming ASCII lines straight into a live 500-point chart window and full-session CSV archive.
             </p>
           </div>
           <div className="md:col-span-6 py-3 md:py-0 md:pl-8">

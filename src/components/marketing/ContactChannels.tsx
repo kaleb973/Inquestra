@@ -43,9 +43,9 @@ export function ContactChannels() {
               <div className="w-10 h-10 rounded bg-muted flex items-center justify-center mb-5 text-foreground">
                 <Headphones className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Technical &amp; Lab Support</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">Technical &amp; Hardware Support</h2>
               <p className="text-xs text-muted-foreground leading-relaxed mb-6">
-                Assistance with Web Serial DAQ, ESP32/Arduino drivers, protocol notebook syncing, and enterprise lab deployment.
+                Questions about W3C Web Serial device profiles, ESP32/Arduino streaming, protocol exports, or optional self-hosted PostgreSQL deployments.
               </p>
 
               <div className="bg-background border border-border rounded p-3 mb-6 flex items-center justify-between">
@@ -130,7 +130,7 @@ export function ContactChannels() {
 
             <div className="space-y-2 pt-2">
               <a
-                href={getGmailComposeUrl('legal@inquestra.org', 'Inquestra Legal & Compliance Notice')}
+                href={getGmailComposeUrl('legal@inquestra.org', 'Inquestra Legal Notice')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded text-xs font-semibold bg-foreground text-background hover:bg-foreground/90 transition-colors"
@@ -151,10 +151,10 @@ export function ContactChannels() {
         {/* Response Note */}
         <div className="mt-10 p-6 rounded-lg bg-card border border-border text-center space-y-2">
           <p className="text-xs font-medium text-foreground">
-            Response time &amp; open-source repository
+            Open-source maintainer &amp; community issues
           </p>
           <p className="text-xs text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Messages go directly to Kaleb (founder and lead maintainer). You can expect a response within one business day, or open public bug reports and feature discussions on{' '}
+            Messages go directly to Kaleb (founder and lead maintainer) and are reviewed asynchronously alongside academic schedules. For bug reports and feature requests, open an issue on{' '}
             <a
               href={GITHUB_REPO_URL}
               target="_blank"

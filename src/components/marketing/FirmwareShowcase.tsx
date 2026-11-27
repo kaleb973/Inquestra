@@ -92,7 +92,7 @@ void loop() {
     title: 'Browser Web Serial Consumer',
     badge: 'Zero Drivers Required',
     language: 'typescript',
-    description: 'Native W3C Web Serial API implementation ingesting bytes directly into Web Worker ring buffers.',
+    description: 'Native W3C Web Serial API implementation reading line-delimited frames into the workspace store.',
     code: `// Inquestra Browser-Silicon Ingestion Engine
 async function connectBenchInstrument(baudRate: number = 115200) {
   const port = await navigator.serial.requestPort({
@@ -103,7 +103,7 @@ async function connectBenchInstrument(baudRate: number = 115200) {
     ]
   });
 
-  await port.open({ baudRate, bufferSize: 65536 });
+  await port.open({ baudRate });
   const textDecoder = new TextDecoderStream();
   port.readable.pipeTo(textDecoder.writable);
   const reader = textDecoder.readable.getReader();
@@ -111,7 +111,7 @@ async function connectBenchInstrument(baudRate: number = 115200) {
   while (true) {
     const { value, done } = await reader.read();
     if (done) break;
-    telemetryWorker.postMessage({ type: 'APPEND_CHUNK', chunk: value });
+    appendSerialLinesToStore(value); // 500-sample live sparkline + full-session CSV export
   }
 }`,
   },

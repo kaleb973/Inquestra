@@ -42,15 +42,15 @@ export function PilotInterestForm() {
   };
 
   const isSubmitting = state === 'submitting';
-  const submitLabel = isSubmitting ? 'Submitting…' : 'Request Access';
+  const submitLabel = isSubmitting ? 'Sending…' : 'Send Inquiry';
 
   if (state === 'success') {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
         <CheckCircle2 className="w-10 h-10 text-phosphor" />
-        <h3 className="text-lg font-semibold text-foreground">You&apos;re on the list.</h3>
+        <h3 className="text-lg font-semibold text-foreground">Inquiry received.</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Bench requirements are reviewed within 48 hours followed by access instructions.
+          Thank you for reaching out. Your note has been forwarded to the project maintainer for review.
         </p>
       </div>
     );
@@ -77,7 +77,7 @@ export function PilotInterestForm() {
         </div>
         <div>
           <label htmlFor="pilot-email" className="block text-sm font-medium text-foreground mb-1.5">
-            Institutional email <span className="text-critical">*</span>
+            Email <span className="text-critical">*</span>
           </label>
           <input
             id="pilot-email"
@@ -87,7 +87,7 @@ export function PilotInterestForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@institution.edu"
+            placeholder="you@example.com"
             className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
@@ -96,17 +96,17 @@ export function PilotInterestForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="pilot-institution" className="block text-sm font-medium text-foreground mb-1.5">
-            Institution or lab <span className="text-critical">*</span>
+            Lab, organization, or project{' '}
+            <span className="text-muted-foreground font-normal">(optional)</span>
           </label>
           <input
             id="pilot-institution"
             name="institution"
             type="text"
             autoComplete="organization"
-            required
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
-            placeholder="e.g. Department of Chemistry or Core Facility"
+            placeholder="University lab, maker bench, or independent"
             className="w-full h-11 px-3 rounded-md bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           />
         </div>
@@ -161,7 +161,7 @@ export function PilotInterestForm() {
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Free pilot onboarding. Reviewed within 48 hours.
+        Open-source hardware and setup inquiry. Reviewed asynchronously by the maintainer.
       </p>
     </form>
   );

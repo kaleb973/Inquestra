@@ -37,7 +37,7 @@ const LABARCHIVES_FAQS = [
   {
     question: 'Can Inquestra satisfy university institutional compliance and IP patent requirements?',
     answer:
-      'Yes. Inquestra features append-only audit logging, SHA-256 cryptographic trial snapshots, and dual-signoff witness review workflows that support 21 CFR Part 11 and university tech-transfer provenance workflows.',
+      'Self-hosted PostgreSQL workspaces feature append-only audit logging, SHA-256 cryptographic trial snapshots, and dual-signoff witness review workflows designed to support 21 CFR Part 11 technical controls and tech-transfer provenance (subject to institutional SOPs and IQ/OQ/PQ validation).',
   },
   {
     question: 'How easy is it to switch from LabArchives to Inquestra?',
@@ -99,10 +99,10 @@ export default function LabArchivesAlternativePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/app/signup"
+              href="/app"
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 h-11 rounded-md border border-border bg-card hover:bg-muted/60 font-medium text-foreground transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Start Free Academic Workspace
+              Open Local Academic Workspace
             </Link>
           </div>
         </div>
@@ -230,7 +230,7 @@ export default function LabArchivesAlternativePage() {
                 <tr>
                   <td className="py-4 px-6 font-medium text-foreground">2D Barcode Label Generation</td>
                   <td className="py-4 px-6 text-foreground font-semibold flex items-center gap-2">
-                    <Check className="w-4 h-4 text-phosphor" /> Native DataMatrix &amp; QR
+                    <Check className="w-4 h-4 text-phosphor" /> Built-in QR Label Scanning
                   </td>
                   <td className="py-4 px-6 text-muted-foreground">Separate paid add-on</td>
                 </tr>

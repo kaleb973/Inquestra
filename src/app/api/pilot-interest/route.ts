@@ -12,7 +12,7 @@ import { fetchWithTimeout } from '@/lib/resilience';
 const PilotInterestSchema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().email().max(255),
-  institution: z.string().min(1).max(300),
+  institution: z.string().max(300).optional().default(''),
   role: z.string().max(100).optional(),
   useCase: z.string().max(1000).optional(),
 });
@@ -81,11 +81,13 @@ export async function POST(req: NextRequest) {
 
   // Sanitize string fields against XSS, template injection, and SMTP header injection
   const cleanName = stripControlChars(DOMPurify.sanitize(data.name, { ALLOWED_TAGS: [] }));
-  const cleanInstitution = stripControlChars(DOMPurify.sanitize(data.institution, { ALLOWED_TAGS: [] }));
+  const cleanInstitution = stripControlChars(
+    DOMPurify.sanitize(data.institution || '', { ALLOWED_TAGS: [] })
+  );
   const sanitized = {
     name: cleanName || 'Researcher',
     email: stripControlChars(data.email).toLowerCase(),
-    institution: cleanInstitution || 'Laboratory',
+    institution: cleanInstitution || 'Independent / Bench Lab',
     role: data.role ? stripControlChars(DOMPurify.sanitize(data.role, { ALLOWED_TAGS: [] })) : null,
     useCase: data.useCase ? DOMPurify.sanitize(data.useCase, { ALLOWED_TAGS: [] }).trim() : null,
   };
@@ -115,16 +117,16 @@ export async function POST(req: NextRequest) {
 
     // 1. Internal notification to Inquestra team
     const adminNotificationPayload = {
-      from: 'Inquestra Pilot <support@inquestra.org>',
+      from: 'Inquestra Support <support@inquestra.org>',
       to: [notifyEmail],
       reply_to: sanitized.email,
-      subject: `New Pilot Interest: ${safeSubjectInst} / ${safeSubjectName}`,
+      subject: `New Workspace / Hardware Inquiry: ${safeSubjectInst} / ${safeSubjectName}`,
       html: `
-        <h2>New Pilot Lab Interest</h2>
+        <h2>New Workspace &amp; Hardware Inquiry</h2>
         <table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;line-height:1.6">
           <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Name</td><td><strong>${escName}</strong></td></tr>
           <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Email</td><td><a href="mailto:${escEmail}">${escEmail}</a></td></tr>
-          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Institution</td><td>${escInst}</td></tr>
+          <tr><td style="padding:6px 12px 6px 0;color:#6b7280">Affiliation / Bench</td><td>${escInst}</td></tr>
           ${escRole ? `<tr><td style="padding:6px 12px 6px 0;color:#6b7280">Role</td><td>${escRole}</td></tr>` : ''}
           ${escUseCase ? `<tr><td style="padding:6px 12px 6px 0;color:#6b7280">Use Case / Targets</td><td>${escUseCase}</td></tr>` : ''}
           <tr><td style="padding:6px 12px 6px 0;color:#6b7280">IP</td><td>${escapeHtml(clientIp)}</td></tr>
@@ -135,43 +137,43 @@ export async function POST(req: NextRequest) {
 
     // 2. Direct confirmation to the applicant
     const applicantConfirmationPayload = {
-      from: 'Inquestra Pilot Program <support@inquestra.org>',
+      from: 'Inquestra Maintainer <support@inquestra.org>',
       to: [sanitized.email],
       reply_to: 'support@inquestra.org',
-      subject: `Inquestra Pilot Lab Access: Application Received (${safeSubjectInst})`,
+      subject: `Inquestra Inquiry Received (${safeSubjectInst})`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#18181b;line-height:1.6">
           <div style="border-bottom:1px solid #e4e4e7;padding-bottom:16px;margin-bottom:20px">
             <h1 style="font-size:18px;margin:0;font-weight:700;letter-spacing:-0.02em;color:#09090b">INQUESTRA</h1>
-            <p style="font-size:12px;color:#71717a;margin:4px 0 0">Electronic Lab Notebook for Life Sciences, Chemistry & Engineering</p>
+            <p style="font-size:12px;color:#71717a;margin:4px 0 0">Open-Source Electronic Lab Notebook &amp; Web Serial Workspace</p>
           </div>
 
-          <p style="font-size:15px;margin-bottom:16px">Dear ${escName},</p>
+          <p style="font-size:15px;margin-bottom:16px">Hello ${escName},</p>
 
           <p style="font-size:14px;color:#27272a;margin-bottom:16px">
-            Thank you for requesting access to the Inquestra Pilot Lab program for <strong>${escInst}</strong>. Your lab specifications and onboarding request have been received.
+            Thank you for sending an inquiry regarding Inquestra (${escInst}). Your message has been delivered to the project maintainer.
           </p>
 
           <div style="background-color:#f4f4f5;border-radius:6px;padding:16px;margin-bottom:20px;font-size:13px">
             <p style="font-weight:600;margin:0 0 8px;color:#09090b">Submission Summary:</p>
             <ul style="margin:0;padding-left:18px;color:#3f3f46">
-              <li><strong>Institution / Lab:</strong> ${escInst}</li>
+              <li><strong>Affiliation / Bench:</strong> ${escInst}</li>
               ${escRole ? `<li><strong>Role:</strong> ${escRole}</li>` : ''}
-              ${escUseCase ? `<li><strong>Research & Protocol Scope:</strong> ${escUseCase}</li>` : ''}
+              ${escUseCase ? `<li><strong>Notes / Hardware Scope:</strong> ${escUseCase}</li>` : ''}
             </ul>
           </div>
 
           <p style="font-size:14px;color:#27272a;margin-bottom:16px">
             <strong>What happens next?</strong><br/>
-            Your research focus and protocol requirements are under review. A follow-up with access instructions and workspace configuration guidance will be sent within 48 hours.
+            The Local Notebook is open immediately at <a href="https://inquestra.org/app" style="color:#2563eb">inquestra.org/app</a> with no account required. Inquiries are reviewed asynchronously by the project maintainer as time permits (with no guaranteed response SLA).
           </p>
 
           <p style="font-size:14px;color:#27272a;margin-bottom:24px">
-            If you have questions or specific protocol notes to share in advance, you can reply directly to this email or contact <a href="mailto:support@inquestra.org" style="color:#2563eb">support@inquestra.org</a>.
+            For public bug reports or feature requests, you can also open an issue on <a href="https://github.com/kaleb973/Inquestra/issues" style="color:#2563eb">GitHub</a> or email <a href="mailto:support@inquestra.org" style="color:#2563eb">support@inquestra.org</a>.
           </p>
 
           <div style="border-top:1px solid #e4e4e7;padding-top:16px;font-size:12px;color:#71717a">
-            <p style="margin:0"><strong>Inquestra Onboarding</strong></p>
+            <p style="margin:0"><strong>Inquestra Project Maintainer</strong></p>
             <p style="margin:2px 0 0"><a href="https://inquestra.org" style="color:#71717a;text-decoration:none">inquestra.org</a> &bull; <a href="mailto:support@inquestra.org" style="color:#71717a;text-decoration:none">support@inquestra.org</a></p>
           </div>
         </div>
