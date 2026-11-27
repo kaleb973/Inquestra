@@ -733,7 +733,7 @@ export function Header() {
           </button>
 
           {showMoreMenu && (
-            <div className="absolute right-0 mt-2 w-52 rounded-lg border border-border bg-popover/95 backdrop-blur-sm text-popover-foreground shadow-lg p-1 z-50 text-xs animate-in fade-in-50 zoom-in-95 duration-75 select-none">
+            <div className="absolute right-0 mt-2 w-56 rounded-lg border border-border bg-popover/95 backdrop-blur-sm text-popover-foreground shadow-lg p-1 z-50 text-xs animate-in fade-in-50 zoom-in-95 duration-75 select-none">
               {/* Import in dropdown */}
               <button
                 type="button"
@@ -799,6 +799,20 @@ export function Header() {
                   <Shield className="w-3.5 h-3.5 shrink-0" />
                   <span>Seal Trial Record…</span>
                 </button>
+              )}
+
+              {!user && !IS_CLOUD_WORKSPACE_ENABLED && (
+                <>
+                  <div className="my-1 h-px bg-border/50" />
+                  <Link
+                    href="/app/login"
+                    onClick={() => setShowMoreMenu(false)}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent text-left transition-colors"
+                  >
+                    <LogIn className="w-3.5 h-3.5 shrink-0" />
+                    <span>Sign in (existing account)…</span>
+                  </Link>
+                </>
               )}
             </div>
           )}

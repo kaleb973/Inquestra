@@ -40,6 +40,11 @@ test.describe('Trial Persistence, Routing & Login Flow', () => {
     await expect(page.getByRole('link', { name: /Sign In/i })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /Back up to Cloud/i })).toHaveCount(0);
     await expect(page.locator('a[href="/app/admin"]')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'More actions and regulatory tools' }).click();
+    const fallbackLogin = page.getByRole('link', { name: /Sign in \(existing account\)/i });
+    await expect(fallbackLogin).toBeVisible();
+    await expect(fallbackLogin).toHaveAttribute('href', '/app/login');
   });
 
   test('surfaces export backup alerts instead of claiming saved when localStorage quota is exceeded', async ({ page }) => {
